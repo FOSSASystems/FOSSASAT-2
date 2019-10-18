@@ -1,2 +1,2 @@
 # FOSSASAT-2
-First generation generation 2P Satellite
+First generation 2P Satellite
