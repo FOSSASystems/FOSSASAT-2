@@ -1,6 +1,6 @@
 # FOSSASAT-2 I2C Address Map
 
-The purpose of this document is to keep track of I2C adddresses of all devices on all I2C buses on FOSSASAT-2.
+The purpose of this document is to keep track of I2C addresses of all devices on all I2C buses on FOSSASAT-2.
 
 **IMPORTANT**: When adding new devices, care MUST be taken so that no two devices on the same I2C bus share the same address! In addition, all used I2C buses SHOULD have similar number of devices.
 
@@ -37,7 +37,7 @@ The purpose of this document is to keep track of I2C adddresses of all devices o
 
 ## Address space
 
-Used adress are crossed out.
+Used addresses are crossed out.
 
 | Device      | Available addresses          |
 | ----------- | ---------------------------- |
