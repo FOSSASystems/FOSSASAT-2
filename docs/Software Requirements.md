@@ -15,7 +15,7 @@ Each Software Requirement SHALL be referred to by section name, followed by requ
 9. Satellite MUST enter low power mode when battery voltage drops below specified limit.
 10. Satellite MUST be able to correctly measure battery voltage, temperature, charging voltage and charging current.
 11. Satellite MUST be able to correctly measure all other environmental properties.
-12. Power configuration MUST persist during restarts.
+12. Power and radio configuration MUST persist during restarts.
 13. Satellite MUST reset external watchdog timer every second.
 14. Satellite MUST be put to sleep mode when no other task is running.
 15. Satellite MUST remain inactive during ground handling.
@@ -23,8 +23,7 @@ Each Software Requirement SHALL be referred to by section name, followed by requ
 17. Satellite MUST be able to charge battery before deploying if under a certain voltage.
 18. Satellite MUST heat battery depending on temperature range outside limits and spare power available.
 19. Satellite SHOULD implement basic radiation corruption mitigation such as memory validation and/or correction.
-20 Satellite MUST put components to sleep when not in use (OV2640 FET available).
-
+20. Satellite MUST put components to sleep when not in use (OV2640 FET available).
 
 ## Communication (COMR)
 1. Satellite MUST be able to communicate using specified protocol, frequencies and modulations.
@@ -48,3 +47,4 @@ Each Software Requirement SHALL be referred to by section name, followed by requ
 ## Development and Integration (DINR)
 1. All debug-only code MUST be removable from compilation by a single macro.
 2. It MUST be possible to wipe all non-volatile storage, both internal and external.
+3. Satellite SHOULD output minimal debug information upon every reset, to allow easier integration.
