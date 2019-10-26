@@ -9,10 +9,15 @@ The purpose of this document is to keep track of all functional specifications, 
 5. Check voltage, if under 3.7v: wait until you are charged for a maximum of 12 hours and then deploy. If above 3.7v: Deploy.
 5. Send Mosfet deploymen signal 
 7. Set EEPROM Deploy = 1
-8. System tx start
+8. System Start
 
 ## Battery Charging and Heating
+Battery heater is a mosfet control pin
 
+1. When under 5c, battery above 3.9v and Charging current above 100mA: Turn on Battery Heater.
+2. When 5c reached: turn off battery heater
+3. If battery heater on and battery voltage drops below 3.8 volts: Turn off Battery Heater.
+4. If battery heater off due to voltage and, temperature drops below 0c, Turn off MPPT.
 
 ## Transmissions and Reception 
 
