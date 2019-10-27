@@ -1,8 +1,10 @@
 # FOSSASAT-2 Software Dependencies
 The following is a list of all libraries and other dependencies required to build software for FOSSASAT-2.
 
-## Platform
+## Platform & Core Libraries
 * STM32 Arduino core: https://github.com/stm32duino/Arduino_Core_STM32
+* STM32 RTC library: https://github.com/stm32duino/STM32RTC
+* STM32 Low Power library: https://github.com/stm32duino/STM32LowPower
 
 ## Libraries
 * FOSSA-Comms: https://github.com/FOSSASystems/FOSSA-Comms
