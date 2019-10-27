@@ -6,17 +6,17 @@ The purpose of this document is to keep track of I2C addresses of all devices on
 
 ## I2C1
 
-| #  | Device    | Address |
-| -- | --------- | ------- |
-| 1  | VEML7700_1| 1001010 |
-| 2  | TMP100_1  | 1001000 |
-| 3  | DRV8830_1 | 1100000 |
-| 4  | DRV8830_2 | 1100001 |
-| 5  | DRV8830_3 | 1100010 |
-| 6  | INA260_2  | 1000001 |
-| 7  | INA260_3  | 1000010 |
-| 8  | INA260_4  | 1000011 |
-| 9  | INA260_5  | 1000100 |
+| #  | Device     | Address |
+| -- | ---------- | ------- |
+| 1  | VEML7700_1 | 1001010 |
+| 2  | TMP100_1   | 1001000 |
+| 3  | DRV8830_1  | 1100000 |
+| 4  | DRV8830_2  | 1100001 |
+| 5  | DRV8830_3  | 1100010 |
+| 6  | INA260_2   | 1000001 |
+| 7  | INA260_3   | 1000010 |
+| 8  | INA260_4   | 1000011 |
+| 9  | INA260_5   | 1000100 |
 
 ## I2C2
 
@@ -31,6 +31,7 @@ The purpose of this document is to keep track of I2C addresses of all devices on
 | 7  | LSM9DS1 MAG | 0011100 |
 | 8  | INA260_1    | 1000000 |
 | 9  | INA260_6    | 1000100 |
+
 ## Address space
 
 Used addresses are crossed out.
