@@ -30,7 +30,7 @@ The purpose of this document is to keep track of I2C addresses of all devices on
 | 6  | LSM9DS1 ACC | 1101010 |
 | 7  | LSM9DS1 MAG | 0011100 |
 | 8  | INA260_1    | 1000000 |
-
+| 9  | INA260_6    | 1000100 |
 ## Address space
 
 Used addresses are crossed out.
