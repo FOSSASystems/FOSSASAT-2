@@ -11,6 +11,7 @@ This document specifies all communication channels used on FOSSASAT-2, as well a
 * Coding rate: 4/5 (parity only)
 * Sync word: **TBD**
 * Preamble length: **TBD**
+* Listen mode length: **TBD**
 
 ## GFSK
 * Functions: backup control interface, direct repeater, store & forward, image downlink, full ADCS and system info downlink
@@ -22,6 +23,7 @@ This document specifies all communication channels used on FOSSASAT-2, as well a
 * Gaussian data shaping: 0.5 (bandwidth-time product)
 * Sync word: **TBD**
 * Preamble length: **TBD**
+* Listen mode length: **TBD**
 
 ## CW Beacon
 * Functions: beacon (60s period callsign and battery voltage downlink)
