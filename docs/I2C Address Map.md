@@ -8,24 +8,24 @@ The purpose of this document is to keep track of I2C addresses of all devices on
 
 | #  | Device     | Address |
 | -- | ---------- | ------- |
-| 1  | VEML7700_1 | 1001010 |
-| 2  | TMP100_1   | 1001000 |
+| 1  | VEML7700_1 Y PANEL| 1001010 |
+| 2  | TMP100_1  Y PANEL | 1001000 |
 | 3  | DRV8830_1  | 1100000 |
 | 4  | DRV8830_2  | 1100001 |
 | 5  | DRV8830_3  | 1100010 |
 | 6  | INA260_2   | 1000001 |
 | 7  | INA260_3   | 1000010 |
-| 8  | INA260_4   | 1000011 |
+| 8  | INA260_4   | 1001100 |
 | 9  | INA260_5   | 1000100 |
 
 ## I2C2
 
 | #  | Device      | Address |
 | -- | ----------- | ------- |
-| 1  | VEML7700_2  | 1001010 |
-| 2  | TMP100_2    | 1001001 |
-| 3  | TMP100_3    | 1001101 |
-| 4  | TMP100_4    | 1001011 |
+| 1  | VEML7700_2 TOP PANEL | 1001010 |
+| 2  | TMP100_2   TOP PANEL | 1001011 |
+| 3  | TMP100_3   BOTTOM PANEL | 1001000 |
+| 4  | TMP100_4    | 1001001 |
 | 5  | TMP100_5    | 1001100 |
 | 6  | LSM9DS1 ACC | 1101010 |
 | 7  | LSM9DS1 MAG | 0011100 |
