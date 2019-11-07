@@ -35,3 +35,4 @@ This document specifies all communication channels used on FOSSASAT-2, as well a
 * Output power: 20 dBm
 * Encoding: ITU Morse Code (as per [M.1677](https://www.itu.int/rec/R-REC-M.1677-1-200910-I/))
 * Data rate: 12 words per minute
+* Preamble: Starting signal (-.-.-), repeated 3 times
