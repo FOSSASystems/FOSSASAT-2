@@ -28,6 +28,7 @@ void setup() {
   #endif
 
   // print power configuration
+  // TODO add the rest of power configuration
   FOSSASAT_DEBUG_PORT.println(F("--- Power Configuration ---"));
   FOSSASAT_DEBUG_PORT.print(F("Transmissions enabled: "));
   FOSSASAT_DEBUG_PORT.println(PersistentStorage_Read_Internal<uint8_t>(EEPROM_TRANSMISSIONS_ENABLED));
