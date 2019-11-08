@@ -12,10 +12,9 @@ The following is a list of all libraries and other dependencies required to buil
   * compile with static-only memory management enabled (src/TypeDef.h - uncomment #define STATIC_ONLY)
 * tiny-AES-c: https://github.com/kokke/tiny-AES-c
   * test.c and test.cpp must be removed from the repository to use it as Arduino library
-* Adafruit Unified Sensor Driver: https://github.com/adafruit/Adafruit_Sensor
 * Adafruit Bus IO: https://github.com/adafruit/Adafruit_BusIO
   * ARDUINO_ARCH_STM32 must be added to the list of platforms that have bit order macros MSBFIRST/LSBFIRST
 * Adafruit INA260: https://github.com/adafruit/Adafruit_INA260
-* Adafruit TSL2561 Light Sensor Driver: https://github.com/adafruit/Adafruit_TSL2561
+* Adafruit VEML7700 Light Sensor Driver: https://github.com/adafruit/Adafruit_VEML7700
 * Grove Mini I2C Motor Driver: https://github.com/kkoiwai/Grove_Mini_I2C_Motor_Driver
 * SparkFun LSM9DS1: https://github.com/sparkfun/SparkFun_LSM9DS1_Arduino_Library
