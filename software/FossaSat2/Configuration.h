@@ -4,8 +4,8 @@
 #include "FossaSat2.h"
 
 /*
- *  Configuration Macros - All macros MUST be enabled prior to integration!!!
- */
+    Configuration Macros - All macros MUST be enabled prior to integration!!!
+*/
 
 // uncomment to wipe internal EEPROM on start (will also set all internal EEPROM variables to defaults)
 //#define DISABLE_EEPROM_WIPE
@@ -23,11 +23,11 @@
 //#define ENABLE_TRANSMISSION_CONTROL
 
 // comment out to disable reset on radio init error
-//#define ENABLE_RADIO_ERROR_RESET
+#define ENABLE_RADIO_ERROR_RESET
 
 /*
- *  Array Length Limits
- */
+    Array Length Limits
+*/
 
 // string length limit
 #define MAX_STRING_LENGTH                               32
@@ -39,8 +39,8 @@
 #define MAX_RADIO_BUFFER_LENGTH                         256
 
 /*
- *  Pin Mapping
- */
+    Pin Mapping
+*/
 
 // I2C
 #define I2C1_SDA                                        PA10
@@ -76,8 +76,8 @@
 #define ANALOG_IN_RANDOM_SEED                           PA11    // used as source for randomSeed(), should be left floating
 
 /*
- * Low Power Modes
- */
+   Low Power Modes
+*/
 
 #define LOW_POWER_NONE                                  0
 #define LOW_POWER_IDLE                                  1
@@ -86,8 +86,8 @@
 #define LOW_POWER_SHUTDOWN                              4
 
 /*
- * Timing Definitions
- */
+   Timing Definitions
+*/
 
 #define DEPLOYMENT_DEBUG_LENGTH                         60      // s
 #define DEPLOYMENT_DEBUG_SAMPLE_PERIOD                  1000    // ms
@@ -97,14 +97,14 @@
 #define WATCHDOG_LOOP_HEARTBEAT_PERIOD                  1000    // ms
 
 /*
- * Voltage Limits
- */
+   Voltage Limits
+*/
 
 #define DEPLOYMENT_BATTERY_LEVEL_LIMIT                  3700.0  // mV
 
 /*
- *  Internal Emulated EEPROM Configuration
- */
+    Internal Emulated EEPROM Configuration
+*/
 
 // EEPROM reset value
 #define EEPROM_RESET_VALUE                              0xFF
@@ -122,8 +122,8 @@
 // EEPROM variables
 
 /*
- *  Radio Configuration
- */
+    Radio Configuration
+*/
 
 // modem definitions
 #define MODEM_FSK                                       0
@@ -163,8 +163,8 @@
 #define MORSE_PREAMBLE_LENGTH                           3       // symbols
 
 /*
- *  Temperature Sensors
- */
+    Temperature Sensors
+*/
 
 // common
 #define TMP_100_REG_TEMPERATURE                         0x00
@@ -196,23 +196,23 @@
 #define TEMP_SENSOR_SEC_BATTERY_ADDRESS                 0b1001100 // ADD1 float, ADD0 float ?????????
 
 /*
- *  ADCS H-bridges
- */
+    ADCS H-bridges
+*/
 
 #define ADCS_X_BRIDGE_ADDRESS                           0b1100100 // A1 float, A0 float
 #define ADCS_Y_BRIDGE_ADDRESS                           0b1100101 // A1 float, A0 high
 #define ADCS_Z_BRIDGE_ADDRESS                           0b1100010 // A1 low, A0 high
 
 /*
- * IMU
- */
+   IMU
+*/
 
 #define IMU_ACCEL_GYRO_ADDRESS                          0b1101010 // SDO_A/G low
 #define IMU_MAG_ADDRESS                                 0b0011100 // SDO_M low
 
 /*
- * Current Sensors
- */
+   Current Sensors
+*/
 
 // X axis solar cells
 #define CURR_SENSOR_X_A_BUS                             Wire
@@ -235,8 +235,8 @@
 #define CURR_SENSOR_MPPT_OUTPUT_ADDRESS                 0b1000100 // A1 high, A0 low
 
 /*
- * Light Sensors
- */
+   Light Sensors
+*/
 
 #define LIGHT_SENSOR_GAIN                               VEML7700_GAIN_1
 #define LIGHT_SENSOR_INTEGRATION_TIME                   VEML7700_IT_800MS
@@ -244,8 +244,8 @@
 #define LIGHT_SENSOR_TOP_PANEL_BUS                      Wire2
 
 /*
- *  Global Variables
- */
+    Global Variables
+*/
 
 // debug-only stopwatch
 FOSSASAT_DEBUG_STOPWATCH_INIT_H
