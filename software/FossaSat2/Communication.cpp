@@ -289,7 +289,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             FOSSASAT_DEBUG_PRINTLN(state);
           } else {
             // configuration changed successfully, transmit response
-            Communication_Send_Response(RESP_REPEATED_MESSAGE_CUSTOM, optData + 7, optDataLen - 7, true);
+            Communication_Send_Response(RESP_REPEATED_MESSAGE_CUSTOM, optData + 7, optDataLen - 7, false, true);
           }
         }
       } break;
@@ -307,7 +307,59 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     // TODO new public frames
 
-    // TODO private function IDs
+    case CMD_DEPLOY: {
+        // run deployment sequence
+        PowerControl_Deploy();
+
+        // get deployment counter value and send it
+        uint8_t counter = PersistentStorage_Read_Internal<uint8_t>(EEPROM_DEPLOYMENT_COUNTER_ADDR);
+        Communication_Send_Response(RESP_DEPLOYMENT_STATE, &counter, 1, true);
+      } break;
+
+    case CMD_RESTART:
+      // restart
+      PowerControl_Watchdog_Restart();
+      break;
+
+    case CMD_WIPE_EEPROM: {
+        // check optional data length
+        if(Communication_Check_OptDataLen(1, optDataLen)) {
+          // optional data present, check the value
+          if(optData[0] & 0b00000001) {
+            // wipe internal
+            PersistentStorage_Wipe_Internal();
+          }
+  
+          if(optData[0] & 0b00000010) {
+            // wipe external
+            PersistentStorage_Wipe_External();
+          }
+        }
+      } break;
+
+    case CMD_SET_TRANSMIT_ENABLE: {
+        // check optional data length
+        if(Communication_Check_OptDataLen(1, optDataLen)) {
+          PersistentStorage_Write_Internal<uint16_t>(EEPROM_TRANSMISSIONS_ENABLED, optData[0]);
+        }
+      } break;
+
+    case CMD_SET_CALLSIGN: {
+        // check optional data is less than limit
+        if(optDataLen <= MAX_STRING_LENGTH) {
+          // get callsign from frame
+          char newCallsign[MAX_STRING_LENGTH];
+          memcpy(newCallsign, optData, optDataLen);
+          newCallsign[optDataLen] = '\0';
+
+          // update callsign
+          PersistentStorage_Set_Callsign(newCallsign);
+          FOSSASAT_DEBUG_PRINT(F("newCallsign = "));
+          FOSSASAT_DEBUG_PRINTLN(newCallsign);
+        }
+      } break;
+
+    // TODO new private frames
 
     default:
       FOSSASAT_DEBUG_PRINT(F("Unknown function ID!"));
@@ -315,19 +367,38 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
   }
 }
 
-int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData, size_t optDataLen, bool overrideModem) {
+int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData, size_t optDataLen, bool encrypt, bool overrideModem) {
   // get callsign from EEPROM
   uint8_t callsignLen = PersistentStorage_Read_Internal<uint8_t>(EEPROM_CALLSIGN_LEN_ADDR);
   char callsign[MAX_STRING_LENGTH];
   PersistentStorage_Get_Callsign(callsign, callsignLen);
 
   // build response frame
-  uint8_t len = FCP_Get_Frame_Length(callsign, optDataLen);
+  uint8_t len = 0;
   uint8_t frame[MAX_RADIO_BUFFER_LENGTH];
-  FCP_Encode(frame, callsign, respId, optDataLen, optData);
+  if(encrypt) {
+    len = FCP_Get_Frame_Length(callsign, optDataLen, password);
+    FCP_Encode(frame, callsign, respId, optDataLen, optData, encryptionKey, password);
+  } else {
+    len = FCP_Get_Frame_Length(callsign, optDataLen);
+    FCP_Encode(frame, callsign, respId, optDataLen, optData);
+  }
 
   // send response
   return (Communication_Transmit(frame, len, overrideModem));
+}
+
+bool Communication_Check_OptDataLen(uint8_t expected, uint8_t actual) {
+  if(expected != actual) {
+    // received length of optional data does not match expected
+    FOSSASAT_DEBUG_PRINT(F("optDataLen mismatch, exp. "));
+    FOSSASAT_DEBUG_PRINT(expected);
+    FOSSASAT_DEBUG_PRINT(F(" got "));
+    FOSSASAT_DEBUG_PRINTLN(actual);
+    return(false);
+  }
+
+  return(true);
 }
 
 int16_t Communication_Transmit(uint8_t* data, uint8_t len, bool overrideModem) {
