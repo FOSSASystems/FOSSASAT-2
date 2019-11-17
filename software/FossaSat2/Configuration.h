@@ -207,6 +207,7 @@
    IMU
 */
 
+#define IMU_BUS                                         Wire2
 #define IMU_ACCEL_GYRO_ADDRESS                          0b1101010 // SDO_A/G low
 #define IMU_MAG_ADDRESS                                 0b0011100 // SDO_M low
 

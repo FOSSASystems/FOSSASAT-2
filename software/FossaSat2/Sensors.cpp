@@ -30,6 +30,7 @@ void Sensors_Setup_IMU() {
   imu.settings.device.commInterface = IMU_MODE_I2C;
   imu.settings.device.agAddress = IMU_ACCEL_GYRO_ADDRESS;
   imu.settings.device.mAddress = IMU_MAG_ADDRESS;
+  imu.settings.device.i2c = &IMU_BUS;
 
   // initialize IMU
   FOSSASAT_DEBUG_PRINT(F("IMU init ... "));
