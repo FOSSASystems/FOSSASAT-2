@@ -12,7 +12,8 @@ void Communication_Set_Modem(uint8_t modem);
 int16_t Communication_Set_LoRa_Configuration(float bw, uint8_t sf, uint8_t cr, uint16_t preambleLen, bool crc, int8_t power);
 
 // system info functions
-void Communication_System_Info_Add(uint8_t** buffPtr, uint8_t val, const char* name, uint32_t mult, const char* unit);
+template <class T>
+void Communication_System_Info_Add(uint8_t** buffPtr, T val, const char* name, uint32_t mult, const char* unit);
 void Communication_Send_System_Info();
 void Communication_Send_Morse_Beacon();
 

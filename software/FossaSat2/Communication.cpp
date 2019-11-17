@@ -83,9 +83,10 @@ int16_t Communication_Set_LoRa_Configuration(float bw, uint8_t sf, uint8_t cr, u
   return (state);
 }
 
-void Communication_System_Info_Add(uint8_t** buffPtr, uint8_t val, const char* name, uint32_t mult, const char* unit) {
-  memcpy(*buffPtr, &val, sizeof(uint8_t));
-  (*buffPtr) += sizeof(uint8_t);
+template <class T>
+void Communication_System_Info_Add(uint8_t** buffPtr, T val, const char* name, uint32_t mult, const char* unit) {
+  memcpy(*buffPtr, &val, sizeof(val));
+  (*buffPtr) += sizeof(val);
   FOSSASAT_DEBUG_PRINT(name);
   FOSSASAT_DEBUG_PRINT(F(" = "));
   FOSSASAT_DEBUG_PRINT(val);
@@ -93,24 +94,53 @@ void Communication_System_Info_Add(uint8_t** buffPtr, uint8_t val, const char* n
   FOSSASAT_DEBUG_PRINT(mult);
   FOSSASAT_DEBUG_PRINT(' ');
   FOSSASAT_DEBUG_PRINTLN(unit);
-
 }
+
+template void Communication_System_Info_Add<uint8_t>(uint8_t**, uint8_t, const char*, uint32_t, const char*);
+template void Communication_System_Info_Add<int16_t>(uint8_t**, int16_t, const char*, uint32_t, const char*);
+template void Communication_System_Info_Add<uint16_t>(uint8_t**, uint16_t, const char*, uint32_t, const char*);
 
 void Communication_Send_System_Info() {
   // build response frame
-  static const uint8_t optDataLen = sizeof(uint8_t);
+  static const uint8_t optDataLen = sizeof(uint8_t) + 8*sizeof(int16_t) + sizeof(uint16_t);
   uint8_t optData[optDataLen];
   uint8_t* optDataPtr = optData;
 
   FOSSASAT_DEBUG_PRINTLN(F("--- System info: ---"));
 
-  // set mpptOutputVoltage variable
+  // TODO add operational mode status
+
   uint8_t mpptOutputVoltage = currSensorMPPT.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_System_Info_Add(&optDataPtr, mpptOutputVoltage, "mpptOutputVoltage", VOLTAGE_MULTIPLIER, "mV");
 
-  FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
+  int16_t mpptOutputCurrent = currSensorMPPT.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  Communication_System_Info_Add(&optDataPtr, mpptOutputCurrent, "mpptOutputCurrent", CURRENT_MULTIPLIER, "uA");
 
-  // TODO add more info
+  int16_t batteryTemperature = Sensors_Read_Temperature(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  Communication_System_Info_Add(&optDataPtr, batteryTemperature, "batteryTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
+
+  int16_t secBatteryTemperature = Sensors_Read_Temperature(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  Communication_System_Info_Add(&optDataPtr, secBatteryTemperature, "secBatteryTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
+
+  int16_t currentXA = currSensorXA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  Communication_System_Info_Add(&optDataPtr, currentXA, "currentXA", CURRENT_MULTIPLIER, "uA");
+
+  int16_t currentXB = currSensorXB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  Communication_System_Info_Add(&optDataPtr, currentXB, "currentXB", CURRENT_MULTIPLIER, "uA");
+
+  int16_t currentZA = currSensorZA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  Communication_System_Info_Add(&optDataPtr, currentZA, "currentZA", CURRENT_MULTIPLIER, "uA");
+
+  int16_t currentZB = currSensorZB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  Communication_System_Info_Add(&optDataPtr, currentZB, "currentZB", CURRENT_MULTIPLIER, "uA");
+
+  int16_t currentY = currSensorY.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  Communication_System_Info_Add(&optDataPtr, currentY, "currentY", CURRENT_MULTIPLIER, "uA");
+
+  uint16_t resetCounter = PersistentStorage_Read_Internal<uint16_t>(EEPROM_RESTART_COUNTER_ADDR);
+  Communication_System_Info_Add(&optDataPtr, resetCounter, "resetCounter", VOLTAGE_MULTIPLIER, "");
+
+  FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
 
   // send response
   Communication_Send_Response(RESP_SYSTEM_INFO, optData, optDataLen);
