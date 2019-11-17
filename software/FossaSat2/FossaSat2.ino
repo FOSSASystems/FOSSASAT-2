@@ -159,6 +159,16 @@ void setup() {
         FOSSASAT_DEBUG_PORT.println(0/*lightSensorTop.readLux()*/);
         FOSSASAT_DEBUG_PORT.println();
 
+        // ADCS H-bridge drivers
+        FOSSASAT_DEBUG_PORT.println(F("Device\t\tFault #"));
+        FOSSASAT_DEBUG_PORT.println(F("-------------------------------------------------------------"));
+        FOSSASAT_DEBUG_PORT.print(F("X axis \t"));
+        FOSSASAT_DEBUG_PORT.println(bridgeX.getFault());
+        FOSSASAT_DEBUG_PORT.print(F("Y axis \t"));
+        FOSSASAT_DEBUG_PORT.println(bridgeY.getFault());
+        FOSSASAT_DEBUG_PORT.print(F("Z axis \t"));
+        FOSSASAT_DEBUG_PORT.println(bridgeZ.getFault());
+
         FOSSASAT_DEBUG_PORT.println(F("============================================================="));
       }
     
