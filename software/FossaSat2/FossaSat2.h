@@ -3,6 +3,7 @@
 
 // Arduino/STM32 libraries
 #include <STM32LowPower.h>
+#include <SPI.h>
 #include <Wire.h>
 
 // FOSSA libraries
@@ -12,6 +13,7 @@
 #include <Adafruit_INA260.h>
 #include <Adafruit_VEML7700.h>
 #include <aes.hpp>
+#include <ArduCAM.h>
 #include <GroveMiniMoto.h>
 #include <RadioLib.h>
 #include <SparkFunLSM9DS1.h>
