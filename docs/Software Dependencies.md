@@ -10,8 +10,7 @@ The following is a list of all libraries and other dependencies required to buil
 * FOSSA-Comms: https://github.com/FOSSASystems/FOSSA-Comms
 * RadioLib: https://github.com/jgromes/RadioLib
   * compile with static-only memory management enabled (src/TypeDef.h - uncomment #define STATIC_ONLY)
-* tiny-AES-c: https://github.com/kokke/tiny-AES-c
-  * test.c and test.cpp must be removed from the repository to use it as Arduino library
+* tiny-AES-c: https://github.com/FOSSASystems/tiny-AES-c
 * Adafruit Bus IO: https://github.com/adafruit/Adafruit_BusIO
   * ARDUINO_ARCH_STM32 must be added to the list of platforms that have bit order macros MSBFIRST/LSBFIRST
 * Adafruit INA260: https://github.com/adafruit/Adafruit_INA260
