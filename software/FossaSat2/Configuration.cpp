@@ -27,7 +27,7 @@ HardwareTimer tmr(TIM1);
 TwoWire Wire2;
 
 // RadioLib instances
-SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_DIO2, RADIO_BUSY);
+SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_BUSY);
 MorseClient morse(&radio);
 
 // transmission password

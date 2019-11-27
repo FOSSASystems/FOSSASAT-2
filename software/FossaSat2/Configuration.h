@@ -57,7 +57,6 @@
 #define RADIO_NSS                                       PC7
 #define RADIO_BUSY                                      PC6
 #define RADIO_DIO1                                      PB12
-#define RADIO_DIO2                                      PB15
 
 // external flash
 #define FLASH_CS                                        PC11
