@@ -30,6 +30,9 @@ TwoWire Wire2;
 SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_BUSY);
 MorseClient morse(&radio);
 
+// camera instance
+ArduCAM camera(OV2640, CAMERA_CS);
+
 // transmission password
 const char* password = "password";
 
@@ -79,6 +82,8 @@ void Configuration_Setup() {
   pinMode(WATCHDOG_IN, OUTPUT);
   pinMode(MPPT_OFF, OUTPUT);
   pinMode(ANALOG_IN_RANDOM_SEED, INPUT);
+
+  digitalWrite(CAMERA_CS, HIGH);
 
   // initialize default I2C interface
   Wire.setSDA(I2C1_SDA);

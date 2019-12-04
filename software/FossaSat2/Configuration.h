@@ -121,6 +121,14 @@
 // EEPROM variables
 
 /*
+    Internal Flash Configuration
+*/
+
+// Flash address map                                                   LSB           MSB
+#define FLASH_IMAGE_CAPTURE_LENGTH                      0x00000000  // 0x00000000    0x00000003
+#define FLASH_IMAGE_CAPTURE                             0x00000004  // 0x00000004    0x00320004  assuming 400 kB JPEG as the maximum size
+
+/*
     Radio Configuration
 */
 
@@ -276,6 +284,9 @@ extern TwoWire Wire2;
 // RadioLib instances
 extern SX1268 radio;
 extern MorseClient morse;
+
+// camera instance
+extern ArduCAM camera;
 
 // transmission password
 extern const char* password;

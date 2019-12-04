@@ -8,12 +8,12 @@
 template <class T>
 T PersistentStorage_Read_Internal(uint16_t addr);
 template <class T>
-T PersistentStorage_Read_External(uint16_t addr);
+T PersistentStorage_Read_External(uint32_t addr);
 
 template <class T>
 void PersistentStorage_Write_Internal(uint16_t addr, T val);
 template <class T>
-void PersistentStorage_Write_External(uint16_t addr, T val);
+void PersistentStorage_Write_External(uint32_t addr, T val);
 
 void PersistentStorage_Wipe_Internal();
 void PersistentStorage_Wipe_External();

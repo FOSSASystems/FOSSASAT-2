@@ -3,6 +3,7 @@
 
 #include "FossaSat2.h"
 
-// TODO camera
+void Camera_Init();
+void Camera_Capture();
 
 #endif
