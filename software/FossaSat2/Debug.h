@@ -11,7 +11,7 @@
 #define FOSSASAT_DEBUG_SPEED  115200
 
 #ifdef FOSSASAT_DEBUG
-#define FOSSASAT_DEBUG_BEGIN(...) { FOSSASAT_DEBUG_PORT.begin(__VA_ARGS__); while(!Serial); }
+#define FOSSASAT_DEBUG_BEGIN(...) { FOSSASAT_DEBUG_PORT.begin(__VA_ARGS__); delay(500); while(!FOSSASAT_DEBUG_PORT); }
 #define FOSSASAT_DEBUG_PRINT(...) { FOSSASAT_DEBUG_PORT.print(__VA_ARGS__); }
 #define FOSSASAT_DEBUG_PRINTLN(...) { FOSSASAT_DEBUG_PORT.println(__VA_ARGS__); }
 #define FOSSASAT_DEBUG_WRITE(...) { FOSSASAT_DEBUG_PORT.write(__VA_ARGS__); }
@@ -23,6 +23,7 @@
       FOSSASAT_DEBUG_PORT.write(BUFF[i]); \
       FOSSASAT_DEBUG_PORT.println(); \
     } }
+#define FOSSASAT_DEBUG_DELAY(MS) { delay(MS); }
 #define FOSSASAT_DEBUG_STOPWATCH_INIT_H extern uint32_t fsdbgStart;
 #define FOSSASAT_DEBUG_STOPWATCH_INIT_CPP uint32_t fsdbgStart = 0;
 #define FOSSASAT_DEBUG_STOPWATCH_START() { fsdbgStart = millis(); }
@@ -41,6 +42,7 @@
 #define FOSSASAT_DEBUG_STOPWATCH_INIT_CPP
 #define FOSSASAT_DEBUG_STOPWATCH_START(...) {}
 #define FOSSASAT_DEBUG_STOPWATCH_STOP(...) {}
+#define FOSSASAT_DEBUG_DELAY(MS) {}
 #endif
 
 #endif
