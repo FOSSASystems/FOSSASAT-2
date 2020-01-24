@@ -81,13 +81,13 @@ void Camera_Capture() {
     FOSSASAT_DEBUG_PRINTLN(F("Image size is 0 B!"));
     return;
   }
-  PersistentStorage_Write_External<uint32_t>(FLASH_IMAGE_CAPTURE_LENGTH, len);
+  //PersistentStorage_Write_External<uint32_t>(FLASH_IMAGE_CAPTURE_LENGTH, len);
 
   // read data
   camera.CS_LOW();
   camera.set_fifo_burst();
   for(uint32_t i = 0; i < len; i++) {
-    PersistentStorage_Write_External<uint8_t>(FLASH_IMAGE_CAPTURE, SPI.transfer(0x00));
+    //PersistentStorage_Write_External<uint8_t>(FLASH_IMAGE_CAPTURE, SPI.transfer(0x00));
   }
   camera.CS_HIGH();
 }

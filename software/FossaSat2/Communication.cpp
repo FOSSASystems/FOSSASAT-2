@@ -137,8 +137,9 @@ void Communication_Send_System_Info() {
   int16_t currentY = currSensorY.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
   Communication_System_Info_Add(&optDataPtr, currentY, "currentY", CURRENT_MULTIPLIER, "uA");
 
-  uint16_t resetCounter = PersistentStorage_Read_Internal<uint16_t>(EEPROM_RESTART_COUNTER_ADDR);
-  Communication_System_Info_Add(&optDataPtr, resetCounter, "resetCounter", VOLTAGE_MULTIPLIER, "");
+  uint16_t resetCounter = 0xFFFF;
+  PersistentStorage_Get(FLASH_RESTART_COUNTER_ADDR, resetCounter);
+  Communication_System_Info_Add(&optDataPtr, resetCounter, "resetCounter", 1, "");
 
   FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
 
@@ -149,7 +150,9 @@ void Communication_Send_System_Info() {
 void Communication_Send_Morse_Beacon() {
   // check transmit enable flag
 #ifdef ENABLE_TRANSMISSION_CONTROL
-  if (!PersistentStorage_Read_Internal<uint8_t>(EEPROM_TRANSMISSIONS_ENABLED)) {
+  uint8_t txEnabled = 0xFF;
+  PersistentStorage_Get(FLASH_TRANSMISSIONS_ENABLED, txEnabled);
+  if (txEnabled == 0x00) {
     FOSSASAT_DEBUG_PRINTLN(F("Tx off by cmd"));
     return;
   }
@@ -162,8 +165,9 @@ void Communication_Send_Morse_Beacon() {
   }
 
   // read callsign
-  uint8_t callsignLen = PersistentStorage_Read_Internal<uint8_t>(EEPROM_CALLSIGN_LEN_ADDR);
-  char callsign[MAX_STRING_LENGTH + 1];
+  uint8_t callsignLen = 0xFF;
+  PersistentStorage_Get(FLASH_CALLSIGN_LEN_ADDR, callsignLen);
+  char callsign[MAX_STRING_LENGTH];
   PersistentStorage_Get_Callsign(callsign, callsignLen);
 
   // TODO measure battery voltage
@@ -215,7 +219,8 @@ void Communication_Send_Morse_Beacon() {
 
 void Comunication_Parse_Frame(uint8_t* frame, uint8_t len) {
   // get callsign from EEPROM
-  uint8_t callsignLen = PersistentStorage_Read_Internal<uint8_t>(EEPROM_CALLSIGN_LEN_ADDR);
+  uint8_t callsignLen = 0xFF;
+  PersistentStorage_Get(FLASH_CALLSIGN_LEN_ADDR, callsignLen);
   char callsign[MAX_STRING_LENGTH];
   PersistentStorage_Get_Callsign(callsign, callsignLen);
 
@@ -329,10 +334,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       Communication_Send_System_Info();
       break;
 
-    case CMD_GET_LAST_PACKET_INFO: {
+    case CMD_GET_PACKET_INFO: {
         // get last packet info and send it
         uint8_t respOptData[] = {(uint8_t)(radio.getSNR() * 4.0), (uint8_t)(radio.getRSSI() * -2.0)};
-        Communication_Send_Response(RESP_LAST_PACKET_INFO, respOptData, 2);
+        Communication_Send_Response(RESP_PACKET_INFO, respOptData, 2);
       } break;
 
     // TODO new public frames
@@ -342,8 +347,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         PowerControl_Deploy();
 
         // get deployment counter value and send it
-        uint8_t counter = PersistentStorage_Read_Internal<uint8_t>(EEPROM_DEPLOYMENT_COUNTER_ADDR);
-        Communication_Send_Response(RESP_DEPLOYMENT_STATE, &counter, 1, true);
+        uint8_t attemptNumber = 0xFF;
+        PersistentStorage_Get(FLASH_DEPLOYMENT_COUNTER_ADDR, attemptNumber);
+        Communication_Send_Response(RESP_DEPLOYMENT_STATE, &attemptNumber, 1, true);
       } break;
 
     case CMD_RESTART:
@@ -356,13 +362,13 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         if(Communication_Check_OptDataLen(1, optDataLen)) {
           // optional data present, check the value
           if(optData[0] & 0b00000001) {
-            // wipe internal
-            PersistentStorage_Wipe_Internal();
+            // wipe system info
+            PersistentStorage_Reset_System_Info();
           }
   
           if(optData[0] & 0b00000010) {
-            // wipe external
-            PersistentStorage_Wipe_External();
+            // wipe images
+            
           }
         }
       } break;
@@ -370,7 +376,8 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     case CMD_SET_TRANSMIT_ENABLE: {
         // check optional data length
         if(Communication_Check_OptDataLen(1, optDataLen)) {
-          PersistentStorage_Write_Internal<uint16_t>(EEPROM_TRANSMISSIONS_ENABLED, optData[0]);
+          uint8_t txEnabled = optData[0];
+          PersistentStorage_Set(FLASH_TRANSMISSIONS_ENABLED, txEnabled);
         }
       } break;
 
@@ -399,7 +406,8 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
 int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData, size_t optDataLen, bool encrypt, bool overrideModem) {
   // get callsign from EEPROM
-  uint8_t callsignLen = PersistentStorage_Read_Internal<uint8_t>(EEPROM_CALLSIGN_LEN_ADDR);
+  uint8_t callsignLen = 0xFF;
+  PersistentStorage_Get(FLASH_CALLSIGN_LEN_ADDR, callsignLen);
   char callsign[MAX_STRING_LENGTH];
   PersistentStorage_Get_Callsign(callsign, callsignLen);
 
@@ -434,7 +442,9 @@ bool Communication_Check_OptDataLen(uint8_t expected, uint8_t actual) {
 int16_t Communication_Transmit(uint8_t* data, uint8_t len, bool overrideModem) {
   // check transmit enable flag
 #ifdef ENABLE_TRANSMISSION_CONTROL
-  if (!PersistentStorage_Read_Internal<uint8_t>(EEPROM_TRANSMISSIONS_ENABLED)) {
+  uint8_t txEnabled = 0xFF;
+  PersistentStorage_Get(FLASH_TRANSMISSIONS_ENABLED, txEnabled);
+  if (txEnabled == 0x00) {
     FOSSASAT_DEBUG_PRINTLN(F("Tx off by cmd"));
     return (ERR_TX_TIMEOUT);
   }

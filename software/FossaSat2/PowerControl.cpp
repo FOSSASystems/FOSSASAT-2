@@ -6,7 +6,7 @@ void PowerControl_Wait(uint32_t ms, uint8_t type) {
   }
 
   // calculate number of required loops (rounded up)
-  float stepSize = 1000.0;
+  float stepSize = 500.0;
   if (type == LOW_POWER_NONE) {
     // 10 ms steps when no sleep mode is active
     stepSize = 10.0;
@@ -17,9 +17,7 @@ void PowerControl_Wait(uint32_t ms, uint8_t type) {
   for (uint32_t i = 0; i < (uint32_t)numLoops; i++) {
     PowerControl_Watchdog_Heartbeat();
 
-#warning "LowPower is disabled due to https://github.com/stm32duino/STM32LowPower/issues/14"
-    delay((uint32_t)stepSize);
-    /*switch(type) {
+    switch(type) {
       case LOW_POWER_NONE:
         delay((uint32_t)stepSize);
         break;
@@ -37,7 +35,7 @@ void PowerControl_Wait(uint32_t ms, uint8_t type) {
         break;
       default:
         return;
-      }*/
+      }
   }
 }
 
@@ -52,8 +50,8 @@ void PowerControl_Watchdog_Heartbeat() {
 void PowerControl_Watchdog_Restart() {
   // do not pet watchdog for more than 15 seconds to restart
   FOSSASAT_DEBUG_PRINTLN(F("Restart in 15 seconds ..."));
-#warning "Reset using deepSleep is disabled due to https://github.com/stm32duino/STM32LowPower/issues/14"
-  //LowPower.deepSleep(16000);
+  FOSSASAT_DEBUG_DELAY(10);
+  LowPower.deepSleep(16000);
 }
 
 void PowerControl_Deploy() {

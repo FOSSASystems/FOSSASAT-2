@@ -7,14 +7,11 @@
     Configuration Macros - All macros MUST be enabled prior to integration!!!
 */
 
-// uncomment to wipe internal EEPROM on start (will also set all internal EEPROM variables to defaults)
-//#define DISABLE_EEPROM_WIPE
-
-// uncomment to wipe external Flash on start
-//#define DISABLE_FLASH_WIPE
+// uncomment reset system info (callsing, configuration etc.) on start
+//#define RESET_SYSTEM_INFO
 
 // comment out to disable deployment sequence
-#define ENABLE_DEPLOYMENT_SEQUENCE
+//#define ENABLE_DEPLOYMENT_SEQUENCE
 
 // comment out to disable sleep during deployment sequence
 //#define ENABLE_DEPLOYMENT_SLEEP
@@ -94,39 +91,37 @@
 #define DEPLOYMENT_CHARGE_LIMIT                         12      // h
 #define DEPLOYMENT_PULSE_LENGTH                         1200    // ms
 #define WATCHDOG_LOOP_HEARTBEAT_PERIOD                  1000    // ms
+#define BATTERY_CHECK_PERIOD                            300000  // ms
 
 /*
    Voltage Limits
 */
 
 #define DEPLOYMENT_BATTERY_LEVEL_LIMIT                  3700.0  // mV
+#define HEATER_BATTERY_LEVEL_LIMIT                      3800.0  // mV
 
 /*
-    Internal Emulated EEPROM Configuration
+   Temperature Limits
 */
 
-// EEPROM reset value
-#define EEPROM_RESET_VALUE                              0xFF
-
-// used EEPROM size in bytes
-#define EEPROM_USED_SIZE                                0x30    // 0x800 maximum, should be kept as low as possible!
-
-// EEPROM address map                                              LSB       MSB
-#define EEPROM_RESTART_COUNTER_ADDR                     0x0000  // 0x0000    0x0001
-#define EEPROM_DEPLOYMENT_COUNTER_ADDR                  0x0002  // 0x0002    0x0002
-#define EEPROM_CALLSIGN_LEN_ADDR                        0x0003  // 0x0003    0x0003
-#define EEPROM_CALLSIGN_ADDR                            0x0004  // 0x0004    0x0024
-#define EEPROM_TRANSMISSIONS_ENABLED                    0x0025  // 0x0025    0x0025
-
-// EEPROM variables
+#define BATTERY_HEATER_TEMP_LIMIT                       5.0     // deg. C
+#define MPPT_TEMP_LIMIT                                 0.0     // deg. C
 
 /*
-    Internal Flash Configuration
+    Flash Configuration
 */
 
 // Flash address map                                                   LSB           MSB
-#define FLASH_IMAGE_CAPTURE_LENGTH                      0x00000000  // 0x00000000    0x00000003
-#define FLASH_IMAGE_CAPTURE                             0x00000004  // 0x00000004    0x00320004  assuming 400 kB JPEG as the maximum size
+// sector 0 - system info
+#define FLASH_RESTART_COUNTER_ADDR                      0x00000000  // 0x00000000    0x00000001
+#define FLASH_DEPLOYMENT_COUNTER_ADDR                   0x00000002  // 0x00000002    0x00000002
+#define FLASH_TRANSMISSIONS_ENABLED                     0x00000003  // 0x00000003    0x00000003
+#define FLASH_CALLSIGN_LEN_ADDR                         0x00000004  // 0x00000004    0x00000004
+#define FLASH_CALLSIGN_ADDR                             0x00000005  // 0x00000005    0x00000025
+
+// sector 1-X - images
+#define FLASH_IMAGE_CAPTURE_LENGTH                      0x00001000  // 0x00001000    0x00001003
+#define FLASH_IMAGE_CAPTURE                             0x00001004  // 0x00001004    0x00321004  assuming 400 kB JPEG as the maximum size
 
 /*
     Radio Configuration
@@ -151,7 +146,7 @@
 #define LORA_OUTPUT_POWER                               20      // dBm
 #define LORA_SPREADING_FACTOR                           11      //
 #define LORA_CODING_RATE                                5       // parity only
-#define LORA_SYNC_WORD                                  0x0F0F  //
+#define LORA_SYNC_WORD                                  0x12    //
 #define LORA_PREAMBLE_LENGTH                            8       // symbols
 #define LORA_CURRENT_LIMIT                              120     // mA
 
@@ -160,7 +155,7 @@
 #define FSK_OUTPUT_POWER                                20      // dBm
 #define FSK_BIT_RATE                                    9.6     // kbps
 #define FSK_DATA_SHAPING                                0.5     // FSK filter BT product
-#define FSK_SYNC_WORD                                   {0x0F, 0x0F}
+#define FSK_SYNC_WORD                                   {0x12, 0x12}
 #define FSK_PREAMBLE_LENGTH                             16      // bits
 #define FSK_RX_BANDWIDTH                                19.5    // kHz (single sideband)
 #define FSK_CURRENT_LIMIT                               200     // mA
