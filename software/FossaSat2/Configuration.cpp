@@ -99,6 +99,7 @@ void Configuration_Setup() {
   SPI.setSCLK(SPI1_SCK);
   SPI.setMISO(SPI1_MISO);
   SPI.setMOSI(SPI1_MOSI);
+  SPI.begin();
 
   // provide seed for encrpytion PRNG
   randomSeed(analogRead(ANALOG_IN_RANDOM_SEED));
