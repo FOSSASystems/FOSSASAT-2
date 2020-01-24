@@ -12,7 +12,7 @@
 // 3rd party libraries
 #include <Adafruit_INA260.h>
 #include <Adafruit_VEML7700.h>
-#include <aes.hpp>
+#include <aes.h>
 #include <ArduCAM.h>
 #include <GroveMiniMoto.h>
 #include <RadioLib.h>
