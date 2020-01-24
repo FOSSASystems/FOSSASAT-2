@@ -17,9 +17,6 @@
 
 #define CALLSIGN_DEFAULT                                "FOSSASAT-2"
 
-#define FLASH_SYSTEM_INFO_START                         0x00000000
-#define FLASH_SYSTEM_INFO_LEN                           0x25
-
 // Flash address map                                                   LSB           MSB
 // sector 0 - system info
 #define FLASH_RESTART_COUNTER_ADDR                      0x00000000  // 0x00000000    0x00000001

@@ -1,32 +1,5 @@
 #include "PersistentStorage.h"
 
-uint8_t PersistentStorage_Get(uint8_t addr) {
-  uint8_t buff[1];
-  PersistentStorage_Read(FLASH_SYSTEM_INFO_START + addr, buff, 1);
-  return(buff[0]);
-}
-
-void PersistentStorage_Set(uint8_t addr, uint8_t val) {
-  // check address is in first page
-  if(addr > FLASH_SYSTEM_INFO_LEN) {
-    return;
-  }
-  
-  // read the current system info page
-  uint8_t sysInfoPage[FLASH_SYSTEM_INFO_LEN];
-  PersistentStorage_Read(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
-
-  // check if we need to update
-  if(val == sysInfoPage[addr]) {
-    // the value is alread there, no need to write
-    return;
-  }
-
-  // we need to update
-  sysInfoPage[addr] = val;
-  PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
-}
-
 void PersistentStorage_Get_Callsign(char* buff, uint8_t len) {
   PersistentStorage_Read(FLASH_CALLSIGN_ADDR, (uint8_t*)buff, len);
 }

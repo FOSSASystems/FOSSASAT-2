@@ -56,21 +56,26 @@ void setup() {
   FOSSASAT_DEBUG_PORT.println(PersistentStorage_ReadSecurityRegister(), BIN);
 
   // reset system info
-  PersistentStorage_Reset_System_Info();
+  //PersistentStorage_Reset_System_Info();
   showBytes(FLASH_SYSTEM_INFO_START, FLASH_SYSTEM_INFO_LEN);
 
   // read reset counter
+  uint16_t resetCounter = 0xFFFF;
+  PersistentStorage_Get(FLASH_RESTART_COUNTER_ADDR, resetCounter);
   FOSSASAT_DEBUG_PORT.print(F("Reset counter = "));
-  FOSSASAT_DEBUG_PORT.println(PersistentStorage_Get(FLASH_RESTART_COUNTER_ADDR));
+  FOSSASAT_DEBUG_PORT.println(resetCounter);
   showBytes(FLASH_SYSTEM_INFO_START, FLASH_SYSTEM_INFO_LEN);
 
   // increment reset counter
-  PersistentStorage_Set(FLASH_RESTART_COUNTER_ADDR, PersistentStorage_Get(FLASH_RESTART_COUNTER_ADDR) + 1);
+  resetCounter++;
+  PersistentStorage_Set(FLASH_RESTART_COUNTER_ADDR, resetCounter);
   showBytes(FLASH_SYSTEM_INFO_START, FLASH_SYSTEM_INFO_LEN);
 
   // read reset counter
+  resetCounter = 0xFFFF;
+  PersistentStorage_Get(FLASH_RESTART_COUNTER_ADDR, resetCounter);
   FOSSASAT_DEBUG_PORT.print(F("Reset counter = "));
-  FOSSASAT_DEBUG_PORT.println(PersistentStorage_Get(FLASH_RESTART_COUNTER_ADDR));
+  FOSSASAT_DEBUG_PORT.println(resetCounter);
   showBytes(FLASH_SYSTEM_INFO_START, FLASH_SYSTEM_INFO_LEN);
 }
 

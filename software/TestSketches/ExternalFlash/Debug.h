@@ -21,6 +21,7 @@
       FOSSASAT_DEBUG_PORT.write(BUFF[i]); \
       FOSSASAT_DEBUG_PORT.println(); \
     } }
+#define FOSSASAT_DEBUG_DELAY(MS) { delay(MS); }
 #define FOSSASAT_DEBUG_STOPWATCH_INIT_H extern uint32_t fsdbgStart;
 #define FOSSASAT_DEBUG_STOPWATCH_INIT_CPP uint32_t fsdbgStart = 0;
 #define FOSSASAT_DEBUG_STOPWATCH_START() { fsdbgStart = millis(); }
@@ -39,6 +40,7 @@
 #define FOSSASAT_DEBUG_STOPWATCH_INIT_CPP
 #define FOSSASAT_DEBUG_STOPWATCH_START(...) {}
 #define FOSSASAT_DEBUG_STOPWATCH_STOP(...) {}
+#define FOSSASAT_DEBUG_DELAY(MS) {}
 #endif
 
 #endif
