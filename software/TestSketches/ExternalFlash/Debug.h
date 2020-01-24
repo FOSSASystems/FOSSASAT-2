@@ -1,16 +1,12 @@
 #ifndef _FOSSASAT_DEBUG_H
 #define _FOSSASAT_DEBUG_H
 
-#include <SoftwareSerial.h>
-
-SoftwareSerial softSerial(PA13, PA14);
-
 // uncomment to enable debug output
 // RadioLib debug can be enabled in RadioLib/src/TypeDef.h
 #define FOSSASAT_DEBUG
 
-#define FOSSASAT_DEBUG_PORT   softSerial
-#define FOSSASAT_DEBUG_SPEED  9600
+#define FOSSASAT_DEBUG_PORT   Serial//softSerial
+#define FOSSASAT_DEBUG_SPEED  115200
 
 #ifdef FOSSASAT_DEBUG
 #define FOSSASAT_DEBUG_BEGIN(...) { FOSSASAT_DEBUG_PORT.begin(__VA_ARGS__); delay(500); while(!FOSSASAT_DEBUG_PORT); }
