@@ -80,6 +80,8 @@ void setup() {
 }
 
 void loop() {
+  Sensors_Update_IMU();
+  
   FOSSASAT_DEBUG_PORT.print(imu.calcGyro(imu.gx));
   FOSSASAT_DEBUG_PORT.print('\t');
   FOSSASAT_DEBUG_PORT.print(imu.calcAccel(imu.ax));
