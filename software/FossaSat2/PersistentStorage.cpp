@@ -122,10 +122,10 @@ void PersistentStorage_Exit4ByteMode() {
 }
 
 void PersistentStorage_Reset() {
-  pinMode(7, OUTPUT);
-  digitalWrite(7, LOW);
+  pinMode(FLASH_RESET, OUTPUT);
+  digitalWrite(FLASH_RESET, LOW);
   delayMicroseconds(100);
-  pinMode(7, INPUT);
+  pinMode(FLASH_RESET, INPUT);
 }
 
 void PersistentStorage_WriteStatusRegister(uint8_t sr, uint8_t cr) {
