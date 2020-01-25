@@ -71,7 +71,8 @@ Adafruit_VEML7700 lightSensorTop = Adafruit_VEML7700();
 void Configuration_Setup() {
   // initialize pins
   pinMode(FLASH_CS, OUTPUT);
-  pinMode(FLASH_RESET, OUTPUT);
+  digitalWrite(FLASH_CS, HIGH);
+  pinMode(FLASH_RESET, INPUT);
 
   pinMode(DEPLOYMENT_FET_1, OUTPUT);
   pinMode(DEPLOYMENT_FET_2, OUTPUT);
