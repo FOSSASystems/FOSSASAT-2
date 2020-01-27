@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-void Camera_Init() {
+uint8_t Camera_Init() {
   // reset CPLD
   camera.write_reg(0x07, 0x80);
   delay(100);
@@ -9,6 +9,7 @@ void Camera_Init() {
 
   // check camera SPI
   uint32_t start = millis();
+  uint8_t state = 0;
   while(millis() - start <= 5000) {
     // write to test register
     camera.write_reg(ARDUCHIP_TEST1, 0x55);
@@ -18,29 +19,48 @@ void Camera_Init() {
     if(testValue != 0x55){
       FOSSASAT_DEBUG_PRINT(F("Camera SPI test failed, got 0x"));
       FOSSASAT_DEBUG_PRINTLN(testValue, HEX);
+      state = 1;
       delay(500);
     } else {
-      FOSSASAT_DEBUG_PRINT(F("Camera SPI test OK"));
+      FOSSASAT_DEBUG_PRINTLN(F("Camera SPI test OK"));
+      state = 0;
       break;
     }
 
     PowerControl_Watchdog_Heartbeat();
   }
 
-  // check camera type
-  uint8_t vid = 0;
-  uint8_t pid = 0;
-  camera.wrSensorReg16_8(0xff, 0x01);
-  camera.rdSensorReg16_8(OV2640_CHIPID_HIGH, &vid);
-  camera.rdSensorReg16_8(OV2640_CHIPID_LOW, &pid);
-  if((vid != 0x26) && ((pid != 0x41) || (pid != 0x42))){
-    FOSSASAT_DEBUG_PRINTLN(F("Unexpected vendor/product ID!"));
-    FOSSASAT_DEBUG_PRINT(F("Expected 0x26 0x41/0x42, got 0x"));
-    FOSSASAT_DEBUG_PRINT(vid, HEX);
-    FOSSASAT_DEBUG_PRINT(F(" 0x"));
-    FOSSASAT_DEBUG_PRINTLN(pid, HEX);
+  if(state != 0) {
+    return(state);
   }
 
+  // check camera I2C
+  start = millis();
+  while(millis() - start <= 5000) {
+    uint8_t vid = 0;
+    uint8_t pid = 0;
+    camera.wrSensorReg8_8(0xff, 0x01);
+    camera.rdSensorReg8_8(OV2640_CHIPID_HIGH, &vid); //CD
+    camera.rdSensorReg8_8(OV2640_CHIPID_LOW, &pid);  //CD
+    if((vid != 0x26) && ((pid != 0x41) || (pid != 0x42))){
+      FOSSASAT_DEBUG_PRINTLN(F("Unexpected vendor/product ID!"));
+      FOSSASAT_DEBUG_PRINT(F("Expected 0x26 0x41/0x42, got 0x"));
+      FOSSASAT_DEBUG_PRINT(vid, HEX);
+      FOSSASAT_DEBUG_PRINT(F(" 0x"));
+      FOSSASAT_DEBUG_PRINTLN(pid, HEX);
+      state = 2;
+    } else {
+      FOSSASAT_DEBUG_PRINTLN(F("Detected OV2640"));
+      state = 0;
+      break;
+    }
+    delay(500);
+  }
+
+  if(state != 0) {
+    return(state);
+  }
+  
   // set JPEG mode and initialize
   camera.set_format(JPEG);
   camera.InitCAM();
@@ -49,6 +69,7 @@ void Camera_Init() {
   camera.OV2640_set_JPEG_size(OV2640_320x240);
   delay(1000);
   camera.clear_fifo_flag();
+  return(state);
 }
 
 void Camera_Capture() {

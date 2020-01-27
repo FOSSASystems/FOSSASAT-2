@@ -3,25 +3,32 @@
 // Atom arduino-upload build configuration:
 // STM32:stm32:Nucleo_64:pnum=NUCLEO_L452REP
 
+// compile-time checks
+#if (!defined RADIOLIB_VERSION) || (RADIOLIB_VERSION < 0x03010000)
+  #error "Unsupported RadioLib version (< 3.1.0)!"
+#endif
+
+#if (!defined(RADIOLIB_STATIC_ONLY))
+  #error "RadioLib is using dynamic memory management, enable static only in RadioLib/src/TypeDef.h"
+#endif
+
 void setup() {
   // initialize debug port
   FOSSASAT_DEBUG_PORT.begin(FOSSASAT_DEBUG_SPEED);
-  while(!FOSSASAT_DEBUG_PORT);
   FOSSASAT_DEBUG_PORT.println();
+
+  // setup hardware interfaces
+  Configuration_Setup();
 
   // initialize external flash
   PersistentStorage_Reset();
   PersistentStorage_Enter4ByteMode();
 
   // increment reset counter
-  uint16_t restartCounter = 0xFFFF;
-  PersistentStorage_Get(FLASH_RESTART_COUNTER_ADDR, restartCounter);
+  uint16_t restartCounter = PersistentStorage_Get<uint16_t>(FLASH_RESTART_COUNTER_ADDR);
   FOSSASAT_DEBUG_PORT.print(F("Restart #"));
-  FOSSASAT_DEBUG_PORT.println(restartCounter);
-  PersistentStorage_Set(FLASH_RESTART_COUNTER_ADDR, ++restartCounter);
-
-  // setup hardware interfaces
-  Configuration_Setup();
+  FOSSASAT_DEBUG_PORT.println(restartCounter++);
+  PersistentStorage_Set(FLASH_RESTART_COUNTER_ADDR, restartCounter);
 
 #ifdef RESET_SYSTEM_INFO
   // reset system info (first sector in external flash)
@@ -29,43 +36,82 @@ void setup() {
 #endif
 
   // print power configuration
-  // TODO add the rest of power configuration
-  FOSSASAT_DEBUG_PORT.println(F("--- Power Configuration ---"));
-  FOSSASAT_DEBUG_PORT.print(F("Transmissions enabled: "));
-  uint8_t txEnabled = 0xFF;
-  PersistentStorage_Get(FLASH_TRANSMISSIONS_ENABLED, txEnabled);
-  FOSSASAT_DEBUG_PORT.println(txEnabled);
-  FOSSASAT_DEBUG_PORT.println(F("---------------------------"));
+  PowerControl_Print_Power_Config();
 
   // initialize radio
-  Communication_Set_Modem(currentModem);
+  FOSSASAT_DEBUG_PORT.print(F("LoRa modem init: "));
+  FOSSASAT_DEBUG_PORT.println(Communication_Set_Modem(MODEM_LORA));
+  FOSSASAT_DEBUG_PORT.print(F("FSK modem init:\t"));
+  FOSSASAT_DEBUG_PORT.println(Communication_Set_Modem(MODEM_FSK));
 
-  // initialize temperature sensors
-  Sensors_Setup_Temp(tempSensorPanelY, TMP_100_RESOLUTION_12_BITS);
-  Sensors_Setup_Temp(tempSensorTop, TMP_100_RESOLUTION_12_BITS);
-  Sensors_Setup_Temp(tempSensorBottom, TMP_100_RESOLUTION_12_BITS);
-  Sensors_Setup_Temp(tempSensorBattery, TMP_100_RESOLUTION_12_BITS);
-  Sensors_Setup_Temp(tempSensorSecBattery, TMP_100_RESOLUTION_12_BITS);
+  // initialize camera
+  FOSSASAT_DEBUG_PORT.print(F("Camera init:\t"));
+  FOSSASAT_DEBUG_PORT.println(Camera_Init());
 
   // initialize IMU
-  Sensors_Setup_IMU();
+  FOSSASAT_DEBUG_PORT.print(F("IMU init (expected 0x683D):\t0x"));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_IMU(), HEX);
+
+  // initialize temperature sensors
+  FOSSASAT_DEBUG_PORT.println(F("Temperature sensors init:"));
+  
+  FOSSASAT_DEBUG_PORT.print(F("Y panel: "));
+  Sensors_Setup_Temp(tempSensorPanelY, TMP_100_RESOLUTION_12_BITS);
+  FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorPanelY));
+
+  FOSSASAT_DEBUG_PORT.print(F("Top: "));
+  Sensors_Setup_Temp(tempSensorTop, TMP_100_RESOLUTION_12_BITS);
+  FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorTop));
+
+  FOSSASAT_DEBUG_PORT.print(F("Bottom: "));
+  Sensors_Setup_Temp(tempSensorBottom, TMP_100_RESOLUTION_12_BITS);
+  FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorBottom));
+
+  FOSSASAT_DEBUG_PORT.print(F("Battery: "));
+  Sensors_Setup_Temp(tempSensorBattery, TMP_100_RESOLUTION_12_BITS);
+  FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorBattery));
+
+  FOSSASAT_DEBUG_PORT.print(F("Secondary battery: "));
+  Sensors_Setup_Temp(tempSensorSecBattery, TMP_100_RESOLUTION_12_BITS);
+  FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorSecBattery));
 
   // initialize current sensors
-  Sensors_Setup_Current(currSensorXA, CURR_SENSOR_X_A_BUS, CURR_SENSOR_X_A_ADDRESS);
-  Sensors_Setup_Current(currSensorXB, CURR_SENSOR_X_B_BUS, CURR_SENSOR_X_B_ADDRESS);
-  Sensors_Setup_Current(currSensorZA, CURR_SENSOR_Z_A_BUS, CURR_SENSOR_Z_A_ADDRESS);
-  Sensors_Setup_Current(currSensorZB, CURR_SENSOR_Z_B_BUS, CURR_SENSOR_Z_B_ADDRESS);
-  Sensors_Setup_Current(currSensorY, CURR_SENSOR_Y_BUS, CURR_SENSOR_Y_ADDRESS);
-  Sensors_Setup_Current(currSensorMPPT, CURR_SENSOR_MPPT_OUTPUT_BUS, CURR_SENSOR_MPPT_OUTPUT_ADDRESS);
-
+  FOSSASAT_DEBUG_PORT.println(F("Current sensors init:"));
+  FOSSASAT_DEBUG_PORT.print(F("XA: "));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Current(currSensorXA, CURR_SENSOR_X_A_BUS, CURR_SENSOR_X_A_ADDRESS));
+  FOSSASAT_DEBUG_PORT.print(F("XB: "));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Current(currSensorXB, CURR_SENSOR_X_B_BUS, CURR_SENSOR_X_B_ADDRESS));
+  FOSSASAT_DEBUG_PORT.print(F("ZA: "));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Current(currSensorZA, CURR_SENSOR_Z_A_BUS, CURR_SENSOR_Z_A_ADDRESS));
+  FOSSASAT_DEBUG_PORT.print(F("ZB: "));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Current(currSensorZB, CURR_SENSOR_Z_B_BUS, CURR_SENSOR_Z_B_ADDRESS));
+  FOSSASAT_DEBUG_PORT.print(F("Y: "));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Current(currSensorY, CURR_SENSOR_Y_BUS, CURR_SENSOR_Y_ADDRESS));
+  FOSSASAT_DEBUG_PORT.print(F("MPPT: "));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Current(currSensorMPPT, CURR_SENSOR_MPPT_OUTPUT_BUS, CURR_SENSOR_MPPT_OUTPUT_ADDRESS));
+  
   // initialize light sensors
-  Sensors_Setup_Light(lightSensorPanelY, LIGHT_SENSOR_Y_PANEL_BUS);
-  Sensors_Setup_Light(lightSensorTop, LIGHT_SENSOR_TOP_PANEL_BUS);
+  FOSSASAT_DEBUG_PORT.println(F("Light sensors init:"));
+  FOSSASAT_DEBUG_PORT.print(F("Y: "));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Light(lightSensorPanelY, LIGHT_SENSOR_Y_PANEL_BUS));
+  FOSSASAT_DEBUG_PORT.print(F("Top: "));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Light(lightSensorTop, LIGHT_SENSOR_TOP_PANEL_BUS));
+
+  // initialize H-bridges
+  FOSSASAT_DEBUG_PORT.println(F("H-bridges init:"));
+  bridgeX.begin();
+  FOSSASAT_DEBUG_PORT.print(F("X: "));
+  FOSSASAT_DEBUG_PORT.println(bridgeX.getFault());
+  bridgeY.begin();
+  FOSSASAT_DEBUG_PORT.print(F("Y: "));
+  FOSSASAT_DEBUG_PORT.println(bridgeY.getFault());
+  bridgeZ.begin();
+  FOSSASAT_DEBUG_PORT.print(F("Z: "));
+  FOSSASAT_DEBUG_PORT.println(bridgeZ.getFault());
 
   // check deployment
 #ifdef ENABLE_DEPLOYMENT_SEQUENCE
-  uint8_t attemptNumber = 0xFF;
-  PersistentStorage_Get(FLASH_DEPLOYMENT_COUNTER_ADDR, attemptNumber);
+  uint8_t attemptNumber = PersistentStorage_Get<uint8_t>(FLASH_DEPLOYMENT_COUNTER_ADDR);
   FOSSASAT_DEBUG_PORT.print(F("Deployment attempt #"));
   FOSSASAT_DEBUG_PORT.println(attemptNumber);
 
@@ -153,13 +199,13 @@ void setup() {
         FOSSASAT_DEBUG_PORT.println(currSensorMPPT.readBusVoltage());
         FOSSASAT_DEBUG_PORT.println();
 
-        // TODO light sensors
+        // light sensors
         FOSSASAT_DEBUG_PORT.println(F("Device\t\tE [lx]"));
         FOSSASAT_DEBUG_PORT.println(F("-------------------------------------------------------------"));
         FOSSASAT_DEBUG_PORT.print(F("Y panel \t"));
-        FOSSASAT_DEBUG_PORT.println(0/*lightSensorPanelY.readLux()*/);
+        FOSSASAT_DEBUG_PORT.println(lightSensorPanelY.readLux());
         FOSSASAT_DEBUG_PORT.print(F("Top panel\t"));
-        FOSSASAT_DEBUG_PORT.println(0/*lightSensorTop.readLux()*/);
+        FOSSASAT_DEBUG_PORT.println(lightSensorTop.readLux());
         FOSSASAT_DEBUG_PORT.println();
 
         // ADCS H-bridge drivers
@@ -188,7 +234,7 @@ void setup() {
 
     // check voltage
     uint32_t chargingStart = millis();
-    while (currSensorMPPT.readBusVoltage() < DEPLOYMENT_BATTERY_LEVEL_LIMIT) {
+    while (PowerControl_Get_Battery_Voltage() < DEPLOYMENT_BATTERY_VOLTAGE_LIMIT) {
       // voltage below 3.7V, wait until charged
       if (millis() - chargingStart >= (uint32_t)DEPLOYMENT_CHARGE_LIMIT * (uint32_t)3600 * (uint32_t)1000) {
         // reached maximum charging interval, stop further charging
@@ -202,18 +248,124 @@ void setup() {
     PowerControl_Deploy();
 
     // increment deployment counter
-    PersistentStorage_Set(FLASH_DEPLOYMENT_COUNTER_ADDR, ++attemptNumber);
+    attemptNumber++;
+    PersistentStorage_Set(FLASH_DEPLOYMENT_COUNTER_ADDR, attemptNumber);
   }
 #endif
 
-  // set receive ISR
-  radio.setDio1Action(Communication_Receive_Interrupt);
-  radio.startReceive();
-
-  // reset timestamps
-  lastHeartbeat = millis();
+  // TODO reset uptime counter
 }
 
 void loop() {
+  // check battery voltage
+  FOSSASAT_DEBUG_PRINT(F("Battery check: "));
+  float battVoltage = PowerControl_Get_Battery_Voltage();
+  FOSSASAT_DEBUG_PRINTLN(battVoltage, 2);
+  PowerControl_Check_Battery_Limit();
+  PowerControl_Print_Power_Config();
 
+  // TODO try to switch MPPT on (may be overridden by temperature check)
+
+  // CW beacon
+  Communication_Set_Modem(MODEM_FSK);
+  FOSSASAT_DEBUG_DELAY(10);
+  #ifdef ENABLE_TRANSMISSION_CONTROL
+  if(PersistentStorage_Get<uint8_t>(FLASH_TRANSMISSIONS_ENABLED) == 0) {
+    FOSSASAT_DEBUG_PRINTLN(F("Tx off by cmd"));
+  } else {
+  #endif
+
+  if(battVoltage >= BATTERY_CW_BEEP_VOLTAGE_LIMIT) {
+    // transmit full Morse beacon
+    Communication_Send_Morse_Beacon(battVoltage);
+  } else {
+    // battery is low, transmit CW beeps
+    for(uint8_t i = 0; i < NUM_CW_BEEPS; i++) {
+      Communication_CW_Beep(500);
+      PowerControl_Wait(500, LOW_POWER_SLEEP);
+    }
+  }
+
+  #ifdef ENABLE_TRANSMISSION_CONTROL
+  }
+  #endif
+
+  // wait for a bit
+  FOSSASAT_DEBUG_DELAY(10);
+  PowerControl_Wait(500, LOW_POWER_SLEEP, true);
+
+  // send FSK system info
+  Communication_Set_Modem(MODEM_FSK);
+  Communication_Send_System_Info();
+
+  // wait for a bit
+  FOSSASAT_DEBUG_DELAY(10);
+  PowerControl_Wait(500, LOW_POWER_SLEEP, true);
+
+  // send LoRa system info if not in low power mode
+  Communication_Set_Modem(MODEM_LORA);
+  #ifdef ENABLE_TRANSMISSION_CONTROL
+  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ACTIVE) == 0) {
+    Communication_Send_System_Info();
+  }
+  #else
+    Communication_Send_System_Info();
+  #endif
+
+  // wait for a bit
+  FOSSASAT_DEBUG_DELAY(10);
+  PowerControl_Wait(500, LOW_POWER_SLEEP, true);
+
+  // LoRa receive
+  uint8_t windowLenLoRa = PersistentStorage_Get<uint8_t>(FLASH_LORA_RECEIVE_LEN_ADDR);
+  FOSSASAT_DEBUG_PRINT(F("LoRa Rx "));
+  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ACTIVE) == 1) {
+    // use only half of the interval in low power mode
+    windowLenLoRa /= 2;
+    FOSSASAT_DEBUG_PRINT(F("(halved due to LP mode) "));
+  }
+  FOSSASAT_DEBUG_PRINTLN(windowLenLoRa);
+  FOSSASAT_DEBUG_DELAY(10);
+  radio.setDio1Action(Communication_Receive_Interrupt);
+  int16_t state = radio.startReceive();
+  FOSSASAT_DEBUG_PRINTLN(state);
+
+  for(uint8_t i = 0; i < windowLenLoRa; i++) {
+    PowerControl_Wait(500, LOW_POWER_SLEEP);
+    if(dataReceived) {
+      radio.standby();
+      Communication_Process_Packet();
+      radio.startReceive();
+    }
+  }
+
+  // GFSK receive
+  uint8_t windowLenFsk = PersistentStorage_Get<uint8_t>(FLASH_FSK_RECEIVE_LEN_ADDR);
+  Communication_Set_Modem(MODEM_FSK);
+  FOSSASAT_DEBUG_PRINT(F("FSK Rx "));
+  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ACTIVE) == 1) {
+    // use only half of the interval in low power mode
+    windowLenFsk /= 2;
+    FOSSASAT_DEBUG_PRINT(F("(halved due to LP mode) "));
+  }
+  FOSSASAT_DEBUG_PRINTLN(windowLenFsk);
+  FOSSASAT_DEBUG_DELAY(10);
+  radio.setDio1Action(Communication_Receive_Interrupt);
+  state = radio.startReceive();
+  FOSSASAT_DEBUG_PRINTLN(state);
+
+  for(uint8_t i = 0; i < windowLenFsk; i++) {
+    PowerControl_Wait(500, LOW_POWER_SLEEP);
+    if(dataReceived) {
+      radio.standby();
+      Communication_Process_Packet();
+      radio.startReceive();
+    }
+  }
+  
+  radio.clearDio1Action();
+
+  // set everything to sleep
+
+  // TODO update uptime counter
 }

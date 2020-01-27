@@ -9,25 +9,22 @@ volatile bool interruptsEnabled = true;
 // flag to signal data was received from ISR
 volatile bool dataReceived = false;
 
-// flag to signal modem should be switched
-volatile bool switchModem = false;
-
 // current modem configuration
 uint8_t currentModem = MODEM_FSK;
 
-// timestamps
-uint32_t lastTransmit = 0;
-uint32_t lastMorseTransmit = 0;
-uint32_t lastHeartbeat = 0;
+uint8_t spreadingFactorMode = LORA_SPREADING_FACTOR;
 
-// hardware timer instance
-HardwareTimer tmr(TIM1);
+// timestamps
+uint32_t lastHeartbeat = 0;
 
 // second I2C instance
 TwoWire Wire2;
 
+SPIClass RadioSPI(RADIO_MOSI, RADIO_MISO, RADIO_SCK);
+SPIClass FlashSPI(FLASH_MOSI, FLASH_MISO, FLASH_SCK);
+
 // RadioLib instances
-SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_BUSY);
+SX1262 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_NRST, RADIO_BUSY, RadioSPI);
 MorseClient morse(&radio);
 
 // camera instance
@@ -73,18 +70,19 @@ void Configuration_Setup() {
   pinMode(FLASH_CS, OUTPUT);
   digitalWrite(FLASH_CS, HIGH);
   pinMode(FLASH_RESET, INPUT);
+  
+  pinMode(CAMERA_CS, OUTPUT);
+  digitalWrite(CAMERA_CS, HIGH);
+  pinMode(CAMERA_POWER_FET, OUTPUT);
+  digitalWrite(CAMERA_POWER_FET, HIGH);
 
   pinMode(DEPLOYMENT_FET_1, OUTPUT);
   pinMode(DEPLOYMENT_FET_2, OUTPUT);
-  pinMode(CAMERA_POWER_FET, OUTPUT);
   pinMode(BATTERY_HEATER_FET, OUTPUT);
-
-  pinMode(CAMERA_CS, OUTPUT);
+  
   pinMode(WATCHDOG_IN, OUTPUT);
   pinMode(MPPT_OFF, OUTPUT);
   pinMode(ANALOG_IN_RANDOM_SEED, INPUT);
-
-  digitalWrite(CAMERA_CS, HIGH);
 
   // initialize default I2C interface
   Wire.setSDA(I2C1_SDA);
@@ -96,15 +94,17 @@ void Configuration_Setup() {
   Wire2.setSCL(I2C2_SCL);
   Wire2.begin();
 
-  // initialize default SPI interface
-  SPI.setSCLK(SPI1_SCK);
-  SPI.setMISO(SPI1_MISO);
-  SPI.setMOSI(SPI1_MOSI);
+  // initialize SPI interfaces
+  FlashSPI.begin();
+  SPI.setMOSI(CAMERA_MOSI);
+  SPI.setMISO(CAMERA_MISO);
+  SPI.setSCLK(CAMERA_SCK);
   SPI.begin();
-
+  
   // provide seed for encrpytion PRNG
   randomSeed(analogRead(ANALOG_IN_RANDOM_SEED));
 
   // initialize low power library
   LowPower.begin();
+  LowPower.attachInterruptWakeup(RADIO_DIO1, Communication_Receive_Interrupt, RISING);
 }

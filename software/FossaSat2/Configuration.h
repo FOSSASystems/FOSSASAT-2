@@ -11,16 +11,13 @@
 //#define RESET_SYSTEM_INFO
 
 // comment out to disable deployment sequence
-//#define ENABLE_DEPLOYMENT_SEQUENCE
+#define ENABLE_DEPLOYMENT_SEQUENCE
 
 // comment out to disable sleep during deployment sequence
-//#define ENABLE_DEPLOYMENT_SLEEP
+#define ENABLE_DEPLOYMENT_SLEEP
 
 // comment out to disable transmission control (transmission disable and no transmissions in low power mode)
-//#define ENABLE_TRANSMISSION_CONTROL
-
-// comment out to disable reset on radio init error
-#define ENABLE_RADIO_ERROR_RESET
+#define ENABLE_TRANSMISSION_CONTROL
 
 /*
     Array Length Limits
@@ -30,10 +27,10 @@
 #define MAX_STRING_LENGTH                               32
 
 // optional data length limit
-#define MAX_OPT_DATA_LENGTH                             64
+#define MAX_OPT_DATA_LENGTH                             128
 
 // radio buffer length limit
-#define MAX_RADIO_BUFFER_LENGTH                         256
+#define MAX_RADIO_BUFFER_LENGTH                         (MAX_STRING_LENGTH + 2 + MAX_OPT_DATA_LENGTH)
 
 /*
     Pin Mapping
@@ -45,31 +42,38 @@
 #define I2C2_SDA                                        PB11
 #define I2C2_SCL                                        PB10
 
-// SPI
-#define SPI1_SCK                                        PA5
-#define SPI1_MISO                                       PA6
-#define SPI1_MOSI                                       PA7
-
 // radio
+#define RADIO_MOSI                                      PB15
+#define RADIO_MISO                                      PB14
+#define RADIO_SCK                                       PB13
 #define RADIO_NSS                                       PC7
+#define RADIO_DIO1                                      PC9
+#define RADIO_NRST                                      PC8
 #define RADIO_BUSY                                      PC6
-#define RADIO_DIO1                                      PB12
 
 // external flash
-#define FLASH_CS                                        PC11
-#define FLASH_RESET                                     PC12
+#define FLASH_MOSI                                      PA7
+#define FLASH_MISO                                      PA6
+#define FLASH_SCK                                       PA5
+#define FLASH_CS                                        PC4
+#define FLASH_RESET                                     PC5
+
+// camera
+#define CAMERA_MOSI                                     PC12
+#define CAMERA_MISO                                     PC11
+#define CAMERA_SCK                                      PC10
+#define CAMERA_POWER_FET                                PB5
+#define CAMERA_CS                                       PB6
 
 // control FETs
-#define DEPLOYMENT_FET_1                                PB1
-#define DEPLOYMENT_FET_2                                PC4
-#define CAMERA_POWER_FET                                PC9
-#define BATTERY_HEATER_FET                              PC8
+#define DEPLOYMENT_FET_1                                PA3
+#define DEPLOYMENT_FET_2                                PB1
+#define BATTERY_HEATER_FET                              PA8
 
 // other
-#define CAMERA_CS                                       PC10
 #define WATCHDOG_IN                                     PB2
-#define MPPT_OFF                                        PA8
-#define ANALOG_IN_RANDOM_SEED                           PA11    // used as source for randomSeed(), should be left floating
+#define MPPT_OFF                                        PA11
+#define ANALOG_IN_RANDOM_SEED                           PA12    // used as source for randomSeed(), should be left floating
 
 /*
    Low Power Modes
@@ -91,14 +95,15 @@
 #define DEPLOYMENT_CHARGE_LIMIT                         12      // h
 #define DEPLOYMENT_PULSE_LENGTH                         1200    // ms
 #define WATCHDOG_LOOP_HEARTBEAT_PERIOD                  1000    // ms
-#define BATTERY_CHECK_PERIOD                            300000  // ms
 
 /*
    Voltage Limits
 */
 
-#define DEPLOYMENT_BATTERY_LEVEL_LIMIT                  3700.0  // mV
-#define HEATER_BATTERY_LEVEL_LIMIT                      3800.0  // mV
+#define DEPLOYMENT_BATTERY_VOLTAGE_LIMIT                3700.0  // mV
+#define HEATER_BATTERY_VOLTAGE_LIMIT                    3800.0  // mV
+#define BATTERY_CW_BEEP_VOLTAGE_LIMIT                   3800.0        /*!< Battery voltage limit to switch into morse beep (mV). */
+#define LOW_POWER_MODE_VOLTAGE_LIMIT                    3800.0
 
 /*
    Temperature Limits
@@ -111,58 +116,70 @@
     Flash Configuration
 */
 
-// Flash address map                                                   LSB           MSB
+// Flash address map                                                    LSB           MSB
 // sector 0 - system info
-#define FLASH_RESTART_COUNTER_ADDR                      0x00000000  // 0x00000000    0x00000001
-#define FLASH_DEPLOYMENT_COUNTER_ADDR                   0x00000002  // 0x00000002    0x00000002
-#define FLASH_TRANSMISSIONS_ENABLED                     0x00000003  // 0x00000003    0x00000003
-#define FLASH_CALLSIGN_LEN_ADDR                         0x00000004  // 0x00000004    0x00000004
-#define FLASH_CALLSIGN_ADDR                             0x00000005  // 0x00000005    0x00000025
+#define FLASH_RESTART_COUNTER_ADDR                      0x00000000  //  0x00000000    0x00000001
+#define FLASH_DEPLOYMENT_COUNTER_ADDR                   0x00000002  //  0x00000002    0x00000002
+#define FLASH_TRANSMISSIONS_ENABLED                     0x00000003  //  0x00000003    0x00000003
+#define FLASH_CALLSIGN_LEN_ADDR                         0x00000004  //  0x00000004    0x00000004
+#define FLASH_CALLSIGN_ADDR                             0x00000005  //  0x00000005    0x00000025
+#define FLASH_FSK_RECEIVE_LEN_ADDR                      0x00000026  //  0x00000026    0x00000026
+#define FLASH_LORA_RECEIVE_LEN_ADDR                     0x00000027  //  0x00000027    0x00000027
+#define FLASH_UPTIME_COUNTER_ADDR                       0x00000028  //  0x00000028    0x0000002A
+#define FLASH_LORA_VALID_COUNTER_ADDR                   0x0000002B  //  0x0000002B    0x0000002C
+#define FLASH_LORA_INVALID_COUNTER_ADDR                 0x0000002D  //  0x0000002D    0x0000002E
+#define FLASH_FSK_VALID_COUNTER_ADDR                    0x0000002F  //  0x0000002F    0x00000030
+#define FLASH_FSK_INVALID_COUNTER_ADDR                  0x00000031  //  0x00000031    0x00000032
+#define FLASH_LOW_POWER_MODE_ENABLED                    0x00000033  //  0x00000033    0x00000033
+#define FLASH_LOW_POWER_MODE_ACTIVE                     0x00000034  //  0x00000034    0x00000034
+// todo stats
 
 // sector 1-X - images
-#define FLASH_IMAGE_CAPTURE_LENGTH                      0x00001000  // 0x00001000    0x00001003
-#define FLASH_IMAGE_CAPTURE                             0x00001004  // 0x00001004    0x00321004  assuming 400 kB JPEG as the maximum size
+#define FLASH_IMAGE_CAPTURE_LENGTH                      0x00001000  //  0x00001000    0x00001003
+#define FLASH_IMAGE_CAPTURE                             0x00001004  //  0x00001004    0x00321004  assuming 400 kB JPEG as the maximum size
 
 /*
     Radio Configuration
 */
 
 // modem definitions
-#define MODEM_FSK                                       0
-#define MODEM_LORA                                      1
+#define MODEM_FSK                                       'F'
+#define MODEM_LORA                                      'L'
 
 // common
 #define CALLSIGN_DEFAULT                                "FOSSASAT-2"
-#define CARRIER_FREQUENCY                               436.7   // MHz
-#define TCXO_VOLTAGE                                    1.6     // V
-#define MAX_NUM_OF_BLOCKS                               3       // maximum number of AES128 blocks that will be accepted
-#define MODEM_SWITCHING_PERIOD_FSK                      2000000 // us
-#define MODEM_SWITCHING_PERIOD_LORA                     6000000 // us
-#define SYSTEM_INFO_TRANSMIT_PERIOD                     60000   // us
-#define MORSE_BEACON_PERIOD                             60000   // us
+#define CARRIER_FREQUENCY                               436.7       /*!< MHz */
+#define SYNC_WORD                                       0x12        /*!< Ensure this sync word is compatable with all devices. */
+#define TCXO_VOLTAGE                                    1.6         /*!< Sets the radio's TCX0 voltage. (V) */
+#define MAX_NUM_OF_BLOCKS                               3           /*!< maximum number of AES128 blocks that will be accepted */
+#define LORA_RECEIVE_WINDOW_LENGTH                      40          /*!< How long to listen out for LoRa transmissions for (s) */
+#define FSK_RECEIVE_WINDOW_LENGTH                       20          /*!< How long to listen out for FSK transmissions for (s) */
+#define RESPONSE_DELAY                                  1000        /*!< How long to wait for before responding/processing a transmission (ms) */
 
 // LoRa
-#define LORA_BANDWIDTH                                  125.0   // kHz (dual sideband)
-#define LORA_OUTPUT_POWER                               20      // dBm
-#define LORA_SPREADING_FACTOR                           11      //
-#define LORA_CODING_RATE                                5       // parity only
-#define LORA_SYNC_WORD                                  0x12    //
+#define LORA_BANDWIDTH                                  125.0       /*!< kHz dual sideband */
+#define LORA_SPREADING_FACTOR                           11
+#define LORA_SPREADING_FACTOR_ALT                       10
+#define LORA_CODING_RATE                                8           /*!< 4/8, Extended Hamming */
+#define LORA_OUTPUT_POWER                               20          /*!< dBm */
+#define LORA_CURRENT_LIMIT                              140.0       /*!< mA */
 #define LORA_PREAMBLE_LENGTH                            8       // symbols
-#define LORA_CURRENT_LIMIT                              120     // mA
 
 // GFSK
-#define FSK_FREQUENCY_DEVIATION                         5.0     // kHz (single sideband)
-#define FSK_OUTPUT_POWER                                20      // dBm
-#define FSK_BIT_RATE                                    9.6     // kbps
-#define FSK_DATA_SHAPING                                0.5     // FSK filter BT product
-#define FSK_SYNC_WORD                                   {0x12, 0x12}
-#define FSK_PREAMBLE_LENGTH                             16      // bits
-#define FSK_RX_BANDWIDTH                                19.5    // kHz (single sideband)
-#define FSK_CURRENT_LIMIT                               200     // mA
+#define FSK_BIT_RATE                                    9.6         /*!< kbps nominal */
+#define FSK_FREQUENCY_DEVIATION                         5.0         /*!< kHz single-sideband */
+#define FSK_RX_BANDWIDTH                                39.0        /*!< kHz single-sideband */
+#define FSK_OUTPUT_POWER                                20          /*!< dBm */
+#define FSK_PREAMBLE_LENGTH                             16          /*!< bits */
+#define FSK_DATA_SHAPING                                0.5         /*!< GFSK filter BT product */
+#define FSK_CURRENT_LIMIT                               140.0       /*!< mA */
 
 // Morse Code
-#define MORSE_SPEED                                     12      // words per minute (assuming PARIS as standard word)
-#define MORSE_PREAMBLE_LENGTH                           3       // symbols
+#define NUM_CW_BEEPS                                    3           /*!< number of CW sync beeps in low power mode */
+#define MORSE_PREAMBLE_LENGTH                           3           /*!< number of start signal repetitions */
+#define MORSE_SPEED                                     20          /*!< words per minute */
+#define MORSE_BATTERY_MIN                               3200.0      /*!< minimum voltage value that can be send via Morse (corresponds to 'A'), mV*/
+#define MORSE_BATTERY_STEP                              50.0        /*!< voltage step in Morse, mV*/
 
 /*
     Temperature Sensors
@@ -195,7 +212,7 @@
 
 // second battery temperature sensor
 #define TEMP_SENSOR_SEC_BATTERY_BUS                     Wire2
-#define TEMP_SENSOR_SEC_BATTERY_ADDRESS                 0b1001100 // ADD1 float, ADD0 float ?????????
+#define TEMP_SENSOR_SEC_BATTERY_ADDRESS                 0b1001010 // ADD1 low, ADD0 high
 
 /*
     ADCS H-bridges
@@ -203,15 +220,15 @@
 
 #define ADCS_X_BRIDGE_ADDRESS                           0b1100100 // A1 float, A0 float
 #define ADCS_Y_BRIDGE_ADDRESS                           0b1100101 // A1 float, A0 high
-#define ADCS_Z_BRIDGE_ADDRESS                           0b1100010 // A1 low, A0 high
+#define ADCS_Z_BRIDGE_ADDRESS                           0b1100110 // A1 high, A0 low
 
 /*
    IMU
 */
 
 #define IMU_BUS                                         Wire2
-#define IMU_ACCEL_GYRO_ADDRESS                          0b1101010 // SDO_A/G low
-#define IMU_MAG_ADDRESS                                 0b0011100 // SDO_M low
+#define IMU_ACCEL_GYRO_ADDRESS                          0b1101011 // SDO_A/G pulled high internally
+#define IMU_MAG_ADDRESS                                 0b0011110 // SDO_M pulled high internally
 
 /*
    Current Sensors
@@ -259,25 +276,22 @@ extern volatile bool interruptsEnabled;
 // flag to signal data was received from ISR
 extern volatile bool dataReceived;
 
-// flag to signal modem should be switched
-extern volatile bool switchModem;
-
 // current modem configuration
 extern uint8_t currentModem;
 
-// timestamps
-extern uint32_t lastTransmit;
-extern uint32_t lastMorseTransmit;
-extern uint32_t lastHeartbeat;
+extern uint8_t spreadingFactorMode;
 
-// hardware timer instance
-extern HardwareTimer tmr;
+// timestamps
+extern uint32_t lastHeartbeat;
 
 // second I2C instance
 extern TwoWire Wire2;
 
+//extern SPIClass MainSPI;
+extern SPIClass FlashSPI;
+
 // RadioLib instances
-extern SX1268 radio;
+extern SX1262 radio;
 extern MorseClient morse;
 
 // camera instance

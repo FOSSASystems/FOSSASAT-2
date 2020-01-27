@@ -5,22 +5,36 @@
 
 // interrupt functions
 void Communication_Receive_Interrupt();
-void Communication_Change_Modem(HardwareTimer* tmr);
 
 // modem configuration
-void Communication_Set_Modem(uint8_t modem);
+int16_t Communication_Set_SpreadingFactor(uint8_t sfMode);
 int16_t Communication_Set_LoRa_Configuration(float bw, uint8_t sf, uint8_t cr, uint16_t preambleLen, bool crc, int8_t power);
+int16_t Communication_Set_Modem(uint8_t modem);
+
+// CW functions
+void Communication_Send_Morse_Beacon(float battVoltage);
+void Communication_CW_Beep(uint32_t len);
 
 // system info functions
-template <class T>
-void Communication_System_Info_Add(uint8_t** buffPtr, T val, const char* name, uint32_t mult, const char* unit);
 void Communication_Send_System_Info();
-void Communication_Send_Morse_Beacon();
+template <typename T>
+void Communication_Frame_Add(uint8_t** buffPtr, T val, const char* name, uint32_t mult, const char* unit) {
+  memcpy(*buffPtr, &val, sizeof(val));
+  (*buffPtr) += sizeof(val);
+  FOSSASAT_DEBUG_PRINT(name);
+  FOSSASAT_DEBUG_PRINT(F(" = "));
+  FOSSASAT_DEBUG_PRINT(val);
+  FOSSASAT_DEBUG_PRINT('*');
+  FOSSASAT_DEBUG_PRINT(mult);
+  FOSSASAT_DEBUG_PRINT(' ');
+  FOSSASAT_DEBUG_PRINTLN(unit);
+}
 
 // FOSSA Communication Protocol frame handling
+void Communication_Process_Packet();
 void Comunication_Parse_Frame(uint8_t* frame, uint8_t len);
 void Communication_Execute_Function(uint8_t functionId, uint8_t* optData = nullptr, size_t optDataLen = 0);
-int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData = nullptr, size_t optDataLen = 0, bool encrypt = false, bool overrideModem = false);
+int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData = nullptr, size_t optDataLen = 0, bool overrideModem = false);
 bool Communication_Check_OptDataLen(uint8_t expected, uint8_t actual);
 
 // radio handling

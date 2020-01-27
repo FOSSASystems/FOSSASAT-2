@@ -1,6 +1,6 @@
 #include "PowerControl.h"
 
-void PowerControl_Wait(uint32_t ms, uint8_t type) {
+void PowerControl_Wait(uint32_t ms, uint8_t type, bool radioSleep) {
   if (ms == 0) {
     return;
   }
@@ -13,10 +13,14 @@ void PowerControl_Wait(uint32_t ms, uint8_t type) {
   }
   float numLoops = 0.5 + (float)ms / stepSize;
 
+  // set radio to sleep
+  if(radioSleep) {
+    radio.sleep();
+  }
+
   // perform all loops
   for (uint32_t i = 0; i < (uint32_t)numLoops; i++) {
     PowerControl_Watchdog_Heartbeat();
-
     switch(type) {
       case LOW_POWER_NONE:
         delay((uint32_t)stepSize);
@@ -35,7 +39,12 @@ void PowerControl_Wait(uint32_t ms, uint8_t type) {
         break;
       default:
         return;
-      }
+    }
+  }
+
+  // wake up radio
+  if(radioSleep) {
+    radio.standby();
   }
 }
 
@@ -43,8 +52,8 @@ void PowerControl_Watchdog_Heartbeat() {
   // toggle watchdog pin
   digitalWrite(WATCHDOG_IN, !digitalRead(WATCHDOG_IN));
 
-  // save timestamp
-  lastHeartbeat = millis();
+  // check voltage
+  PowerControl_Check_Battery_Limit();
 }
 
 void PowerControl_Watchdog_Restart() {
@@ -56,15 +65,42 @@ void PowerControl_Watchdog_Restart() {
 
 void PowerControl_Deploy() {
   FOSSASAT_DEBUG_PRINTLN(F("Deploy"));
+  FOSSASAT_DEBUG_DELAY(10);
 
   // burn the nichrome wires
   digitalWrite(DEPLOYMENT_FET_1, HIGH);
-  digitalWrite(DEPLOYMENT_FET_1, HIGH);
+  digitalWrite(DEPLOYMENT_FET_2, HIGH);
 
   // wait a bit
-  PowerControl_Wait(1200, LOW_POWER_NONE);
+  PowerControl_Wait(1500, LOW_POWER_SLEEP);
 
   // set MOSFETs low
   digitalWrite(DEPLOYMENT_FET_1, LOW);
-  digitalWrite(DEPLOYMENT_FET_1, LOW);
+  digitalWrite(DEPLOYMENT_FET_2, LOW);
+}
+
+float PowerControl_Get_Battery_Voltage() {
+  return(currSensorMPPT.readBusVoltage());
+}
+
+void PowerControl_Check_Battery_Limit() {
+  // check battery voltage
+  if((PowerControl_Get_Battery_Voltage() <= LOW_POWER_MODE_VOLTAGE_LIMIT) && (PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED) == 1)) {
+    // activate low power mode
+   PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE_ACTIVE, LOW_POWER_SLEEP);
+  } else {
+    // deactivate low power mode
+    PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE_ACTIVE, LOW_POWER_NONE);
+  }
+}
+
+void PowerControl_Print_Power_Config() {
+  FOSSASAT_DEBUG_PORT.println(F("--- Power Configuration ---"));
+  FOSSASAT_DEBUG_PORT.print(F("Transmissions enabled: "));
+  FOSSASAT_DEBUG_PORT.println(PersistentStorage_Get<uint8_t>(FLASH_TRANSMISSIONS_ENABLED));
+  FOSSASAT_DEBUG_PORT.print(F("Low power mode enabled: "));
+  FOSSASAT_DEBUG_PORT.println(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED));
+  FOSSASAT_DEBUG_PORT.print(F("Low power mode active: "));
+  FOSSASAT_DEBUG_PORT.println(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ACTIVE));
+  FOSSASAT_DEBUG_PORT.println(F("---------------------------"));
 }

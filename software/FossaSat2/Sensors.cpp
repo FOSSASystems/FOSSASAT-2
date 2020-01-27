@@ -25,7 +25,7 @@ float Sensors_Read_Temperature(wireSensor_t& sensor) {
   return (temp);
 }
 
-void Sensors_Setup_IMU() {
+uint16_t Sensors_Setup_IMU() {
   // set configuration
   imu.settings.device.commInterface = IMU_MODE_I2C;
   imu.settings.device.agAddress = IMU_ACCEL_GYRO_ADDRESS;
@@ -33,13 +33,7 @@ void Sensors_Setup_IMU() {
   imu.settings.device.i2c = &IMU_BUS;
 
   // initialize IMU
-  FOSSASAT_DEBUG_PRINT(F("IMU init ... "));
-  if (!imu.begin()) {
-    FOSSASAT_DEBUG_PRINTLN(F("failed!"));
-    return;
-  } else {
-    FOSSASAT_DEBUG_PRINTLN(F("success!"));
-  }
+  return(imu.begin());
 }
 
 void Sensors_Update_IMU() {
@@ -56,7 +50,7 @@ void Sensors_Update_IMU() {
   }
 }
 
-void Sensors_Setup_Current(Adafruit_INA260& sensor, TwoWire& wire, uint8_t addr) {
+bool Sensors_Setup_Current(Adafruit_INA260& sensor, TwoWire& wire, uint8_t addr) {
   FOSSASAT_DEBUG_PRINT(F("Current sensor 0b"));
   FOSSASAT_DEBUG_PRINT(addr, BIN);
   FOSSASAT_DEBUG_PRINT(F(" init ... "));
@@ -64,13 +58,13 @@ void Sensors_Setup_Current(Adafruit_INA260& sensor, TwoWire& wire, uint8_t addr)
   // initialize the current sensor
   if (!sensor.begin(addr, &wire)) {
     FOSSASAT_DEBUG_PRINTLN(F("failed!"));
-    return;
-  } else {
-    FOSSASAT_DEBUG_PRINTLN(F("success!"));
+    return(false);
   }
+  FOSSASAT_DEBUG_PRINTLN(F("success!"));
+  return(true);
 }
 
-void Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire) {
+bool Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire) {
   FOSSASAT_DEBUG_PRINT(F("Light sensor I2C"));
   if (&wire == &Wire) {
     FOSSASAT_DEBUG_PRINT('1');
@@ -82,7 +76,7 @@ void Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire) {
   // initialize the current sensor
   if (!sensor.begin(&wire)) {
     FOSSASAT_DEBUG_PRINTLN(F("failed!"));
-    return;
+    return(false);
   } else {
     FOSSASAT_DEBUG_PRINTLN(F("success!"));
   }
@@ -90,4 +84,5 @@ void Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire) {
   // set default properties
   sensor.setGain(LIGHT_SENSOR_GAIN);
   sensor.setIntegrationTime(LIGHT_SENSOR_INTEGRATION_TIME);
+  return(true);
 }

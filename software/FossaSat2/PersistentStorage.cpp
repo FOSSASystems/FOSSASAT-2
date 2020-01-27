@@ -1,5 +1,28 @@
 #include "PersistentStorage.h"
 
+void PersistentStorage_Increment_Counter(uint16_t addr) {
+  uint16_t counter = PersistentStorage_Get<uint16_t>(addr);
+  counter++;
+  PersistentStorage_Set(addr, counter);
+}
+
+void PersistentStorage_Increment_Frame_Counter(bool valid) {
+  uint16_t addr = FLASH_LORA_VALID_COUNTER_ADDR;
+  if(currentModem == MODEM_LORA) {
+    if(!valid) {
+      addr += 2;
+    }
+  } else {
+    if(valid) {
+      addr += 4;
+    } else {
+      addr += 6;
+    }
+  }
+
+  PersistentStorage_Increment_Counter(addr);
+}
+
 void PersistentStorage_Get_Callsign(char* buff, uint8_t len) {
   PersistentStorage_Read(FLASH_CALLSIGN_ADDR, (uint8_t*)buff, len);
 }
@@ -26,7 +49,8 @@ void PersistentStorage_Set_Callsign(char* newCallsign) {
 
 void PersistentStorage_Reset_System_Info() {
   // build a completely new system info page
-  uint8_t sysInfoPage[FLASH_SYSTEM_INFO_LEN];
+  uint8_t sysInfoPage[FLASH_SYSTEM_INFO_LEN + 1];
+  uint8_t* sysInfoPagePtr = sysInfoPage;
 
   // set reset counter to 0
   sysInfoPage[FLASH_RESTART_COUNTER_ADDR] = 0;
@@ -42,10 +66,29 @@ void PersistentStorage_Reset_System_Info() {
   sysInfoPage[FLASH_CALLSIGN_LEN_ADDR] = strlen(CALLSIGN_DEFAULT);
 
   // set default callsign
-  memcpy(sysInfoPage + FLASH_CALLSIGN_ADDR, CALLSIGN_DEFAULT, strlen(CALLSIGN_DEFAULT));
+  memcpy(sysInfoPagePtr + FLASH_CALLSIGN_ADDR, CALLSIGN_DEFAULT, strlen(CALLSIGN_DEFAULT));
+
+  // set default receive windows
+  sysInfoPage[FLASH_FSK_RECEIVE_LEN_ADDR] = FSK_RECEIVE_WINDOW_LENGTH;
+  sysInfoPage[FLASH_LORA_RECEIVE_LEN_ADDR] = LORA_RECEIVE_WINDOW_LENGTH;
+
+  // reset uptime counter
+  uint32_t uptimeCounter = 0;
+  memcpy(sysInfoPagePtr + FLASH_UPTIME_COUNTER_ADDR, &uptimeCounter, sizeof(uint32_t));
+
+  // reset frame counters
+  uint16_t frameCounter = 0;
+  memcpy(sysInfoPagePtr + FLASH_LORA_VALID_COUNTER_ADDR, &frameCounter, sizeof(uint16_t));
+  memcpy(sysInfoPagePtr + FLASH_LORA_INVALID_COUNTER_ADDR, &frameCounter, sizeof(uint16_t));
+  memcpy(sysInfoPagePtr + FLASH_FSK_VALID_COUNTER_ADDR, &frameCounter, sizeof(uint16_t));
+  memcpy(sysInfoPagePtr + FLASH_FSK_INVALID_COUNTER_ADDR, &frameCounter, sizeof(uint16_t));
+
+  // set default low power mode configuration
+  sysInfoPage[FLASH_LOW_POWER_MODE_ENABLED] = 1;
+  sysInfoPage[FLASH_LOW_POWER_MODE_ACTIVE] = 0;
 
   // write the default system info
-  PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
+  PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN + 1);
 }
 
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len) {
@@ -175,27 +218,27 @@ void PersistentStorage_SPItranscation(uint8_t cmd, bool write, uint8_t* data, si
 
 void PersistentStorage_SPItranscation(uint8_t* cmd, uint8_t cmdLen, bool write, uint8_t* data, size_t numBytes) {
   digitalWrite(FLASH_CS, LOW);
-  SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
+  FlashSPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
 
   // send command
   for(uint8_t n = 0; n < cmdLen; n++) {
     // send byte
-    SPI.transfer(cmd[n]);
+    FlashSPI.transfer(cmd[n]);
   }
 
   // send data
   if(write) {
     for(size_t n = 0; n < numBytes; n++) {
       // send byte
-      SPI.transfer(data[n]);
+      FlashSPI.transfer(data[n]);
     }
 
   } else {
     for(size_t n = 0; n < numBytes; n++) {
-      data[n] = SPI.transfer(MX25L51245G_CMD_NOP);
+      data[n] = FlashSPI.transfer(MX25L51245G_CMD_NOP);
     }
   }
 
-  SPI.endTransaction();
+  FlashSPI.endTransaction();
   digitalWrite(FLASH_CS, HIGH);
 }
