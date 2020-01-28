@@ -103,7 +103,7 @@ void Communication_Send_Morse_Beacon(float battVoltage) {
   morse.begin(CARRIER_FREQUENCY, MORSE_SPEED);
   
   // read callsign
-  uint8_t callsignLen = PersistentStorage_Get<uint8_t>(FLASH_CALLSIGN_LEN_ADDR);
+  uint8_t callsignLen = PersistentStorage_Get<uint8_t>(FLASH_CALLSIGN_LEN);
   char callsign[MAX_STRING_LENGTH];
   PersistentStorage_Get_Callsign(callsign, callsignLen);
 
@@ -182,7 +182,7 @@ void Communication_Send_System_Info() {
   int16_t currentY = currSensorY.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentY, "currentY", CURRENT_MULTIPLIER, "uA");
 
-  uint16_t resetCounter = PersistentStorage_Get<uint16_t>(FLASH_RESTART_COUNTER_ADDR);
+  uint16_t resetCounter = PersistentStorage_Get<uint16_t>(FLASH_RESTART_COUNTER);
   Communication_Frame_Add(&optDataPtr, resetCounter, "resetCounter", 1, "");
 
   FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
@@ -215,7 +215,7 @@ void Communication_Process_Packet() {
     FOSSASAT_DEBUG_PRINT_BUFF(frame, len);
 
     // check callsign
-    uint8_t callsignLen = PersistentStorage_Get<uint8_t>(FLASH_CALLSIGN_LEN_ADDR);
+    uint8_t callsignLen = PersistentStorage_Get<uint8_t>(FLASH_CALLSIGN_LEN);
     char callsign[MAX_STRING_LENGTH];
     PersistentStorage_Get_Callsign(callsign, callsignLen);
     if(memcmp(frame, (uint8_t*)callsign, callsignLen - 1) == 0) {
@@ -241,7 +241,7 @@ void Communication_Process_Packet() {
 
 void Comunication_Parse_Frame(uint8_t* frame, uint8_t len) {
   // get callsign from EEPROM
-  uint8_t callsignLen = PersistentStorage_Get<uint8_t>(FLASH_CALLSIGN_LEN_ADDR);
+  uint8_t callsignLen = PersistentStorage_Get<uint8_t>(FLASH_CALLSIGN_LEN);
   char callsign[MAX_STRING_LENGTH];
   PersistentStorage_Get_Callsign(callsign, callsignLen);
 
@@ -258,7 +258,7 @@ void Comunication_Parse_Frame(uint8_t* frame, uint8_t len) {
   // check encryption
   int16_t optDataLen = 0;
   uint8_t optData[MAX_OPT_DATA_LENGTH];
-  if((functionId >= CMD_DEPLOY) && (functionId <= CMD_RECORD_SOLAR_CELLS)) {
+  if((functionId >= CMD_DEPLOY) && (functionId <= CMD_CAMERA_CAPTURE)) {
     // frame contains encrypted data, decrypt
     FOSSASAT_DEBUG_PRINTLN(F("Decrypting"));
 
@@ -394,16 +394,16 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         uint8_t rssi = (uint8_t)(radio.getRSSI() * -2.0);
         Communication_Frame_Add(&respOptDataPtr, rssi, "RSSI", 2, "dBm");
 
-        uint16_t loraValid = PersistentStorage_Get<uint16_t>(FLASH_LORA_VALID_COUNTER_ADDR);
+        uint16_t loraValid = PersistentStorage_Get<uint16_t>(FLASH_LORA_VALID_COUNTER);
         Communication_Frame_Add(&respOptDataPtr, loraValid, "LoRa valid", 1, "");
 
-        uint16_t loraInvalid = PersistentStorage_Get<uint16_t>(FLASH_LORA_INVALID_COUNTER_ADDR);
+        uint16_t loraInvalid = PersistentStorage_Get<uint16_t>(FLASH_LORA_INVALID_COUNTER);
         Communication_Frame_Add(&respOptDataPtr, loraInvalid, "LoRa invalid", 1, "");
 
-        uint16_t fskValid = PersistentStorage_Get<uint16_t>(FLASH_FSK_VALID_COUNTER_ADDR);
+        uint16_t fskValid = PersistentStorage_Get<uint16_t>(FLASH_FSK_VALID_COUNTER);
         Communication_Frame_Add(&respOptDataPtr, fskValid, "FSK valid", 1, "");
 
-        uint16_t fskInvalid = PersistentStorage_Get<uint16_t>(FLASH_FSK_INVALID_COUNTER_ADDR);
+        uint16_t fskInvalid = PersistentStorage_Get<uint16_t>(FLASH_FSK_INVALID_COUNTER);
         Communication_Frame_Add(&respOptDataPtr, fskInvalid, "FSK invalid", 1, "");
 
         Communication_Send_Response(RESP_PACKET_INFO, respOptData, respOptDataLen);
@@ -420,7 +420,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         PowerControl_Deploy();
 
         // get deployment counter value and send it
-        uint8_t attemptNumber = PersistentStorage_Get<uint8_t>(FLASH_DEPLOYMENT_COUNTER_ADDR);
+        uint8_t attemptNumber = PersistentStorage_Get<uint8_t>(FLASH_DEPLOYMENT_COUNTER);
         Communication_Send_Response(RESP_DEPLOYMENT_STATE, &attemptNumber, 1);
       } break;
 
@@ -496,19 +496,26 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         uint8_t windowLen = optData[0];
         FOSSASAT_DEBUG_PRINT(F("fskRxLen="));
         FOSSASAT_DEBUG_PRINTLN(windowLen);
-        PersistentStorage_Set(FLASH_FSK_RECEIVE_LEN_ADDR, windowLen);
+        PersistentStorage_Set(FLASH_FSK_RECEIVE_LEN, windowLen);
 
         // set LoRa receive length
         windowLen = optData[1];
         FOSSASAT_DEBUG_PRINT(F("loraRxLen="));
         FOSSASAT_DEBUG_PRINTLN(windowLen);
-        PersistentStorage_Set(FLASH_LORA_RECEIVE_LEN_ADDR, windowLen);
+        PersistentStorage_Set(FLASH_LORA_RECEIVE_LEN, windowLen);
       }
     } break;
 
-    case CMD_CAMERA_CAPTURE:
-      Camera_Capture();
-      break;
+    case CMD_CAMERA_CAPTURE: {
+      // check optional data is exactly 1 byte
+      if(Communication_Check_OptDataLen(1, optDataLen)) {
+        digitalWrite(CAMERA_POWER_FET, HIGH);
+        Camera_Init(optData[0]);
+        Camera_Capture();
+        digitalWrite(CAMERA_POWER_FET, LOW);
+        // TODO capture done response
+      }
+    } break;
 
     // TODO new private frames
 
@@ -520,7 +527,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
 int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData, size_t optDataLen, bool overrideModem) {
   // get callsign from EEPROM
-  uint8_t callsignLen = PersistentStorage_Get<uint8_t>(FLASH_CALLSIGN_LEN_ADDR);
+  uint8_t callsignLen = PersistentStorage_Get<uint8_t>(FLASH_CALLSIGN_LEN);
   char callsign[MAX_STRING_LENGTH];
   PersistentStorage_Get_Callsign(callsign, callsignLen);
 

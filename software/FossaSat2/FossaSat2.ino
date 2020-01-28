@@ -25,10 +25,10 @@ void setup() {
   PersistentStorage_Enter4ByteMode();
 
   // increment reset counter
-  uint16_t restartCounter = PersistentStorage_Get<uint16_t>(FLASH_RESTART_COUNTER_ADDR);
+  uint16_t restartCounter = PersistentStorage_Get<uint16_t>(FLASH_RESTART_COUNTER);
   FOSSASAT_DEBUG_PORT.print(F("Restart #"));
   FOSSASAT_DEBUG_PORT.println(restartCounter++);
-  PersistentStorage_Set(FLASH_RESTART_COUNTER_ADDR, restartCounter);
+  PersistentStorage_Set(FLASH_RESTART_COUNTER, restartCounter);
 
 #ifdef RESET_SYSTEM_INFO
   // reset system info (first sector in external flash)
@@ -111,7 +111,7 @@ void setup() {
 
   // check deployment
 #ifdef ENABLE_DEPLOYMENT_SEQUENCE
-  uint8_t attemptNumber = PersistentStorage_Get<uint8_t>(FLASH_DEPLOYMENT_COUNTER_ADDR);
+  uint8_t attemptNumber = PersistentStorage_Get<uint8_t>(FLASH_DEPLOYMENT_COUNTER);
   FOSSASAT_DEBUG_PORT.print(F("Deployment attempt #"));
   FOSSASAT_DEBUG_PORT.println(attemptNumber);
 
@@ -249,7 +249,7 @@ void setup() {
 
     // increment deployment counter
     attemptNumber++;
-    PersistentStorage_Set(FLASH_DEPLOYMENT_COUNTER_ADDR, attemptNumber);
+    PersistentStorage_Set(FLASH_DEPLOYMENT_COUNTER, attemptNumber);
   }
 #endif
 
@@ -317,7 +317,7 @@ void loop() {
   PowerControl_Wait(500, LOW_POWER_SLEEP, true);
 
   // LoRa receive
-  uint8_t windowLenLoRa = PersistentStorage_Get<uint8_t>(FLASH_LORA_RECEIVE_LEN_ADDR);
+  uint8_t windowLenLoRa = PersistentStorage_Get<uint8_t>(FLASH_LORA_RECEIVE_LEN);
   FOSSASAT_DEBUG_PRINT(F("LoRa Rx "));
   if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ACTIVE) == 1) {
     // use only half of the interval in low power mode
@@ -340,7 +340,7 @@ void loop() {
   }
 
   // GFSK receive
-  uint8_t windowLenFsk = PersistentStorage_Get<uint8_t>(FLASH_FSK_RECEIVE_LEN_ADDR);
+  uint8_t windowLenFsk = PersistentStorage_Get<uint8_t>(FLASH_FSK_RECEIVE_LEN);
   Communication_Set_Modem(MODEM_FSK);
   FOSSASAT_DEBUG_PRINT(F("FSK Rx "));
   if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ACTIVE) == 1) {

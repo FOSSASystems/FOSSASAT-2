@@ -7,7 +7,7 @@ void PersistentStorage_Increment_Counter(uint16_t addr) {
 }
 
 void PersistentStorage_Increment_Frame_Counter(bool valid) {
-  uint16_t addr = FLASH_LORA_VALID_COUNTER_ADDR;
+  uint16_t addr = FLASH_LORA_VALID_COUNTER;
   if(currentModem == MODEM_LORA) {
     if(!valid) {
       addr += 2;
@@ -24,7 +24,7 @@ void PersistentStorage_Increment_Frame_Counter(bool valid) {
 }
 
 void PersistentStorage_Get_Callsign(char* buff, uint8_t len) {
-  PersistentStorage_Read(FLASH_CALLSIGN_ADDR, (uint8_t*)buff, len);
+  PersistentStorage_Read(FLASH_CALLSIGN, (uint8_t*)buff, len);
 }
 
 void PersistentStorage_Set_Callsign(char* newCallsign) {
@@ -42,50 +42,36 @@ void PersistentStorage_Set_Callsign(char* newCallsign) {
   PersistentStorage_Read(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
 
   // update callsign entries
-  sysInfoPage[FLASH_CALLSIGN_LEN_ADDR] = newCallsignLen;
-  memcpy(sysInfoPage + FLASH_CALLSIGN_ADDR, newCallsign, newCallsignLen);
+  sysInfoPage[FLASH_CALLSIGN_LEN] = newCallsignLen;
+  memcpy(sysInfoPage + FLASH_CALLSIGN, newCallsign, newCallsignLen);
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
 }
 
 void PersistentStorage_Reset_System_Info() {
   // build a completely new system info page
-  uint8_t sysInfoPage[FLASH_SYSTEM_INFO_LEN + 1];
+  uint8_t sysInfoPage[FLASH_SYSTEM_INFO_LEN];
   uint8_t* sysInfoPagePtr = sysInfoPage;
 
-  // set reset counter to 0
-  sysInfoPage[FLASH_RESTART_COUNTER_ADDR] = 0;
-  sysInfoPage[FLASH_RESTART_COUNTER_ADDR + 1] = 0;
+  // set everything to 0 by default
+  memset(sysInfoPage, 0, FLASH_SYSTEM_INFO_LEN);
 
-  // set deployment counter to 0
-  sysInfoPage[FLASH_DEPLOYMENT_COUNTER_ADDR] = 0;
+  // set non-zero defaults
 
   // set default transmission configuration
   sysInfoPage[FLASH_TRANSMISSIONS_ENABLED] = 1;
 
   // set default callsign length
-  sysInfoPage[FLASH_CALLSIGN_LEN_ADDR] = strlen(CALLSIGN_DEFAULT);
+  sysInfoPage[FLASH_CALLSIGN_LEN] = strlen(CALLSIGN_DEFAULT);
 
   // set default callsign
-  memcpy(sysInfoPagePtr + FLASH_CALLSIGN_ADDR, CALLSIGN_DEFAULT, strlen(CALLSIGN_DEFAULT));
+  memcpy(sysInfoPagePtr + FLASH_CALLSIGN, CALLSIGN_DEFAULT, strlen(CALLSIGN_DEFAULT));
 
   // set default receive windows
-  sysInfoPage[FLASH_FSK_RECEIVE_LEN_ADDR] = FSK_RECEIVE_WINDOW_LENGTH;
-  sysInfoPage[FLASH_LORA_RECEIVE_LEN_ADDR] = LORA_RECEIVE_WINDOW_LENGTH;
-
-  // reset uptime counter
-  uint32_t uptimeCounter = 0;
-  memcpy(sysInfoPagePtr + FLASH_UPTIME_COUNTER_ADDR, &uptimeCounter, sizeof(uint32_t));
-
-  // reset frame counters
-  uint16_t frameCounter = 0;
-  memcpy(sysInfoPagePtr + FLASH_LORA_VALID_COUNTER_ADDR, &frameCounter, sizeof(uint16_t));
-  memcpy(sysInfoPagePtr + FLASH_LORA_INVALID_COUNTER_ADDR, &frameCounter, sizeof(uint16_t));
-  memcpy(sysInfoPagePtr + FLASH_FSK_VALID_COUNTER_ADDR, &frameCounter, sizeof(uint16_t));
-  memcpy(sysInfoPagePtr + FLASH_FSK_INVALID_COUNTER_ADDR, &frameCounter, sizeof(uint16_t));
+  sysInfoPage[FLASH_FSK_RECEIVE_LEN] = FSK_RECEIVE_WINDOW_LENGTH;
+  sysInfoPage[FLASH_LORA_RECEIVE_LEN] = LORA_RECEIVE_WINDOW_LENGTH;
 
   // set default low power mode configuration
   sysInfoPage[FLASH_LOW_POWER_MODE_ENABLED] = 1;
-  sysInfoPage[FLASH_LOW_POWER_MODE_ACTIVE] = 0;
 
   // write the default system info
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN + 1);
