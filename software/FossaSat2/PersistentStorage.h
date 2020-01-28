@@ -14,6 +14,7 @@
 #define MX25L51245G_CMD_RDSCUR                          0x2B
 #define MX25L51245G_CMD_SE                              0x20
 #define MX25L51245G_CMD_EN4B                            0xB7
+#define MX25L51245G_CMD_BE                              0xD8
 #define MX25L51245G_CMD_EX4B                            0xE9
 #define MX25L51245G_CMD_REMS                            0x90
 
@@ -21,7 +22,7 @@
 #define MX25L51245G_SR_WIP                              0b00000001
 
 #define FLASH_SYSTEM_INFO_START                         0x00000000
-#define FLASH_SYSTEM_INFO_LEN                           0x34
+#define FLASH_SYSTEM_INFO_LEN                           0x38
 
 void PersistentStorage_Increment_Counter(uint16_t addr);
 void PersistentStorage_Increment_Frame_Counter(bool valid);
@@ -30,9 +31,10 @@ void PersistentStorage_Set_Callsign(char* newCallsign);
 void PersistentStorage_Reset_System_Info();
 
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len);
-void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len);
+void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool autoErase = true);
 
 void PersistentStorage_SectorErase(uint32_t addr);
+void PersistentStorage_64kBlockErase(uint32_t addr);
 
 void PersistentStorage_WriteEnable();
 void PersistentStorage_WriteDisable();

@@ -96,9 +96,11 @@ void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len) {
   PersistentStorage_SPItranscation(cmdBuff, 5, false, buff, len);
 }
 
-void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len) {
+void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool autoErase) {
   // erase requested sector
-  PersistentStorage_SectorErase(addr);
+  if(autoErase) {
+    PersistentStorage_SectorErase(addr);
+  }
 
   // set WEL bit again
   PersistentStorage_WaitForWriteEnable();
@@ -117,6 +119,18 @@ void PersistentStorage_SectorErase(uint32_t addr) {
 
   // erase required sector
   uint8_t cmdBuf[] = {MX25L51245G_CMD_SE, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
+  PersistentStorage_SPItranscation(cmdBuf, 5, false, NULL, 0);
+
+  // wait until sector is erased
+  PersistentStorage_WaitForWriteInProgress();
+}
+
+void PersistentStorage_64kBlockErase(uint32_t addr) {
+  // set WEL bit
+  PersistentStorage_WaitForWriteEnable();
+
+  // erase required sector
+  uint8_t cmdBuf[] = {MX25L51245G_CMD_BE, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
   PersistentStorage_SPItranscation(cmdBuf, 5, false, NULL, 0);
 
   // wait until sector is erased
