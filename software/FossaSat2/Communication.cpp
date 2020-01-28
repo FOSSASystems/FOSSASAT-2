@@ -506,6 +506,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       }
     } break;
 
+    case CMD_CAMERA_CAPTURE:
+      Camera_Capture();
+      break;
+
     // TODO new private frames
 
     default:
