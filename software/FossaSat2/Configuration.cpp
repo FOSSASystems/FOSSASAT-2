@@ -74,7 +74,7 @@ void Configuration_Setup() {
   pinMode(CAMERA_CS, OUTPUT);
   digitalWrite(CAMERA_CS, HIGH);
   pinMode(CAMERA_POWER_FET, OUTPUT);
-  digitalWrite(CAMERA_POWER_FET, HIGH);
+  digitalWrite(CAMERA_POWER_FET, LOW);
 
   pinMode(DEPLOYMENT_FET_1, OUTPUT);
   pinMode(DEPLOYMENT_FET_2, OUTPUT);
