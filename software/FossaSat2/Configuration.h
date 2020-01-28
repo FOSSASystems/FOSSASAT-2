@@ -117,7 +117,7 @@
 */
 
 // Flash address map                                                    LSB           MSB
-// sector 0 - system info
+// 64kB block 0 - system info
 #define FLASH_RESTART_COUNTER_ADDR                      0x00000000  //  0x00000000    0x00000001
 #define FLASH_DEPLOYMENT_COUNTER_ADDR                   0x00000002  //  0x00000002    0x00000002
 #define FLASH_TRANSMISSIONS_ENABLED                     0x00000003  //  0x00000003    0x00000003
@@ -132,11 +132,11 @@
 #define FLASH_FSK_INVALID_COUNTER_ADDR                  0x00000031  //  0x00000031    0x00000032
 #define FLASH_LOW_POWER_MODE_ENABLED                    0x00000033  //  0x00000033    0x00000033
 #define FLASH_LOW_POWER_MODE_ACTIVE                     0x00000034  //  0x00000034    0x00000034
+#define FLASH_IMAGE1_LENGTH                             0x00000035  //  0x00000035    0x00000038
 // todo stats
 
-// sector 1-X - images
-#define FLASH_IMAGE_CAPTURE_LENGTH                      0x00001000  //  0x00001000    0x00001003
-#define FLASH_IMAGE_CAPTURE                             0x00001004  //  0x00001004    0x00321004  assuming 400 kB JPEG as the maximum size
+// 64kB block 1-8 - image 1 (assuming 512 kB JPEG as the maximum size)
+#define FLASH_IMAGE1                                    0x00010000  //  0x00010000    0x0007FFFF
 
 /*
     Radio Configuration
