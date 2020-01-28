@@ -3,7 +3,7 @@
 
 #include "FossaSat2.h"
 
-uint8_t Camera_Init();
+uint8_t Camera_Init(uint8_t pictureSize);
 void Camera_Capture();
 
 #endif

@@ -43,6 +43,16 @@
 #define DATA_SHAPING          0.5     // BT product
 #define TCXO_VOLTAGE          1.6
 
+#define OV2640_160x120        0 //160x120
+#define OV2640_176x144        1 //176x144
+#define OV2640_320x240        2 //320x240
+#define OV2640_352x288        3 //352x288
+#define OV2640_640x480        4 //640x480
+#define OV2640_800x600        5 //800x600
+#define OV2640_1024x768       6 //1024x768
+#define OV2640_1280x1024      7 //1280x1024
+#define OV2640_1600x1200      8 //1600x1200
+
 // set up radio module
 #ifdef USE_SX126X
 SX1268 radio = new Module(CS, DIO, NRST, BUSY);
@@ -130,6 +140,7 @@ void printControls() {
   Serial.println(F("o - get rotation data"));
   Serial.println(F("u - send packet with unknown function ID"));
   Serial.println(F("s - get stats"));
+  Serial.println(F("c - capture photo"));
   Serial.println(F("------------------------------------"));
 }
 
@@ -626,6 +637,11 @@ void recordSolarCells(uint8_t samples, uint16_t period) {
   sendFrameEncrypted(CMD_RECORD_SOLAR_CELLS, 3, optData);
 }
 
+void cameraCapture(uint8_t pictureSize) {
+  Serial.print(F("Sending capture request ... "));
+  sendFrameEncrypted(CMD_CAMERA_CAPTURE, 1, &pictureSize);
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println(F("FOSSASAT-2 Ground Station Demo Code"));
@@ -732,6 +748,9 @@ void loop() {
         break;
       case 's':
         getStats(0xFF);
+        break;
+      case 'c':
+        cameraCapture(OV2640_1600x1200);
         break;
       default:
         Serial.print(F("Unknown command: "));

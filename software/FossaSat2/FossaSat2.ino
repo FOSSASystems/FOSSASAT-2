@@ -45,8 +45,10 @@ void setup() {
   FOSSASAT_DEBUG_PORT.println(Communication_Set_Modem(MODEM_FSK));
 
   // initialize camera
+  digitalWrite(CAMERA_POWER_FET, HIGH);
   FOSSASAT_DEBUG_PORT.print(F("Camera init:\t"));
-  FOSSASAT_DEBUG_PORT.println(Camera_Init());
+  FOSSASAT_DEBUG_PORT.println(Camera_Init(OV2640_320x240));
+  digitalWrite(CAMERA_POWER_FET, LOW);
 
   // initialize IMU
   FOSSASAT_DEBUG_PORT.print(F("IMU init (expected 0x683D):\t0x"));
