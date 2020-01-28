@@ -1,24 +1,27 @@
 #include "FossaSat2.h"
 
-#include <SoftwareSerial.h>
-
-SoftwareSerial softSerial(PA13, PA14);
-
 #define NUM_BYTES                                       256
-#define NUM_BYTES_W                                     256
-#define ADDRESS                                         0x00000000
 
 void showBytes(uint32_t addr, size_t len) {
-  FOSSASAT_DEBUG_PORT.println(F("Read"));
   uint8_t readBuff[NUM_BYTES];
   PersistentStorage_Read(addr, readBuff, len);
-  for(size_t i = 0; i < len/16; i++) {
-    for(uint8_t j = 0; j < 16; j++) {
-      FOSSASAT_DEBUG_PORT.print(readBuff[i*16 + j], HEX);
-      FOSSASAT_DEBUG_PORT.print('\t');
+  char buff[16];
+
+  if(len < 16) {
+    for(uint8_t i = 0; i < len; i++) {
+      sprintf(buff, "%02x ", readBuff[i]);
+      FOSSASAT_DEBUG_PORT.print(buff);
     }
     FOSSASAT_DEBUG_PORT.println();
-  }
+  } else {
+    for(size_t i = 0; i < len/16; i++) {
+      for(uint8_t j = 0; j < 16; j++) {
+        sprintf(buff, "%02x ", readBuff[i*16 + j]);
+        FOSSASAT_DEBUG_PORT.print(buff);
+      }
+      FOSSASAT_DEBUG_PORT.println();
+    }
+  }  
 }
 
 void setup() {
@@ -26,13 +29,11 @@ void setup() {
   while(!FOSSASAT_DEBUG_PORT);
   FOSSASAT_DEBUG_PORT.println();
 
-  SPI.setSCLK(SPI1_SCK);
-  SPI.setMISO(SPI1_MISO);
-  SPI.setMOSI(SPI1_MOSI);
-  SPI.begin();
+  FlashSPI.begin();
   
   pinMode(FLASH_CS, OUTPUT);
   digitalWrite(FLASH_CS, HIGH);
+  pinMode(FLASH_RESET, INPUT);
 
   PersistentStorage_Reset();
   PersistentStorage_Enter4ByteMode();
@@ -55,28 +56,20 @@ void setup() {
   FOSSASAT_DEBUG_PORT.print(F("Security = 0b"));
   FOSSASAT_DEBUG_PORT.println(PersistentStorage_ReadSecurityRegister(), BIN);
 
-  // reset system info
-  //PersistentStorage_Reset_System_Info();
-  showBytes(FLASH_SYSTEM_INFO_START, FLASH_SYSTEM_INFO_LEN);
+  // read image 1
+  uint32_t len = PersistentStorage_Get<uint32_t>(FLASH_IMAGE1_LENGTH);
+  FOSSASAT_DEBUG_PORT.print(F("Image 1 length: "));
+  FOSSASAT_DEBUG_PORT.println(len);
 
-  // read reset counter
-  uint16_t resetCounter = 0xFFFF;
-  PersistentStorage_Get(FLASH_RESTART_COUNTER_ADDR, resetCounter);
-  FOSSASAT_DEBUG_PORT.print(F("Reset counter = "));
-  FOSSASAT_DEBUG_PORT.println(resetCounter);
-  showBytes(FLASH_SYSTEM_INFO_START, FLASH_SYSTEM_INFO_LEN);
+  // read the complete sectors first
+  uint32_t i;
+  for(i = 0; i < len / FLASH_SECTOR_SIZE; i++) {
+    showBytes(FLASH_IMAGE1 + i*FLASH_SECTOR_SIZE, FLASH_SECTOR_SIZE);
+  }
 
-  // increment reset counter
-  resetCounter++;
-  PersistentStorage_Set(FLASH_RESTART_COUNTER_ADDR, resetCounter);
-  showBytes(FLASH_SYSTEM_INFO_START, FLASH_SYSTEM_INFO_LEN);
-
-  // read reset counter
-  resetCounter = 0xFFFF;
-  PersistentStorage_Get(FLASH_RESTART_COUNTER_ADDR, resetCounter);
-  FOSSASAT_DEBUG_PORT.print(F("Reset counter = "));
-  FOSSASAT_DEBUG_PORT.println(resetCounter);
-  showBytes(FLASH_SYSTEM_INFO_START, FLASH_SYSTEM_INFO_LEN);
+  // read the remaining sector
+  uint32_t remLen = len - i*FLASH_SECTOR_SIZE;
+  showBytes(FLASH_IMAGE1 + i*FLASH_SECTOR_SIZE, remLen);
 }
 
 void loop() {

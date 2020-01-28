@@ -16,6 +16,9 @@
 #define FOSSASAT_DEBUG_PRINT_BUFF(BUFF, LEN) { \
     for(size_t i = 0; i < LEN; i++) { \
       FOSSASAT_DEBUG_PORT.print(F("0x")); \
+      FOSSASAT_DEBUG_PORT.print(i, HEX); \
+      FOSSASAT_DEBUG_PORT.print('\t'); \
+      FOSSASAT_DEBUG_PORT.print(F("0x")); \
       FOSSASAT_DEBUG_PORT.print(BUFF[i], HEX); \
       FOSSASAT_DEBUG_PORT.print('\t'); \
       FOSSASAT_DEBUG_PORT.write(BUFF[i]); \

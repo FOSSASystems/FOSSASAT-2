@@ -14,6 +14,7 @@
 #define MX25L51245G_CMD_RDSCUR                          0x2B
 #define MX25L51245G_CMD_SE                              0x20
 #define MX25L51245G_CMD_EN4B                            0xB7
+#define MX25L51245G_CMD_BE                              0xD8
 #define MX25L51245G_CMD_EX4B                            0xE9
 #define MX25L51245G_CMD_REMS                            0x90
 
@@ -21,17 +22,19 @@
 #define MX25L51245G_SR_WIP                              0b00000001
 
 #define FLASH_SYSTEM_INFO_START                         0x00000000
-#define FLASH_SYSTEM_INFO_LEN                           0x25
+#define FLASH_SYSTEM_INFO_LEN                           0x39
 
-// get/set only works in system info page!
+void PersistentStorage_Increment_Counter(uint16_t addr);
+void PersistentStorage_Increment_Frame_Counter(bool valid);
 void PersistentStorage_Get_Callsign(char* buff, uint8_t len);
 void PersistentStorage_Set_Callsign(char* newCallsign);
 void PersistentStorage_Reset_System_Info();
 
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len);
-void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len);
+void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool autoErase = true);
 
 void PersistentStorage_SectorErase(uint32_t addr);
+void PersistentStorage_64kBlockErase(uint32_t addr);
 
 void PersistentStorage_WriteEnable();
 void PersistentStorage_WriteDisable();
@@ -50,17 +53,18 @@ void PersistentStorage_SPItranscation(uint8_t cmd, bool write = true, uint8_t* d
 void PersistentStorage_SPItranscation(uint8_t* cmd, uint8_t cmdLen, bool write, uint8_t* data, size_t numBytes);
 
 // get/set only works in system info page!
-template<typename T> T& PersistentStorage_Get(uint8_t addr, T &t) {
+template<typename T> T PersistentStorage_Get(uint8_t addr) {
   uint8_t buff[FLASH_SYSTEM_INFO_LEN];
-  PersistentStorage_Read(FLASH_SYSTEM_INFO_START + addr, buff, sizeof(t));
+  PersistentStorage_Read(FLASH_SYSTEM_INFO_START + addr, buff, sizeof(T));
+  T t;
   memcpy(&t, buff, sizeof(T));
   return(t);
 }
 
-template<typename T> const T& PersistentStorage_Set(uint8_t addr, const T &t) {
+template<typename T> void PersistentStorage_Set(uint8_t addr, T t) {
   // check address is in first page
   if(addr > FLASH_SYSTEM_INFO_LEN) {
-    return(t);
+    return;
   }
 
   // read the current system info page
@@ -73,12 +77,11 @@ template<typename T> const T& PersistentStorage_Set(uint8_t addr, const T &t) {
   memcpy(newSysInfoPage + addr, &t, sizeof(T));
   if(memcmp(currSysInfoPage, newSysInfoPage, FLASH_SYSTEM_INFO_LEN) == 0) {
     // the value is already there, no need to write
-    return(t);
+    return;
   }
 
   // we need to update
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, newSysInfoPage, FLASH_SYSTEM_INFO_LEN);
-  return(t);
 }
 
 #endif

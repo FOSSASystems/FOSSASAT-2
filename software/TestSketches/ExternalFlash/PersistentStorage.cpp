@@ -1,7 +1,30 @@
 #include "PersistentStorage.h"
 
+void PersistentStorage_Increment_Counter(uint16_t addr) {
+  uint16_t counter = PersistentStorage_Get<uint16_t>(addr);
+  counter++;
+  PersistentStorage_Set(addr, counter);
+}
+
+void PersistentStorage_Increment_Frame_Counter(bool valid) {
+  uint16_t addr = FLASH_LORA_VALID_COUNTER;
+  if(currentModem == MODEM_LORA) {
+    if(!valid) {
+      addr += 2;
+    }
+  } else {
+    if(valid) {
+      addr += 4;
+    } else {
+      addr += 6;
+    }
+  }
+
+  PersistentStorage_Increment_Counter(addr);
+}
+
 void PersistentStorage_Get_Callsign(char* buff, uint8_t len) {
-  PersistentStorage_Read(FLASH_CALLSIGN_ADDR, (uint8_t*)buff, len);
+  PersistentStorage_Read(FLASH_CALLSIGN, (uint8_t*)buff, len);
 }
 
 void PersistentStorage_Set_Callsign(char* newCallsign) {
@@ -19,33 +42,39 @@ void PersistentStorage_Set_Callsign(char* newCallsign) {
   PersistentStorage_Read(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
 
   // update callsign entries
-  sysInfoPage[FLASH_CALLSIGN_LEN_ADDR] = newCallsignLen;
-  memcpy(sysInfoPage + FLASH_CALLSIGN_ADDR, newCallsign, newCallsignLen);
+  sysInfoPage[FLASH_CALLSIGN_LEN] = newCallsignLen;
+  memcpy(sysInfoPage + FLASH_CALLSIGN, newCallsign, newCallsignLen);
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
 }
 
 void PersistentStorage_Reset_System_Info() {
   // build a completely new system info page
   uint8_t sysInfoPage[FLASH_SYSTEM_INFO_LEN];
+  uint8_t* sysInfoPagePtr = sysInfoPage;
 
-  // set reset counter to 0
-  sysInfoPage[FLASH_RESTART_COUNTER_ADDR] = 0;
-  sysInfoPage[FLASH_RESTART_COUNTER_ADDR + 1] = 0;
+  // set everything to 0 by default
+  memset(sysInfoPage, 0, FLASH_SYSTEM_INFO_LEN);
 
-  // set deployment counter to 0
-  sysInfoPage[FLASH_DEPLOYMENT_COUNTER_ADDR] = 0;
+  // set non-zero defaults
 
   // set default transmission configuration
   sysInfoPage[FLASH_TRANSMISSIONS_ENABLED] = 1;
 
   // set default callsign length
-  sysInfoPage[FLASH_CALLSIGN_LEN_ADDR] = strlen(CALLSIGN_DEFAULT);
+  sysInfoPage[FLASH_CALLSIGN_LEN] = strlen(CALLSIGN_DEFAULT);
 
   // set default callsign
-  memcpy(sysInfoPage + FLASH_CALLSIGN_ADDR, CALLSIGN_DEFAULT, strlen(CALLSIGN_DEFAULT));
+  memcpy(sysInfoPagePtr + FLASH_CALLSIGN, CALLSIGN_DEFAULT, strlen(CALLSIGN_DEFAULT));
+
+  // set default receive windows
+  sysInfoPage[FLASH_FSK_RECEIVE_LEN] = FSK_RECEIVE_WINDOW_LENGTH;
+  sysInfoPage[FLASH_LORA_RECEIVE_LEN] = LORA_RECEIVE_WINDOW_LENGTH;
+
+  // set default low power mode configuration
+  sysInfoPage[FLASH_LOW_POWER_MODE_ENABLED] = 1;
 
   // write the default system info
-  PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
+  PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN + 1);
 }
 
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len) {
@@ -53,9 +82,11 @@ void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len) {
   PersistentStorage_SPItranscation(cmdBuff, 5, false, buff, len);
 }
 
-void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len) {
+void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool autoErase) {
   // erase requested sector
-  PersistentStorage_SectorErase(addr);
+  if(autoErase) {
+    PersistentStorage_SectorErase(addr);
+  }
 
   // set WEL bit again
   PersistentStorage_WaitForWriteEnable();
@@ -74,6 +105,18 @@ void PersistentStorage_SectorErase(uint32_t addr) {
 
   // erase required sector
   uint8_t cmdBuf[] = {MX25L51245G_CMD_SE, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
+  PersistentStorage_SPItranscation(cmdBuf, 5, false, NULL, 0);
+
+  // wait until sector is erased
+  PersistentStorage_WaitForWriteInProgress();
+}
+
+void PersistentStorage_64kBlockErase(uint32_t addr) {
+  // set WEL bit
+  PersistentStorage_WaitForWriteEnable();
+
+  // erase required sector
+  uint8_t cmdBuf[] = {MX25L51245G_CMD_BE, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
   PersistentStorage_SPItranscation(cmdBuf, 5, false, NULL, 0);
 
   // wait until sector is erased
@@ -122,10 +165,10 @@ void PersistentStorage_Exit4ByteMode() {
 }
 
 void PersistentStorage_Reset() {
-  pinMode(7, OUTPUT);
-  digitalWrite(7, LOW);
+  pinMode(FLASH_RESET, OUTPUT);
+  digitalWrite(FLASH_RESET, LOW);
   delayMicroseconds(100);
-  pinMode(7, INPUT);
+  pinMode(FLASH_RESET, INPUT);
 }
 
 void PersistentStorage_WriteStatusRegister(uint8_t sr, uint8_t cr) {
@@ -175,27 +218,27 @@ void PersistentStorage_SPItranscation(uint8_t cmd, bool write, uint8_t* data, si
 
 void PersistentStorage_SPItranscation(uint8_t* cmd, uint8_t cmdLen, bool write, uint8_t* data, size_t numBytes) {
   digitalWrite(FLASH_CS, LOW);
-  SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
+  FlashSPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
 
   // send command
   for(uint8_t n = 0; n < cmdLen; n++) {
     // send byte
-    SPI.transfer(cmd[n]);
+    FlashSPI.transfer(cmd[n]);
   }
 
   // send data
   if(write) {
     for(size_t n = 0; n < numBytes; n++) {
       // send byte
-      SPI.transfer(data[n]);
+      FlashSPI.transfer(data[n]);
     }
 
   } else {
     for(size_t n = 0; n < numBytes; n++) {
-      data[n] = SPI.transfer(MX25L51245G_CMD_NOP);
+      data[n] = FlashSPI.transfer(MX25L51245G_CMD_NOP);
     }
   }
 
-  SPI.endTransaction();
+  FlashSPI.endTransaction();
   digitalWrite(FLASH_CS, HIGH);
 }
