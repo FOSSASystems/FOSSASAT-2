@@ -24,7 +24,7 @@ SPIClass RadioSPI(RADIO_MOSI, RADIO_MISO, RADIO_SCK);
 SPIClass FlashSPI(FLASH_MOSI, FLASH_MISO, FLASH_SCK);
 
 // RadioLib instances
-SX1262 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_NRST, RADIO_BUSY, RadioSPI);
+SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_NRST, RADIO_BUSY, RadioSPI);
 MorseClient morse(&radio);
 
 // camera instance
