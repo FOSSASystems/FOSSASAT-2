@@ -479,7 +479,14 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       } break;
 
     case CMD_SET_LOW_POWER_ENABLE: {
-        
+        // check optional data is exactly 1 byte
+        if(Communication_Check_OptDataLen(1, optDataLen)) {
+          // update spreading factor mode
+          uint8_t lowPowerEnable = optData[0];
+          FOSSASAT_DEBUG_PRINT(F("lowPowerEnable="));
+          FOSSASAT_DEBUG_PRINTLN(lowPowerEnable);
+          PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED, lowPowerEnable);
+        }
       } break;
 
     case CMD_SET_RECEIVE_WINDOWS: {
