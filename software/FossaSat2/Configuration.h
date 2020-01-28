@@ -75,15 +75,6 @@
 #define MPPT_OFF                                        PA11
 #define ANALOG_IN_RANDOM_SEED                           PA12    // used as source for randomSeed(), should be left floating
 
-/*
-   Low Power Modes
-*/
-
-#define LOW_POWER_NONE                                  0
-#define LOW_POWER_IDLE                                  1
-#define LOW_POWER_SLEEP                                 2
-#define LOW_POWER_DEEP_SLEEP                            3
-#define LOW_POWER_SHUTDOWN                              4
 
 /*
    Timing Definitions
