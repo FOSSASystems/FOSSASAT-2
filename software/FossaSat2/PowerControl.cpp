@@ -87,10 +87,10 @@ void PowerControl_Check_Battery_Limit() {
   // check battery voltage
   if((PowerControl_Get_Battery_Voltage() <= LOW_POWER_MODE_VOLTAGE_LIMIT) && (PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED) == 1)) {
     // activate low power mode
-   PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE_ACTIVE, LOW_POWER_SLEEP);
+   PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE, LOW_POWER_SLEEP);
   } else {
     // deactivate low power mode
-    PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE_ACTIVE, LOW_POWER_NONE);
+    PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE, LOW_POWER_NONE);
   }
 }
 
@@ -100,7 +100,7 @@ void PowerControl_Print_Power_Config() {
   FOSSASAT_DEBUG_PORT.println(PersistentStorage_Get<uint8_t>(FLASH_TRANSMISSIONS_ENABLED));
   FOSSASAT_DEBUG_PORT.print(F("Low power mode enabled: "));
   FOSSASAT_DEBUG_PORT.println(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED));
-  FOSSASAT_DEBUG_PORT.print(F("Low power mode active: "));
-  FOSSASAT_DEBUG_PORT.println(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ACTIVE));
+  FOSSASAT_DEBUG_PORT.print(F("Low power mode: "));
+  FOSSASAT_DEBUG_PORT.println(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE));
   FOSSASAT_DEBUG_PORT.println(F("---------------------------"));
 }

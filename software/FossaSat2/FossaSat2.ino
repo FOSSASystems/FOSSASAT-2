@@ -307,7 +307,7 @@ void loop() {
   // send LoRa system info if not in low power mode
   Communication_Set_Modem(MODEM_LORA);
   #ifdef ENABLE_TRANSMISSION_CONTROL
-  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ACTIVE) == 0) {
+  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
     Communication_Send_System_Info();
   }
   #else
@@ -321,7 +321,7 @@ void loop() {
   // LoRa receive
   uint8_t windowLenLoRa = PersistentStorage_Get<uint8_t>(FLASH_LORA_RECEIVE_LEN);
   FOSSASAT_DEBUG_PRINT(F("LoRa Rx "));
-  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ACTIVE) == 1) {
+  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_SLEEP) {
     // use only half of the interval in low power mode
     windowLenLoRa /= 2;
     FOSSASAT_DEBUG_PRINT(F("(halved due to LP mode) "));
@@ -345,7 +345,7 @@ void loop() {
   uint8_t windowLenFsk = PersistentStorage_Get<uint8_t>(FLASH_FSK_RECEIVE_LEN);
   Communication_Set_Modem(MODEM_FSK);
   FOSSASAT_DEBUG_PRINT(F("FSK Rx "));
-  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ACTIVE) == 1) {
+  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_SLEEP) {
     // use only half of the interval in low power mode
     windowLenFsk /= 2;
     FOSSASAT_DEBUG_PRINT(F("(halved due to LP mode) "));
