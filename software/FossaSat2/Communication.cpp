@@ -145,45 +145,47 @@ void Communication_CW_Beep(uint32_t len) {
   radio.standby();
 }
 
-void Communication_Send_System_Info() {
+void Communication_Send_Basic_System_Info() {
   // build response frame
-  static const uint8_t optDataLen = sizeof(uint8_t) + 8*sizeof(int16_t) + sizeof(uint16_t);
+  static const uint8_t optDataLen = 6*sizeof(uint8_t) + 3*sizeof(int16_t) + sizeof(uint16_t);
   uint8_t optData[optDataLen];
   uint8_t* optDataPtr = optData;
 
   FOSSASAT_DEBUG_PRINTLN(F("--- System info: ---"));
 
-  // TODO add operational mode status
-
   uint8_t mpptOutputVoltage = currSensorMPPT.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
-  Communication_Frame_Add(&optDataPtr, mpptOutputVoltage, "mpptOutputVoltage", VOLTAGE_MULTIPLIER, "mV");
+  Communication_Frame_Add(&optDataPtr, mpptOutputVoltage, "batteryVoltage", VOLTAGE_MULTIPLIER, "mV");
 
   int16_t mpptOutputCurrent = currSensorMPPT.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mpptOutputCurrent, "mpptOutputCurrent", CURRENT_MULTIPLIER, "uA");
 
-  int16_t batteryTemperature = Sensors_Read_Temperature(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
-  Communication_Frame_Add(&optDataPtr, batteryTemperature, "batteryTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
+  // TODO uptime counter (4B)
 
-  int16_t secBatteryTemperature = Sensors_Read_Temperature(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
-  Communication_Frame_Add(&optDataPtr, secBatteryTemperature, "secBatteryTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
-
-  int16_t currentXA = currSensorXA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
-  Communication_Frame_Add(&optDataPtr, currentXA, "currentXA", CURRENT_MULTIPLIER, "uA");
-
-  int16_t currentXB = currSensorXB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
-  Communication_Frame_Add(&optDataPtr, currentXB, "currentXB", CURRENT_MULTIPLIER, "uA");
-
-  int16_t currentZA = currSensorZA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
-  Communication_Frame_Add(&optDataPtr, currentZA, "currentZA", CURRENT_MULTIPLIER, "uA");
-
-  int16_t currentZB = currSensorZB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
-  Communication_Frame_Add(&optDataPtr, currentZB, "currentZB", CURRENT_MULTIPLIER, "uA");
-
-  int16_t currentY = currSensorY.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
-  Communication_Frame_Add(&optDataPtr, currentY, "currentY", CURRENT_MULTIPLIER, "uA");
+  // TODO power config
 
   uint16_t resetCounter = PersistentStorage_Get<uint16_t>(FLASH_RESTART_COUNTER);
   Communication_Frame_Add(&optDataPtr, resetCounter, "resetCounter", 1, "");
+
+  uint8_t voltageXA = currSensorXA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, voltageXA, "voltageXA", VOLTAGE_MULTIPLIER, "mV");
+
+  uint8_t voltageXB = currSensorXB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, voltageXB, "voltageXB", VOLTAGE_MULTIPLIER, "mV");
+
+  uint8_t voltageZA = currSensorZA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, voltageZA, "voltageZA", VOLTAGE_MULTIPLIER, "mV");
+
+  uint8_t voltageZB = currSensorZB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, voltageZB, "voltageZB", VOLTAGE_MULTIPLIER, "mV");
+
+  uint8_t voltageY = currSensorY.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, voltageY, "voltageY", VOLTAGE_MULTIPLIER, "mV");
+
+  int16_t batteryTemperature = Sensors_Read_Temperature(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, batteryTemperature, "batteryTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
+
+  int16_t boardTemperature = Sensors_Read_Temperature(tempSensorTop) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, boardTemperature, "boardTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
 
   FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
 
@@ -258,7 +260,7 @@ void Comunication_Parse_Frame(uint8_t* frame, uint8_t len) {
   // check encryption
   int16_t optDataLen = 0;
   uint8_t optData[MAX_OPT_DATA_LENGTH];
-  if((functionId >= CMD_DEPLOY) && (functionId <= CMD_CAMERA_CAPTURE)) {
+  if((functionId >= PRIVATE_OFFSET) && (functionId < (PRIVATE_OFFSET + NUM_PRIVATE_COMMANDS))) {
     // frame contains encrypted data, decrypt
     FOSSASAT_DEBUG_PRINTLN(F("Decrypting"));
 
@@ -278,7 +280,7 @@ void Comunication_Parse_Frame(uint8_t* frame, uint8_t len) {
       FCP_Get_OptData(callsign, frame, len, optData, encryptionKey, password);
     }
 
-  } else if(functionId < CMD_DEPLOY) {
+  } else if(functionId < PRIVATE_OFFSET) {
     // no decryption necessary
 
     // get optional data length
@@ -377,7 +379,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_TRANSMIT_SYSTEM_INFO:
       // send system info via LoRa
-      Communication_Send_System_Info();
+      Communication_Send_Basic_System_Info();
       break;
 
     case CMD_GET_PACKET_INFO: {
@@ -409,7 +411,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         Communication_Send_Response(RESP_PACKET_INFO, respOptData, respOptDataLen);
       } break;
 
-    case CMD_GET_STATISTICS: {
+    case CMD_GET_FULL_SYSTEM_INFO: {
       
     } break;
 
@@ -488,6 +490,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED, lowPowerEnable);
         }
       } break;
+
+    case CMD_SET_MPPT_MODE: {
+      // TODO implement MPPT keep alive
+    } break;
 
     case CMD_SET_RECEIVE_WINDOWS: {
       // check optional data is exactly 2 bytes
