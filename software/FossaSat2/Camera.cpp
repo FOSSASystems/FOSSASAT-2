@@ -170,25 +170,25 @@ uint32_t Camera_Capture(uint8_t slot) {
   camera.set_fifo_burst();
 
   // write the complete pages first
-  uint8_t dataBuffer[FLASH_PAGE_SIZE];
+  uint8_t dataBuffer[FLASH_EXT_PAGE_SIZE];
   uint32_t i;
-  for(i = 0; i < len / FLASH_PAGE_SIZE; i++) {
-    for(uint32_t j = 0; j < FLASH_PAGE_SIZE; j++) {
+  for(i = 0; i < len / FLASH_EXT_PAGE_SIZE; i++) {
+    for(uint32_t j = 0; j < FLASH_EXT_PAGE_SIZE; j++) {
       dataBuffer[j] = SPI.transfer(0x00);
     }
 
     // write a single sector
-    PersistentStorage_Write(imgAddress + i*FLASH_PAGE_SIZE, dataBuffer, FLASH_PAGE_SIZE, false);
-    FOSSASAT_DEBUG_PRINT_FLASH(imgAddress + i*FLASH_PAGE_SIZE, FLASH_PAGE_SIZE);
+    PersistentStorage_Write(imgAddress + i*FLASH_EXT_PAGE_SIZE, dataBuffer, FLASH_EXT_PAGE_SIZE, false);
+    FOSSASAT_DEBUG_PRINT_FLASH(imgAddress + i*FLASH_EXT_PAGE_SIZE, FLASH_EXT_PAGE_SIZE);
   }
 
   // write the remaining page
-  uint32_t remLen = len - i*FLASH_PAGE_SIZE;
+  uint32_t remLen = len - i*FLASH_EXT_PAGE_SIZE;
   for(uint32_t j = 0; j < remLen; j++) {
     dataBuffer[j] = SPI.transfer(0x00);
   }
-  PersistentStorage_Write(imgAddress + i*FLASH_PAGE_SIZE, dataBuffer, remLen, false);
-  FOSSASAT_DEBUG_PRINT_FLASH(imgAddress + i*FLASH_PAGE_SIZE, remLen);
+  PersistentStorage_Write(imgAddress + i*FLASH_EXT_PAGE_SIZE, dataBuffer, remLen, false);
+  FOSSASAT_DEBUG_PRINT_FLASH(imgAddress + i*FLASH_EXT_PAGE_SIZE, remLen);
   FOSSASAT_DEBUG_PRINTLN(F("Writing done"));
   
   camera.CS_HIGH();

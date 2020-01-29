@@ -57,14 +57,37 @@ uint32_t PersistentStorage_Get_Image_Len(uint8_t slot) {
 
 void PersistentStorage_Set_Image_Len(uint8_t slot, uint32_t len) {
   // read the correct page
-  uint8_t buff[FLASH_PAGE_SIZE];
-  PersistentStorage_Read(FLASH_IMAGE_LENGTHS, buff, FLASH_PAGE_SIZE);
+  uint8_t buff[FLASH_EXT_PAGE_SIZE];
+  PersistentStorage_Read(FLASH_IMAGE_LENGTHS, buff, FLASH_EXT_PAGE_SIZE);
 
   // update value
   memcpy(buff + slot*sizeof(uint32_t), &len, sizeof(uint32_t));
 
   // write it back in (will automatically erase the sector)
-  PersistentStorage_Write(FLASH_IMAGE_LENGTHS, buff, FLASH_PAGE_SIZE);
+  PersistentStorage_Write(FLASH_IMAGE_LENGTHS, buff, FLASH_EXT_PAGE_SIZE);
+}
+
+void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, uint8_t len) {
+  // check address is in system info
+  if(addr > FLASH_SYSTEM_INFO_LEN) {
+    return;
+  }
+  
+  // read the current system info page
+  uint8_t currSysInfoPage[FLASH_SYSTEM_INFO_LEN];
+  PersistentStorage_Read(FLASH_SYSTEM_INFO_START, currSysInfoPage, FLASH_SYSTEM_INFO_LEN);
+
+  // check if we need to update
+  uint8_t newSysInfoPage[FLASH_SYSTEM_INFO_LEN];
+  memcpy(newSysInfoPage, currSysInfoPage, FLASH_SYSTEM_INFO_LEN);
+  memcpy(newSysInfoPage + addr, buff, len);
+  if(memcmp(currSysInfoPage, newSysInfoPage, FLASH_SYSTEM_INFO_LEN) == 0) {
+    // the value is already there, no need to write
+    return;
+  }
+
+  // we need to update
+  PersistentStorage_Write(FLASH_SYSTEM_INFO_START, newSysInfoPage, FLASH_SYSTEM_INFO_LEN);
 }
 
 void PersistentStorage_Reset_System_Info() {

@@ -113,14 +113,14 @@
     Flash Configuration
 */
 
-#define FLASH_PAGE_SIZE                                 0x00000100
+#define FLASH_EXT_PAGE_SIZE                             0x00000100
 #define FLASH_SECTOR_SIZE                               0x00001000
 #define FLASH_64K_BLOCK_SIZE                            0x00010000
 #define FLASH_IMAGE_NUM_64K_BLOCKS                      8
 
 // Flash address map                                                    LSB           MSB
 // 64kB block 0 - system info, stats, image lengths
-// sector 0 - system info
+// sector 0 - system info/configuration
 #define FLASH_RESTART_COUNTER                           0x00000000  //  0x00000000    0x00000001
 #define FLASH_DEPLOYMENT_COUNTER                        0x00000002  //  0x00000002    0x00000002
 #define FLASH_TRANSMISSIONS_ENABLED                     0x00000003  //  0x00000003    0x00000003
