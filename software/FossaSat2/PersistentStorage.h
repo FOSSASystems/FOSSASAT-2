@@ -22,7 +22,7 @@
 #define MX25L51245G_SR_WIP                              0b00000001
 
 #define FLASH_SYSTEM_INFO_START                         0x00000000
-#define FLASH_SYSTEM_INFO_LEN                           0x39
+#define FLASH_SYSTEM_INFO_LEN                           (0x34 + 1)  // final address in Flash map + 1 byte
 
 void PersistentStorage_Increment_Counter(uint16_t addr);
 void PersistentStorage_Increment_Frame_Counter(bool valid);

@@ -56,7 +56,9 @@ void setup() {
   FOSSASAT_DEBUG_PORT.print(F("Security = 0b"));
   FOSSASAT_DEBUG_PORT.println(PersistentStorage_ReadSecurityRegister(), BIN);
 
-  // read image 1
+  // read image
+  uint8_t slot = 0;
+  uint32_t imgAddress = FLASH_IMAGES_START + slot*FLASH_IMAGE_SLOT_SIZE;
   uint32_t len = PersistentStorage_Get<uint32_t>(FLASH_IMAGE1_LENGTH);
   FOSSASAT_DEBUG_PORT.print(F("Image 1 length: "));
   FOSSASAT_DEBUG_PORT.println(len);
@@ -64,12 +66,12 @@ void setup() {
   // read the complete sectors first
   uint32_t i;
   for(i = 0; i < len / FLASH_SECTOR_SIZE; i++) {
-    showBytes(FLASH_IMAGE1 + i*FLASH_SECTOR_SIZE, FLASH_SECTOR_SIZE);
+    showBytes(imgAddress + i*FLASH_SECTOR_SIZE, FLASH_SECTOR_SIZE);
   }
 
   // read the remaining sector
   uint32_t remLen = len - i*FLASH_SECTOR_SIZE;
-  showBytes(FLASH_IMAGE1 + i*FLASH_SECTOR_SIZE, remLen);
+  showBytes(imgAddress + i*FLASH_SECTOR_SIZE, remLen);
 }
 
 void loop() {

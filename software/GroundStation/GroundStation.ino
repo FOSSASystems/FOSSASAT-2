@@ -43,15 +43,56 @@
 #define DATA_SHAPING          0.5     // BT product
 #define TCXO_VOLTAGE          1.6
 
-#define OV2640_160x120        0 //160x120
-#define OV2640_176x144        1 //176x144
-#define OV2640_320x240        2 //320x240
-#define OV2640_352x288        3 //352x288
-#define OV2640_640x480        4 //640x480
-#define OV2640_800x600        5 //800x600
-#define OV2640_1024x768       6 //1024x768
-#define OV2640_1280x1024      7 //1280x1024
-#define OV2640_1600x1200      8 //1600x1200
+// camera configuration macros, from ArduCAM.h
+
+// size
+#define OV2640_160x120        0
+#define OV2640_176x144        1
+#define OV2640_320x240        2
+#define OV2640_352x288        3
+#define OV2640_640x480        4
+#define OV2640_800x600        5
+#define OV2640_1024x768       6
+#define OV2640_1280x1024      7
+#define OV2640_1600x1200      8
+
+// light mode
+#define Auto                  0
+#define Sunny                 1
+#define Cloudy                2
+#define Office                3
+#define Home                  4
+
+// saturation
+#define Saturation2           2
+#define Saturation1           3
+#define Saturation0           4
+#define Saturation_1          5
+#define Saturation_2          6
+
+// brightness
+#define Brightness2           2
+#define Brightness1           3
+#define Brightness0           4
+#define Brightness_1          5
+#define Brightness_2          6
+
+// contrast
+#define Contrast2             2
+#define Contrast1             3
+#define Contrast0             4
+#define Contrast_1            5
+#define Contrast_2            6
+
+// special effects
+#define Antique               0
+#define Bluish                1
+#define Greenish              2
+#define Reddish               3
+#define BW                    4
+#define Negative              5
+#define BWnegative            6
+#define Normal                7
 
 // set up radio module
 #ifdef USE_SX126X
@@ -637,9 +678,12 @@ void recordSolarCells(uint8_t samples, uint16_t period) {
   sendFrameEncrypted(CMD_RECORD_SOLAR_CELLS, 3, optData);
 }
 
-void cameraCapture(uint8_t pictureSize) {
+void cameraCapture(uint8_t slot, uint8_t pictureSize, uint8_t lightMode, uint8_t saturation, uint8_t brightness, uint8_t contrast, uint8_t special) {
   Serial.print(F("Sending capture request ... "));
-  sendFrameEncrypted(CMD_CAMERA_CAPTURE, 1, &pictureSize);
+  uint8_t optData[4] = {slot, ((pictureSize << 4) & 0xF0) | (lightMode & 0x0F),
+                         ((saturation << 4) & 0xF0) | (brightness & 0x0F),
+                         ((contrast << 4) & 0xF0) | (special & 0x0F)};
+  sendFrameEncrypted(CMD_CAMERA_CAPTURE, 4, optData);
 }
 
 void setup() {
@@ -750,7 +794,7 @@ void loop() {
         getStats(0xFF);
         break;
       case 'c':
-        cameraCapture(OV2640_1600x1200);
+        cameraCapture(65, OV2640_320x240, Auto, Saturation0, Brightness0, Contrast0, Normal);
         break;
       default:
         Serial.print(F("Unknown command: "));

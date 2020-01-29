@@ -101,7 +101,8 @@ void PersistentStorage_Reset_System_Info() {
   sysInfoPage[FLASH_LOW_POWER_MODE_ENABLED] = 1;
 
   // write the default system info
-  PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN + 1);
+  PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, 0x40)
 }
 
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len) {

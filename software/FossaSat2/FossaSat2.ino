@@ -47,7 +47,7 @@ void setup() {
   // initialize camera
   digitalWrite(CAMERA_POWER_FET, HIGH);
   FOSSASAT_DEBUG_PORT.print(F("Camera init:\t"));
-  FOSSASAT_DEBUG_PORT.println(Camera_Init(OV2640_320x240));
+  FOSSASAT_DEBUG_PORT.println(Camera_Init(OV2640_320x240, Auto, Saturation0, Brightness0, Contrast0, Normal));
   digitalWrite(CAMERA_POWER_FET, LOW);
 
   // initialize IMU

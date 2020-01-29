@@ -439,7 +439,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           }
   
           if(optData[0] & 0b00000010) {
-            // wipe images
+            // TODO wipe images
             
           }
         }
@@ -507,13 +507,40 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_CAMERA_CAPTURE: {
-      // check optional data is exactly 1 byte
-      if(Communication_Check_OptDataLen(1, optDataLen)) {
+      // check optional data is exactly 4 bytes
+      if(Communication_Check_OptDataLen(4, optDataLen)) {
+        // get parameters
+        uint8_t pictureSize = (uint8_t)((optData[1] & 0xF0) >> 4);
+        uint8_t lightMode = (uint8_t)(optData[1] & 0x0F);
+        uint8_t saturation = (uint8_t)((optData[2] & 0xF0) >> 4);
+        uint8_t brightness = (uint8_t)(optData[2] & 0x0F);
+        uint8_t contrast = (uint8_t)((optData[3] & 0xF0) >> 4);
+        uint8_t special = (uint8_t)(optData[3] & 0x0F);
+
+        // power up camera
         digitalWrite(CAMERA_POWER_FET, HIGH);
-        Camera_Init(optData[0]);
-        Camera_Capture();
+
+        // initialize
+        uint32_t cameraState = (uint32_t)Camera_Init(pictureSize, lightMode, saturation, brightness, contrast, special);
+        if(cameraState != 0) {
+          // initialization failed, send the error
+          digitalWrite(CAMERA_POWER_FET, LOW);
+          FOSSASAT_DEBUG_PRINT(F("Camera init failed, code "));
+          FOSSASAT_DEBUG_PRINTLN(cameraState);
+          uint8_t respOptData[4];
+          memcpy(respOptData, &cameraState, 4);
+          Communication_Send_Response(RESP_CAMERA_STATE, respOptData, 4);
+          return;
+        }
+
+        // take a picture
+        uint32_t imgLen = Camera_Capture(optData[0]);
         digitalWrite(CAMERA_POWER_FET, LOW);
-        // TODO capture done response
+
+        // send response
+        uint8_t respOptData[4];
+        memcpy(respOptData, &imgLen, 4);
+        Communication_Send_Response(RESP_CAMERA_STATE, respOptData, 4);
       }
     } break;
 

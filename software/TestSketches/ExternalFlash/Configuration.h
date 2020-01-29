@@ -43,7 +43,8 @@
 // todo stats
 
 // 64kB block 1-8 - image 1 (assuming 512 kB JPEG as the maximum size)
-#define FLASH_IMAGE1                                    0x00020000  //  0x00010000    0x0007FFFF
+#define FLASH_IMAGES_START                              0x00070000  //  0x00070000    0x03FFFFFF
+#define FLASH_IMAGE_SLOT_SIZE                           (FLASH_IMAGE_NUM_64K_BLOCKS * FLASH_64K_BLOCK_SIZE)
 
 extern SPIClass FlashSPI;
 extern uint8_t currentModem;

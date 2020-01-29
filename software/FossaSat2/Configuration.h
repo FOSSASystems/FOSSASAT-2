@@ -112,7 +112,8 @@
 #define FLASH_IMAGE_NUM_64K_BLOCKS                      8
 
 // Flash address map                                                    LSB           MSB
-// 64kB block 0 - system info
+// 64kB block 0 - system info, stats, image lengths
+// sector 0 - system info
 #define FLASH_RESTART_COUNTER                           0x00000000  //  0x00000000    0x00000001
 #define FLASH_DEPLOYMENT_COUNTER                        0x00000002  //  0x00000002    0x00000002
 #define FLASH_TRANSMISSIONS_ENABLED                     0x00000003  //  0x00000003    0x00000003
@@ -126,14 +127,27 @@
 #define FLASH_FSK_VALID_COUNTER                         0x0000002F  //  0x0000002F    0x00000030
 #define FLASH_FSK_INVALID_COUNTER                       0x00000031  //  0x00000031    0x00000032
 #define FLASH_LOW_POWER_MODE_ENABLED                    0x00000033  //  0x00000033    0x00000033
-#define FLASH_LOW_POWER_MODE_ACTIVE                     0x00000034  //  0x00000034    0x00000034
-#define FLASH_IMAGE1_LENGTH                             0x00000035  //  0x00000035    0x00000038
+#define FLASH_LOW_POWER_MODE                            0x00000034  //  0x00000034    0x00000034
+
+// sector 1 - stats
 // todo stats
+#define FLASH_STATS                                     0x00000100  //  0x00000100    0x000001FF
 
-// 64kB block 1 - store & forward packets
+// sector 2 - image 0 - 63 lengths: 4 bytes per length
+#define FLASH_IMAGE_LENGTHS                             0x00000200  //  0x00000200    0x000002FF
 
-// 64kB block 2-9 - image 1 (assuming 512 kB JPEG as the maximum size)
-#define FLASH_IMAGE1                                    0x00020000  //  0x00020000    0x0008FFFF
+// sector 3 - image 64 - 127 lengths: 4 bytes per length
+#define FLASH_IMAGE_LENGTHS_2                           0x00000300  //  0x00000300    0x000003FF
+
+// 64kB block 1 - store & forward slots
+#define FLASH_STORE_AND_FORWARD_START                   0x00020000  //  0x00020000    0x0002FFFF
+
+// 64kB block 2 - NMEA sentences: null-terminated C-strings, each starts with 4-byte timestamp (offset since recording start)
+#define FLASH_NMEA_START                                0x00030000  //  0x00030000    0x0003FFFF
+
+// 64kB blocks 8 - 1023 - image slots: 8 blocks per slot
+#define FLASH_IMAGES_START                              0x00070000  //  0x00070000    0x03FFFFFF
+#define FLASH_IMAGE_SLOT_SIZE                           (FLASH_IMAGE_NUM_64K_BLOCKS * FLASH_64K_BLOCK_SIZE)
 
 /*
     Radio Configuration
