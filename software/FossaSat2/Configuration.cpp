@@ -23,6 +23,9 @@ TwoWire Wire2;
 SPIClass RadioSPI(RADIO_MOSI, RADIO_MISO, RADIO_SCK);
 SPIClass FlashSPI(FLASH_MOSI, FLASH_MISO, FLASH_SCK);
 
+// additional UART interface
+HardwareSerial GpsSerial(GPS_RX, GPS_TX);
+
 // RadioLib instances
 SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_NRST, RADIO_BUSY, RadioSPI);
 MorseClient morse(&radio);
@@ -99,6 +102,9 @@ void Configuration_Setup() {
   SPI.setMISO(CAMERA_MISO);
   SPI.setSCLK(CAMERA_SCK);
   SPI.begin();
+
+  // initialize UART interfaces
+  GpsSerial.begin(9600);
   
   // provide seed for encrpytion PRNG
   randomSeed(analogRead(ANALOG_IN_RANDOM_SEED));

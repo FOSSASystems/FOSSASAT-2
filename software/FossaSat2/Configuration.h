@@ -65,13 +65,18 @@
 #define CAMERA_POWER_FET                                PB5
 #define CAMERA_CS                                       PB6
 
+// GPS
+#define GPS_TX                                          PA0
+#define GPS_RX                                          PA1
+#define GPS_POWER_FET                                   PC3
+
 // control FETs
-#define DEPLOYMENT_FET_1                                PA3
-#define DEPLOYMENT_FET_2                                PB1
+#define DEPLOYMENT_FET_1                                PB1//PA3
+#define DEPLOYMENT_FET_2                                PB2//PB1
 #define BATTERY_HEATER_FET                              PA8
 
 // other
-#define WATCHDOG_IN                                     PB2
+#define WATCHDOG_IN                                     PC13//PB2
 #define MPPT_OFF                                        PA11
 #define ANALOG_IN_RANDOM_SEED                           PA12    // used as source for randomSeed(), should be left floating
 
@@ -295,14 +300,18 @@ extern uint8_t spreadingFactorMode;
 // timestamps
 extern uint32_t lastHeartbeat;
 
-// second I2C instance
+// second I2C interface
 extern TwoWire Wire2;
 
-//extern SPIClass MainSPI;
+// additional SPI interfaces
+extern SPIClass RadioSPI;
 extern SPIClass FlashSPI;
 
+// additional UART interface
+extern HardwareSerial GpsSerial;
+
 // RadioLib instances
-extern SX1268 radio;
+extern SX1262 radio;
 extern MorseClient morse;
 
 // camera instance
