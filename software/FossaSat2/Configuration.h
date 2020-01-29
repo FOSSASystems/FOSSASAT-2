@@ -116,6 +116,7 @@
 #define FLASH_EXT_PAGE_SIZE                             0x00000100
 #define FLASH_SECTOR_SIZE                               0x00001000
 #define FLASH_64K_BLOCK_SIZE                            0x00010000
+#define FLASH_CHIP_SIZE                                 0x04000000
 #define FLASH_IMAGE_NUM_64K_BLOCKS                      8
 
 // Flash address map                                                    LSB           MSB

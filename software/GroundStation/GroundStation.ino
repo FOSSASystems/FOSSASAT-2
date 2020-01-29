@@ -175,7 +175,7 @@ void printControls() {
   Serial.println(F("m - disable MPPT keep alive"));
   Serial.println(F("M - enable MPPT keep alive"));
   Serial.println(F("t - restart"));
-  Serial.println(F("f - wipe EEPROM"));
+  Serial.println(F("f - wipe flash"));
   Serial.println(F("L - set Rx window lengths"));
   Serial.println(F("R - retransmit custom"));
   Serial.println(F("o - get rotation data"));
@@ -489,11 +489,11 @@ void restart() {
   sendFrameEncrypted(CMD_RESTART);
 }
 
-void wipe() {
+void wipe(uint8_t flags) {
   Serial.print(F("Sending wipe request ... "));
 
   // send the frame
-  sendFrameEncrypted(CMD_WIPE_EEPROM);
+  sendFrameEncrypted(CMD_WIPE_EEPROM, 1, &flags);
 }
 
 void setLowPowerMode(uint8_t en) {
@@ -789,7 +789,7 @@ void loop() {
         restart();
         break;
       case 'f':
-        wipe();
+        wipe(0xFF);
         break;
       case 'L':
         setRxWindows(20, 20);

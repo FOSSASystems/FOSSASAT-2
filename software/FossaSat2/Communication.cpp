@@ -441,8 +441,28 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           }
   
           if(optData[0] & 0b00000010) {
-            // TODO wipe images
-            
+            // wipe stats
+            PersistentStorage_SectorErase(FLASH_STATS);
+          }
+  
+          if(optData[0] & 0b00000100) {
+            // wipe store & forward
+            PersistentStorage_SectorErase(FLASH_STORE_AND_FORWARD_START);
+          }
+          
+          if(optData[0] & 0b00001000) {
+            // wipe NMEA
+            PersistentStorage_64kBlockErase(FLASH_NMEA_START);
+          }
+
+          if(optData[0] & 0b00010000) {
+            // wipe image lengths
+            PersistentStorage_SectorErase(FLASH_IMAGE_LENGTHS);
+
+            // wipe all 64k image blocks
+            for(uint32_t addr = FLASH_IMAGES_START; addr < FLASH_CHIP_SIZE; addr += FLASH_64K_BLOCK_SIZE) {
+              PersistentStorage_64kBlockErase(addr);
+            }
           }
         }
       } break;

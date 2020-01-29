@@ -127,7 +127,7 @@ void PowerControl_Manage_Battery() {
     // MPPT keep alive is enabled, force charging regardless of everything else
     // TODO low or high-Z?
     digitalWrite(MPPT_OFF, LOW);
-  } else if((mpptTempSwitch == 1) && ((Sensors_Read_Temperature(tempSensorBattery) <= mpptTempLimit) || (Sensors_Read_Temperature(tempSensorSecBattery) <= mpptTempLimit)))
+  } else if((mpptTempSwitch == 1) && ((Sensors_Read_Temperature(tempSensorBattery) <= mpptTempLimit) || (Sensors_Read_Temperature(tempSensorSecBattery) <= mpptTempLimit))) {
     // at least one battery has temperature below limit, disable charging
     digitalWrite(MPPT_OFF, HIGH);
   } else {
