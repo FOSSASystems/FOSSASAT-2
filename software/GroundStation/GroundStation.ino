@@ -175,13 +175,14 @@ void printControls() {
   Serial.println(F("m - disable MPPT keep alive"));
   Serial.println(F("M - enable MPPT keep alive"));
   Serial.println(F("t - restart"));
-  Serial.println(F("e - wipe EEPROM"));
+  Serial.println(F("f - wipe EEPROM"));
   Serial.println(F("L - set Rx window lengths"));
   Serial.println(F("R - retransmit custom"));
   Serial.println(F("o - get rotation data"));
   Serial.println(F("u - send packet with unknown function ID"));
   Serial.println(F("s - get stats"));
   Serial.println(F("c - capture photo"));
+  Serial.println(F("e - set power limits"));
   Serial.println(F("------------------------------------"));
 }
 
@@ -686,6 +687,19 @@ void cameraCapture(uint8_t slot, uint8_t pictureSize, uint8_t lightMode, uint8_t
   sendFrameEncrypted(CMD_CAMERA_CAPTURE, 4, optData);
 }
 
+void setPowerLimits(int16_t deploymentVoltageLimit, int16_t heaterBatteryLimit, int16_t cwBeepLimit, int16_t lowPowerLimit, float heaterTempLimit, float mpptTempLimit, uint8_t heaterDutyCycle) {
+  Serial.print(F("Sending power limits change request ... "));
+  uint8_t optData[17];
+  memcpy(optData, &deploymentVoltageLimit, sizeof(int16_t));
+  memcpy(optData + sizeof(int16_t), &heaterBatteryLimit, sizeof(int16_t));
+  memcpy(optData + 2*sizeof(int16_t), &cwBeepLimit, sizeof(int16_t));
+  memcpy(optData + 3*sizeof(int16_t), &lowPowerLimit, sizeof(int16_t));
+  memcpy(optData + 4*sizeof(int16_t), &heaterTempLimit, sizeof(float));
+  memcpy(optData + 4*sizeof(int16_t) + sizeof(float), &mpptTempLimit, sizeof(float));
+  memcpy(optData + 4*sizeof(int16_t) + 2*sizeof(float), &heaterDutyCycle, sizeof(uint8_t));
+  sendFrameEncrypted(CMD_SET_POWER_LIMITS, 17, optData);
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println(F("FOSSASAT-2 Ground Station Demo Code"));
@@ -774,7 +788,7 @@ void loop() {
       case 't':
         restart();
         break;
-      case 'e':
+      case 'f':
         wipe();
         break;
       case 'L':
@@ -795,6 +809,9 @@ void loop() {
         break;
       case 'c':
         cameraCapture(65, OV2640_320x240, Auto, Saturation0, Brightness0, Contrast0, Normal);
+        break;
+      case 'e':
+        setPowerLimits(3600, 3700, 3750, 3900, 4.2, -1.5, 126);
         break;
       default:
         Serial.print(F("Unknown command: "));

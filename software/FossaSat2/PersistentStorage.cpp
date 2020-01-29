@@ -116,9 +116,28 @@ void PersistentStorage_Reset_System_Info() {
   // set default low power mode configuration
   sysInfoPage[FLASH_LOW_POWER_MODE_ENABLED] = 1;
 
+  // set default voltage limits
+  int16_t voltageLimit = DEPLOYMENT_BATTERY_VOLTAGE_LIMIT;
+  memcpy(sysInfoPagePtr + FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
+  voltageLimit = HEATER_BATTERY_VOLTAGE_LIMIT;
+  memcpy(sysInfoPagePtr + FLASH_HEATER_BATTERY_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
+  voltageLimit = BATTERY_CW_BEEP_VOLTAGE_LIMIT;
+  memcpy(sysInfoPagePtr + FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
+  voltageLimit = LOW_POWER_MODE_VOLTAGE_LIMIT;
+  memcpy(sysInfoPagePtr + FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
+
+  // set default temperature limits
+  float tempLimit = BATTERY_HEATER_TEMP_LIMIT;
+  memcpy(sysInfoPagePtr + FLASH_BATTERY_HEATER_TEMP_LIMIT, &tempLimit, sizeof(float));
+  tempLimit = MPPT_TEMP_LIMIT;
+  memcpy(sysInfoPagePtr + FLASH_MPPT_TEMP_LIMIT, &tempLimit, sizeof(float));
+
+  // set default heater duty cycle
+  uint8_t dutyCycle = BATTERY_HEATER_DUTY_CYCLE;
+  memcpy(sysInfoPagePtr + FLASH_BATTERY_HEATER_DUTY_CYCLE, &dutyCycle, sizeof(uint8_t));
+
   // write the default system info
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
-  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, 0x40)
 }
 
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len) {

@@ -544,6 +544,47 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       }
     } break;
 
+    case CMD_SET_POWER_LIMITS: {
+      // check optional data is exactly 17 bytes
+      if(Communication_Check_OptDataLen(17, optDataLen)) {
+        // print values for debugging only
+        #ifdef FOSSASAT_DEBUG
+        int16_t voltageLimit = 0;
+        float temperatureLimit = 0;
+
+        memcpy(&voltageLimit, optData, sizeof(int16_t));
+        FOSSASAT_DEBUG_PRINT(F("deploymentVoltageLimit = "));
+        FOSSASAT_DEBUG_PRINTLN(voltageLimit);
+        
+        memcpy(&voltageLimit, optData + sizeof(int16_t), sizeof(int16_t));
+        FOSSASAT_DEBUG_PRINT(F("heaterBatteryLimit = "));
+        FOSSASAT_DEBUG_PRINTLN(voltageLimit);
+        
+        memcpy(&voltageLimit, optData + 2*sizeof(int16_t), sizeof(int16_t));
+        FOSSASAT_DEBUG_PRINT(F("cwBeepLimit = "));
+        FOSSASAT_DEBUG_PRINTLN(voltageLimit);
+        
+        memcpy(&voltageLimit, optData + 3*sizeof(int16_t), sizeof(int16_t));
+        FOSSASAT_DEBUG_PRINT(F("lowPowerLimit = "));
+        FOSSASAT_DEBUG_PRINTLN(voltageLimit);
+        
+        memcpy(&temperatureLimit, optData + 4*sizeof(int16_t), sizeof(float));
+        FOSSASAT_DEBUG_PRINT(F("heaterTempLimit = "));
+        FOSSASAT_DEBUG_PRINTLN(temperatureLimit);
+        
+        memcpy(&temperatureLimit, optData + 4*sizeof(int16_t) + sizeof(float), sizeof(float));
+        FOSSASAT_DEBUG_PRINT(F("mpptTempLimit = "));
+        FOSSASAT_DEBUG_PRINTLN(temperatureLimit);
+        
+        FOSSASAT_DEBUG_PRINT(F("heaterDutyCycle = "));
+        FOSSASAT_DEBUG_PRINTLN(optData[16]);
+        #endif
+
+        // write all at once
+        PersistentStorage_Set_Buffer(FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT, optData, optDataLen);
+      }
+    } break;
+
     // TODO new private frames
 
     default:

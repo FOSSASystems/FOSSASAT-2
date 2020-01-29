@@ -6,7 +6,7 @@ uint32_t PowerControl_Get_Sleep_Interval() {
 
   #ifdef ENABLE_INTERVAL_CONTROL
     // get battery voltage
-    float batt = Power_Control_Get_Battery_Voltage();
+    float batt = PowerControl_Get_Battery_Voltage();
 
     if(batt > 4.05f) {
       interval = (uint32_t)20 * (uint32_t)1000;
@@ -111,7 +111,7 @@ float PowerControl_Get_Battery_Voltage() {
 
 void PowerControl_Manage_Battery() {
   // check battery voltage
-  if((PowerControl_Get_Battery_Voltage() <= LOW_POWER_MODE_VOLTAGE_LIMIT) && (PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED) == 1)) {
+  if((PowerControl_Get_Battery_Voltage() <= PersistentStorage_Get<uint16_t>(FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT)) && (PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED) == 1)) {
     // activate low power mode
    PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE, LOW_POWER_SLEEP);
   } else {
@@ -120,8 +120,9 @@ void PowerControl_Manage_Battery() {
   }
 
   // check temperature limit to enable/disable charging
-  if(Sensors_Read_Temperature(tempSensorBattery) < MPPT_TEMP_LIMIT) {
-    // temperature below limit, disable charging
+  float mpptTempLimit = PersistentStorage_Get<float>(FLASH_MPPT_TEMP_LIMIT);
+  if((Sensors_Read_Temperature(tempSensorBattery) <= mpptTempLimit) || (Sensors_Read_Temperature(tempSensorSecBattery) <= mpptTempLimit)) {
+    // at least one battery has temperature below limit, disable charging
     digitalWrite(MPPT_OFF, HIGH);
   } else {
     // temperature above limit, enable charging
@@ -129,9 +130,12 @@ void PowerControl_Manage_Battery() {
   }
 
   // check temperature and voltage limit to enable heater
-  if((Sensors_Read_Temperature(tempSensorBattery) <= BATTERY_HEATER_TEMP_LIMIT) && (PowerControl_Get_Battery_Voltage() >= HEATER_BATTERY_VOLTAGE_LIMIT)) {
-    // temperature is below limit and battery is above limit, enable heater
-    analogWrite(BATTERY_HEATER_FET, BATTERY_HEATER_DUTY_CYCLE);
+  float heaterTempLimit = PersistentStorage_Get<float>(FLASH_BATTERY_HEATER_TEMP_LIMIT);
+  if((Sensors_Read_Temperature(tempSensorBattery) <= heaterTempLimit) && 
+     (Sensors_Read_Temperature(tempSensorSecBattery) <= heaterTempLimit) && 
+     (PowerControl_Get_Battery_Voltage() >= PersistentStorage_Get<int16_t>(FLASH_HEATER_BATTERY_VOLTAGE_LIMIT))) {
+    // both temperatures are below limit and battery is above limit, enable heater
+    analogWrite(BATTERY_HEATER_FET, PersistentStorage_Get<uint8_t>(BATTERY_HEATER_DUTY_CYCLE));
   } else {
     // temperature is too high or battery is too low, disable heater
     digitalWrite(BATTERY_HEATER_FET, LOW);

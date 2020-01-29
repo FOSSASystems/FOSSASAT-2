@@ -96,10 +96,10 @@
    Voltage Limits
 */
 
-#define DEPLOYMENT_BATTERY_VOLTAGE_LIMIT                3700.0  // mV
-#define HEATER_BATTERY_VOLTAGE_LIMIT                    3800.0  // mV
-#define BATTERY_CW_BEEP_VOLTAGE_LIMIT                   3800.0        /*!< Battery voltage limit to switch into morse beep (mV). */
-#define LOW_POWER_MODE_VOLTAGE_LIMIT                    3800.0
+#define DEPLOYMENT_BATTERY_VOLTAGE_LIMIT                3700    // mV
+#define HEATER_BATTERY_VOLTAGE_LIMIT                    3800    // mV
+#define BATTERY_CW_BEEP_VOLTAGE_LIMIT                   3800          /*!< Battery voltage limit to switch into morse beep (mV). */
+#define LOW_POWER_MODE_VOLTAGE_LIMIT                    3800
 
 /*
    Temperature Limits
@@ -135,6 +135,13 @@
 #define FLASH_FSK_INVALID_COUNTER                       0x00000031  //  0x00000031    0x00000032
 #define FLASH_LOW_POWER_MODE_ENABLED                    0x00000033  //  0x00000033    0x00000033
 #define FLASH_LOW_POWER_MODE                            0x00000034  //  0x00000034    0x00000034
+#define FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT          0x00000035  //  0x00000035    0x00000036
+#define FLASH_HEATER_BATTERY_VOLTAGE_LIMIT              0x00000037  //  0x00000037    0x00000038
+#define FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT             0x00000038  //  0x00000039    0x0000003A
+#define FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT              0x0000003B  //  0x0000003B    0x0000003C
+#define FLASH_BATTERY_HEATER_TEMP_LIMIT                 0x0000003D  //  0x0000003D    0x00000040
+#define FLASH_MPPT_TEMP_LIMIT                           0x00000041  //  0x00000041    0x00000044
+#define FLASH_BATTERY_HEATER_DUTY_CYCLE                 0x00000045  //  0x00000045    0x00000045
 
 // sector 1 - stats
 // todo stats

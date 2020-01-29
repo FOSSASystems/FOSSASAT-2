@@ -35,8 +35,8 @@ void setup() {
   PersistentStorage_Reset_System_Info();
 #endif
 
-  // print power configuration
-  PowerControl_Print_Power_Config();
+  // print system info page
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, 0x50)
 
   // initialize radio
   FOSSASAT_DEBUG_PORT.print(F("LoRa modem init: "));
@@ -236,7 +236,8 @@ void setup() {
 
     // check voltage
     uint32_t chargingStart = millis();
-    while (PowerControl_Get_Battery_Voltage() < DEPLOYMENT_BATTERY_VOLTAGE_LIMIT) {
+    int16_t voltageLimit = PersistentStorage_Get<int16_t>(FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT);
+    while (PowerControl_Get_Battery_Voltage() < voltageLimit) {
       // voltage below 3.7V, wait until charged
       if (millis() - chargingStart >= (uint32_t)DEPLOYMENT_CHARGE_LIMIT * (uint32_t)3600 * (uint32_t)1000) {
         // reached maximum charging interval, stop further charging
@@ -269,7 +270,7 @@ void loop() {
   float battVoltage = PowerControl_Get_Battery_Voltage();
   FOSSASAT_DEBUG_PRINTLN(battVoltage, 2);
   PowerControl_Manage_Battery();
-  PowerControl_Print_Power_Config();
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, 0x50)
 
   // CW beacon
   Communication_Set_Modem(MODEM_FSK);
@@ -280,7 +281,7 @@ void loop() {
   } else {
   #endif
 
-  if(battVoltage >= BATTERY_CW_BEEP_VOLTAGE_LIMIT) {
+  if(battVoltage >= PersistentStorage_Get<int16_t>(FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT)) {
     // transmit full Morse beacon
     Communication_Send_Morse_Beacon(battVoltage);
   } else {
@@ -300,8 +301,9 @@ void loop() {
   PowerControl_Wait(500, LOW_POWER_SLEEP, true);
 
   // send FSK system info
+  // TODO - basic or full?
   Communication_Set_Modem(MODEM_FSK);
-  Communication_Send_System_Info();
+  Communication_Send_Basic_System_Info();
 
   // wait for a bit
   FOSSASAT_DEBUG_DELAY(10);
@@ -311,10 +313,10 @@ void loop() {
   Communication_Set_Modem(MODEM_LORA);
   #ifdef ENABLE_TRANSMISSION_CONTROL
   if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
-    Communication_Send_System_Info();
+    Communication_Send_Basic_System_Info();
   }
   #else
-    Communication_Send_System_Info();
+    Communication_Send_Basic_System_Info();
   #endif
 
   // wait for a bit
