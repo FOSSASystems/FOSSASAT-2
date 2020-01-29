@@ -23,6 +23,25 @@
       FOSSASAT_DEBUG_PORT.write(BUFF[i]); \
       FOSSASAT_DEBUG_PORT.println(); \
     } }
+#define FOSSASAT_DEBUG_PRINT_FLASH(ADDR, LEN) { \
+    uint8_t readBuff[FLASH_SECTOR_SIZE]; \
+    PersistentStorage_Read(ADDR, readBuff, LEN); \
+    char buff[16]; \
+    if(LEN < 16) { \
+      for(uint8_t i = 0; i < LEN; i++) { \
+        sprintf(buff, "%02x ", readBuff[i]); \
+        FOSSASAT_DEBUG_PORT.print(buff); \
+      } \
+      FOSSASAT_DEBUG_PORT.println(); \
+    } else { \
+      for(size_t i = 0; i < LEN/16; i++) { \
+        for(uint8_t j = 0; j < 16; j++) { \
+          sprintf(buff, "%02x ", readBuff[i*16 + j]); \
+          FOSSASAT_DEBUG_PORT.print(buff); \
+        } \
+        FOSSASAT_DEBUG_PORT.println(); \
+      } \
+    } }
 #define FOSSASAT_DEBUG_DELAY(MS) { delay(MS); }
 #define FOSSASAT_DEBUG_STOPWATCH_INIT_H extern uint32_t fsdbgStart;
 #define FOSSASAT_DEBUG_STOPWATCH_INIT_CPP uint32_t fsdbgStart = 0;
@@ -38,6 +57,7 @@
 #define FOSSASAT_DEBUG_PRINTLN(...) {}
 #define FOSSASAT_DEBUG_WRITE(...) {}
 #define FOSSASAT_DEBUG_PRINT_BUFF(BUFF, LEN) {}
+#define FOSSASAT_DEBUG_PRINT_FLASH(ADDR, LEN) {}
 #define FOSSASAT_DEBUG_STOPWATCH_INIT_H
 #define FOSSASAT_DEBUG_STOPWATCH_INIT_CPP
 #define FOSSASAT_DEBUG_STOPWATCH_START(...) {}
