@@ -71,12 +71,12 @@
 #define GPS_POWER_FET                                   PC3
 
 // control FETs
-#define DEPLOYMENT_FET_1                                PB1//PA3
-#define DEPLOYMENT_FET_2                                PB2//PB1
+#define DEPLOYMENT_FET_1                                PB1
+#define DEPLOYMENT_FET_2                                PB2
 #define BATTERY_HEATER_FET                              PA8
 
 // other
-#define WATCHDOG_IN                                     PC13//PB2
+#define WATCHDOG_IN                                     PC13
 #define MPPT_OFF                                        PA11
 #define ANALOG_IN_RANDOM_SEED                           PA12    // used as source for randomSeed(), should be left floating
 
@@ -107,12 +107,14 @@
 
 #define BATTERY_HEATER_TEMP_LIMIT                       5.0     // deg. C
 #define MPPT_TEMP_LIMIT                                 0.0     // deg. C
+#define BATTERY_HEATER_DUTY_CYCLE                       255     // PWM duty cycle 0 - 255
 
 /*
     Flash Configuration
 */
 
-#define FLASH_SECTOR_SIZE                               0x00000100
+#define FLASH_PAGE_SIZE                                 0x00000100
+#define FLASH_SECTOR_SIZE                               0x00001000
 #define FLASH_64K_BLOCK_SIZE                            0x00010000
 #define FLASH_IMAGE_NUM_64K_BLOCKS                      8
 
@@ -136,13 +138,10 @@
 
 // sector 1 - stats
 // todo stats
-#define FLASH_STATS                                     0x00000100  //  0x00000100    0x000001FF
+#define FLASH_STATS                                     0x00001000  //  0x00001000    0x00001FFF
 
-// sector 2 - image 0 - 63 lengths: 4 bytes per length
-#define FLASH_IMAGE_LENGTHS                             0x00000200  //  0x00000200    0x000002FF
-
-// sector 3 - image 64 - 127 lengths: 4 bytes per length
-#define FLASH_IMAGE_LENGTHS_2                           0x00000300  //  0x00000300    0x000003FF
+// sector 2 - image lengths: 4 bytes per length
+#define FLASH_IMAGE_LENGTHS                             0x00002000  //  0x00002000    0x00002FFF
 
 // 64kB block 1 - store & forward slots
 #define FLASH_STORE_AND_FORWARD_START                   0x00020000  //  0x00020000    0x0002FFFF

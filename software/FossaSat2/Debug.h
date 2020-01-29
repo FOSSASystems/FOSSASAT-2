@@ -24,7 +24,7 @@
       FOSSASAT_DEBUG_PORT.println(); \
     } }
 #define FOSSASAT_DEBUG_PRINT_FLASH(ADDR, LEN) { \
-    uint8_t readBuff[FLASH_SECTOR_SIZE]; \
+    uint8_t readBuff[FLASH_PAGE_SIZE]; \
     PersistentStorage_Read(ADDR, readBuff, LEN); \
     char buff[16]; \
     if(LEN < 16) { \

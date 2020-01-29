@@ -25,22 +25,19 @@ uint8_t Camera_Init(uint8_t pictureSize, uint8_t lightMode, uint8_t saturation, 
     FOSSASAT_DEBUG_PRINTLN(brightness);
     return 4;
   }
-
   
   if(!((contrast >= Contrast2) && (contrast <= Contrast_2))) {
     FOSSASAT_DEBUG_PRINT(F("Error - invalid contrast: "));
     FOSSASAT_DEBUG_PRINTLN(contrast);
     return 5;
   }
-
   
   if(!((special >= Antique) && (special <= Normal))) {
     FOSSASAT_DEBUG_PRINT(F("Error - invalid special effect: "));
     FOSSASAT_DEBUG_PRINTLN(special);
     return 6;
   }
-
-
+  
   FOSSASAT_DEBUG_PRINT(F("Picture size: "));
   FOSSASAT_DEBUG_PRINTLN(pictureSize);
   
@@ -172,26 +169,26 @@ uint32_t Camera_Capture(uint8_t slot) {
   camera.CS_LOW();
   camera.set_fifo_burst();
 
-  // write the complete sectors first
-  uint8_t dataBuffer[FLASH_SECTOR_SIZE];
+  // write the complete pages first
+  uint8_t dataBuffer[FLASH_PAGE_SIZE];
   uint32_t i;
-  for(i = 0; i < len / FLASH_SECTOR_SIZE; i++) {
-    for(uint32_t j = 0; j < FLASH_SECTOR_SIZE; j++) {
+  for(i = 0; i < len / FLASH_PAGE_SIZE; i++) {
+    for(uint32_t j = 0; j < FLASH_PAGE_SIZE; j++) {
       dataBuffer[j] = SPI.transfer(0x00);
     }
 
     // write a single sector
-    PersistentStorage_Write(imgAddress + i*FLASH_SECTOR_SIZE, dataBuffer, FLASH_SECTOR_SIZE, false);
-    FOSSASAT_DEBUG_PRINT_FLASH(imgAddress + i*FLASH_SECTOR_SIZE, FLASH_SECTOR_SIZE);
+    PersistentStorage_Write(imgAddress + i*FLASH_PAGE_SIZE, dataBuffer, FLASH_PAGE_SIZE, false);
+    FOSSASAT_DEBUG_PRINT_FLASH(imgAddress + i*FLASH_PAGE_SIZE, FLASH_PAGE_SIZE);
   }
 
-  // write the remaining sector
-  uint32_t remLen = len - i*FLASH_SECTOR_SIZE;
+  // write the remaining page
+  uint32_t remLen = len - i*FLASH_PAGE_SIZE;
   for(uint32_t j = 0; j < remLen; j++) {
     dataBuffer[j] = SPI.transfer(0x00);
   }
-  PersistentStorage_Write(imgAddress + i*FLASH_SECTOR_SIZE, dataBuffer, remLen, false);
-  FOSSASAT_DEBUG_PRINT_FLASH(imgAddress + i*FLASH_SECTOR_SIZE, remLen);
+  PersistentStorage_Write(imgAddress + i*FLASH_PAGE_SIZE, dataBuffer, remLen, false);
+  FOSSASAT_DEBUG_PRINT_FLASH(imgAddress + i*FLASH_PAGE_SIZE, remLen);
   FOSSASAT_DEBUG_PRINTLN(F("Writing done"));
   
   camera.CS_HIGH();
