@@ -1,5 +1,31 @@
 #include "PowerControl.h"
 
+uint32_t PowerControl_Get_Sleep_Interval() {
+  // sleep interval in ms (default for battery > 3.7 V)
+  uint32_t interval = 0;
+
+  #ifdef ENABLE_INTERVAL_CONTROL
+    // get battery voltage
+    float batt = Power_Control_Get_Battery_Voltage();
+
+    if(batt > 4.05f) {
+      interval = (uint32_t)20 * (uint32_t)1000;
+    } else if(batt > 4.0f) {
+      interval = (uint32_t)35 * (uint32_t)1000;
+    } else if(batt > 3.9f) {
+      interval = (uint32_t)100 * (uint32_t)1000;
+    } else if(batt > 3.8f) {
+      interval = (uint32_t)160 * (uint32_t)1000;
+    } else if(batt > 3.7f) {
+      interval = (uint32_t)180 * (uint32_t)1000;
+    } else {
+      interval = (uint32_t)240 * (uint32_t)1000;
+    }
+  #endif
+
+  return(interval);
+}
+
 void PowerControl_Wait(uint32_t ms, uint8_t type, bool radioSleep) {
   if (ms == 0) {
     return;
@@ -52,8 +78,8 @@ void PowerControl_Watchdog_Heartbeat() {
   // toggle watchdog pin
   digitalWrite(WATCHDOG_IN, !digitalRead(WATCHDOG_IN));
 
-  // check voltage
-  PowerControl_Check_Battery_Limit();
+  // manage battery (low power, heater, charging)
+  PowerControl_Manage_Battery();
 }
 
 void PowerControl_Watchdog_Restart() {
@@ -83,7 +109,7 @@ float PowerControl_Get_Battery_Voltage() {
   return(currSensorMPPT.readBusVoltage());
 }
 
-void PowerControl_Check_Battery_Limit() {
+void PowerControl_Manage_Battery() {
   // check battery voltage
   if((PowerControl_Get_Battery_Voltage() <= LOW_POWER_MODE_VOLTAGE_LIMIT) && (PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED) == 1)) {
     // activate low power mode
@@ -91,6 +117,24 @@ void PowerControl_Check_Battery_Limit() {
   } else {
     // deactivate low power mode
     PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE, LOW_POWER_NONE);
+  }
+
+  // check temperature limit to enable/disable charging
+  if(Sensors_Read_Temperature(tempSensorBattery) < MPPT_TEMP_LIMIT) {
+    // temperature below limit, disable charging
+    digitalWrite(MPPT_OFF, HIGH);
+  } else {
+    // temperature above limit, enable charging
+    digitalWrite(MPPT_OFF, LOW);
+  }
+
+  // check temperature and voltage limit to enable heater
+  if((Sensors_Read_Temperature(tempSensorBattery) <= BATTERY_HEATER_TEMP_LIMIT) && (PowerControl_Get_Battery_Voltage() >= HEATER_BATTERY_VOLTAGE_LIMIT)) {
+    // temperature is below limit and battery is above limit, enable heater
+    analogWrite(BATTERY_HEATER_FET, BATTERY_HEATER_DUTY_CYCLE);
+  } else {
+    // temperature is too high or battery is too low, disable heater
+    digitalWrite(BATTERY_HEATER_FET, LOW);
   }
 }
 

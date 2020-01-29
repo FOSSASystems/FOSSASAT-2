@@ -4,8 +4,8 @@
 // STM32:stm32:Nucleo_64:pnum=NUCLEO_L452REP
 
 // compile-time checks
-#if (!defined RADIOLIB_VERSION) || (RADIOLIB_VERSION < 0x03010000)
-  #error "Unsupported RadioLib version (< 3.1.0)!"
+#if (!defined RADIOLIB_VERSION) || (RADIOLIB_VERSION < 0x03020100)
+  #error "Unsupported RadioLib version (< 3.2.1)!"
 #endif
 
 #if (!defined(RADIOLIB_STATIC_ONLY))
@@ -244,6 +244,11 @@ void setup() {
       }
 
       // TODO sleep for variable amount of time
+      uint32_t interval = PowerControl_Get_Sleep_Interval();
+      FOSSASAT_DEBUG_PRINT(F("Sleep for "));
+      FOSSASAT_DEBUG_PRINTLN(interval);
+      FOSSASAT_DEBUG_DELAY(10);
+      PowerControl_Wait(interval, LOW_POWER_SLEEP);
     }
 
     // voltage above 3.7V, deploy
@@ -263,10 +268,8 @@ void loop() {
   FOSSASAT_DEBUG_PRINT(F("Battery check: "));
   float battVoltage = PowerControl_Get_Battery_Voltage();
   FOSSASAT_DEBUG_PRINTLN(battVoltage, 2);
-  PowerControl_Check_Battery_Limit();
+  PowerControl_Manage_Battery();
   PowerControl_Print_Power_Config();
-
-  // TODO try to switch MPPT on (may be overridden by temperature check)
 
   // CW beacon
   Communication_Set_Modem(MODEM_FSK);
@@ -321,7 +324,7 @@ void loop() {
   // LoRa receive
   uint8_t windowLenLoRa = PersistentStorage_Get<uint8_t>(FLASH_LORA_RECEIVE_LEN);
   FOSSASAT_DEBUG_PRINT(F("LoRa Rx "));
-  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_SLEEP) {
+  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
     // use only half of the interval in low power mode
     windowLenLoRa /= 2;
     FOSSASAT_DEBUG_PRINT(F("(halved due to LP mode) "));
@@ -345,7 +348,7 @@ void loop() {
   uint8_t windowLenFsk = PersistentStorage_Get<uint8_t>(FLASH_FSK_RECEIVE_LEN);
   Communication_Set_Modem(MODEM_FSK);
   FOSSASAT_DEBUG_PRINT(F("FSK Rx "));
-  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_SLEEP) {
+  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
     // use only half of the interval in low power mode
     windowLenFsk /= 2;
     FOSSASAT_DEBUG_PRINT(F("(halved due to LP mode) "));
@@ -368,6 +371,11 @@ void loop() {
   radio.clearDio1Action();
 
   // set everything to sleep
+  uint32_t interval = PowerControl_Get_Sleep_Interval();
+  FOSSASAT_DEBUG_PRINT(F("Sleep for "));
+  FOSSASAT_DEBUG_PRINTLN(interval);
+  FOSSASAT_DEBUG_DELAY(10);
+  PowerControl_Wait(interval, LOW_POWER_SLEEP, true);
 
   // TODO update uptime counter
 }

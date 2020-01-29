@@ -13,7 +13,7 @@
 #define LOW_POWER_DEEP_SLEEP                            3
 #define LOW_POWER_SHUTDOWN                              4
 
-
+uint32_t PowerControl_Get_Sleep_Interval();
 void PowerControl_Wait(uint32_t ms, uint8_t type = LOW_POWER_NONE, bool radioSleep = false);
 
 void PowerControl_Watchdog_Heartbeat();
@@ -22,7 +22,7 @@ void PowerControl_Watchdog_Restart();
 void PowerControl_Deploy();
 
 float PowerControl_Get_Battery_Voltage();
-void PowerControl_Check_Battery_Limit();
+void PowerControl_Manage_Battery();
 
 void PowerControl_Print_Power_Config();
 
