@@ -28,6 +28,8 @@ void PersistentStorage_Increment_Counter(uint16_t addr);
 void PersistentStorage_Increment_Frame_Counter(bool valid);
 void PersistentStorage_Get_Callsign(char* buff, uint8_t len);
 void PersistentStorage_Set_Callsign(char* newCallsign);
+uint32_t PersistentStorage_Get_Image_Len(uint8_t slot);
+void PersistentStorage_Set_Image_Len(uint8_t slot, uint32_t len);
 void PersistentStorage_Reset_System_Info();
 
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len);

@@ -47,6 +47,33 @@ void PersistentStorage_Set_Callsign(char* newCallsign) {
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
 }
 
+uint32_t PersistentStorage_Get_Image_Len(uint8_t slot) {
+  uint8_t buff[4];
+  PersistentStorage_Read(FLASH_IMAGE_LENGTHS + slot*sizeof(uint32_t), buff, sizeof(uint32_t));
+  uint32_t len;
+  memcpy(&len, buff, sizeof(uint32_t));
+  return(len);
+}
+
+void PersistentStorage_Set_Image_Len(uint8_t slot, uint32_t len) {
+  // check which sector will be written to
+  uint32_t addr = FLASH_IMAGE_LENGTHS;
+  if(slot >= 64) {
+    slot -= 64;
+    addr = FLASH_IMAGE_LENGTHS_2;
+  }
+
+  // read the correct sector
+  uint8_t buff[FLASH_SECTOR_SIZE];
+  PersistentStorage_Read(addr, buff, FLASH_SECTOR_SIZE);
+
+  // update value
+  memcpy(buff + slot*sizeof(uint32_t), &len, sizeof(uint32_t));
+
+  // write it back in (will automatically erase the sector)
+  PersistentStorage_Write(addr, buff, FLASH_SECTOR_SIZE);
+}
+
 void PersistentStorage_Reset_System_Info() {
   // build a completely new system info page
   uint8_t sysInfoPage[FLASH_SYSTEM_INFO_LEN];
