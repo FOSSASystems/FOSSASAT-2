@@ -244,7 +244,7 @@ void setup() {
         break;
       }
 
-      // TODO sleep for variable amount of time
+      // sleep for variable amount of time
       uint32_t interval = PowerControl_Get_Sleep_Interval();
       FOSSASAT_DEBUG_PRINT(F("Sleep for "));
       FOSSASAT_DEBUG_PRINTLN(interval);
@@ -334,8 +334,7 @@ void loop() {
   FOSSASAT_DEBUG_PRINTLN(windowLenLoRa);
   FOSSASAT_DEBUG_DELAY(10);
   radio.setDio1Action(Communication_Receive_Interrupt);
-  int16_t state = radio.startReceive();
-  FOSSASAT_DEBUG_PRINTLN(state);
+  radio.startReceive();
 
   for(uint8_t i = 0; i < windowLenLoRa; i++) {
     PowerControl_Wait(500, LOW_POWER_SLEEP);
@@ -358,8 +357,7 @@ void loop() {
   FOSSASAT_DEBUG_PRINTLN(windowLenFsk);
   FOSSASAT_DEBUG_DELAY(10);
   radio.setDio1Action(Communication_Receive_Interrupt);
-  state = radio.startReceive();
-  FOSSASAT_DEBUG_PRINTLN(state);
+  radio.startReceive();
 
   for(uint8_t i = 0; i < windowLenFsk; i++) {
     PowerControl_Wait(500, LOW_POWER_SLEEP);

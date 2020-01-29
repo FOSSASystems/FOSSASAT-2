@@ -121,11 +121,18 @@ void PowerControl_Manage_Battery() {
 
   // check temperature limit to enable/disable charging
   float mpptTempLimit = PersistentStorage_Get<float>(FLASH_MPPT_TEMP_LIMIT);
-  if((Sensors_Read_Temperature(tempSensorBattery) <= mpptTempLimit) || (Sensors_Read_Temperature(tempSensorSecBattery) <= mpptTempLimit)) {
+  uint8_t mpptKeepAlive = PersistentStorage_Get<uint8_t>(FLASH_MPPT_KEEP_ALIVE_ENABLED);
+  uint8_t mpptTempSwitch = PersistentStorage_Get<uint8_t>(FLASH_MPPT_TEMP_SWITCH_ENABLED);
+  if(mpptKeepAlive == 1) {
+    // MPPT keep alive is enabled, force charging regardless of everything else
+    // TODO low or high-Z?
+    digitalWrite(MPPT_OFF, LOW);
+  } else if((mpptTempSwitch == 1) && ((Sensors_Read_Temperature(tempSensorBattery) <= mpptTempLimit) || (Sensors_Read_Temperature(tempSensorSecBattery) <= mpptTempLimit)))
     // at least one battery has temperature below limit, disable charging
     digitalWrite(MPPT_OFF, HIGH);
   } else {
     // temperature above limit, enable charging
+    // TODO low or high-Z?
     digitalWrite(MPPT_OFF, LOW);
   }
 
@@ -140,15 +147,4 @@ void PowerControl_Manage_Battery() {
     // temperature is too high or battery is too low, disable heater
     digitalWrite(BATTERY_HEATER_FET, LOW);
   }
-}
-
-void PowerControl_Print_Power_Config() {
-  FOSSASAT_DEBUG_PORT.println(F("--- Power Configuration ---"));
-  FOSSASAT_DEBUG_PORT.print(F("Transmissions enabled: "));
-  FOSSASAT_DEBUG_PORT.println(PersistentStorage_Get<uint8_t>(FLASH_TRANSMISSIONS_ENABLED));
-  FOSSASAT_DEBUG_PORT.print(F("Low power mode enabled: "));
-  FOSSASAT_DEBUG_PORT.println(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED));
-  FOSSASAT_DEBUG_PORT.print(F("Low power mode: "));
-  FOSSASAT_DEBUG_PORT.println(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE));
-  FOSSASAT_DEBUG_PORT.println(F("---------------------------"));
 }

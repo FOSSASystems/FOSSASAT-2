@@ -136,6 +136,9 @@ void PersistentStorage_Reset_System_Info() {
   uint8_t dutyCycle = BATTERY_HEATER_DUTY_CYCLE;
   memcpy(sysInfoPagePtr + FLASH_BATTERY_HEATER_DUTY_CYCLE, &dutyCycle, sizeof(uint8_t));
 
+  // set default MPPT temperature switch mode
+  sysInfoPage[FLASH_MPPT_TEMP_SWITCH_ENABLED] = 1;
+
   // write the default system info
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
 }

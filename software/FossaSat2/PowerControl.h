@@ -24,6 +24,4 @@ void PowerControl_Deploy();
 float PowerControl_Get_Battery_Voltage();
 void PowerControl_Manage_Battery();
 
-void PowerControl_Print_Power_Config();
-
 #endif

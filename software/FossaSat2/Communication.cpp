@@ -412,7 +412,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       } break;
 
     case CMD_GET_FULL_SYSTEM_INFO: {
-      
+      // TODO full system info, GFSK only
     } break;
 
     // TODO new public frames
@@ -492,7 +492,15 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       } break;
 
     case CMD_SET_MPPT_MODE: {
-      // TODO implement MPPT keep alive
+      // check optional data is exactly 2 bytes
+      if(Communication_Check_OptDataLen(2, optDataLen)) {
+        FOSSASAT_DEBUG_PRINT(F("mpptTempSwitchEnabled="));
+        FOSSASAT_DEBUG_PRINTLN(optData[0]);
+        PersistentStorage_Set<uint8_t>(FLASH_MPPT_TEMP_SWITCH_ENABLED, optData[0]);
+        FOSSASAT_DEBUG_PRINT(F("mpptKeepAliveEnabled="));
+        FOSSASAT_DEBUG_PRINTLN(optData[1]);
+        PersistentStorage_Set<uint8_t>(FLASH_MPPT_KEEP_ALIVE_ENABLED, optData[1]);
+      }
     } break;
 
     case CMD_SET_RECEIVE_WINDOWS: {
@@ -666,6 +674,7 @@ int16_t Communication_Transmit(uint8_t* data, uint8_t len, bool overrideModem) {
   }
   FOSSASAT_DEBUG_PRINT(F("Timeout in: "));
   FOSSASAT_DEBUG_PRINTLN(timeout);
+  FOSSASAT_DEBUG_DELAY(10);
 
   // start transmitting
   int16_t state = radio.startTransmit(data, len);
@@ -694,6 +703,10 @@ int16_t Communication_Transmit(uint8_t* data, uint8_t len, bool overrideModem) {
       return (ERR_TX_TIMEOUT);
     }
   }
+
+  FOSSASAT_DEBUG_PRINT(F("Tx done in: "));
+  FOSSASAT_DEBUG_PRINTLN(micros() - start);
+  FOSSASAT_DEBUG_DELAY(10);
 
   // transmission done, set mode standby
   state = radio.standby();

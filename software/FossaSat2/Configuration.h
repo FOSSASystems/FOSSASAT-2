@@ -142,6 +142,8 @@
 #define FLASH_BATTERY_HEATER_TEMP_LIMIT                 0x0000003D  //  0x0000003D    0x00000040
 #define FLASH_MPPT_TEMP_LIMIT                           0x00000041  //  0x00000041    0x00000044
 #define FLASH_BATTERY_HEATER_DUTY_CYCLE                 0x00000045  //  0x00000045    0x00000045
+#define FLASH_MPPT_TEMP_SWITCH_ENABLED                  0x00000046  //  0x00000046    0x00000046
+#define FLASH_MPPT_KEEP_ALIVE_ENABLED                   0x00000047  //  0x00000047    0x00000047
 
 // sector 1 - stats
 // todo stats
