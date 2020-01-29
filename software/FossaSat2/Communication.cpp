@@ -91,7 +91,7 @@ int16_t Communication_Set_Modem(uint8_t modem) {
   }
 
   // set spreading factor
-  //Communication_Set_SpreadingFactor(spreadingFactorMode);
+  Communication_Set_SpreadingFactor(spreadingFactorMode);
 
   // save current modem
   currentModem = modem;
