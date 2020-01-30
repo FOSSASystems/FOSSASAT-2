@@ -174,7 +174,7 @@ void PersistentStorage_SectorErase(uint32_t addr) {
   PersistentStorage_SPItranscation(cmdBuf, 5, false, NULL, 0);
 
   // wait until sector is erased
-  PersistentStorage_WaitForWriteInProgress();
+  PersistentStorage_WaitForWriteInProgress(1000);
 }
 
 void PersistentStorage_64kBlockErase(uint32_t addr) {
@@ -186,7 +186,7 @@ void PersistentStorage_64kBlockErase(uint32_t addr) {
   PersistentStorage_SPItranscation(cmdBuf, 5, false, NULL, 0);
 
   // wait until sector is erased
-  PersistentStorage_WaitForWriteInProgress();
+  PersistentStorage_WaitForWriteInProgress(3000);
 }
 
 void PersistentStorage_WriteEnable() {
