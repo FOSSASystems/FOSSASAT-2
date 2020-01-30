@@ -1,5 +1,73 @@
 #include "PersistentStorage.h"
 
+void PersistentStorage_Update_Stats(uint8_t flags) {
+  if(flags & 0b00000001) {
+    // temperatures
+    int16_t tempValue = Sensors_Read_Temperature(tempSensorPanelY) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_PANEL_Y, tempValue);
+    
+    tempValue = Sensors_Read_Temperature(tempSensorTop) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_TOP, tempValue);
+    
+    tempValue = Sensors_Read_Temperature(tempSensorBottom) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_BOTTOM, tempValue);
+    
+    tempValue = Sensors_Read_Temperature(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_BATTERY, tempValue);
+    
+    tempValue = Sensors_Read_Temperature(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_SEC_BATTERY, tempValue);
+  }
+
+  if(flags & 0b00000010) {
+    // currents
+    int16_t currentValue = currSensorXA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_XA, currentValue);
+
+    currentValue = currSensorXB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_XB, currentValue);
+
+    currentValue = currSensorZA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_ZA, currentValue);
+
+    currentValue = currSensorZB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_ZB, currentValue);
+
+    currentValue = currSensorY.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_Y, currentValue);
+
+    currentValue = currSensorMPPT.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_MPPT, currentValue);
+  }
+
+  if(flags & 0b00000100) {
+    // voltages
+    uint8_t voltageValue = currSensorXA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_XA, voltageValue);
+
+    voltageValue = currSensorXB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_XB, voltageValue);
+    
+    voltageValue = currSensorZA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_ZA, voltageValue);
+    
+    voltageValue = currSensorZB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_ZB, voltageValue);
+    
+    voltageValue = currSensorY.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_Y, voltageValue);
+    
+    voltageValue = currSensorMPPT.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_MPPT, voltageValue);
+  }
+
+  if(flags & 0b00001000) {
+    // lights
+    PersistentStorage_Update_Stat(FLASH_STATS_LIGHT_PANEL_Y, lightSensorPanelY.readLux());
+    PersistentStorage_Update_Stat(FLASH_STATS_LIGHT_TOP, lightSensorTop.readLux());
+  }
+}
+
 void PersistentStorage_Increment_Counter(uint16_t addr) {
   uint16_t counter = PersistentStorage_Get<uint16_t>(addr);
   counter++;

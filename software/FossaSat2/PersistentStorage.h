@@ -21,6 +21,8 @@
 #define MX25L51245G_SR_WEL                              0b00000010
 #define MX25L51245G_SR_WIP                              0b00000001
 
+#define FLASH_EXT_PAGE_SIZE                             0x00000100
+#define FLASH_STATS                                     0x00001000
 #define FLASH_SYSTEM_INFO_START                         0x00000000
 #define FLASH_SYSTEM_INFO_LEN                          (0x00000048 + 1)  // final address in Flash map + 1 byte
 
@@ -90,32 +92,35 @@ void PersistentStorage_Set(uint8_t addr, T t) {
 }
 
 template <typename T>
-void PersistentStorage_Update_Stats(uint32_t addr, T val) {
-  // read the current stat
-  static const uint8_t statLen = 3*sizeof(T);
-  uint8_t statBuff[statLen];
-  PersistentStorage_Read(addr, statBuff, statLen);
+void PersistentStorage_Update_Stat(uint32_t addr, T val) {
+  // read the current page
+  uint8_t statBuff[FLASH_EXT_PAGE_SIZE];
+  PersistentStorage_Read(FLASH_STATS, statBuff, FLASH_EXT_PAGE_SIZE);
 
   // get min/avg/max
   T min;
-  memcpy(&min, statBuff, sizeof(T));
+  memcpy(&min, statBuff + addr, sizeof(T));
   T avg;
-  memcpy(&avg, statBuff + sizeof(T), sizeof(T));
+  memcpy(&avg, statBuff + addr + sizeof(T), sizeof(T));
   T max;
-  memcpy(&max, statBuff + 2*sizeof(T), sizeof(T));
+  memcpy(&max, statBuff + addr + 2*sizeof(T), sizeof(T));
 
   // update stats
   if(val < min) {
-    PersistentStorage_Set<T>(addr, val);
+    memcpy(statBuff + addr, &val, sizeof(T));
   }
-
-  PersistentStorage_Set<T>(addr + sizeof(T), (avg + val)/2);
+  
+  avg = (avg + val)/2;
+  memcpy(statBuff + addr + sizeof(T), &avg, sizeof(T));
 
   if(val > max) {
-    PersistentStorage_Set<T>(addr + 2*sizeof(T), val);
+    memcpy(statBuff + addr + 2*sizeof(T), &val, sizeof(T));
   }
 
   // write the updated buffer
+  PersistentStorage_Write(FLASH_STATS, statBuff, FLASH_EXT_PAGE_SIZE);
 }
+
+void PersistentStorage_Update_Stats(uint8_t flags);
 
 #endif
