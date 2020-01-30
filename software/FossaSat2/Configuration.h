@@ -12,8 +12,8 @@
 #define RTC_MONTH                                       4
 #define RTC_DAY                                         1
 #define RTC_WEEKDAY                                     1     // Monday = 1
-#define RTC_HOURS                                       14    // 24-hour formatm no leading 0s
-#define RTC_MINUTES                                     18
+#define RTC_HOURS                                       14    // 24-hour format, no leading 0s
+#define RTC_MINUTES                                     36
 #define RTC_SECONDS                                     0
 
 // uncomment reset system info (callsing, configuration etc.) on start

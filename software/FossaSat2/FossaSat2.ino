@@ -119,13 +119,23 @@ void setup() {
 
   // check number of deployment attempts
   if (attemptNumber == 0) {
+    // integration, reset system info
+    PersistentStorage_Reset_System_Info();
+    
     // ask for RTC configuration
     FOSSASAT_DEBUG_PORT.println(F("Do you wish to update RTC time?"));
     FOSSASAT_DEBUG_PORT.println(F(" - 'y' (lower case) to update using values in Configuration.h"));
-    FOSSASAT_DEBUG_PORT.println(F(" - anything else to skip"));
+    FOSSASAT_DEBUG_PORT.println(F(" - anything else to skip or wait 60 seconds"));
+    delay(10);
 
+    uint32_t start = millis();
     while(!FOSSASAT_DEBUG_PORT.available()) {
       PowerControl_Watchdog_Heartbeat(false);
+      delay(1000);
+      if(millis() - start >= 60000) {
+        FOSSASAT_DEBUG_PORT.println(F("No input for 60 seconds, skipping"));
+        break;
+      }
     }
 
     char c = FOSSASAT_DEBUG_PORT.read();
@@ -139,7 +149,7 @@ void setup() {
     }
     
     // print data for integration purposes (independently of FOSSASAT_DEBUG macro!)
-    uint32_t start = millis();
+    start = millis();
     uint32_t lastSample = 0;
     while (millis() - start <= (uint32_t)DEPLOYMENT_DEBUG_LENGTH * (uint32_t)1000) {
       // update IMU
