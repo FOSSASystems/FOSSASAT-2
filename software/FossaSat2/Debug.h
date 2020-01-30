@@ -42,6 +42,13 @@
         FOSSASAT_DEBUG_PORT.println(); \
       } \
     } }
+#define FOSSASAT_DEBUG_PRINT_RTC_TIME() { \
+    FOSSASAT_DEBUG_PORT.print(rtc.getHours()); \
+    FOSSASAT_DEBUG_PORT.print(':'); \
+    FOSSASAT_DEBUG_PORT.print(rtc.getMinutes()); \
+    FOSSASAT_DEBUG_PORT.print(':'); \
+    FOSSASAT_DEBUG_PORT.println(rtc.getSeconds()); \
+  }
 #define FOSSASAT_DEBUG_DELAY(MS) { delay(MS); }
 #define FOSSASAT_DEBUG_STOPWATCH_INIT_H extern uint32_t fsdbgStart;
 #define FOSSASAT_DEBUG_STOPWATCH_INIT_CPP uint32_t fsdbgStart = 0;
@@ -58,6 +65,7 @@
 #define FOSSASAT_DEBUG_WRITE(...) {}
 #define FOSSASAT_DEBUG_PRINT_BUFF(BUFF, LEN) {}
 #define FOSSASAT_DEBUG_PRINT_FLASH(ADDR, LEN) {}
+#define FOSSASAT_DEBUG_PRINT_RTC_TIME() {}
 #define FOSSASAT_DEBUG_STOPWATCH_INIT_H
 #define FOSSASAT_DEBUG_STOPWATCH_INIT_CPP
 #define FOSSASAT_DEBUG_STOPWATCH_START(...) {}

@@ -119,6 +119,25 @@ void setup() {
 
   // check number of deployment attempts
   if (attemptNumber == 0) {
+    // ask for RTC configuration
+    FOSSASAT_DEBUG_PORT.println(F("Do you wish to update RTC time?"));
+    FOSSASAT_DEBUG_PORT.println(F(" - 'y' (lower case) to update using values in Configuration.h"));
+    FOSSASAT_DEBUG_PORT.println(F(" - anything else to skip"));
+
+    while(!FOSSASAT_DEBUG_PORT.available()) {
+      PowerControl_Watchdog_Heartbeat(false);
+    }
+
+    char c = FOSSASAT_DEBUG_PORT.read();
+    if(c == 'y') {
+      rtc.setDate(RTC_WEEKDAY, RTC_DAY, RTC_MONTH, RTC_YEAR);
+      rtc.setTime(RTC_HOURS, RTC_MINUTES, RTC_SECONDS);
+    }
+
+    while(FOSSASAT_DEBUG_PORT.available()) {
+      FOSSASAT_DEBUG_PORT.read();
+    }
+    
     // print data for integration purposes (independently of FOSSASAT_DEBUG macro!)
     uint32_t start = millis();
     uint32_t lastSample = 0;
@@ -221,11 +240,9 @@ void setup() {
         FOSSASAT_DEBUG_PORT.println(bridgeZ.getFault());
 
         FOSSASAT_DEBUG_PORT.println(F("============================================================="));
-      }
 
-      // pet watchdog
-      if (millis() - lastHeartbeat >= WATCHDOG_LOOP_HEARTBEAT_PERIOD) {
-        PowerControl_Watchdog_Heartbeat();
+        // pet watchdog
+        PowerControl_Watchdog_Heartbeat(false);
       }
     }
 
@@ -235,6 +252,7 @@ void setup() {
 #endif
 
     // check voltage
+#ifdef ENABLE_DEPLOYMENT_CHARGING
     uint32_t chargingStart = millis();
     int16_t voltageLimit = PersistentStorage_Get<int16_t>(FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT);
     while (PowerControl_Get_Battery_Voltage() < voltageLimit) {
@@ -249,9 +267,9 @@ void setup() {
       FOSSASAT_DEBUG_PRINT(F("Sleep for "));
       FOSSASAT_DEBUG_PRINTLN(interval);
       FOSSASAT_DEBUG_DELAY(10);
-      PowerControl_Wait(interval, LOW_POWER_SLEEP);
+      PowerControl_Wait(interval, LOW_POWER_SLEEP, false);
     }
-
+#endif
     // voltage above 3.7V, deploy
     PowerControl_Deploy();
 
@@ -265,6 +283,8 @@ void setup() {
 }
 
 void loop() {
+  FOSSASAT_DEBUG_PRINT_RTC_TIME();
+  
   // check battery voltage
   FOSSASAT_DEBUG_PRINT(F("Battery check: "));
   float battVoltage = PowerControl_Get_Battery_Voltage();

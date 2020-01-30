@@ -4,17 +4,28 @@
 #include "FossaSat2.h"
 
 /*
-    Configuration Macros - All macros MUST be enabled prior to integration!!!
+    Configuration Macros
 */
 
+// RTC time to configure during interation
+#define RTC_YEAR                                        20    // offset from 2000
+#define RTC_MONTH                                       4
+#define RTC_DAY                                         1
+#define RTC_WEEKDAY                                     1     // Monday = 1
+#define RTC_HOURS                                       14    // 24-hour formatm no leading 0s
+#define RTC_MINUTES                                     18
+#define RTC_SECONDS                                     0
+
 // uncomment reset system info (callsing, configuration etc.) on start
-//#define RESET_SYSTEM_INFO
+#define RESET_SYSTEM_INFO
 
 // comment out to disable deployment sequence
 #define ENABLE_DEPLOYMENT_SEQUENCE
 
 // comment out to disable sleep during deployment sequence
 #define ENABLE_DEPLOYMENT_SLEEP
+// comment out to disable charging period during deployment sequence
+//#define ENABLE_DEPLOYMENT_CHARGING
 
 // comment out to disable transmission control (transmission disable and no transmissions in low power mode)
 #define ENABLE_TRANSMISSION_CONTROL
@@ -121,7 +132,8 @@
 
 // Flash address map                                                    LSB           MSB
 // 64kB block 0 - system info, stats, image lengths
-// sector 0 - system info/configuration
+// sector 0 page 0 - system info and configuration
+#define FLASH_SYSTEM_INFO                               0x00000000  //  0x00000000    0x000000FF
 #define FLASH_RESTART_COUNTER                           0x00000000  //  0x00000000    0x00000001
 #define FLASH_DEPLOYMENT_COUNTER                        0x00000002  //  0x00000002    0x00000002
 #define FLASH_TRANSMISSIONS_ENABLED                     0x00000003  //  0x00000003    0x00000003
@@ -146,12 +158,45 @@
 #define FLASH_MPPT_TEMP_SWITCH_ENABLED                  0x00000046  //  0x00000046    0x00000046
 #define FLASH_MPPT_KEEP_ALIVE_ENABLED                   0x00000047  //  0x00000047    0x00000047
 
-// sector 1 - stats
-// todo stats
-#define FLASH_STATS                                     0x00001000  //  0x00001000    0x00001FFF
+// sector 1 page 0 - stats
+#define FLASH_STATS                                     0x00001000  //  0x00001000    0x000010FF
 
-// sector 2 - image lengths: 4 bytes per length
-#define FLASH_IMAGE_LENGTHS                             0x00002000  //  0x00002000    0x00002FFF
+#define FLASH_STATS_TEMP_PANEL_Y                        0x00001000  //  0x00001000    0x00001005
+#define FLASH_STATS_TEMP_TOP                            0x00001006  //  0x00001006    0x0000100B
+#define FLASH_STATS_TEMP_BOTTOM                         0x0000100C  //  0x0000100C    0x00001011
+#define FLASH_STATS_TEMP_BATTERY                        0x00001012  //  0x00001012    0x00001017
+#define FLASH_STATS_TEMP_SEC_BATTERY                    0x00001018  //  0x00001018    0x0000101D
+
+#define FLASH_STATS_CURR_XA                             0x0000101E  //  0x0000101E    0x00001023
+#define FLASH_STATS_CURR_XB                             0x00001024  //  0x00001024    0x00001029
+#define FLASH_STATS_CURR_ZA                             0x0000102A  //  0x0000102A    0x0000102F
+#define FLASH_STATS_CURR_ZB                             0x00001030  //  0x00001030    0x00001035
+#define FLASH_STATS_CURR_Y                              0x00001036  //  0x00001036    0x0000103B
+#define FLASH_STATS_CURR_MPPT                           0x0000103C  //  0x0000103C    0x00001041
+
+#define FLASH_STATS_VOLT_XA                             0x00001042  //  0x00001042    0x00001042
+#define FLASH_STATS_VOLT_XB                             0x00001043  //  0x00001043    0x00001043
+#define FLASH_STATS_VOLT_ZA                             0x00001044  //  0x00001044    0x00001044
+#define FLASH_STATS_VOLT_ZB                             0x00001045  //  0x00001045    0x00001045
+#define FLASH_STATS_VOLT_Y                              0x00001046  //  0x00001046    0x00001046
+#define FLASH_STATS_VOLT_MPPT                           0x00001047  //  0x00001047    0x00001047
+
+#define FLASH_STATS_GYRO_X                              0x00001048  //  0x00001048    0x00001053
+#define FLASH_STATS_GYRO_Y                              0x00001054  //  0x00001054    0x0000105F
+#define FLASH_STATS_GYRO_Z                              0x00001060  //  0x00001060    0x0000106B
+#define FLASH_STATS_ACCEL_X                             0x0000106C  //  0x0000106C    0x00001077
+#define FLASH_STATS_ACCEL_Y                             0x00001078  //  0x00001078    0x00001083
+#define FLASH_STATS_ACCEL_Z                             0x00001084  //  0x00001084    0x0000108F
+#define FLASH_STATS_MAG_X                               0x00001090  //  0x00001090    0x0000109B
+#define FLASH_STATS_MAG_Y                               0x0000109C  //  0x0000109C    0x000010A7
+#define FLASH_STATS_MAG_Z                               0x000010A8  //  0x000010A8    0x000010B3
+
+#define FLASH_STATS_LIGHT_PANEL_Y                       0x000010B4  //  0x000010B4    0x000010BF
+#define FLASH_STATS_LIGHT_TOP                           0x000010C0  //  0x000010C0    0x000010CB
+
+// sectors 2 + 3 - image lengths: 4 bytes per length
+#define FLASH_IMAGE_LENGTHS_1                           0x00002000  //  0x00002000    0x00002FFF
+#define FLASH_IMAGE_LENGTHS_2                           0x00003000  //  0x00003000    0x00003FFF
 
 // 64kB block 1 - store & forward slots
 #define FLASH_STORE_AND_FORWARD_START                   0x00010000  //  0x00010000    0x0001FFFF
@@ -306,9 +351,6 @@ extern uint8_t currentModem;
 
 extern uint8_t spreadingFactorMode;
 
-// timestamps
-extern uint32_t lastHeartbeat;
-
 // second I2C interface
 extern TwoWire Wire2;
 
@@ -325,6 +367,9 @@ extern MorseClient morse;
 
 // camera instance
 extern ArduCAM camera;
+
+// RTC instance
+extern STM32RTC& rtc;
 
 // transmission password
 extern const char* password;

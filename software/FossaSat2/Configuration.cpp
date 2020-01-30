@@ -14,12 +14,10 @@ uint8_t currentModem = MODEM_FSK;
 
 uint8_t spreadingFactorMode = LORA_SPREADING_FACTOR;
 
-// timestamps
-uint32_t lastHeartbeat = 0;
-
 // second I2C instance
 TwoWire Wire2;
 
+// additional SPI interfaces
 SPIClass RadioSPI(RADIO_MOSI, RADIO_MISO, RADIO_SCK);
 SPIClass FlashSPI(FLASH_MOSI, FLASH_MISO, FLASH_SCK);
 
@@ -32,6 +30,9 @@ MorseClient morse(&radio);
 
 // camera instance
 ArduCAM camera(OV2640, CAMERA_CS);
+
+// RTC instance
+STM32RTC& rtc = STM32RTC::getInstance();
 
 // transmission password
 const char* password = "password";
@@ -105,6 +106,10 @@ void Configuration_Setup() {
 
   // initialize UART interfaces
   GpsSerial.begin(9600);
+
+  // initialize RTC
+  rtc.setClockSource(STM32RTC::LSE_CLOCK);
+  rtc.begin();
   
   // provide seed for encrpytion PRNG
   randomSeed(analogRead(ANALOG_IN_RANDOM_SEED));

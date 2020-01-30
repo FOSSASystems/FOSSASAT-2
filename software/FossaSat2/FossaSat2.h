@@ -2,6 +2,7 @@
 #include <string.h>
 
 // Arduino/STM32 libraries
+#include <STM32RTC.h>
 #include <STM32LowPower.h>
 #include <SPI.h>
 #include <Wire.h>

@@ -149,7 +149,6 @@ uint32_t Camera_Capture(uint8_t slot) {
 
   // write image length
   PersistentStorage_Set_Image_Len(slot, len);
-  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGE_LENGTHS + slot*sizeof(len), sizeof(len));
 
   // print some basic info
   FOSSASAT_DEBUG_PRINT(F("Image size (bytes): "));

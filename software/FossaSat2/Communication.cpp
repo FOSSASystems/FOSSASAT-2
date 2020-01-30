@@ -411,6 +411,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         Communication_Send_Response(RESP_PACKET_INFO, respOptData, respOptDataLen);
       } break;
 
+    case CMD_GET_STATISTICS: {
+      
+    } break;
+    
     case CMD_GET_FULL_SYSTEM_INFO: {
       // TODO full system info, GFSK only
     } break;
@@ -466,7 +470,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           if(optData[0] & 0b00010000) {
             // wipe image lengths
             FOSSASAT_DEBUG_PRINTLN(F("Wiping image lengths"));
-            PersistentStorage_SectorErase(FLASH_IMAGE_LENGTHS);
+            PersistentStorage_SectorErase(FLASH_IMAGE_LENGTHS_1);
+            PersistentStorage_SectorErase(FLASH_IMAGE_LENGTHS_2);
+            PowerControl_Watchdog_Heartbeat();
 
             // wipe all 64k image blocks
             FOSSASAT_DEBUG_PRINTLN(F("Wiping images (will take about 3 minutes)"));
