@@ -244,7 +244,7 @@ void PersistentStorage_WriteStatusRegister(uint8_t sr, uint8_t cr) {
   PersistentStorage_WriteDisable();
 }
 
-bool PersistentStorage_WaitForWriteEnable(uint8_t timeout) {
+bool PersistentStorage_WaitForWriteEnable(uint32_t timeout) {
   // start the timer
   uint32_t start = millis();
 
@@ -261,7 +261,7 @@ bool PersistentStorage_WaitForWriteEnable(uint8_t timeout) {
   return(true);
 }
 
-bool PersistentStorage_WaitForWriteInProgress(uint8_t timeout) {
+bool PersistentStorage_WaitForWriteInProgress(uint32_t timeout) {
   // start the timer
   uint32_t start = millis();
 

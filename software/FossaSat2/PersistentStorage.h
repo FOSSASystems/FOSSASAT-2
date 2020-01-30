@@ -49,14 +49,15 @@ void PersistentStorage_Enter4ByteMode();
 void PersistentStorage_Exit4ByteMode();
 void PersistentStorage_Reset();
 void PersistentStorage_WriteStatusRegister(uint8_t sr, uint8_t cr);
-bool PersistentStorage_WaitForWriteEnable(uint8_t timeout = 50);
-bool PersistentStorage_WaitForWriteInProgress(uint8_t timeout = 50);
+bool PersistentStorage_WaitForWriteEnable(uint32_t timeout = 50);
+bool PersistentStorage_WaitForWriteInProgress(uint32_t timeout = 50);
 
 void PersistentStorage_SPItranscation(uint8_t cmd, bool write = true, uint8_t* data = NULL, size_t numBytes = 0);
 void PersistentStorage_SPItranscation(uint8_t* cmd, uint8_t cmdLen, bool write, uint8_t* data, size_t numBytes);
 
 // get/set only works in system info page!
-template<typename T> T PersistentStorage_Get(uint8_t addr) {
+template<typename T>
+T PersistentStorage_Get(uint8_t addr) {
   uint8_t buff[FLASH_SYSTEM_INFO_LEN];
   PersistentStorage_Read(FLASH_SYSTEM_INFO_START + addr, buff, sizeof(T));
   T t;
@@ -64,7 +65,8 @@ template<typename T> T PersistentStorage_Get(uint8_t addr) {
   return(t);
 }
 
-template<typename T> void PersistentStorage_Set(uint8_t addr, T t) {
+template<typename T>
+void PersistentStorage_Set(uint8_t addr, T t) {
   // check address is in system info
   if(addr > FLASH_SYSTEM_INFO_LEN) {
     return;
