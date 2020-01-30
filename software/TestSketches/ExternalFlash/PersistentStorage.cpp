@@ -47,6 +47,49 @@ void PersistentStorage_Set_Callsign(char* newCallsign) {
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
 }
 
+uint32_t PersistentStorage_Get_Image_Len(uint8_t slot) {
+  uint8_t buff[4];
+  PersistentStorage_Read(FLASH_IMAGE_LENGTHS + slot*sizeof(uint32_t), buff, sizeof(uint32_t));
+  uint32_t len;
+  memcpy(&len, buff, sizeof(uint32_t));
+  return(len);
+}
+
+void PersistentStorage_Set_Image_Len(uint8_t slot, uint32_t len) {
+  // read the correct page
+  uint8_t buff[FLASH_EXT_PAGE_SIZE];
+  PersistentStorage_Read(FLASH_IMAGE_LENGTHS, buff, FLASH_EXT_PAGE_SIZE);
+
+  // update value
+  memcpy(buff + slot*sizeof(uint32_t), &len, sizeof(uint32_t));
+
+  // write it back in (will automatically erase the sector)
+  PersistentStorage_Write(FLASH_IMAGE_LENGTHS, buff, FLASH_EXT_PAGE_SIZE);
+}
+
+void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, uint8_t len) {
+  // check address is in system info
+  if(addr > FLASH_SYSTEM_INFO_LEN) {
+    return;
+  }
+  
+  // read the current system info page
+  uint8_t currSysInfoPage[FLASH_SYSTEM_INFO_LEN];
+  PersistentStorage_Read(FLASH_SYSTEM_INFO_START, currSysInfoPage, FLASH_SYSTEM_INFO_LEN);
+
+  // check if we need to update
+  uint8_t newSysInfoPage[FLASH_SYSTEM_INFO_LEN];
+  memcpy(newSysInfoPage, currSysInfoPage, FLASH_SYSTEM_INFO_LEN);
+  memcpy(newSysInfoPage + addr, buff, len);
+  if(memcmp(currSysInfoPage, newSysInfoPage, FLASH_SYSTEM_INFO_LEN) == 0) {
+    // the value is already there, no need to write
+    return;
+  }
+
+  // we need to update
+  PersistentStorage_Write(FLASH_SYSTEM_INFO_START, newSysInfoPage, FLASH_SYSTEM_INFO_LEN);
+}
+
 void PersistentStorage_Reset_System_Info() {
   // build a completely new system info page
   uint8_t sysInfoPage[FLASH_SYSTEM_INFO_LEN];
@@ -73,8 +116,31 @@ void PersistentStorage_Reset_System_Info() {
   // set default low power mode configuration
   sysInfoPage[FLASH_LOW_POWER_MODE_ENABLED] = 1;
 
+  // set default voltage limits
+  int16_t voltageLimit = DEPLOYMENT_BATTERY_VOLTAGE_LIMIT;
+  memcpy(sysInfoPagePtr + FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
+  voltageLimit = HEATER_BATTERY_VOLTAGE_LIMIT;
+  memcpy(sysInfoPagePtr + FLASH_HEATER_BATTERY_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
+  voltageLimit = BATTERY_CW_BEEP_VOLTAGE_LIMIT;
+  memcpy(sysInfoPagePtr + FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
+  voltageLimit = LOW_POWER_MODE_VOLTAGE_LIMIT;
+  memcpy(sysInfoPagePtr + FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
+
+  // set default temperature limits
+  float tempLimit = BATTERY_HEATER_TEMP_LIMIT;
+  memcpy(sysInfoPagePtr + FLASH_BATTERY_HEATER_TEMP_LIMIT, &tempLimit, sizeof(float));
+  tempLimit = MPPT_TEMP_LIMIT;
+  memcpy(sysInfoPagePtr + FLASH_MPPT_TEMP_LIMIT, &tempLimit, sizeof(float));
+
+  // set default heater duty cycle
+  uint8_t dutyCycle = BATTERY_HEATER_DUTY_CYCLE;
+  memcpy(sysInfoPagePtr + FLASH_BATTERY_HEATER_DUTY_CYCLE, &dutyCycle, sizeof(uint8_t));
+
+  // set default MPPT temperature switch mode
+  sysInfoPage[FLASH_MPPT_TEMP_SWITCH_ENABLED] = 1;
+
   // write the default system info
-  PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN + 1);
+  PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
 }
 
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len) {
@@ -108,7 +174,7 @@ void PersistentStorage_SectorErase(uint32_t addr) {
   PersistentStorage_SPItranscation(cmdBuf, 5, false, NULL, 0);
 
   // wait until sector is erased
-  PersistentStorage_WaitForWriteInProgress();
+  PersistentStorage_WaitForWriteInProgress(1000);
 }
 
 void PersistentStorage_64kBlockErase(uint32_t addr) {
@@ -120,7 +186,7 @@ void PersistentStorage_64kBlockErase(uint32_t addr) {
   PersistentStorage_SPItranscation(cmdBuf, 5, false, NULL, 0);
 
   // wait until sector is erased
-  PersistentStorage_WaitForWriteInProgress();
+  PersistentStorage_WaitForWriteInProgress(3000);
 }
 
 void PersistentStorage_WriteEnable() {

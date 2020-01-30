@@ -1,29 +1,5 @@
 #include "FossaSat2.h"
 
-#define NUM_BYTES                                       256
-
-void showBytes(uint32_t addr, size_t len) {
-  uint8_t readBuff[NUM_BYTES];
-  PersistentStorage_Read(addr, readBuff, len);
-  char buff[16];
-
-  if(len < 16) {
-    for(uint8_t i = 0; i < len; i++) {
-      sprintf(buff, "%02x ", readBuff[i]);
-      FOSSASAT_DEBUG_PORT.print(buff);
-    }
-    FOSSASAT_DEBUG_PORT.println();
-  } else {
-    for(size_t i = 0; i < len/16; i++) {
-      for(uint8_t j = 0; j < 16; j++) {
-        sprintf(buff, "%02x ", readBuff[i*16 + j]);
-        FOSSASAT_DEBUG_PORT.print(buff);
-      }
-      FOSSASAT_DEBUG_PORT.println();
-    }
-  }  
-}
-
 void setup() {
   FOSSASAT_DEBUG_PORT.begin(FOSSASAT_DEBUG_SPEED);
   while(!FOSSASAT_DEBUG_PORT);
@@ -56,22 +32,30 @@ void setup() {
   FOSSASAT_DEBUG_PORT.print(F("Security = 0b"));
   FOSSASAT_DEBUG_PORT.println(PersistentStorage_ReadSecurityRegister(), BIN);
 
-  // read image
-  uint8_t slot = 0;
-  uint32_t imgAddress = FLASH_IMAGES_START + slot*FLASH_IMAGE_SLOT_SIZE;
-  uint32_t len = PersistentStorage_Get<uint32_t>(FLASH_IMAGE1_LENGTH);
-  FOSSASAT_DEBUG_PORT.print(F("Image 1 length: "));
-  FOSSASAT_DEBUG_PORT.println(len);
-
-  // read the complete sectors first
-  uint32_t i;
-  for(i = 0; i < len / FLASH_SECTOR_SIZE; i++) {
-    showBytes(imgAddress + i*FLASH_SECTOR_SIZE, FLASH_SECTOR_SIZE);
+  // write something
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGES_START, FLASH_EXT_PAGE_SIZE);
+  FOSSASAT_DEBUG_PRINTLN();
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGES_START + FLASH_64K_BLOCK_SIZE, FLASH_EXT_PAGE_SIZE);
+  FOSSASAT_DEBUG_PRINTLN();
+  uint8_t buff[FLASH_EXT_PAGE_SIZE];
+  for(uint32_t i = 0; i < FLASH_EXT_PAGE_SIZE; i++) {
+    buff[i] = (uint8_t)random(0, 255);
   }
+  PersistentStorage_Write(FLASH_IMAGES_START, buff, FLASH_EXT_PAGE_SIZE);
+  PersistentStorage_Write(FLASH_IMAGES_START + FLASH_64K_BLOCK_SIZE, buff, FLASH_EXT_PAGE_SIZE);
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGES_START, FLASH_EXT_PAGE_SIZE);
+  FOSSASAT_DEBUG_PRINTLN();
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGES_START + FLASH_64K_BLOCK_SIZE, FLASH_EXT_PAGE_SIZE);
+  FOSSASAT_DEBUG_PRINTLN();
 
-  // read the remaining sector
-  uint32_t remLen = len - i*FLASH_SECTOR_SIZE;
-  showBytes(imgAddress + i*FLASH_SECTOR_SIZE, remLen);
+  // erase
+  PersistentStorage_64kBlockErase(FLASH_IMAGES_START);
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGES_START, FLASH_EXT_PAGE_SIZE);
+  FOSSASAT_DEBUG_PRINTLN();
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGES_START + FLASH_64K_BLOCK_SIZE, FLASH_EXT_PAGE_SIZE);
+  FOSSASAT_DEBUG_PRINTLN();
+
+  
 }
 
 void loop() {
