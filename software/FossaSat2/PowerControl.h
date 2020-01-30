@@ -16,7 +16,7 @@
 uint32_t PowerControl_Get_Sleep_Interval();
 void PowerControl_Wait(uint32_t ms, uint8_t type = LOW_POWER_NONE, bool radioSleep = false);
 
-void PowerControl_Watchdog_Heartbeat();
+void PowerControl_Watchdog_Heartbeat(bool manageBattery = true);
 void PowerControl_Watchdog_Restart();
 
 void PowerControl_Deploy();

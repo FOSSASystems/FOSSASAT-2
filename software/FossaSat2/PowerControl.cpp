@@ -74,12 +74,14 @@ void PowerControl_Wait(uint32_t ms, uint8_t type, bool radioSleep) {
   }
 }
 
-void PowerControl_Watchdog_Heartbeat() {
+void PowerControl_Watchdog_Heartbeat(bool manageBattery) {
   // toggle watchdog pin
   digitalWrite(WATCHDOG_IN, !digitalRead(WATCHDOG_IN));
 
   // manage battery (low power, heater, charging)
-  PowerControl_Manage_Battery();
+  if(manageBattery) {
+    PowerControl_Manage_Battery();
+  }
 }
 
 void PowerControl_Watchdog_Restart() {
