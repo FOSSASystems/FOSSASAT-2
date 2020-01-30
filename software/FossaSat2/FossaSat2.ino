@@ -324,6 +324,11 @@ void loop() {
   PowerControl_Manage_Battery();
   FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, 0x50)
 
+  // update all stats when not in low power mode
+  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
+    PersistentStorage_Update_Stats(0xFF);
+  }
+
   // CW beacon
   Communication_Set_Modem(MODEM_FSK);
   FOSSASAT_DEBUG_DELAY(10);

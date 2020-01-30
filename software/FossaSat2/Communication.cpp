@@ -419,14 +419,68 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       } break;
 
     case CMD_GET_STATISTICS: {
+      if(Communication_Check_OptDataLen(1, optDataLen)) {
+        // check FSK is active
+        if(currentModem != MODEM_FSK) {
+          FOSSASAT_DEBUG_PRINTLN(F("FSK is required to get stats"));
+          return;
+        }
+
+        // response will have maximum of 109 bytes if all stats are included
+        uint8_t respOptData[109];
+        uint8_t respOptDataLen = 1;
+        uint8_t* respOptDataPtr = respOptData;
+
+        // copy stat flags
+        uint8_t flags = optData[0];
+        memcpy(respOptDataPtr, &flags, sizeof(uint8_t));
+        respOptDataPtr += sizeof(uint8_t);
+
+        if(flags & 0b00000001) {
+          // temperatures
+          PersistentStorage_Read(FLASH_STATS_TEMP_PANEL_Y, respOptDataPtr, 15*sizeof(int16_t));
+          respOptDataPtr += 15*sizeof(int16_t);
+          respOptDataLen += 15*sizeof(int16_t);
+        }
       
+        if(flags & 0b00000010) {
+          // currents
+          PersistentStorage_Read(FLASH_STATS_CURR_XA, respOptDataPtr, 18*sizeof(int16_t));
+          respOptDataPtr += 18*sizeof(int16_t);
+          respOptDataLen += 18*sizeof(int16_t);
+        }
+      
+        if(flags & 0b00000100) {
+          // voltages
+          PersistentStorage_Read(FLASH_STATS_VOLT_XA, respOptDataPtr, 18*sizeof(uint8_t));
+          respOptDataPtr += 18*sizeof(uint8_t);
+          respOptDataLen += 18*sizeof(uint8_t);
+        }
+      
+        if(flags & 0b00001000) {
+          // lights
+          PersistentStorage_Read(FLASH_STATS_LIGHT_PANEL_Y, respOptDataPtr, 6*sizeof(float));
+          respOptDataPtr += 6*sizeof(float);
+          respOptDataLen += 6*sizeof(float);
+        }
+
+        Communication_Send_Response(RESP_STATISTICS, respOptData, respOptDataLen);
+      }
     } break;
     
     case CMD_GET_FULL_SYSTEM_INFO: {
-      // TODO full system info, GFSK only
+      if(currentModem == MODEM_FSK) {
+        static const uint8_t respOptDataLen = 2*sizeof(uint8_t) + 4*sizeof(uint16_t);
+        uint8_t respOptData[respOptDataLen];
+        uint8_t* respOptDataPtr = respOptData;
+
+        
+      } else {
+        FOSSASAT_DEBUG_PRINTLN(F("FSK is required to get full system info"));
+      }
     } break;
 
-    // TODO new public frames
+    // private frames below this line
 
     case CMD_DEPLOY: {
         // run deployment sequence

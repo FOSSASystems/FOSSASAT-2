@@ -673,12 +673,12 @@ void getStats(uint8_t mask) {
   sendFrame(CMD_GET_STATISTICS, 1, &mask);
 }
 
-void recordSolarCells(uint8_t samples, uint16_t period) {
-  Serial.print(F("Sending record cells request ... "));
+void recordIMU(uint8_t samples, uint16_t period) {
+  Serial.print(F("Sending record IMU request ... "));
   uint8_t optData[3];
   optData[0] = samples;
   memcpy(optData + 1, &period, 2);
-  sendFrameEncrypted(CMD_RECORD_SOLAR_CELLS, 3, optData);
+  sendFrameEncrypted(CMD_RECORD_IMU, 3, optData);
 }
 
 void cameraCapture(uint8_t slot, uint8_t pictureSize, uint8_t lightMode, uint8_t saturation, uint8_t brightness, uint8_t contrast, uint8_t special) {
@@ -806,14 +806,14 @@ void loop() {
         requestRetransmitCustom();
         break;
       case 'o':
-        recordSolarCells(40, 1000);
+        recordIMU(40, 1000);
         break;
       case 'u':
         Serial.print(F("Sending unknown frame ... "));
         sendFrame(0xFF);
         break;
       case 's':
-        getStats(0xFF);
+        getStats(0b00001111);
         break;
       case 'c':
         cameraCapture(0, OV2640_320x240, Auto, Saturation0, Brightness0, Contrast0, Normal);
