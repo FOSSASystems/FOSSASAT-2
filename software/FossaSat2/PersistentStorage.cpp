@@ -49,7 +49,12 @@ void PersistentStorage_Set_Callsign(char* newCallsign) {
 
 uint32_t PersistentStorage_Get_Image_Len(uint8_t slot) {
   uint8_t buff[4];
-  PersistentStorage_Read(FLASH_IMAGE_LENGTHS + slot*sizeof(uint32_t), buff, sizeof(uint32_t));
+  uint32_t addr = FLASH_IMAGE_LENGTHS_1;
+  if(slot >= 64) {
+    addr = FLASH_IMAGE_LENGTHS_2;
+    slot -= 64;
+  }
+  PersistentStorage_Read(addr + slot*sizeof(uint32_t), buff, sizeof(uint32_t));
   uint32_t len;
   memcpy(&len, buff, sizeof(uint32_t));
   return(len);
@@ -58,13 +63,18 @@ uint32_t PersistentStorage_Get_Image_Len(uint8_t slot) {
 void PersistentStorage_Set_Image_Len(uint8_t slot, uint32_t len) {
   // read the correct page
   uint8_t buff[FLASH_EXT_PAGE_SIZE];
-  PersistentStorage_Read(FLASH_IMAGE_LENGTHS, buff, FLASH_EXT_PAGE_SIZE);
-
+  uint32_t addr = FLASH_IMAGE_LENGTHS_1;
+  if(slot >= 64) {
+    addr = FLASH_IMAGE_LENGTHS_2;
+    slot -= 64;
+  }
+  PersistentStorage_Read(addr, buff, FLASH_EXT_PAGE_SIZE);
+  
   // update value
   memcpy(buff + slot*sizeof(uint32_t), &len, sizeof(uint32_t));
 
   // write it back in (will automatically erase the sector)
-  PersistentStorage_Write(FLASH_IMAGE_LENGTHS, buff, FLASH_EXT_PAGE_SIZE);
+  PersistentStorage_Write(addr, buff, FLASH_EXT_PAGE_SIZE);
 }
 
 void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, uint8_t len) {
