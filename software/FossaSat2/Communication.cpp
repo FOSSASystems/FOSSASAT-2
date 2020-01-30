@@ -658,6 +658,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINTLN(optData[6]);
         rtc.setDate(optData[3], optData[2], optData[1], optData[0]);
         rtc.setTime(optData[4], optData[5], optData[6]);
+        PersistentStorage_Set<uint32_t>(FLASH_RTC_EPOCH, rtc.getEpoch());
       }
     } break;
 

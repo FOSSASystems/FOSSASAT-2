@@ -157,6 +157,7 @@ void setup() {
     if(c == 'y') {
       rtc.setDate(RTC_WEEKDAY, RTC_DAY, RTC_MONTH, RTC_YEAR);
       rtc.setTime(RTC_HOURS, RTC_MINUTES, RTC_SECONDS);
+      PersistentStorage_Set<uint32_t>(FLASH_RTC_EPOCH, rtc.getEpoch());
     }
 
     while(FOSSASAT_DEBUG_PORT.available()) {
@@ -306,6 +307,14 @@ void setup() {
 }
 
 void loop() {
+  // check RTC time
+  if(!rtc.isTimeSet()) {
+    FOSSASAT_DEBUG_PRINTLN(F("RTC time not set, restoring last saved epoch"));
+    rtc.setEpoch(PersistentStorage_Get<uint32_t>(FLASH_RTC_EPOCH));
+  } else {
+    PersistentStorage_Set<uint32_t>(FLASH_RTC_EPOCH, rtc.getEpoch());
+  }
+  FOSSASAT_DEBUG_PRINT(F("On-board time: "));
   FOSSASAT_DEBUG_PRINT_RTC_TIME();
   
   // check battery voltage
@@ -412,6 +421,9 @@ void loop() {
   }
   
   radio.clearDio1Action();
+
+  // update saved epoch
+  PersistentStorage_Set<uint32_t>(FLASH_RTC_EPOCH, rtc.getEpoch());
 
   // set everything to sleep
   uint32_t interval = PowerControl_Get_Sleep_Interval();

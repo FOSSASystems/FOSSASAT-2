@@ -16,7 +16,7 @@
 #define RTC_MINUTES                                     36
 #define RTC_SECONDS                                     0
 
-// uncomment reset system info (callsing, configuration etc.) on start
+// uncomment to reset system info (callsing, configuration etc.) on start
 #define RESET_SYSTEM_INFO
 
 // comment out to disable deployment sequence
@@ -157,6 +157,7 @@
 #define FLASH_BATTERY_HEATER_DUTY_CYCLE                 0x00000045  //  0x00000045    0x00000045
 #define FLASH_MPPT_TEMP_SWITCH_ENABLED                  0x00000046  //  0x00000046    0x00000046
 #define FLASH_MPPT_KEEP_ALIVE_ENABLED                   0x00000047  //  0x00000047    0x00000047
+#define FLASH_RTC_EPOCH                                 0x00000048  //  0x00000048    0x0000004B
 
 // sector 1 page 0 - stats
 #define FLASH_STATS                                     0x00001000  //  0x00001000    0x000010FF

@@ -183,6 +183,7 @@ void printControls() {
   Serial.println(F("s - get stats"));
   Serial.println(F("c - capture photo"));
   Serial.println(F("e - set power limits"));
+  Serial.println(F("T - set RTC"));
   Serial.println(F("------------------------------------"));
 }
 
