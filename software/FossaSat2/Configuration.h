@@ -154,10 +154,10 @@
 #define FLASH_IMAGE_LENGTHS                             0x00002000  //  0x00002000    0x00002FFF
 
 // 64kB block 1 - store & forward slots
-#define FLASH_STORE_AND_FORWARD_START                   0x00020000  //  0x00020000    0x0002FFFF
+#define FLASH_STORE_AND_FORWARD_START                   0x00010000  //  0x00010000    0x0001FFFF
 
 // 64kB block 2 - NMEA sentences: null-terminated C-strings, each starts with 4-byte timestamp (offset since recording start)
-#define FLASH_NMEA_START                                0x00030000  //  0x00030000    0x0003FFFF
+#define FLASH_NMEA_START                                0x00020000  //  0x00020000    0x0002FFFF
 
 // 64kB blocks 8 - 1023 - image slots: 8 blocks per slot
 #define FLASH_IMAGES_START                              0x00070000  //  0x00070000    0x03FFFFFF
