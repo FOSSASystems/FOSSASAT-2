@@ -730,11 +730,14 @@ int16_t Communication_Transmit(uint8_t* data, uint8_t len, bool overrideModem) {
 
   // transmission done, set mode standby
   state = radio.standby();
-  Communication_Set_Modem(modem);
+
+  // restore modem
+  if(overrideModem) {
+    Communication_Set_Modem(modem);
+  }
 
   // set receive ISR
   radio.setDio1Action(Communication_Receive_Interrupt);
-  radio.startReceive();
 
   return (state);
 }
