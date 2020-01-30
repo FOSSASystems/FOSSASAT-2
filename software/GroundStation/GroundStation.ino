@@ -701,6 +701,12 @@ void setPowerLimits(int16_t deploymentVoltageLimit, int16_t heaterBatteryLimit, 
   sendFrameEncrypted(CMD_SET_POWER_LIMITS, 17, optData);
 }
 
+void setRTC(uint8_t year, uint8_t month, uint8_t day, uint8_t weekDay, uint8_t hours, uint8_t minutes, uint8_t seconds) {
+  Serial.print(F("Sending RTC change request ... "));
+  uint8_t optData[7] = {year, month, day, weekDay, hours, minutes, seconds};
+  sendFrameEncrypted(CMD_SET_RTC, 7, optData);
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println(F("FOSSASAT-2 Ground Station Demo Code"));
@@ -813,6 +819,9 @@ void loop() {
         break;
       case 'e':
         setPowerLimits(3600, 3700, 3750, 3900, 4.2, -1.5, 126);
+        break;
+      case 'T':
+        setRTC(21, 4, 2, 5, 20, 10, 50);
         break;
       default:
         Serial.print(F("Unknown command: "));

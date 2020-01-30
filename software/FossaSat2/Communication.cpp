@@ -159,7 +159,8 @@ void Communication_Send_Basic_System_Info() {
   int16_t mpptOutputCurrent = currSensorMPPT.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mpptOutputCurrent, "mpptOutputCurrent", CURRENT_MULTIPLIER, "uA");
 
-  // TODO uptime counter (4B)
+  uint32_t onboardTime = rtc.getEpoch();
+  Communication_Frame_Add(&optDataPtr, onboardTime, "onboardTime", 1, "");
 
   // TODO power config
 
@@ -635,6 +636,28 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // write all at once
         PersistentStorage_Set_Buffer(FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT, optData, optDataLen);
+      }
+    } break;
+
+    case CMD_SET_RTC: {
+      // check optional data
+      if(Communication_Check_OptDataLen(7, optDataLen)) {
+        FOSSASAT_DEBUG_PRINT(F("year = "));
+        FOSSASAT_DEBUG_PRINTLN(optData[0]);
+        FOSSASAT_DEBUG_PRINT(F("month = "));
+        FOSSASAT_DEBUG_PRINTLN(optData[1]);
+        FOSSASAT_DEBUG_PRINT(F("day = "));
+        FOSSASAT_DEBUG_PRINTLN(optData[2]);
+        FOSSASAT_DEBUG_PRINT(F("weekDay = "));
+        FOSSASAT_DEBUG_PRINTLN(optData[3]);
+        FOSSASAT_DEBUG_PRINT(F("hours = "));
+        FOSSASAT_DEBUG_PRINTLN(optData[4]);
+        FOSSASAT_DEBUG_PRINT(F("minutes = "));
+        FOSSASAT_DEBUG_PRINTLN(optData[5]);
+        FOSSASAT_DEBUG_PRINT(F("seconds = "));
+        FOSSASAT_DEBUG_PRINTLN(optData[6]);
+        rtc.setDate(optData[3], optData[2], optData[1], optData[0]);
+        rtc.setTime(optData[4], optData[5], optData[6]);
       }
     } break;
 

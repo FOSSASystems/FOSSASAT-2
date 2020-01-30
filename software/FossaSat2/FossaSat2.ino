@@ -123,17 +123,32 @@ void setup() {
     PersistentStorage_Reset_System_Info();
     
     // ask for RTC configuration
-    FOSSASAT_DEBUG_PORT.println(F("Do you wish to update RTC time?"));
-    FOSSASAT_DEBUG_PORT.println(F(" - 'y' (lower case) to update using values in Configuration.h"));
-    FOSSASAT_DEBUG_PORT.println(F(" - anything else to skip or wait 60 seconds"));
+    FOSSASAT_DEBUG_PORT.print(F("Do you wish to update RTC time to: ("));
+    FOSSASAT_DEBUG_PORT.print(RTC_WEEKDAY);
+    FOSSASAT_DEBUG_PORT.print(") ");
+    FOSSASAT_DEBUG_PORT.print(RTC_DAY);
+    FOSSASAT_DEBUG_PORT.print(". ");
+    FOSSASAT_DEBUG_PORT.print(RTC_MONTH);
+    FOSSASAT_DEBUG_PORT.print(". 20");
+    FOSSASAT_DEBUG_PORT.print(RTC_YEAR);
+    FOSSASAT_DEBUG_PORT.print(' ');
+    FOSSASAT_DEBUG_PORT.print(RTC_HOURS);
+    FOSSASAT_DEBUG_PORT.print(':');
+    FOSSASAT_DEBUG_PORT.print(RTC_MINUTES);
+    FOSSASAT_DEBUG_PORT.print(':');
+    FOSSASAT_DEBUG_PORT.print(RTC_SECONDS);
+    FOSSASAT_DEBUG_PORT.println('?');
+    
+    FOSSASAT_DEBUG_PORT.println(F(" - 'y' (lower case) to update"));
+    FOSSASAT_DEBUG_PORT.println(F(" - anything else to skip or wait 10 minutes"));
     delay(10);
 
     uint32_t start = millis();
     while(!FOSSASAT_DEBUG_PORT.available()) {
       PowerControl_Watchdog_Heartbeat(false);
       delay(1000);
-      if(millis() - start >= 60000) {
-        FOSSASAT_DEBUG_PORT.println(F("No input for 60 seconds, skipping"));
+      if(millis() - start >= (uint32_t)600000) {
+        FOSSASAT_DEBUG_PORT.println(F("No input for 10 minutes, skipping"));
         break;
       }
     }
@@ -288,8 +303,6 @@ void setup() {
     PersistentStorage_Set(FLASH_DEPLOYMENT_COUNTER, attemptNumber);
   }
 #endif
-
-  // TODO reset uptime counter
 }
 
 void loop() {
@@ -406,6 +419,4 @@ void loop() {
   FOSSASAT_DEBUG_PRINTLN(interval);
   FOSSASAT_DEBUG_DELAY(10);
   PowerControl_Wait(interval, LOW_POWER_SLEEP, true);
-
-  // TODO update uptime counter
 }
