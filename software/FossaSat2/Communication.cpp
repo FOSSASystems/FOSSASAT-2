@@ -437,32 +437,44 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           // optional data present, check the value
           if(optData[0] & 0b00000001) {
             // wipe system info
+            FOSSASAT_DEBUG_PRINTLN(F("Resetting system info"));
             PersistentStorage_Reset_System_Info();
+            PowerControl_Watchdog_Heartbeat();
           }
   
           if(optData[0] & 0b00000010) {
             // wipe stats
+            FOSSASAT_DEBUG_PRINTLN(F("Wiping stats"));
             PersistentStorage_SectorErase(FLASH_STATS);
+            PowerControl_Watchdog_Heartbeat();
           }
   
           if(optData[0] & 0b00000100) {
             // wipe store & forward
-            PersistentStorage_SectorErase(FLASH_STORE_AND_FORWARD_START);
+            FOSSASAT_DEBUG_PRINTLN(F("Wiping store & forward"));
+            PersistentStorage_64kBlockErase(FLASH_STORE_AND_FORWARD_START);
+            PowerControl_Watchdog_Heartbeat();
           }
           
           if(optData[0] & 0b00001000) {
             // wipe NMEA
+            FOSSASAT_DEBUG_PRINTLN(F("Wiping NMEA storage"));
             PersistentStorage_64kBlockErase(FLASH_NMEA_START);
+            PowerControl_Watchdog_Heartbeat();
           }
 
           if(optData[0] & 0b00010000) {
             // wipe image lengths
+            FOSSASAT_DEBUG_PRINTLN(F("Wiping image lengths"));
             PersistentStorage_SectorErase(FLASH_IMAGE_LENGTHS);
 
             // wipe all 64k image blocks
+            FOSSASAT_DEBUG_PRINTLN(F("Wiping images (will take about 3 minutes)"));
             for(uint32_t addr = FLASH_IMAGES_START; addr < FLASH_CHIP_SIZE; addr += FLASH_64K_BLOCK_SIZE) {
               PersistentStorage_64kBlockErase(addr);
+              PowerControl_Watchdog_Heartbeat();
             }
+            FOSSASAT_DEBUG_PRINTLN(F("Image wipe done"));
           }
         }
       } break;
@@ -570,6 +582,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // take a picture
         uint32_t imgLen = Camera_Capture(optData[0]);
         digitalWrite(CAMERA_POWER_FET, LOW);
+        FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, 0x50)
 
         // send response
         uint8_t respOptData[4];

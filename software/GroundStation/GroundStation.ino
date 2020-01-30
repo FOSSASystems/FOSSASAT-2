@@ -493,7 +493,8 @@ void wipe(uint8_t flags) {
   Serial.print(F("Sending wipe request ... "));
 
   // send the frame
-  sendFrameEncrypted(CMD_WIPE_EEPROM, 1, &flags);
+  uint8_t optData[] = {flags};
+  sendFrameEncrypted(CMD_WIPE_EEPROM, 1, optData);
 }
 
 void setLowPowerMode(uint8_t en) {
@@ -808,7 +809,7 @@ void loop() {
         getStats(0xFF);
         break;
       case 'c':
-        cameraCapture(65, OV2640_320x240, Auto, Saturation0, Brightness0, Contrast0, Normal);
+        cameraCapture(0, OV2640_320x240, Auto, Saturation0, Brightness0, Contrast0, Normal);
         break;
       case 'e':
         setPowerLimits(3600, 3700, 3750, 3900, 4.2, -1.5, 126);
