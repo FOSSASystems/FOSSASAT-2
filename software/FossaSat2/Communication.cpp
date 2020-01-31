@@ -200,6 +200,100 @@ void Communication_Send_Basic_System_Info() {
   Communication_Send_Response(RESP_SYSTEM_INFO, optData, optDataLen);
 }
 
+void Communication_Send_Full_System_Info() {
+  // build response frame
+  static const uint8_t optDataLen = 10*sizeof(uint8_t) + 11*sizeof(int16_t) + sizeof(uint16_t) + sizeof(uint32_t) + 2*sizeof(float);
+  uint8_t optData[optDataLen];
+  uint8_t* optDataPtr = optData;
+
+  FOSSASAT_DEBUG_PRINTLN(F("--- System info: ---"));
+
+  uint8_t mpptOutputVoltage = currSensorMPPT.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, mpptOutputVoltage, "batteryVoltage", VOLTAGE_MULTIPLIER, "mV");
+
+  int16_t mpptOutputCurrent = currSensorMPPT.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, mpptOutputCurrent, "mpptOutputCurrent", CURRENT_MULTIPLIER, "uA");
+
+  uint32_t onboardTime = rtc.getEpoch();
+  Communication_Frame_Add(&optDataPtr, onboardTime, "onboardTime", 1, "");
+
+  // power config: FLASH_TRANSMISSIONS_ENABLED (0), FLASH_LOW_POWER_MODE_ENABLED (1), FLASH_LOW_POWER_MODE (2 - 4), FLASH_MPPT_TEMP_SWITCH_ENABLED (5), FLASH_MPPT_KEEP_ALIVE_ENABLED (6)
+  uint8_t powerConfig = ((PersistentStorage_Get<uint8_t>(FLASH_TRANSMISSIONS_ENABLED)           & 0b00000001) |
+                        ((PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED)    << 1) & 0b00000010) |
+                        ((PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE)            << 2) & 0b00011100) |
+                        ((PersistentStorage_Get<uint8_t>(FLASH_MPPT_TEMP_SWITCH_ENABLED)  << 5) & 0b00100000) |
+                        ((PersistentStorage_Get<uint8_t>(FLASH_MPPT_KEEP_ALIVE_ENABLED)   << 6) & 0b01000000));
+  Communication_Frame_Add(&optDataPtr, powerConfig, "powerConfig", 1, "");
+
+  uint16_t resetCounter = PersistentStorage_Get<uint16_t>(FLASH_RESTART_COUNTER);
+  Communication_Frame_Add(&optDataPtr, resetCounter, "resetCounter", 1, "");
+
+  uint8_t voltageXA = currSensorXA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, voltageXA, "voltageXA", VOLTAGE_MULTIPLIER, "mV");
+
+  int16_t currentXA = currSensorXA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, currentXA, "currentXA", CURRENT_MULTIPLIER, "uA");
+
+  uint8_t voltageXB = currSensorXB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, voltageXB, "voltageXB", VOLTAGE_MULTIPLIER, "mV");
+
+  int16_t currentXB = currSensorXB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, currentXB, "currentXB", CURRENT_MULTIPLIER, "uA");
+
+  uint8_t voltageZA = currSensorZA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, voltageZA, "voltageZA", VOLTAGE_MULTIPLIER, "mV");
+
+  int16_t currentZA = currSensorZA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, currentZA, "currentZA", CURRENT_MULTIPLIER, "uA");
+
+  uint8_t voltageZB = currSensorZB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, voltageZB, "voltageZB", VOLTAGE_MULTIPLIER, "mV");
+
+  int16_t currentZB = currSensorZB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, currentZB, "currentZB", CURRENT_MULTIPLIER, "uA");
+
+  uint8_t voltageY = currSensorY.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, voltageY, "voltageY", VOLTAGE_MULTIPLIER, "mV");
+
+  int16_t currentY = currSensorY.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, currentY, "currentY", CURRENT_MULTIPLIER, "uA");
+
+  int16_t tempPanelY = Sensors_Read_Temperature(tempSensorPanelY) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, tempPanelY, "tempPanelY", TEMPERATURE_MULTIPLIER, "mdeg C");
+
+  int16_t boardTemperature = Sensors_Read_Temperature(tempSensorTop) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, boardTemperature, "boardTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
+
+  int16_t tempBottom = Sensors_Read_Temperature(tempSensorBottom) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, tempBottom, "tempBottom", TEMPERATURE_MULTIPLIER, "mdeg C");
+
+  int16_t batteryTemperature = Sensors_Read_Temperature(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, batteryTemperature, "batteryTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
+
+  int16_t secBatteryTemperature = Sensors_Read_Temperature(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, secBatteryTemperature, "secBatteryTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
+
+  float lightPanelY = lightSensorPanelY.readLux();
+  Communication_Frame_Add(&optDataPtr, lightPanelY, "lightPanelY", 1, "lux");
+
+  float lightTop = lightSensorTop.readLux();
+  Communication_Frame_Add(&optDataPtr, lightTop, "lightTop", 1, "lux");
+
+  uint8_t bridgeXfault = bridgeX.getFault();
+  Communication_Frame_Add(&optDataPtr, bridgeXfault, "bridgeXfault", 1, "");
+  
+  uint8_t bridgeYfault = bridgeY.getFault();
+  Communication_Frame_Add(&optDataPtr, bridgeYfault, "bridgeYfault", 1, "");
+  
+  uint8_t bridgeZfault = bridgeZ.getFault();
+  Communication_Frame_Add(&optDataPtr, bridgeZfault, "bridgeZfault", 1, "");
+
+  FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
+
+  // send response
+  Communication_Send_Response(RESP_SYSTEM_INFO, optData, optDataLen);
+}
+
 void Communication_Process_Packet() {
   // disable interrupts
   interruptsEnabled = false;
@@ -469,15 +563,14 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
     
     case CMD_GET_FULL_SYSTEM_INFO: {
-      if(currentModem == MODEM_FSK) {
-        static const uint8_t respOptDataLen = 2*sizeof(uint8_t) + 4*sizeof(uint16_t);
-        uint8_t respOptData[respOptDataLen];
-        uint8_t* respOptDataPtr = respOptData;
-
-        
-      } else {
-        FOSSASAT_DEBUG_PRINTLN(F("FSK is required to get full system info"));
+      // check FSK is active
+      if(currentModem != MODEM_FSK) {
+        FOSSASAT_DEBUG_PRINTLN(F("FSK is required to get system info"));
+        return;
       }
+      
+      // send complete system info via GFSK
+      Communication_Send_Full_System_Info();
     } break;
 
     // private frames below this line
@@ -817,6 +910,79 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       }
     } break;
 
+    case CMD_RUN_ADCS: {
+      if(Communication_Check_OptDataLen(7, optDataLen)) {
+        int8_t x = optData[0];
+        FOSSASAT_DEBUG_PRINT(F("x = "));
+        FOSSASAT_DEBUG_PRINTLN(x);
+
+        int8_t y = optData[1];
+        FOSSASAT_DEBUG_PRINT(F("y = "));
+        FOSSASAT_DEBUG_PRINTLN(y);
+
+        int8_t z = optData[2];
+        FOSSASAT_DEBUG_PRINT(F("z = "));
+        FOSSASAT_DEBUG_PRINTLN(z);
+
+        uint32_t duration = 0;
+        memcpy(&duration, optData + 3, sizeof(uint32_t));
+        FOSSASAT_DEBUG_PRINT(F("duration = "));
+        FOSSASAT_DEBUG_PRINTLN(duration);
+
+        uint8_t respOptData[7];
+
+        // clear faults
+        bridgeX.getFault();
+        bridgeY.getFault();
+        bridgeZ.getFault();
+        
+        // set H-bridge outputs
+        uint32_t start = millis();
+        uint32_t elapsed = 0;
+        bridgeX.drive(x);
+        bridgeY.drive(y);
+        bridgeZ.drive(z);
+        while(millis() - start < duration) {
+          // check battery
+          #ifdef ENABLE_TRANSMISSION_CONTROL
+          if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
+             // battery check failed, stop ADCS
+             respOptData[0] = UVLO;
+             respOptData[1] = UVLO;
+             respOptData[2] = UVLO;
+             break;
+          }
+          #endif
+
+          // check faults
+          respOptData[0] = bridgeX.getFault();
+          if((x != 0) && (respOptData[0] != 0)) {
+            break;
+          }
+          respOptData[1] = bridgeY.getFault();
+          if((y != 0) && (respOptData[1] != 0)) {
+            break;
+          }
+          respOptData[2] = bridgeZ.getFault();
+          if((z != 0) && (respOptData[2] != 0)) {
+            break;
+          }
+
+          // pet watchdog
+          PowerControl_Watchdog_Heartbeat();
+        }
+
+        // stop everything
+        bridgeX.stop();
+        bridgeY.stop();
+        bridgeZ.stop();
+
+        // sned response
+        elapsed = millis() - start;
+        memcpy(respOptData + 3, &elapsed, sizeof(uint32_t));
+        Communication_Send_Response(RESP_ADCS_RESULT, respOptData, 7);
+      }
+    } break;
 
     default:
       FOSSASAT_DEBUG_PRINT(F("Unknown function ID!"));
@@ -833,7 +999,9 @@ int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData, size_t opt
   // build response frame
   uint8_t len = FCP_Get_Frame_Length(callsign, optDataLen);
   uint8_t frame[MAX_RADIO_BUFFER_LENGTH];
-  FCP_Encode(frame, callsign, respId, optDataLen, optData);
+  int16_t state = FCP_Encode(frame, callsign, respId, optDataLen, optData);
+  FOSSASAT_DEBUG_PRINT(F("Encoding state: "));
+  FOSSASAT_DEBUG_PRINTLN(state);
 
   // send response
   return (Communication_Transmit(frame, len, overrideModem));

@@ -184,6 +184,7 @@ void printControls() {
   Serial.println(F("c - capture photo"));
   Serial.println(F("e - set power limits"));
   Serial.println(F("T - set RTC"));
+  Serial.println(F("a - run ADCS"));
   Serial.println(F("------------------------------------"));
 }
 
@@ -716,6 +717,16 @@ void setRTC(uint8_t year, uint8_t month, uint8_t day, uint8_t weekDay, uint8_t h
   sendFrameEncrypted(CMD_SET_RTC, 7, optData);
 }
 
+void runADCS(int8_t x, int8_t y, int8_t z, uint32_t duration) {
+  Serial.print(F("Sending ADCS request ... "));
+  uint8_t optData[6];
+  optData[0] = x;
+  optData[1] = y;
+  optData[2] = z;
+  memcpy(optData + 3, &duration, sizeof(uint32_t));
+  sendFrameEncrypted(CMD_RUN_ADCS, 7, optData);
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println(F("FOSSASAT-2 Ground Station Demo Code"));
@@ -814,7 +825,7 @@ void loop() {
         requestRetransmitCustom();
         break;
       case 'o':
-        recordIMU(40, 1000);
+        recordIMU(1, 1000, 0b00000001);
         break;
       case 'u':
         Serial.print(F("Sending unknown frame ... "));
@@ -831,6 +842,9 @@ void loop() {
         break;
       case 'T':
         setRTC(21, 4, 2, 5, 20, 10, 50);
+        break;
+      case 'a':
+        runADCS(-60, 0, 30, 10000);
         break;
       default:
         Serial.print(F("Unknown command: "));
