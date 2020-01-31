@@ -291,7 +291,7 @@ void Communication_Send_Full_System_Info() {
   FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
 
   // send response
-  Communication_Send_Response(RESP_SYSTEM_INFO, optData, optDataLen);
+  Communication_Send_Response(RESP_FULL_SYSTEM_INFO, optData, optDataLen);
 }
 
 void Communication_Process_Packet() {
@@ -565,7 +565,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     case CMD_GET_FULL_SYSTEM_INFO: {
       // check FSK is active
       if(currentModem != MODEM_FSK) {
-        FOSSASAT_DEBUG_PRINTLN(F("FSK is required to get system info"));
+        FOSSASAT_DEBUG_PRINTLN(F("FSK is required to get full system info"));
         return;
       }
       
