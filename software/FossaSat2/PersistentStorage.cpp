@@ -93,6 +93,7 @@ void PersistentStorage_Increment_Frame_Counter(bool valid) {
 
 void PersistentStorage_Get_Callsign(char* buff, uint8_t len) {
   PersistentStorage_Read(FLASH_CALLSIGN, (uint8_t*)buff, len);
+  buff[len] = '\0';
 }
 
 void PersistentStorage_Set_Callsign(char* newCallsign) {
