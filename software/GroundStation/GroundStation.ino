@@ -250,42 +250,49 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       Serial.print(FCP_Get_Battery_Charging_Current(respOptData), 4);
       Serial.println(" mA");
 
-      Serial.print(F("batteryChargingVoltage = "));
-      Serial.print(FCP_Get_Battery_Charging_Voltage(respOptData));
-      Serial.println(" V");
+      uint32_t onboardTime = 0;
+      memcpy(&onboardTime, respOptData + 3, sizeof(uint32_t));
+      Serial.print(F("onboardTime = "));
+      Serial.println(onboardTime);
 
-      Serial.print(F("uptimeCounter = "));
-      Serial.println(FCP_Get_Uptime_Counter(respOptData));
-
+      uint8_t powerConfig = 0;
+      memcpy(&powerConfig, respOptData + 7, sizeof(uint8_t));
       Serial.print(F("powerConfig = 0b"));
-      Serial.println(FCP_Get_Power_Configuration(respOptData), BIN);
+      Serial.println(powerConfig, BIN);
 
+      uint16_t resetCounter = 0;
+      memcpy(&resetCounter, respOptData + 8, sizeof(uint16_t));
       Serial.print(F("resetCounter = "));
-      Serial.println(FCP_Get_Reset_Counter(respOptData));
+      Serial.println(resetCounter);
 
-      Serial.print(F("solarCellAVoltage = "));
-      Serial.print(FCP_Get_Solar_Cell_Voltage(0, respOptData));
+      Serial.print(F("voltageXA = "));
+      Serial.print(FCP_System_Info_Get_Voltage(respOptData, 10));
       Serial.println(" V");
 
-      Serial.print(F("solarCellBVoltage = "));
-      Serial.print(FCP_Get_Solar_Cell_Voltage(1, respOptData));
+      Serial.print(F("voltageXB = "));
+      Serial.print(FCP_System_Info_Get_Voltage(respOptData, 11));
       Serial.println(" V");
 
-      Serial.print(F("solarCellCVoltage = "));
-      Serial.print(FCP_Get_Solar_Cell_Voltage(2, respOptData));
+      Serial.print(F("voltageZA = "));
+      Serial.print(FCP_System_Info_Get_Voltage(respOptData, 12));
       Serial.println(" V");
 
-      Serial.print(F("batteryTemperature = "));
-      Serial.print(FCP_Get_Battery_Temperature(respOptData));
+      Serial.print(F("voltageZB = "));
+      Serial.print(FCP_System_Info_Get_Voltage(respOptData, 13));
+      Serial.println(" V");
+
+      Serial.print(F("voltageY = "));
+      Serial.print(FCP_System_Info_Get_Voltage(respOptData, 14));
+      Serial.println(" V");
+
+      Serial.print(F("batteryTemp = "));
+      Serial.print(FCP_System_Info_Get_Temperature(respOptData, 15));
       Serial.println(" deg C");
 
-      Serial.print(F("boardTemperature = "));
-      Serial.print(FCP_Get_Board_Temperature(respOptData));
+      Serial.print(F("boardTemp = "));
+      Serial.print(FCP_System_Info_Get_Temperature(respOptData, 17));
       Serial.println(" deg C");
-
-      Serial.print(F("mcuTemperature = "));
-      Serial.print(FCP_Get_MCU_Temperature(respOptData));
-      Serial.println(" deg C");
+      
       break;
 
     case RESP_PACKET_INFO: {
