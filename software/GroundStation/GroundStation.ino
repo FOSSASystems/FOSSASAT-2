@@ -680,12 +680,13 @@ void getStats(uint8_t mask) {
   sendFrame(CMD_GET_STATISTICS, 1, &mask);
 }
 
-void recordIMU(uint8_t samples, uint16_t period) {
+void recordIMU(uint8_t samples, uint16_t period, uint8_t flags) {
   Serial.print(F("Sending record IMU request ... "));
-  uint8_t optData[3];
+  uint8_t optData[4];
   optData[0] = samples;
   memcpy(optData + 1, &period, 2);
-  sendFrameEncrypted(CMD_RECORD_IMU, 3, optData);
+  optData[3] = flags;
+  sendFrameEncrypted(CMD_RECORD_IMU, 4, optData);
 }
 
 void cameraCapture(uint8_t slot, uint8_t pictureSize, uint8_t lightMode, uint8_t saturation, uint8_t brightness, uint8_t contrast, uint8_t special) {

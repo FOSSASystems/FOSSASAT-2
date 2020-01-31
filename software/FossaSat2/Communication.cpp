@@ -141,13 +141,13 @@ void Communication_CW_Beep(uint32_t len) {
   FOSSASAT_DEBUG_PRINTLN(F("beep"));
   FOSSASAT_DEBUG_DELAY(10);
   radio.transmitDirect();
-  PowerControl_Wait(len, true);
+  PowerControl_Wait(len, LOW_POWER_NONE);
   radio.standby();
 }
 
 void Communication_Send_Basic_System_Info() {
   // build response frame
-  static const uint8_t optDataLen = 6*sizeof(uint8_t) + 3*sizeof(int16_t) + sizeof(uint16_t);
+  static const uint8_t optDataLen = 7*sizeof(uint8_t) + 3*sizeof(int16_t) + sizeof(uint16_t) + sizeof(uint32_t);
   uint8_t optData[optDataLen];
   uint8_t* optDataPtr = optData;
 
@@ -342,10 +342,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     // public function IDs
 
-    case CMD_PING:
+    case CMD_PING: {
       // send pong
       Communication_Send_Response(RESP_PONG);
-      break;
+    } break;
 
     case CMD_RETRANSMIT: {
         // check message length
@@ -384,10 +384,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         }
       } break;
 
-    case CMD_TRANSMIT_SYSTEM_INFO:
+    case CMD_TRANSMIT_SYSTEM_INFO: {
       // send system info via LoRa
       Communication_Send_Basic_System_Info();
-      break;
+    } break;
 
     case CMD_GET_PACKET_INFO: {
         // get last packet info and send it
@@ -491,10 +491,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         Communication_Send_Response(RESP_DEPLOYMENT_STATE, &attemptNumber, 1);
       } break;
 
-    case CMD_RESTART:
+    case CMD_RESTART: {
       // restart
       PowerControl_Watchdog_Restart();
-      break;
+    } break;
 
     case CMD_WIPE_EEPROM: {
         // check optional data length
@@ -722,7 +722,101 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       }
     } break;
 
-    // TODO new private frames
+    case CMD_RECORD_IMU: {
+      // check optional data
+      if(Communication_Check_OptDataLen(4, optDataLen)) {
+        uint16_t numSamples = optData[0];
+        FOSSASAT_DEBUG_PRINT(F("numSamples="));
+        FOSSASAT_DEBUG_PRINTLN(numSamples);
+
+        // check number of samples is less than limit
+        if(numSamples > 10) {
+          FOSSASAT_DEBUG_PRINT(F("too much!"));
+          break;
+        }
+
+        // check flags
+        char device;
+        if(optData[3] & 0b00000001) {
+          // gyroscope
+          device = 'G';
+        } else if(optData[3] & 0b00000010) {
+          // accelerometer
+          device = 'A';
+        } else if(optData[3] & 0b00000100) {
+          // magnetometer
+          device = 'M';
+        } else {
+          FOSSASAT_DEBUG_PRINTLN(F("Unknown device!"));
+          break;
+        }
+
+        // get sample period
+        uint16_t period = 0;
+        memcpy(&period, optData + 1, 2);
+        FOSSASAT_DEBUG_PRINT(F("period="));
+        FOSSASAT_DEBUG_PRINTLN(period);
+
+        uint8_t respOptDataLen = 3*sizeof(float) * numSamples;
+        uint8_t respOptData[MAX_OPT_DATA_LENGTH];
+
+        for(uint16_t i = 0; i < respOptDataLen; i += 3*sizeof(float)) {
+          // check if the battery is good enough to continue
+          uint32_t start = millis();
+          #ifdef ENABLE_TRANSMISSION_CONTROL
+          if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
+             // battery check failed, stop measurement and send what we have
+             respoOptDataLen = i;
+             break;
+          }
+          #endif
+
+          // read the requested values
+          float valX = 0;
+          float valY = 0;
+          float valZ = 0;
+          switch(device) {
+            case 'G': {
+              valX = imu.calcGyro(imu.gx);
+              valY = imu.calcGyro(imu.gy);
+              valZ = imu.calcGyro(imu.gz);
+            } break;
+            case 'A': {
+              valX = imu.calcAccel(imu.ax);
+              valY = imu.calcAccel(imu.ay);
+              valZ = imu.calcAccel(imu.az);
+            } break;
+            case 'M': {
+              valX = imu.calcMag(imu.mx);
+              valY = imu.calcMag(imu.my);
+              valZ = imu.calcMag(imu.mz);
+            } break;
+          }
+
+          FOSSASAT_DEBUG_PRINT(valX);
+          FOSSASAT_DEBUG_PRINT('\t');
+          FOSSASAT_DEBUG_PRINT(valY);
+          FOSSASAT_DEBUG_PRINT('\t');
+          FOSSASAT_DEBUG_PRINTLN(valZ);
+          
+          memcpy(respOptData + i, &valX, sizeof(float));
+          memcpy(respOptData + i + sizeof(float), &valY, sizeof(float));
+          memcpy(respOptData + i + 2*sizeof(float), &valZ, sizeof(float));
+          
+          // wait for for the next measurement
+          while(millis() - start < period) {
+            // update IMU
+            Sensors_Update_IMU();
+
+            // pet watchdog
+            PowerControl_Watchdog_Heartbeat();
+          }
+        }
+
+        Communication_Send_Response(RESP_RECORDED_IMU, respOptData, respOptDataLen);
+      }
+    } break;
+
 
     default:
       FOSSASAT_DEBUG_PRINT(F("Unknown function ID!"));
