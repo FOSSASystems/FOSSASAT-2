@@ -977,13 +977,55 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         bridgeY.stop();
         bridgeZ.stop();
 
-        // sned response
+        // send response
         elapsed = millis() - start;
         memcpy(respOptData + 3, &elapsed, sizeof(uint32_t));
         Communication_Send_Response(RESP_ADCS_RESULT, respOptData, 7);
       }
     } break;
 
+    case CMD_GET_PICTURE_BURST: {
+      if(Communication_Check_OptDataLen(1, optDataLen)) {
+        // check FSK is active
+        if(currentModem != MODEM_FSK) {
+          FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer picture"));
+          return;
+        }
+
+        // get the basic info
+        FOSSASAT_DEBUG_PRINT(F("Reading slot: "));
+        uint8_t slot = optData[0];
+        FOSSASAT_DEBUG_PRINTLN(slot);
+        FOSSASAT_DEBUG_PRINT(F("Starting at address: 0x"));
+        uint32_t imgAddress = FLASH_IMAGES_START + slot*FLASH_IMAGE_SLOT_SIZE;
+        FOSSASAT_DEBUG_PRINTLN(imgAddress, HEX);
+        FOSSASAT_DEBUG_PRINT(F("Image length (bytes): "));
+        uint32_t imgLen = PersistentStorage_Get_Image_Len(slot);
+        FOSSASAT_DEBUG_PRINTLN(imgLen, HEX);
+
+        static const uint8_t respOptDataLen = 2 + MAX_IMAGE_PACKET_LENGTH;
+        uint8_t respOptData[respOptDataLen];
+        uint16_t i;
+        for(i = 0; i < imgLen / MAX_IMAGE_PACKET_LENGTH; i++) {
+          // write packet ID
+          memcpy(respOptData, &i, sizeof(uint16_t));
+          
+          // send full packet
+          PersistentStorage_Read(imgAddress + i*MAX_IMAGE_PACKET_LENGTH, respOptData + 2, MAX_IMAGE_PACKET_LENGTH);
+          Communication_Send_Response(RESP_CAMERA_PICTURE, respOptData, respOptDataLen);
+          PowerControl_Watchdog_Heartbeat();
+        }
+
+        // sned the final packet (might not be full)
+        uint16_t remLen = imgLen - i*MAX_IMAGE_PACKET_LENGTH;
+        memcpy(respOptData, &i, sizeof(uint16_t));
+        PersistentStorage_Read(imgAddress + i*MAX_IMAGE_PACKET_LENGTH, respOptData + 2, remLen);
+        Communication_Send_Response(RESP_CAMERA_PICTURE, respOptData, 2 + remLen);
+        //FOSSASAT_DEBUG_PRINT_FLASH(imgAddress + i*MAX_IMAGE_PACKET_LENGTH, remLen);
+        
+      }
+    } break;
+    
     default:
       FOSSASAT_DEBUG_PRINT(F("Unknown function ID!"));
       return;

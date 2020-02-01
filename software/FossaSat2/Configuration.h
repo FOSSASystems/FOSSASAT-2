@@ -37,6 +37,9 @@
 // string length limit
 #define MAX_STRING_LENGTH                               32
 
+// maximum number of image bytes in packet
+#define MAX_IMAGE_PACKET_LENGTH                         128
+
 // optional data length limit
 #define MAX_OPT_DATA_LENGTH                             128
 

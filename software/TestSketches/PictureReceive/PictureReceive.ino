@@ -138,7 +138,7 @@ void setup() {
   while(!Serial.available());
 
   uint8_t slot = 0;
-  sendFrameEncrypted(CMD_GET_PICTURE, 1, &slot);
+  sendFrameEncrypted(CMD_GET_PICTURE_BURST, 1, &slot);
 
   #if defined(USE_GFSK) && defined(USE_SX126X)
     radio.sleep(false);
