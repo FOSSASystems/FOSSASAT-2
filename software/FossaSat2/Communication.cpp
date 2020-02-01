@@ -1014,14 +1014,21 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           PersistentStorage_Read(imgAddress + i*MAX_IMAGE_PACKET_LENGTH, respOptData + 2, MAX_IMAGE_PACKET_LENGTH);
           Communication_Send_Response(RESP_CAMERA_PICTURE, respOptData, respOptDataLen);
           PowerControl_Watchdog_Heartbeat();
+
+          // check battery
+          #ifdef ENABLE_TRANSMISSION_CONTROL
+          if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
+             // battery check failed, stop sending data
+             return;
+          }
+          #endif
         }
 
-        // sned the final packet (might not be full)
+        // send the final packet (might not be full)
         uint16_t remLen = imgLen - i*MAX_IMAGE_PACKET_LENGTH;
         memcpy(respOptData, &i, sizeof(uint16_t));
         PersistentStorage_Read(imgAddress + i*MAX_IMAGE_PACKET_LENGTH, respOptData + 2, remLen);
         Communication_Send_Response(RESP_CAMERA_PICTURE, respOptData, 2 + remLen);
-        //FOSSASAT_DEBUG_PRINT_FLASH(imgAddress + i*MAX_IMAGE_PACKET_LENGTH, remLen);
         
       }
     } break;
