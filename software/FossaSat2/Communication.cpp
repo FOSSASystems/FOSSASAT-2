@@ -1032,6 +1032,26 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         
       }
     } break;
+
+    case CMD_GET_FLASH_CONTENTS: {
+      if(Communication_Check_OptDataLen(5, optDataLen)) {
+        // get the basic info
+        uint32_t addr = 0;
+        memcpy(&addr, optData, sizeof(uint32_t));
+        FOSSASAT_DEBUG_PRINT(F("Reading adress: 0x"));
+        FOSSASAT_DEBUG_PRINTLN(addr, HEX);
+        uint8_t len = optData[4];
+        FOSSASAT_DEBUG_PRINT(F("Length: "));
+        FOSSASAT_DEBUG_PRINTLN(len);
+
+        // read picture packet
+        uint8_t respOptData[MAX_OPT_DATA_LENGTH];
+        PersistentStorage_Read(addr, respOptData, len);
+
+        // send response
+        Communication_Send_Response(RESP_FLASH_CONTENTS, respOptData, len);
+      }
+    } break;
     
     default:
       FOSSASAT_DEBUG_PRINT(F("Unknown function ID!"));
