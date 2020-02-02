@@ -358,9 +358,8 @@ void loop() {
   PowerControl_Wait(500, LOW_POWER_SLEEP, true);
 
   // send FSK system info
-  // TODO - basic or full?
   Communication_Set_Modem(MODEM_FSK);
-  Communication_Send_Basic_System_Info();
+  Communication_Send_Full_System_Info();
 
   // wait for a bit
   FOSSASAT_DEBUG_DELAY(10);
