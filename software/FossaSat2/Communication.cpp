@@ -617,8 +617,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           if(optData[0] & 0b00001000) {
             // wipe NMEA
             FOSSASAT_DEBUG_PRINTLN(F("Wiping NMEA storage"));
-            PersistentStorage_64kBlockErase(FLASH_NMEA_START);
+            PersistentStorage_64kBlockErase(FLASH_NMEA_LOG_START);
             PowerControl_Watchdog_Heartbeat();
+            // reset NMEA log length
+            PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, 0);
           }
 
           if(optData[0] & 0b00010000) {
@@ -1071,6 +1073,129 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         uint8_t respOptData[respOptDataLen];
         memcpy(respOptData, &imgLen, sizeof(uint32_t));
         Communication_Send_Response(RESP_CAMERA_PICTURE_LENGTH, respOptData, respOptDataLen);
+      }
+    } break;
+
+    case CMD_LOG_GPS: {
+      // TODO test this
+      if(Communication_Check_OptDataLen(4, optDataLen)) {
+        // get parameters
+        uint32_t duration = 0;
+        memcpy(&duration, optData, sizeof(uint32_t));
+        FOSSASAT_DEBUG_PRINT(F("GPS logging duration: "));
+        FOSSASAT_DEBUG_PRINTLN(duration);
+
+        // check battery
+        #ifdef ENABLE_TRANSMISSION_CONTROL
+        if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
+          // battery check failed
+          FOSSASAT_DEBUG_PRINTLN(F("Battery too low."));
+          return;
+        }
+        #endif
+
+        // wipe NMEA log
+        PersistentStorage_64kBlockErase(FLASH_NMEA_LOG_START);
+        PowerControl_Watchdog_Heartbeat();
+        
+        // power up GPS
+        digitalWrite(GPS_POWER_FET, HIGH);
+
+        // run for the requested duration
+        uint32_t start = millis();
+        uint8_t buff[FLASH_EXT_PAGE_SIZE];
+        uint16_t buffPos = sizeof(uint32_t);
+        uint32_t flashPos = FLASH_NMEA_LOG_START;
+        while(millis() - start < duration) {
+          // read GPS data to buffer
+          while(GpsSerial.available() > 0) {
+            char c = GpsSerial.read();
+            
+            // check if we got line ending
+            if(c != '\n') {
+              // add to buffer
+              buff[buffPos] = c;
+              buffPos++;
+            } else {
+              // add timestamp
+              uint32_t offset = millis() - start;
+              memcpy(buff, &offset, sizeof(uint32_t));
+              
+              // add null terminator instead of CR
+              buff[buffPos - 1] = '\0';
+              
+              //  write buffer to flash
+              PersistentStorage_Write(flashPos, buff, buffPos);
+              flashPos += buffPos;
+              buffPos = sizeof(uint32_t);
+            }
+          }
+          
+          // check battery
+          PowerControl_Watchdog_Heartbeat();
+          #ifdef ENABLE_TRANSMISSION_CONTROL
+          if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
+            FOSSASAT_DEBUG_PRINTLN(F("Battery too low."));
+            break;
+          }
+          #endif
+        }
+
+        // turn GPS off
+        digitalWrite(GPS_POWER_FET, LOW);
+
+        // check if there are some data left in the buffer
+        if(buffPos != 0) {
+          // write the remainder to flash
+          PersistentStorage_Write(flashPos, buff, buffPos);
+          flashPos += buffPos;
+        }
+
+        // save the number of logged bytes and send it
+        uint32_t logged = flashPos - FLASH_NMEA_LOG_START;
+        PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, logged);
+        static const uint8_t respOptDataLen = sizeof(uint32_t);
+        uint8_t respOptData[respOptDataLen];
+        memcpy(respOptData, &logged, sizeof(uint32_t));
+        Communication_Send_Response(RESP_GPS_LOG_LENGTH, respOptData, respOptDataLen);
+      }
+    } break;
+
+    case CMD_GET_GPS_LOG: {
+      // TODO test this
+      if(Communication_Check_OptDataLen(4, optDataLen)) {
+        // get parameters
+        uint32_t offset = 0;
+        memcpy(&offset, optData, sizeof(uint32_t));
+        FOSSASAT_DEBUG_PRINT(F("GPS log download offset: "));
+        FOSSASAT_DEBUG_PRINTLN(offset);
+        uint32_t addr = FLASH_NMEA_LOG_START + offset;
+        FOSSASAT_DEBUG_PRINT(F("Starting from address: 0x"));
+        FOSSASAT_DEBUG_PRINTLN(addr, HEX);
+
+        // read data from flash
+        uint32_t logged = PersistentStorage_Get<uint32_t>(FLASH_NMEA_LOG_LENGTH);
+        static const uint8_t respOptDataLen = MAX_IMAGE_PACKET_LENGTH;
+        uint8_t respOptData[respOptDataLen];
+        for(; addr < FLASH_NMEA_LOG_START + logged; addr += MAX_IMAGE_PACKET_LENGTH) {
+          // read data
+          PersistentStorage_Read(addr, respOptData, MAX_IMAGE_PACKET_LENGTH);
+          Communication_Send_Response(RESP_GPS_LOG, respOptData, respOptDataLen);
+          
+          // check battery
+          PowerControl_Watchdog_Heartbeat();
+          #ifdef ENABLE_TRANSMISSION_CONTROL
+          if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
+            FOSSASAT_DEBUG_PRINTLN(F("Battery too low."));
+            return;
+          }
+          #endif
+        }
+
+        // read the remaining data
+        uint32_t remLen = FLASH_NMEA_LOG_START + logged - addr;
+        PersistentStorage_Read(addr, respOptData, remLen);
+        Communication_Send_Response(RESP_GPS_LOG, respOptData, remLen);
       }
     } break;
     

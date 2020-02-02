@@ -87,6 +87,9 @@ void Configuration_Setup() {
   pinMode(MPPT_OFF, OUTPUT);
   pinMode(ANALOG_IN_RANDOM_SEED, INPUT);
 
+  pinMode(GPS_POWER_FET, OUTPUT);
+  digitalWrite(GPS_POWER_FET, LOW);
+
   // initialize default I2C interface
   Wire.setSDA(I2C1_SDA);
   Wire.setSCL(I2C1_SCL);
