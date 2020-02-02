@@ -1009,7 +1009,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         static const uint8_t respOptDataLen = 2 + MAX_IMAGE_PACKET_LENGTH;
         uint8_t respOptData[respOptDataLen];
-        for(i; i < imgLen / MAX_IMAGE_PACKET_LENGTH; i++) {
+        for(; i < imgLen / MAX_IMAGE_PACKET_LENGTH; i++) {
           // write packet ID
           memcpy(respOptData, &i, sizeof(uint16_t));
           
@@ -1021,8 +1021,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           // check battery
           #ifdef ENABLE_TRANSMISSION_CONTROL
           if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
-             // battery check failed, stop sending data
-             return;
+            // battery check failed, stop sending data
+            FOSSASAT_DEBUG_PRINTLN(F("Battery too low, stopped."));
+            return;
           }
           #endif
         }
@@ -1053,6 +1054,23 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // send response
         Communication_Send_Response(RESP_FLASH_CONTENTS, respOptData, len);
+      }
+    } break;
+
+    case CMD_GET_PICTURE_LENGTH: {
+      if(Communication_Check_OptDataLen(1, optDataLen)) {
+        FOSSASAT_DEBUG_PRINT(F("Reading slot: "));
+        uint8_t slot = optData[0];
+        FOSSASAT_DEBUG_PRINTLN(slot);
+        
+        FOSSASAT_DEBUG_PRINT(F("Image length (bytes): "));
+        uint32_t imgLen = PersistentStorage_Get_Image_Len(slot);
+        FOSSASAT_DEBUG_PRINTLN(imgLen, HEX);
+
+        static const uint8_t respOptDataLen = sizeof(uint32_t);
+        uint8_t respOptData[respOptDataLen];
+        memcpy(respOptData, &imgLen, sizeof(uint32_t));
+        Communication_Send_Response(RESP_CAMERA_PICTURE_LENGTH, respOptData, respOptDataLen);
       }
     } break;
     
