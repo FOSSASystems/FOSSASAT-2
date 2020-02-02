@@ -20,12 +20,10 @@
 #include <SparkFunLSM9DS1.h>
 
 // files
-#include "AttitudeControl.h"
 #include "Camera.h"
 #include "Communication.h"
 #include "Configuration.h"
 #include "Debug.h"
-#include "Navigation.h"
 #include "PersistentStorage.h"
 #include "PowerControl.h"
 #include "Sensors.h"
