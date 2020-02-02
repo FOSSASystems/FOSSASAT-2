@@ -186,6 +186,7 @@ void printControls() {
   Serial.println(F("T - set RTC"));
   Serial.println(F("a - run ADCS"));
   Serial.println(F("I - get full system info (GFSK only)"));
+  Serial.println(F("P - get picture (all blocks)"));
   Serial.println(F("------------------------------------"));
 }
 
@@ -194,20 +195,24 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
   Serial.print(F("Received "));
   Serial.print(respLen);
   Serial.println(F(" bytes:"));
-  PRINT_BUFF(respFrame, respLen);
-
-  // print packet info
-  Serial.print(F("RSSI: "));
-  Serial.print(radio.getRSSI());
-  Serial.println(F(" dBm"));
-  Serial.print(F("SNR: "));
-  Serial.print(radio.getSNR());
-  Serial.println(F(" dB"));
 
   // get function ID
   uint8_t functionId = FCP_Get_FunctionID(callsign, respFrame, respLen);
-  Serial.print(F("Function ID: 0x"));
-  Serial.println(functionId, HEX);
+
+  if(functionId != RESP_CAMERA_PICTURE) {
+    // print packet info
+    Serial.print(F("RSSI: "));
+    Serial.print(radio.getRSSI());
+    Serial.println(F(" dBm"));
+    Serial.print(F("SNR: "));
+    Serial.print(radio.getSNR());
+    Serial.println(F(" dB"));
+    Serial.print(F("Frequency error: "));
+    Serial.println(radio.getFrequencyError());
+    Serial.print(F("Function ID: 0x"));
+    Serial.println(functionId, HEX);
+    PRINT_BUFF(respFrame, respLen);
+  }
 
   // check optional data
   uint8_t* respOptData = nullptr;
@@ -232,7 +237,10 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       // private frame
       FCP_Get_OptData(callsign, respFrame, respLen, respOptData, encryptionKey, password);
     }
-    PRINT_BUFF(respOptData, respOptDataLen);
+
+    if(functionId != RESP_CAMERA_PICTURE) {
+      PRINT_BUFF(respOptData, respOptDataLen);
+    }
   }
 
   // process received frame
@@ -454,12 +462,39 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       
     } break;
 
+    case RESP_CAMERA_PICTURE: {
+      uint16_t packetId = 0;
+      memcpy(&packetId, respOptData, sizeof(uint16_t));
+      Serial.print(F("Packet ID: "));
+      Serial.println(packetId);
+      
+      char buff[16];
+      if(respOptDataLen < 16) {
+        for(uint8_t i = 0; i < respOptDataLen; i++) {
+          sprintf(buff, "%02x ", respOptData[2 + i]);
+          Serial.print(buff);
+        }
+        Serial.println();
+      } else {
+        for(uint8_t i = 0; i < respOptDataLen/16; i++) {
+          for(uint8_t j = 0; j < 16; j++) {
+            sprintf(buff, "%02x ", respOptData[2 + i*16 + j]);
+            Serial.print(buff);
+          }
+          Serial.println();
+        }
+      }
+    } break;
+
     default:
       Serial.println(F("Unknown function ID!"));
       break;
   }
-
-  printControls();
+  
+  if(functionId != RESP_CAMERA_PICTURE) {
+    printControls();
+  }
+  
   if (respOptDataLen > 0) {
     delete[] respOptData;
   }
@@ -735,6 +770,22 @@ void getFullSystemInfo() {
   sendFrame(CMD_GET_FULL_SYSTEM_INFO);
 }
 
+void getPictureBurst(uint8_t slot, uint16_t startingId) {
+  Serial.print(F("Sending picture transfer request ... "));
+  uint8_t optData[3];
+  optData[0] = slot;
+  memcpy(optData + 1, &startingId, sizeof(uint16_t));
+  sendFrameEncrypted(CMD_GET_PICTURE_BURST, 3, optData);
+}
+
+void readFlash(uint32_t addr, uint8_t len) {
+  Serial.print(F("Sending flash reading request ... "));
+  uint8_t optData[5];
+  memcpy(optData, &addr, sizeof(uint32_t));
+  optData[4] = len;
+  sendFrameEncrypted(CMD_GET_FLASH_CONTENTS, 5, optData);
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println(F("FOSSASAT-2 Ground Station Demo Code"));
@@ -857,6 +908,12 @@ void loop() {
       case 'I':
         getFullSystemInfo();
         break;
+      case 'P':
+        getPictureBurst(0, 0);
+        break;
+      case 'F':
+        readFlash(0, 128);
+        break;
       default:
         Serial.print(F("Unknown command: "));
         Serial.println(serialCmd);
@@ -903,7 +960,7 @@ void loop() {
       Serial.print(F("Received "));
       Serial.print(respLen);
       Serial.println(F(" bytes:"));
-      PRINT_BUFF(respFrame, respLen);
+      //PRINT_BUFF(respFrame, respLen);
 
     } else {
       Serial.println(F("Reception failed, code "));

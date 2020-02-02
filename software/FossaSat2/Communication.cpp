@@ -985,7 +985,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_GET_PICTURE_BURST: {
-      if(Communication_Check_OptDataLen(1, optDataLen)) {
+      if(Communication_Check_OptDataLen(3, optDataLen)) {
         // check FSK is active
         if(currentModem != MODEM_FSK) {
           FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer picture"));
@@ -996,6 +996,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINT(F("Reading slot: "));
         uint8_t slot = optData[0];
         FOSSASAT_DEBUG_PRINTLN(slot);
+        FOSSASAT_DEBUG_PRINT(F("Starting at ID: "));
+        uint16_t i = 0;
+        memcpy(&i, optData + 1, sizeof(uint16_t));
+        FOSSASAT_DEBUG_PRINTLN(i);
         FOSSASAT_DEBUG_PRINT(F("Starting at address: 0x"));
         uint32_t imgAddress = FLASH_IMAGES_START + slot*FLASH_IMAGE_SLOT_SIZE;
         FOSSASAT_DEBUG_PRINTLN(imgAddress, HEX);
@@ -1005,8 +1009,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         static const uint8_t respOptDataLen = 2 + MAX_IMAGE_PACKET_LENGTH;
         uint8_t respOptData[respOptDataLen];
-        uint16_t i;
-        for(i = 0; i < imgLen / MAX_IMAGE_PACKET_LENGTH; i++) {
+        for(i; i < imgLen / MAX_IMAGE_PACKET_LENGTH; i++) {
           // write packet ID
           memcpy(respOptData, &i, sizeof(uint16_t));
           
