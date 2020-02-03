@@ -1120,7 +1120,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // run for the requested duration
         uint32_t start = millis();
-        uint8_t buff[FLASH_EXT_PAGE_SIZE];
+        uint8_t buff[MAX_IMAGE_PACKET_LENGTH];
         uint16_t buffPos = sizeof(uint32_t);
         uint32_t flashPos = FLASH_NMEA_LOG_START;
         while(millis() - start < duration) {
@@ -1145,7 +1145,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
               
               //  write buffer to flash
               PersistentStorage_Write(flashPos, buff, buffPos, false);
-              flashPos += buffPos;
+              flashPos += MAX_IMAGE_PACKET_LENGTH;
               buffPos = sizeof(uint32_t);
             }
           }
@@ -1162,13 +1162,6 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // turn GPS off
         digitalWrite(GPS_POWER_FET, LOW);
-
-        // check if there are some data left in the buffer
-        if(buffPos != 0) {
-          // write the remainder to flash
-          PersistentStorage_Write(flashPos, buff, buffPos, false);
-          flashPos += buffPos;
-        }
 
         // save the number of logged bytes and send it
         uint32_t logged = flashPos - FLASH_NMEA_LOG_START;
@@ -1213,11 +1206,15 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         }
         
         // read data from flash
-        static const uint8_t respOptDataLen = MAX_IMAGE_PACKET_LENGTH;
-        uint8_t respOptData[respOptDataLen];
+        uint8_t respOptData[MAX_IMAGE_PACKET_LENGTH];
         for(; addr < FLASH_NMEA_LOG_START + logged; addr += MAX_IMAGE_PACKET_LENGTH) {
-          // read data
+          // read data into buffer
           PersistentStorage_Read(addr, respOptData, MAX_IMAGE_PACKET_LENGTH);
+
+          // get the number of bytes in log entry
+          uint8_t respOptDataLen = 4 + strlen((char*)respOptData + 4);
+
+          // send response
           Communication_Send_Response(RESP_GPS_LOG, respOptData, respOptDataLen);
           
           // check battery
@@ -1229,11 +1226,6 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           }
           #endif
         }
-
-        // read the remaining data
-        uint32_t remLen = FLASH_NMEA_LOG_START + logged - addr;
-        PersistentStorage_Read(addr, respOptData, remLen);
-        Communication_Send_Response(RESP_GPS_LOG, respOptData, remLen);
       }
     } break;
     
