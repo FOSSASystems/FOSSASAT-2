@@ -1272,9 +1272,6 @@ int16_t Communication_Transmit(uint8_t* data, uint8_t len, bool overrideModem) {
   }
 #endif
 
-  // disable receive interrupt
-  radio.clearDio1Action();
-
   // print frame for debugging
   FOSSASAT_DEBUG_PRINT(F("Sending frame "));
   FOSSASAT_DEBUG_PRINTLN(len);
@@ -1343,8 +1340,12 @@ int16_t Communication_Transmit(uint8_t* data, uint8_t len, bool overrideModem) {
     Communication_Set_Modem(modem);
   }
 
-  // set receive ISR
-  radio.setDio1Action(Communication_Receive_Interrupt);
+  if(modem == MODEM_FSK) {
+    #ifdef ENABLE_TRANSMISSION_CONTROL
+    radio.reset();
+    #endif
+    Communication_Set_Modem(MODEM_FSK);
+  }
 
   return (state);
 }

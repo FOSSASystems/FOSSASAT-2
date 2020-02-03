@@ -36,7 +36,7 @@ void setup() {
 #endif
 
   // print system info page
-  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, 0x50)
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, 0x50);
 
   // initialize radio
   FOSSASAT_DEBUG_PORT.print(F("LoRa modem init: "));
@@ -389,12 +389,11 @@ void loop() {
   }
   FOSSASAT_DEBUG_PRINTLN(windowLenLoRa);
   FOSSASAT_DEBUG_DELAY(10);
-  radio.setDio1Action(Communication_Receive_Interrupt);
   radio.startReceive();
 
   for(uint8_t i = 0; i < windowLenLoRa; i++) {
     PowerControl_Wait(500, LOW_POWER_SLEEP);
-    if(dataReceived) {
+    if(digitalRead(RADIO_DIO1)) {
       radio.standby();
       Communication_Process_Packet();
       radio.startReceive();
@@ -412,19 +411,18 @@ void loop() {
   }
   FOSSASAT_DEBUG_PRINTLN(windowLenFsk);
   FOSSASAT_DEBUG_DELAY(10);
-  radio.setDio1Action(Communication_Receive_Interrupt);
   radio.startReceive();
 
   for(uint8_t i = 0; i < windowLenFsk; i++) {
     PowerControl_Wait(500, LOW_POWER_SLEEP);
-    if(dataReceived) {
+    if(digitalRead(RADIO_DIO1)) {
       radio.standby();
       Communication_Process_Packet();
       radio.startReceive();
     }
   }
-  
-  radio.clearDio1Action();
+
+  radio.standby();
 
   // update saved epoch
   PersistentStorage_Set<uint32_t>(FLASH_RTC_EPOCH, rtc.getEpoch());
