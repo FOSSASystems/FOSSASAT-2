@@ -700,17 +700,23 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     case CMD_SET_RECEIVE_WINDOWS: {
       // check optional data is exactly 2 bytes
       if(Communication_Check_OptDataLen(2, optDataLen)) {
-        // set FSK receive length
-        uint8_t windowLen = optData[0];
-        FOSSASAT_DEBUG_PRINT(F("fskRxLen="));
-        FOSSASAT_DEBUG_PRINTLN(windowLen);
-        PersistentStorage_Set(FLASH_FSK_RECEIVE_LEN, windowLen);
-
         // set LoRa receive length
-        windowLen = optData[1];
+        uint8_t loraRxLen = optData[1];
         FOSSASAT_DEBUG_PRINT(F("loraRxLen="));
-        FOSSASAT_DEBUG_PRINTLN(windowLen);
-        PersistentStorage_Set(FLASH_LORA_RECEIVE_LEN, windowLen);
+        FOSSASAT_DEBUG_PRINTLN(loraRxLen);
+        PersistentStorage_Set(FLASH_LORA_RECEIVE_LEN, loraRxLen);
+
+        // set FSK receive length
+        uint8_t fskRxLen = optData[0];
+        FOSSASAT_DEBUG_PRINT(F("fskRxLen="));
+        FOSSASAT_DEBUG_PRINTLN(fskRxLen);
+        PersistentStorage_Set(FLASH_FSK_RECEIVE_LEN, fskRxLen);
+
+        // check if there will be still some receive window open
+        if((PersistentStorage_Get<uint8_t>(FLASH_LORA_RECEIVE_LEN) == 0) && (PersistentStorage_Get<uint8_t>(FLASH_FSK_RECEIVE_LEN) == 0)) {
+          FOSSASAT_DEBUG_PRINT(F("Request to set both lengths to 0, restoring FSK default."));
+          PersistentStorage_Set(FLASH_FSK_RECEIVE_LEN, FSK_RECEIVE_WINDOW_LENGTH);
+        }
       }
     } break;
 
