@@ -1062,6 +1062,11 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINT(F("Length: "));
         FOSSASAT_DEBUG_PRINTLN(len);
 
+        if(len > MAX_OPT_DATA_LENGTH) {
+          FOSSASAT_DEBUG_PRINTLN(F("Too long!"));
+          return;
+        }
+
         // read picture packet
         uint8_t respOptData[MAX_OPT_DATA_LENGTH];
         PersistentStorage_Read(addr, respOptData, len);
