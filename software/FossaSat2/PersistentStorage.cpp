@@ -236,10 +236,44 @@ void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool auto
   // set WEL bit again
   PersistentStorage_WaitForWriteEnable();
 
-  // write page
-  uint8_t cmdBuff[] = {MX25L51245G_CMD_PP, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
-  PersistentStorage_SPItranscation(cmdBuff, 5, true, buff, len);
+  // check if all bytes are in the same page
+  uint32_t addrInPage = (addr & 0xFF) + len;
+  if(addrInPage <= FLASH_EXT_PAGE_SIZE) {
+    // all bytes are in the same page, write it
+    uint8_t cmdBuff[] = {MX25L51245G_CMD_PP, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
+    PersistentStorage_SPItranscation(cmdBuff, 5, true, buff, len);
+  } else {
+    // some bytes are in the following page
+    // TODO: extend for arbitrary number of pages in the same sector
 
+    // get the number of bytes in the first page
+    size_t firstPageLen = FLASH_EXT_PAGE_SIZE - (addr & 0xFF);
+    FOSSASAT_DEBUG_PRINTLN(addr, HEX);
+    FOSSASAT_DEBUG_PRINTLN((addr & 0xFF), HEX);
+    FOSSASAT_DEBUG_PRINTLN(len);
+    FOSSASAT_DEBUG_PRINTLN(addrInPage, HEX);
+    FOSSASAT_DEBUG_PRINTLN(firstPageLen);
+
+    // write the first page
+    uint32_t newAddr = addr;
+    uint8_t cmdBuff[] = {MX25L51245G_CMD_PP, (uint8_t)((newAddr >> 24) & 0xFF), (uint8_t)((newAddr >> 16) & 0xFF), (uint8_t)((newAddr >> 8) & 0xFF), (uint8_t)(newAddr & 0xFF)};
+    PersistentStorage_SPItranscation(cmdBuff, 5, true, buff, firstPageLen);
+
+    // wait until page is written
+    PersistentStorage_WaitForWriteInProgress();
+
+    // set WEL bit again
+    PersistentStorage_WaitForWriteEnable();
+
+    // write the remainder
+    newAddr = (addr & 0xFFFFFF00) + FLASH_EXT_PAGE_SIZE;
+    cmdBuff[1] = (uint8_t)((newAddr >> 24) & 0xFF);
+    cmdBuff[2] = (uint8_t)((newAddr >> 16) & 0xFF);
+    cmdBuff[3] = (uint8_t)((newAddr >> 8) & 0xFF);
+    cmdBuff[4] = (uint8_t)(newAddr & 0xFF);
+    PersistentStorage_SPItranscation(cmdBuff, 5, true, buff + firstPageLen, len - firstPageLen);
+  }
+  
   // wait until page is written
   PersistentStorage_WaitForWriteInProgress();
 }

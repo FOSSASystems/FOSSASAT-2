@@ -1124,14 +1124,16 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
               buffPos++;
             } else {
               // add timestamp
-              uint32_t offset = millis() - start;
-              memcpy(buff, &offset, sizeof(uint32_t));
+              uint32_t stamp = millis() - start;
+              memcpy(buff, &stamp, sizeof(uint32_t));
+              FOSSASAT_DEBUG_PRINTLN(stamp, HEX);
               
               // add null terminator instead of CR
               buff[buffPos - 1] = '\0';
+              FOSSASAT_DEBUG_PRINTLN((char*)buff + 4);
               
               //  write buffer to flash
-              PersistentStorage_Write(flashPos, buff, buffPos);
+              PersistentStorage_Write(flashPos, buff, buffPos, false);
               flashPos += buffPos;
               buffPos = sizeof(uint32_t);
             }
@@ -1153,13 +1155,16 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // check if there are some data left in the buffer
         if(buffPos != 0) {
           // write the remainder to flash
-          PersistentStorage_Write(flashPos, buff, buffPos);
+          PersistentStorage_Write(flashPos, buff, buffPos, false);
           flashPos += buffPos;
         }
 
         // save the number of logged bytes and send it
         uint32_t logged = flashPos - FLASH_NMEA_LOG_START;
+        FOSSASAT_DEBUG_PRINT(F("Logged total of (bytes): "));
+        FOSSASAT_DEBUG_PRINTLN(logged);
         PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, logged);
+        
         static const uint8_t respOptDataLen = sizeof(uint32_t);
         uint8_t respOptData[respOptDataLen];
         memcpy(respOptData, &logged, sizeof(uint32_t));
@@ -1170,6 +1175,12 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     case CMD_GET_GPS_LOG: {
       // TODO test this
       if(Communication_Check_OptDataLen(4, optDataLen)) {
+        // check FSK is active
+        if(currentModem != MODEM_FSK) {
+          FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer GPS log"));
+          return;
+        }
+        
         // get parameters
         uint32_t offset = 0;
         memcpy(&offset, optData, sizeof(uint32_t));
@@ -1179,8 +1190,18 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINT(F("Starting from address: 0x"));
         FOSSASAT_DEBUG_PRINTLN(addr, HEX);
 
-        // read data from flash
+        // read log length from flash
         uint32_t logged = PersistentStorage_Get<uint32_t>(FLASH_NMEA_LOG_LENGTH);
+        FOSSASAT_DEBUG_PRINT(F("GPS log length: "));
+        FOSSASAT_DEBUG_PRINTLN(logged);
+        if(logged == 0) {
+          FOSSASAT_DEBUG_PRINT(F("No GPS data logged"));
+          uint8_t respOptData[4] = {0, 0, 0, 0};
+          Communication_Send_Response(RESP_GPS_LOG, respOptData, 4);
+          return;
+        }
+        
+        // read data from flash
         static const uint8_t respOptDataLen = MAX_IMAGE_PACKET_LENGTH;
         uint8_t respOptData[respOptDataLen];
         for(; addr < FLASH_NMEA_LOG_START + logged; addr += MAX_IMAGE_PACKET_LENGTH) {
