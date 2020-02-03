@@ -95,15 +95,13 @@ void PowerControl_Deploy() {
   FOSSASAT_DEBUG_PRINTLN(F("Deploy"));
   FOSSASAT_DEBUG_DELAY(10);
 
-  // burn the nichrome wires
+  // enable MOSFETs one at a time
   digitalWrite(DEPLOYMENT_FET_1, HIGH);
-  digitalWrite(DEPLOYMENT_FET_2, HIGH);
-
-  // wait a bit
-  PowerControl_Wait(1500, LOW_POWER_SLEEP);
-
-  // set MOSFETs low
+  PowerControl_Wait(1000, LOW_POWER_SLEEP);
   digitalWrite(DEPLOYMENT_FET_1, LOW);
+  
+  digitalWrite(DEPLOYMENT_FET_2, HIGH);
+  PowerControl_Wait(1000, LOW_POWER_SLEEP);
   digitalWrite(DEPLOYMENT_FET_2, LOW);
 }
 
