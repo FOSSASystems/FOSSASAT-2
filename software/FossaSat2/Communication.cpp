@@ -361,7 +361,7 @@ void Comunication_Parse_Frame(uint8_t* frame, uint8_t len) {
   // check encryption
   int16_t optDataLen = 0;
   uint8_t optData[MAX_OPT_DATA_LENGTH];
-  if((functionId >= PRIVATE_OFFSET) && (functionId < (PRIVATE_OFFSET + NUM_PRIVATE_COMMANDS))) {
+  if((functionId >= PRIVATE_OFFSET) && (functionId <= (PRIVATE_OFFSET + NUM_PRIVATE_COMMANDS))) {
     // frame contains encrypted data, decrypt
     FOSSASAT_DEBUG_PRINTLN(F("Decrypting"));
 
