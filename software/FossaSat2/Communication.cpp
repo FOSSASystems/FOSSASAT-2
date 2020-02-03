@@ -1008,6 +1008,12 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINT(F("Image length (bytes): "));
         uint32_t imgLen = PersistentStorage_Get_Image_Len(slot);
         FOSSASAT_DEBUG_PRINTLN(imgLen, HEX);
+        if(imgLen == 0xFFFFFFFF) {
+          FOSSASAT_DEBUG_PRINTLN(F("No image in that slot."));
+          uint8_t respOptData[] = {0, 0, 0, 0, 0, 0};
+          Communication_Send_Response(RESP_CAMERA_PICTURE, respOptData, 6);
+          return;
+        }
 
         static const uint8_t respOptDataLen = 2 + MAX_IMAGE_PACKET_LENGTH;
         uint8_t respOptData[respOptDataLen];
