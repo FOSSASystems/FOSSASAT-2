@@ -490,7 +490,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         uint8_t* respOptDataPtr = respOptData;
 
         // SNR
-        uint8_t snr = (uint8_t)(radio.getSNR() * 4.0);
+        int8_t snr = (int8_t)(radio.getSNR() * 4.0);
         Communication_Frame_Add(&respOptDataPtr, snr, "SNR", 4, "dB");
 
         // RSSI
