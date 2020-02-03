@@ -87,6 +87,11 @@ void Configuration_Setup() {
   pinMode(MPPT_OFF, OUTPUT);
   pinMode(ANALOG_IN_RANDOM_SEED, INPUT);
 
+  // provide seed for encrpytion PRNG
+  randomSeed(analogRead(ANALOG_IN_RANDOM_SEED));
+  // switch ANALOG_IN_RANDOM_SEED to output, otherwise it will block some pins (like PC3)
+  pinMode(ANALOG_IN_RANDOM_SEED, OUTPUT);
+
   pinMode(GPS_POWER_FET, OUTPUT);
   digitalWrite(GPS_POWER_FET, LOW);
 
@@ -113,11 +118,7 @@ void Configuration_Setup() {
   // initialize RTC
   rtc.setClockSource(STM32RTC::LSE_CLOCK);
   rtc.begin();
-  
-  // provide seed for encrpytion PRNG
-  randomSeed(analogRead(ANALOG_IN_RANDOM_SEED));
 
   // initialize low power library
   LowPower.begin();
-  LowPower.attachInterruptWakeup(RADIO_DIO1, Communication_Receive_Interrupt, RISING);
 }
