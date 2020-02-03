@@ -826,7 +826,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     case CMD_RECORD_IMU: {
       // check optional data
       if(Communication_Check_OptDataLen(4, optDataLen)) {
-        uint16_t numSamples = optData[0];
+        uint8_t numSamples = optData[0];
         FOSSASAT_DEBUG_PRINT(F("numSamples="));
         FOSSASAT_DEBUG_PRINTLN(numSamples);
 
