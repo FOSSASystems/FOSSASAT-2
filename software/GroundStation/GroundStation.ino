@@ -187,6 +187,9 @@ void printControls() {
   Serial.println(F("a - run ADCS"));
   Serial.println(F("I - get full system info (GFSK only)"));
   Serial.println(F("P - get picture (all blocks)"));
+  Serial.println(F("F - read flash"));
+  Serial.println(F("g - log GPS"));
+  Serial.println(F("G - get GPS log (all blocks)"));
   Serial.println(F("------------------------------------"));
 }
 
@@ -786,6 +789,20 @@ void readFlash(uint32_t addr, uint8_t len) {
   sendFrameEncrypted(CMD_GET_FLASH_CONTENTS, 5, optData);
 }
 
+void logGps(uint32_t duration) {
+  Serial.print(F("Sending GPS logging request ... "));
+  uint8_t optData[4];
+  memcpy(optData, &duration, sizeof(uint32_t));
+  sendFrameEncrypted(CMD_LOG_GPS, 4, optData);
+}
+
+void getGpsLog(uint32_t offset) {
+  Serial.print(F("Sending GPS log downlink request ... "));
+  uint8_t optData[4];
+  memcpy(optData, &offset, sizeof(uint32_t));
+  sendFrameEncrypted(CMD_GET_GPS_LOG, 4, optData);
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println(F("FOSSASAT-2 Ground Station Demo Code"));
@@ -913,6 +930,12 @@ void loop() {
         break;
       case 'F':
         readFlash(0, 128);
+        break;
+      case 'g':
+        logGps(10000);
+        break;
+      case 'G':
+        getGpsLog(0);
         break;
       default:
         Serial.print(F("Unknown command: "));
