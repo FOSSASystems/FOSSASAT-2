@@ -359,7 +359,16 @@ void loop() {
 
   // send FSK system info
   Communication_Set_Modem(MODEM_FSK);
-  Communication_Send_Full_System_Info();
+  #ifdef ENABLE_TRANSMISSION_CONTROL
+  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
+    Communication_Send_Full_System_Info();
+  } else {
+    // send only basic info in low power mode
+    Communication_Send_Basic_System_Info();
+  }
+  #else
+    Communication_Send_Full_System_Info();
+  #endif
 
   // wait for a bit
   FOSSASAT_DEBUG_DELAY(10);
