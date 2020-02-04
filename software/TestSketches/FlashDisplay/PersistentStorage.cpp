@@ -1,5 +1,73 @@
 #include "PersistentStorage.h"
 
+/*void PersistentStorage_Update_Stats(uint8_t flags) {
+  if(flags & 0b00000001) {
+    // temperatures
+    int16_t tempValue = Sensors_Read_Temperature(tempSensorPanelY) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_PANEL_Y, tempValue);
+    
+    tempValue = Sensors_Read_Temperature(tempSensorTop) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_TOP, tempValue);
+    
+    tempValue = Sensors_Read_Temperature(tempSensorBottom) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_BOTTOM, tempValue);
+    
+    tempValue = Sensors_Read_Temperature(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_BATTERY, tempValue);
+    
+    tempValue = Sensors_Read_Temperature(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_SEC_BATTERY, tempValue);
+  }
+
+  if(flags & 0b00000010) {
+    // currents
+    int16_t currentValue = currSensorXA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_XA, currentValue);
+
+    currentValue = currSensorXB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_XB, currentValue);
+
+    currentValue = currSensorZA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_ZA, currentValue);
+
+    currentValue = currSensorZB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_ZB, currentValue);
+
+    currentValue = currSensorY.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_Y, currentValue);
+
+    currentValue = currSensorMPPT.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_MPPT, currentValue);
+  }
+
+  if(flags & 0b00000100) {
+    // voltages
+    uint8_t voltageValue = currSensorXA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_XA, voltageValue);
+
+    voltageValue = currSensorXB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_XB, voltageValue);
+    
+    voltageValue = currSensorZA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_ZA, voltageValue);
+    
+    voltageValue = currSensorZB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_ZB, voltageValue);
+    
+    voltageValue = currSensorY.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_Y, voltageValue);
+    
+    voltageValue = currSensorMPPT.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_MPPT, voltageValue);
+  }
+
+  if(flags & 0b00001000) {
+    // lights
+    PersistentStorage_Update_Stat(FLASH_STATS_LIGHT_PANEL_Y, lightSensorPanelY.readLux());
+    PersistentStorage_Update_Stat(FLASH_STATS_LIGHT_TOP, lightSensorTop.readLux());
+  }
+}*/
+
 void PersistentStorage_Increment_Counter(uint16_t addr) {
   uint16_t counter = PersistentStorage_Get<uint16_t>(addr);
   counter++;
@@ -25,6 +93,7 @@ void PersistentStorage_Increment_Frame_Counter(bool valid) {
 
 void PersistentStorage_Get_Callsign(char* buff, uint8_t len) {
   PersistentStorage_Read(FLASH_CALLSIGN, (uint8_t*)buff, len);
+  buff[len] = '\0';
 }
 
 void PersistentStorage_Set_Callsign(char* newCallsign) {
@@ -49,7 +118,12 @@ void PersistentStorage_Set_Callsign(char* newCallsign) {
 
 uint32_t PersistentStorage_Get_Image_Len(uint8_t slot) {
   uint8_t buff[4];
-  PersistentStorage_Read(FLASH_IMAGE_LENGTHS + slot*sizeof(uint32_t), buff, sizeof(uint32_t));
+  uint32_t addr = FLASH_IMAGE_LENGTHS_1;
+  if(slot >= 64) {
+    addr = FLASH_IMAGE_LENGTHS_2;
+    slot -= 64;
+  }
+  PersistentStorage_Read(addr + slot*sizeof(uint32_t), buff, sizeof(uint32_t));
   uint32_t len;
   memcpy(&len, buff, sizeof(uint32_t));
   return(len);
@@ -58,13 +132,18 @@ uint32_t PersistentStorage_Get_Image_Len(uint8_t slot) {
 void PersistentStorage_Set_Image_Len(uint8_t slot, uint32_t len) {
   // read the correct page
   uint8_t buff[FLASH_EXT_PAGE_SIZE];
-  PersistentStorage_Read(FLASH_IMAGE_LENGTHS, buff, FLASH_EXT_PAGE_SIZE);
-
+  uint32_t addr = FLASH_IMAGE_LENGTHS_1;
+  if(slot >= 64) {
+    addr = FLASH_IMAGE_LENGTHS_2;
+    slot -= 64;
+  }
+  PersistentStorage_Read(addr, buff, FLASH_EXT_PAGE_SIZE);
+  
   // update value
   memcpy(buff + slot*sizeof(uint32_t), &len, sizeof(uint32_t));
 
   // write it back in (will automatically erase the sector)
-  PersistentStorage_Write(FLASH_IMAGE_LENGTHS, buff, FLASH_EXT_PAGE_SIZE);
+  PersistentStorage_Write(addr, buff, FLASH_EXT_PAGE_SIZE);
 }
 
 void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, uint8_t len) {
@@ -157,10 +236,44 @@ void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool auto
   // set WEL bit again
   PersistentStorage_WaitForWriteEnable();
 
-  // write page
-  uint8_t cmdBuff[] = {MX25L51245G_CMD_PP, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
-  PersistentStorage_SPItranscation(cmdBuff, 5, true, buff, len);
+  // check if all bytes are in the same page
+  uint32_t addrInPage = (addr & 0xFF) + len;
+  if(addrInPage <= FLASH_EXT_PAGE_SIZE) {
+    // all bytes are in the same page, write it
+    uint8_t cmdBuff[] = {MX25L51245G_CMD_PP, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
+    PersistentStorage_SPItranscation(cmdBuff, 5, true, buff, len);
+  } else {
+    // some bytes are in the following page
+    // TODO: extend for arbitrary number of pages in the same sector
 
+    // get the number of bytes in the first page
+    size_t firstPageLen = FLASH_EXT_PAGE_SIZE - (addr & 0xFF);
+    FOSSASAT_DEBUG_PRINTLN(addr, HEX);
+    FOSSASAT_DEBUG_PRINTLN((addr & 0xFF), HEX);
+    FOSSASAT_DEBUG_PRINTLN(len);
+    FOSSASAT_DEBUG_PRINTLN(addrInPage, HEX);
+    FOSSASAT_DEBUG_PRINTLN(firstPageLen);
+
+    // write the first page
+    uint32_t newAddr = addr;
+    uint8_t cmdBuff[] = {MX25L51245G_CMD_PP, (uint8_t)((newAddr >> 24) & 0xFF), (uint8_t)((newAddr >> 16) & 0xFF), (uint8_t)((newAddr >> 8) & 0xFF), (uint8_t)(newAddr & 0xFF)};
+    PersistentStorage_SPItranscation(cmdBuff, 5, true, buff, firstPageLen);
+
+    // wait until page is written
+    PersistentStorage_WaitForWriteInProgress();
+
+    // set WEL bit again
+    PersistentStorage_WaitForWriteEnable();
+
+    // write the remainder
+    newAddr = (addr & 0xFFFFFF00) + FLASH_EXT_PAGE_SIZE;
+    cmdBuff[1] = (uint8_t)((newAddr >> 24) & 0xFF);
+    cmdBuff[2] = (uint8_t)((newAddr >> 16) & 0xFF);
+    cmdBuff[3] = (uint8_t)((newAddr >> 8) & 0xFF);
+    cmdBuff[4] = (uint8_t)(newAddr & 0xFF);
+    PersistentStorage_SPItranscation(cmdBuff, 5, true, buff + firstPageLen, len - firstPageLen);
+  }
+  
   // wait until page is written
   PersistentStorage_WaitForWriteInProgress();
 }
@@ -244,7 +357,7 @@ void PersistentStorage_WriteStatusRegister(uint8_t sr, uint8_t cr) {
   PersistentStorage_WriteDisable();
 }
 
-bool PersistentStorage_WaitForWriteEnable(uint8_t timeout) {
+bool PersistentStorage_WaitForWriteEnable(uint32_t timeout) {
   // start the timer
   uint32_t start = millis();
 
@@ -261,7 +374,7 @@ bool PersistentStorage_WaitForWriteEnable(uint8_t timeout) {
   return(true);
 }
 
-bool PersistentStorage_WaitForWriteInProgress(uint8_t timeout) {
+bool PersistentStorage_WaitForWriteInProgress(uint32_t timeout) {
   // start the timer
   uint32_t start = millis();
 

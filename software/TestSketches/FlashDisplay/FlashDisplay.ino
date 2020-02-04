@@ -16,12 +16,12 @@ void setup() {
   PersistentStorage_Enter4ByteMode();
 
   uint8_t buff[FLASH_EXT_PAGE_SIZE];
-  for(uint32_t i = FLASH_IMAGES_START; i < FLASH_CHIP_SIZE; i += FLASH_EXT_PAGE_SIZE) {
+  for(uint32_t i = FLASH_IMAGES_START + 69*FLASH_IMAGE_SLOT_SIZE; i < FLASH_CHIP_SIZE; i += FLASH_EXT_PAGE_SIZE) {
     PersistentStorage_Read(i, buff, FLASH_EXT_PAGE_SIZE);
     for(uint32_t j = 0; j < FLASH_EXT_PAGE_SIZE; j++) {
       FOSSASAT_DEBUG_PORT.write(buff[j]);
     }
-    delay(5000);
+    delay(1000);
   }
   
 }
