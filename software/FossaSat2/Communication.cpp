@@ -582,7 +582,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // search storage to see if that ID is already in use
         uint16_t storageLen = PersistentStorage_Get<uint16_t>(FLASH_STORE_AND_FORWARD_LENGTH);
         uint16_t slotNum = 0;
-        for(; slotNum <= storageLen; slotNum++) {
+        for(; slotNum < storageLen + 1; slotNum++) {
           uint8_t buff[4];
           PersistentStorage_Read(FLASH_STORE_AND_FORWARD_START + slotNum * MAX_STRING_LENGTH, buff, 4);
           uint32_t id = 0;
@@ -626,7 +626,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         uint16_t storageLen = PersistentStorage_Get<uint16_t>(FLASH_STORE_AND_FORWARD_LENGTH);
         uint16_t slotNum = 0;
         bool idFound = false;
-        for(; slotNum <= storageLen; slotNum++) {
+        for(; slotNum < storageLen + 1; slotNum++) {
           uint8_t buff[4];
           PersistentStorage_Read(FLASH_STORE_AND_FORWARD_START + slotNum * MAX_STRING_LENGTH, buff, 4);
           uint32_t id = 0;
@@ -693,6 +693,8 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             FOSSASAT_DEBUG_PRINTLN(F("Wiping store & forward"));
             PersistentStorage_64kBlockErase(FLASH_STORE_AND_FORWARD_START);
             PowerControl_Watchdog_Heartbeat();
+            // reset store & forward length
+            PersistentStorage_Set<uint32_t>(FLASH_STORE_AND_FORWARD_LENGTH, 0);
           }
           
           if(optData[0] & 0b00001000) {
