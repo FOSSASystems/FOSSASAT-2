@@ -59,8 +59,18 @@ The purpose of this document is to provide overview of the communication system 
 - Description: Request basic system information. Only available in FSK mode.
 
 ### CMD_STORE_AND_FORWARD_ADD
+- Optional data length: 0 - 29
+- Optional data:
+  - 0 - N: message to be stored
+- Response: [RESP_STORE_AND_FORWARD_ASSIGNED_ID](#RESP_STORE_AND_FORWARD_ASSIGNED_ID)
+- Description: Adds message to store and forward storage.
 
 ### CMD_STORE_AND_FORWARD_REQUEST
+- Optional data length: 2
+- Optional data:
+  - 0 - 1: ID of the message to be sent, unsigned 16-bit integer, LSB first
+- Response: [RESP_FORWARDED_MESSAGE](#RESP_FORWARDED_MESSAGE)
+- Description:  Satellite will retransmit the message stored previously with supplied ID.
 
 ---
 # Private Commands
@@ -320,7 +330,16 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 44: last Y axis H-bridge fault, unsigned 8-bit integer
   - 45: last Z axis H-bridge fault, unsigned 8-bit integer
 
+### RESP_STORE_AND_FORWARD_ASSIGNED_ID
+- Optional data length: 2
+- Optional data:
+  - 0 - 1: ID assigned to this message, unsigned 16-bit integer
+
 ### RESP_FORWARDED_MESSAGE
+- Optional data length: 0 - 29
+- Optional data:
+  - 0 - N: Requested message
+
 
 ### RESP_DEPLOYMENT_STATE
 - Optional data length: 1

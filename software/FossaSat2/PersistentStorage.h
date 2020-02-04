@@ -24,7 +24,7 @@
 #define FLASH_EXT_PAGE_SIZE                             0x00000100
 #define FLASH_STATS                                     0x00001000
 #define FLASH_SYSTEM_INFO_START                         0x00000000
-#define FLASH_SYSTEM_INFO_LEN                          (0x0000004C + 1)  // final address in Flash map + 1 byte
+#define FLASH_SYSTEM_INFO_LEN                          (0x0000004E + 1)  // final address in Flash map + 1 byte
 
 void PersistentStorage_Increment_Counter(uint16_t addr);
 void PersistentStorage_Increment_Frame_Counter(bool valid);
@@ -34,6 +34,8 @@ uint32_t PersistentStorage_Get_Image_Len(uint8_t slot);
 void PersistentStorage_Set_Image_Len(uint8_t slot, uint32_t len);
 void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, uint8_t len);
 void PersistentStorage_Reset_System_Info();
+uint8_t PersistentStorage_Get_Message(uint16_t id, uint8_t* buff);
+void PersistentStorage_Set_Message(uint16_t id, uint8_t* buff, uint8_t len);
 
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len);
 void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool autoErase = true);

@@ -161,6 +161,7 @@
 #define FLASH_MPPT_TEMP_SWITCH_ENABLED                  0x00000047  //  0x00000047    0x00000047
 #define FLASH_MPPT_KEEP_ALIVE_ENABLED                   0x00000048  //  0x00000048    0x00000048
 #define FLASH_NMEA_LOG_LENGTH                           0x00000049  //  0x00000049    0x0000004C
+#define FLASH_STORE_AND_FORWARD_CURRENT_ID              0x0000004D  //  0x0000004D    0x0000004E
 
 // sector 1 page 0 - stats
 #define FLASH_STATS                                     0x00001000  //  0x00001000    0x000010FF
@@ -204,6 +205,7 @@
 
 // 64kB block 1 - store & forward slots
 #define FLASH_STORE_AND_FORWARD_START                   0x00010000  //  0x00010000    0x0001FFFF
+#define FLASH_STORE_AND_FORWARD_NUM_SLOTS               (FLASH_64K_BLOCK_SIZE / MAX_STRING_LENGTH)
 
 // 64kB blocks 2 - 7 - NMEA sentences: null-terminated C-strings, each starts with 4-byte timestamp (offset since recording start)
 #define FLASH_NMEA_LOG_START                            0x00020000  //  0x00020000    0x0007FFFF

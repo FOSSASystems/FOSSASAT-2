@@ -573,6 +573,60 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       Communication_Send_Full_System_Info();
     } break;
 
+    case CMD_STORE_AND_FORWARD_ADD: {
+      if (optDataLen <= MAX_STRING_LENGTH - 3) {
+        // get the first free message ID
+        uint16_t messageID = PersistentStorage_Get<uint16_t>(FLASH_STORE_AND_FORWARD_CURRENT_ID);
+
+        // create message entry from assigned ID, length and message
+        uint8_t messageBuff[MAX_STRING_LENGTH];
+        memcpy(messageBuff, &messageID, sizeof(uint16_t));
+        messageBuff[sizeof(uint16_t)] = optDataLen;
+        memcpy(messageBuff + 3, optData, optDataLen);
+
+        // add message to store and forward
+        PersistentStorage_Set_Message(messageID, messageBuff, optDataLen + 3);
+
+        // update free message ID
+        if(messageID < FLASH_STORE_AND_FORWARD_NUM_SLOTS) {
+          messageID++;
+        } else {
+          messageID = 0;
+        }
+        PersistentStorage_Set<uint16_t>(FLASH_STORE_AND_FORWARD_CURRENT_ID, messageID);
+
+        // send response
+        Communication_Send_Response(RESP_STORE_AND_FORWARD_ASSIGNED_ID, messageBuff, 2);
+      }
+    } break;
+
+    case CMD_STORE_AND_FORWARD_REQUEST: {
+      if(Communication_Check_OptDataLen(2, optDataLen)) {
+
+        // check message ID
+        uint16_t messageID = 0;
+        memcpy(&messageID, optData, 2);
+        if(messageID > FLASH_STORE_AND_FORWARD_NUM_SLOTS) {
+          FOSSASAT_DEBUG_PRINTLN(F("Message ID out of range"));
+          return;
+        }
+
+        // fetch message from storage
+        uint8_t messageBuff[MAX_STRING_LENGTH];
+        uint8_t messageLen = PersistentStorage_Get_Message(messageID, messageBuff);
+
+        // check there is a message in the slot
+        if(messageLen < MAX_STRING_LENGTH) {
+          // send it
+          Communication_Send_Response(RESP_FORWARDED_MESSAGE, messageBuff, messageLen);
+        } else {
+          // requested message does not exist
+          uint8_t respOptData[] = {0xFF, 0xFF};
+          Communication_Send_Response(RESP_FORWARDED_MESSAGE, respOptData, 2);
+        }
+      }
+    } break;
+
     // private frames below this line
 
     case CMD_DEPLOY: {

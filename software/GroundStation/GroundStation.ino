@@ -190,6 +190,8 @@ void printControls() {
   Serial.println(F("F - read flash"));
   Serial.println(F("g - log GPS"));
   Serial.println(F("G - get GPS log (all blocks)"));
+  Serial.println(F("b - add store and forward message"));
+  Serial.println(F("B - request store and forward message"));
   Serial.println(F("------------------------------------"));
 }
 
@@ -803,6 +805,18 @@ void getGpsLog(uint32_t offset) {
   sendFrameEncrypted(CMD_GET_GPS_LOG, 4, optData);
 }
 
+void addStoreAndForward(char* msg) {
+  Serial.print(F("Adding store and forward message ... "));
+  sendFrame(CMD_STORE_AND_FORWARD_ADD, strlen(msg), (uint8_t*)msg);
+}
+
+void requestStoreAndForward(uint16_t id) {
+  Serial.print(F("Requesting store and forward message ... "));
+  uint8_t optData[2];
+  memcpy(optData, &id, sizeof(uint16_t));
+  sendFrame(CMD_STORE_AND_FORWARD_REQUEST, 2, optData);
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println(F("FOSSASAT-2 Ground Station Demo Code"));
@@ -936,6 +950,12 @@ void loop() {
         break;
       case 'G':
         getGpsLog(0);
+        break;
+      case 'b':
+        addStoreAndForward("Hello there!");
+        break;
+      case 'B':
+        requestStoreAndForward(0);
         break;
       default:
         Serial.print(F("Unknown command: "));

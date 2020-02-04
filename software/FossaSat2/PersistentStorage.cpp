@@ -222,6 +222,35 @@ void PersistentStorage_Reset_System_Info() {
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
 }
 
+uint8_t PersistentStorage_Get_Message(uint16_t id, uint8_t* buff) {
+  // read the message slot
+  uint8_t messageBuff[MAX_STRING_LENGTH];
+  PersistentStorage_Read(FLASH_STORE_AND_FORWARD_START + id*MAX_STRING_LENGTH, messageBuff, MAX_STRING_LENGTH);
+
+  // get message length
+  uint8_t messageLen = messageBuff[2];
+
+  // copy the message without length and ID
+  if(messageLen < MAX_STRING_LENGTH) {
+    memcpy(buff, messageBuff + 3, messageLen);
+  }
+
+  return(messageLen);
+}
+
+void PersistentStorage_Set_Message(uint16_t id, uint8_t* buff, uint8_t len) {
+  // read the current sector
+  uint8_t sectorBuff[FLASH_SECTOR_SIZE];
+  uint32_t addr = FLASH_STORE_AND_FORWARD_START + id*MAX_STRING_LENGTH;
+  PersistentStorage_Read(addr & 0xFFFFFF00, sectorBuff, FLASH_SECTOR_SIZE);
+
+  // update buffer
+  memcpy(sectorBuff + ((id*MAX_STRING_LENGTH) & 0x000000FF), buff, len);
+
+  // write updated buffer
+  PersistentStorage_Write(addr & 0xFFFFFF00, sectorBuff, FLASH_SECTOR_SIZE);
+}
+
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len) {
   uint8_t cmdBuff[] = {MX25L51245G_CMD_READ, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
   PersistentStorage_SPItranscation(cmdBuff, 5, false, buff, len);
@@ -248,11 +277,6 @@ void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool auto
 
     // get the number of bytes in the first page
     size_t firstPageLen = FLASH_EXT_PAGE_SIZE - (addr & 0xFF);
-    FOSSASAT_DEBUG_PRINTLN(addr, HEX);
-    FOSSASAT_DEBUG_PRINTLN((addr & 0xFF), HEX);
-    FOSSASAT_DEBUG_PRINTLN(len);
-    FOSSASAT_DEBUG_PRINTLN(addrInPage, HEX);
-    FOSSASAT_DEBUG_PRINTLN(firstPageLen);
 
     // write the first page
     uint32_t newAddr = addr;
