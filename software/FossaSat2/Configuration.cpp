@@ -85,12 +85,10 @@ void Configuration_Setup() {
   
   pinMode(WATCHDOG_IN, OUTPUT);
   pinMode(MPPT_OFF, OUTPUT);
-  pinMode(ANALOG_IN_RANDOM_SEED, INPUT);
+  pinMode(ANALOG_IN_RANDOM_SEED, INPUT_ANALOG);
 
   // provide seed for encrpytion PRNG
   randomSeed(analogRead(ANALOG_IN_RANDOM_SEED));
-  // switch ANALOG_IN_RANDOM_SEED to output, otherwise it will block some pins (like PC3)
-  pinMode(ANALOG_IN_RANDOM_SEED, OUTPUT);
 
   pinMode(GPS_POWER_FET, OUTPUT);
   digitalWrite(GPS_POWER_FET, LOW);
