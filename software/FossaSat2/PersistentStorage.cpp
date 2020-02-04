@@ -222,33 +222,34 @@ void PersistentStorage_Reset_System_Info() {
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
 }
 
-uint8_t PersistentStorage_Get_Message(uint16_t id, uint8_t* buff) {
+uint8_t PersistentStorage_Get_Message(uint16_t slotNum, uint8_t* buff) {
   // read the message slot
   uint8_t messageBuff[MAX_STRING_LENGTH];
-  PersistentStorage_Read(FLASH_STORE_AND_FORWARD_START + id*MAX_STRING_LENGTH, messageBuff, MAX_STRING_LENGTH);
+  PersistentStorage_Read(FLASH_STORE_AND_FORWARD_START + slotNum*MAX_STRING_LENGTH, messageBuff, MAX_STRING_LENGTH);
 
   // get message length
-  uint8_t messageLen = messageBuff[2];
+  uint8_t messageLen = messageBuff[sizeof(uint32_t)];
 
   // copy the message without length and ID
   if(messageLen < MAX_STRING_LENGTH) {
-    memcpy(buff, messageBuff + 3, messageLen);
+    memcpy(buff, messageBuff + sizeof(uint32_t) + sizeof(uint8_t), messageLen);
   }
 
   return(messageLen);
 }
 
-void PersistentStorage_Set_Message(uint16_t id, uint8_t* buff, uint8_t len) {
+void PersistentStorage_Set_Message(uint16_t slotNum, uint8_t* buff, uint8_t len) {
   // read the current sector
   uint8_t sectorBuff[FLASH_SECTOR_SIZE];
-  uint32_t addr = FLASH_STORE_AND_FORWARD_START + id*MAX_STRING_LENGTH;
-  PersistentStorage_Read(addr & 0xFFFFFF00, sectorBuff, FLASH_SECTOR_SIZE);
+  uint32_t addr = FLASH_STORE_AND_FORWARD_START + slotNum*MAX_STRING_LENGTH;
+  PersistentStorage_Read(addr & 0xFFFFF000, sectorBuff, FLASH_SECTOR_SIZE);
 
   // update buffer
-  memcpy(sectorBuff + ((id*MAX_STRING_LENGTH) & 0x000000FF), buff, len);
+  memcpy(sectorBuff + ((slotNum*MAX_STRING_LENGTH) & 0x00000FFF), buff, len);
 
   // write updated buffer
-  PersistentStorage_Write(addr & 0xFFFFFF00, sectorBuff, FLASH_SECTOR_SIZE);
+  PersistentStorage_Write(addr & 0xFFFFF000, sectorBuff, FLASH_SECTOR_SIZE);
+  FOSSASAT_DEBUG_PRINT_FLASH(addr, FLASH_EXT_PAGE_SIZE);
 }
 
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len) {

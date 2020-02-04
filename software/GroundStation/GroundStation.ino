@@ -805,16 +805,19 @@ void getGpsLog(uint32_t offset) {
   sendFrameEncrypted(CMD_GET_GPS_LOG, 4, optData);
 }
 
-void addStoreAndForward(char* msg) {
+void addStoreAndForward(uint32_t id, char* msg) {
   Serial.print(F("Adding store and forward message ... "));
-  sendFrame(CMD_STORE_AND_FORWARD_ADD, strlen(msg), (uint8_t*)msg);
+  uint8_t optData[32];
+  memcpy(optData, &id, sizeof(uint32_t));
+  memcpy(optData + sizeof(uint32_t), msg, strlen(msg));
+  sendFrame(CMD_STORE_AND_FORWARD_ADD, sizeof(uint32_t) + strlen(msg), optData);
 }
 
-void requestStoreAndForward(uint16_t id) {
+void requestStoreAndForward(uint32_t id) {
   Serial.print(F("Requesting store and forward message ... "));
-  uint8_t optData[2];
-  memcpy(optData, &id, sizeof(uint16_t));
-  sendFrame(CMD_STORE_AND_FORWARD_REQUEST, 2, optData);
+  uint8_t optData[4];
+  memcpy(optData, &id, sizeof(uint32_t));
+  sendFrame(CMD_STORE_AND_FORWARD_REQUEST, 4, optData);
 }
 
 void setup() {
@@ -952,10 +955,10 @@ void loop() {
         getGpsLog(0);
         break;
       case 'b':
-        addStoreAndForward("Hello there!");
+        addStoreAndForward(0x1337BEEF, "Hello there!");
         break;
       case 'B':
-        requestStoreAndForward(0);
+        requestStoreAndForward(0x1337BEEF);
         break;
       default:
         Serial.print(F("Unknown command: "));

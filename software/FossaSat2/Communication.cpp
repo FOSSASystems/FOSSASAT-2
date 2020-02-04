@@ -574,56 +574,83 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_STORE_AND_FORWARD_ADD: {
-      if (optDataLen <= MAX_STRING_LENGTH - 3) {
-        // get the first free message ID
-        uint16_t messageID = PersistentStorage_Get<uint16_t>(FLASH_STORE_AND_FORWARD_CURRENT_ID);
+      if (optDataLen <= MAX_STRING_LENGTH - 1) {
+        // get the user-provided message ID
+        uint32_t messageID = 0;
+        memcpy(&messageID, optData, sizeof(uint32_t));
 
-        // create message entry from assigned ID, length and message
+        // search storage to see if that ID is already in use
+        uint16_t storageLen = PersistentStorage_Get<uint16_t>(FLASH_STORE_AND_FORWARD_LENGTH);
+        uint16_t slotNum = 0;
+        for(; slotNum <= storageLen; slotNum++) {
+          uint8_t buff[4];
+          PersistentStorage_Read(FLASH_STORE_AND_FORWARD_START + slotNum * MAX_STRING_LENGTH, buff, 4);
+          uint32_t id = 0;
+          memcpy(&id, buff, sizeof(uint32_t));
+          if(id == messageID) {
+            break;
+          }
+          PowerControl_Watchdog_Heartbeat();
+        }
+
+        // create message entry from ID, length and message
         uint8_t messageBuff[MAX_STRING_LENGTH];
-        memcpy(messageBuff, &messageID, sizeof(uint16_t));
-        messageBuff[sizeof(uint16_t)] = optDataLen;
-        memcpy(messageBuff + 3, optData, optDataLen);
+        uint8_t messageLen = optDataLen - sizeof(uint32_t);
+        memcpy(messageBuff, &messageID, sizeof(uint32_t));
+        messageBuff[sizeof(uint32_t)] = messageLen;
+        memcpy(messageBuff + sizeof(uint32_t) + sizeof(uint8_t), optData + sizeof(uint32_t), messageLen);
 
         // add message to store and forward
-        PersistentStorage_Set_Message(messageID, messageBuff, optDataLen + 3);
+        PersistentStorage_Set_Message(slotNum, messageBuff, optDataLen + 1);
 
-        // update free message ID
-        if(messageID < FLASH_STORE_AND_FORWARD_NUM_SLOTS) {
-          messageID++;
-        } else {
-          messageID = 0;
+        // update storage length if needed
+        if(slotNum > storageLen) {
+          PersistentStorage_Set<uint16_t>(FLASH_STORE_AND_FORWARD_LENGTH, slotNum);
         }
-        PersistentStorage_Set<uint16_t>(FLASH_STORE_AND_FORWARD_CURRENT_ID, messageID);
 
         // send response
-        Communication_Send_Response(RESP_STORE_AND_FORWARD_ASSIGNED_ID, messageBuff, 2);
+        uint8_t respOptData[2];
+        memcpy(respOptData, &slotNum, sizeof(uint16_t));
+        Communication_Send_Response(RESP_STORE_AND_FORWARD_ASSIGNED_SLOT, respOptData, 2);
       }
     } break;
 
     case CMD_STORE_AND_FORWARD_REQUEST: {
-      if(Communication_Check_OptDataLen(2, optDataLen)) {
+      if(Communication_Check_OptDataLen(4, optDataLen)) {
 
-        // check message ID
-        uint16_t messageID = 0;
-        memcpy(&messageID, optData, 2);
-        if(messageID > FLASH_STORE_AND_FORWARD_NUM_SLOTS) {
-          FOSSASAT_DEBUG_PRINTLN(F("Message ID out of range"));
+        // get the user-provided message ID
+        uint32_t messageID = 0;
+        memcpy(&messageID, optData, sizeof(uint32_t));
+
+        // search storage to see if that ID exists
+        uint16_t storageLen = PersistentStorage_Get<uint16_t>(FLASH_STORE_AND_FORWARD_LENGTH);
+        uint16_t slotNum = 0;
+        bool idFound = false;
+        for(; slotNum <= storageLen; slotNum++) {
+          uint8_t buff[4];
+          PersistentStorage_Read(FLASH_STORE_AND_FORWARD_START + slotNum * MAX_STRING_LENGTH, buff, 4);
+          uint32_t id = 0;
+          memcpy(&id, buff, sizeof(uint32_t));
+          FOSSASAT_DEBUG_PRINTLN(id, HEX);
+          if(id == messageID) {
+            idFound = true;
+            break;
+          }
+          PowerControl_Watchdog_Heartbeat();
+        }
+
+        // check if the ID was found
+        if(idFound) {
+          // fetch message from storage
+          uint8_t messageBuff[MAX_STRING_LENGTH];
+          uint8_t messageLen = PersistentStorage_Get_Message(slotNum, messageBuff);
+          Communication_Send_Response(RESP_FORWARDED_MESSAGE, messageBuff, messageLen);
           return;
         }
 
-        // fetch message from storage
-        uint8_t messageBuff[MAX_STRING_LENGTH];
-        uint8_t messageLen = PersistentStorage_Get_Message(messageID, messageBuff);
-
-        // check there is a message in the slot
-        if(messageLen < MAX_STRING_LENGTH) {
-          // send it
-          Communication_Send_Response(RESP_FORWARDED_MESSAGE, messageBuff, messageLen);
-        } else {
-          // requested message does not exist
-          uint8_t respOptData[] = {0xFF, 0xFF};
-          Communication_Send_Response(RESP_FORWARDED_MESSAGE, respOptData, 2);
-        }
+        // requested message does not exist
+        uint8_t respOptData[] = {0xFF, 0xFF};
+        Communication_Send_Response(RESP_FORWARDED_MESSAGE, respOptData, 2);
       }
     } break;
 

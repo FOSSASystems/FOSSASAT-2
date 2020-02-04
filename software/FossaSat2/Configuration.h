@@ -161,7 +161,7 @@
 #define FLASH_MPPT_TEMP_SWITCH_ENABLED                  0x00000047  //  0x00000047    0x00000047
 #define FLASH_MPPT_KEEP_ALIVE_ENABLED                   0x00000048  //  0x00000048    0x00000048
 #define FLASH_NMEA_LOG_LENGTH                           0x00000049  //  0x00000049    0x0000004C
-#define FLASH_STORE_AND_FORWARD_CURRENT_ID              0x0000004D  //  0x0000004D    0x0000004E
+#define FLASH_STORE_AND_FORWARD_LENGTH                  0x0000004D  //  0x0000004D    0x0000004E
 
 // sector 1 page 0 - stats
 #define FLASH_STATS                                     0x00001000  //  0x00001000    0x000010FF

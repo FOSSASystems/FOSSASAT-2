@@ -34,8 +34,8 @@ uint32_t PersistentStorage_Get_Image_Len(uint8_t slot);
 void PersistentStorage_Set_Image_Len(uint8_t slot, uint32_t len);
 void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, uint8_t len);
 void PersistentStorage_Reset_System_Info();
-uint8_t PersistentStorage_Get_Message(uint16_t id, uint8_t* buff);
-void PersistentStorage_Set_Message(uint16_t id, uint8_t* buff, uint8_t len);
+uint8_t PersistentStorage_Get_Message(uint16_t slotNum, uint8_t* buff);
+void PersistentStorage_Set_Message(uint16_t slotNum, uint8_t* buff, uint8_t len);
 
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len);
 void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool autoErase = true);
