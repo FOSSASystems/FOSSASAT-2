@@ -443,7 +443,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_RETRANSMIT: {
         // check message length
-        if (optDataLen <= MAX_OPT_DATA_LENGTH) {
+        if (optDataLen <= MAX_STRING_LENGTH) {
           // respond with the requested data
           Communication_Send_Response(RESP_REPEATED_MESSAGE, optData, optDataLen);
         }
