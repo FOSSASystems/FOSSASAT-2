@@ -1148,7 +1148,6 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_LOG_GPS: {
-      // TODO test this
       if(Communication_Check_OptDataLen(4, optDataLen)) {
         // get parameters
         uint32_t duration = 0;
@@ -1231,7 +1230,6 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_GET_GPS_LOG: {
-      // TODO test this
       if(Communication_Check_OptDataLen(4, optDataLen)) {
         // check FSK is active
         if(currentModem != MODEM_FSK) {
