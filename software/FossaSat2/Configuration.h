@@ -17,7 +17,7 @@
 #define RTC_SECONDS                                     0
 
 // uncomment to reset system info (callsing, configuration etc.) on start
-#define RESET_SYSTEM_INFO
+//#define RESET_SYSTEM_INFO
 
 // comment out to disable deployment sequence
 #define ENABLE_DEPLOYMENT_SEQUENCE
