@@ -368,7 +368,7 @@ extern SPIClass FlashSPI;
 extern HardwareSerial GpsSerial;
 
 // RadioLib instances
-extern SX1262 radio;
+extern SX1268 radio;
 extern MorseClient morse;
 
 // camera instance
