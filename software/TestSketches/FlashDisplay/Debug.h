@@ -3,14 +3,14 @@
 
 #include "FossaSat2.h"
 
-HardwareSerial debugSerial(PA3, PA2);
+extern HardwareSerial debugSerial;
 
 // uncomment to enable debug output
 // RadioLib debug can be enabled in RadioLib/src/TypeDef.h
 #define FOSSASAT_DEBUG
 
-#define FOSSASAT_DEBUG_PORT   debugSerial
-#define FOSSASAT_DEBUG_SPEED  9600
+#define FOSSASAT_DEBUG_PORT   Serial
+#define FOSSASAT_DEBUG_SPEED  115200
 
 #ifdef FOSSASAT_DEBUG
 #define FOSSASAT_DEBUG_BEGIN(...) { FOSSASAT_DEBUG_PORT.begin(__VA_ARGS__); delay(500); while(!FOSSASAT_DEBUG_PORT); }
@@ -44,15 +44,14 @@ HardwareSerial debugSerial(PA3, PA2);
         FOSSASAT_DEBUG_PORT.println(); \
       } \
     } }
-#define FOSSASAT_DEBUG_DELAY(MS) { delay(MS); }
-#define FOSSASAT_DEBUG_STOPWATCH_INIT_H extern uint32_t fsdbgStart;
-#define FOSSASAT_DEBUG_STOPWATCH_INIT_CPP uint32_t fsdbgStart = 0;
-#define FOSSASAT_DEBUG_STOPWATCH_START() { fsdbgStart = millis(); }
-#define FOSSASAT_DEBUG_STOPWATCH_STOP() { \
-    FOSSASAT_DEBUG_PORT.print(F("Elapsed: ")); \
-    FOSSASAT_DEBUG_PORT.print(millis() - fsdbgStart); \
-    FOSSASAT_DEBUG_PORT.println(F(" ms")); \
+#define FOSSASAT_DEBUG_PRINT_RTC_TIME() { \
+    FOSSASAT_DEBUG_PORT.print(rtc.getHours()); \
+    FOSSASAT_DEBUG_PORT.print(':'); \
+    FOSSASAT_DEBUG_PORT.print(rtc.getMinutes()); \
+    FOSSASAT_DEBUG_PORT.print(':'); \
+    FOSSASAT_DEBUG_PORT.println(rtc.getSeconds()); \
   }
+#define FOSSASAT_DEBUG_DELAY(MS) { delay(MS); }
 #else
 #define FOSSASAT_DEBUG_BEGIN(...) {}
 #define FOSSASAT_DEBUG_PRINT(...) {}
@@ -60,10 +59,7 @@ HardwareSerial debugSerial(PA3, PA2);
 #define FOSSASAT_DEBUG_WRITE(...) {}
 #define FOSSASAT_DEBUG_PRINT_BUFF(BUFF, LEN) {}
 #define FOSSASAT_DEBUG_PRINT_FLASH(ADDR, LEN) {}
-#define FOSSASAT_DEBUG_STOPWATCH_INIT_H
-#define FOSSASAT_DEBUG_STOPWATCH_INIT_CPP
-#define FOSSASAT_DEBUG_STOPWATCH_START(...) {}
-#define FOSSASAT_DEBUG_STOPWATCH_STOP(...) {}
+#define FOSSASAT_DEBUG_PRINT_RTC_TIME() {}
 #define FOSSASAT_DEBUG_DELAY(MS) {}
 #endif
 

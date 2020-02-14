@@ -15,12 +15,14 @@ uint32_t fetchData(uint8_t slot) {
         PersistentStorage_Write(addr, buff, buffPos, false);
         pictureLen += buffPos;
         digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+        digitalWrite(WATCHDOG_IN, !digitalRead(WATCHDOG_IN));
         return(pictureLen);
       }
     }
     PersistentStorage_Write(addr, buff, buffPos, false);
     pictureLen += buffPos;
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    digitalWrite(WATCHDOG_IN, !digitalRead(WATCHDOG_IN));
   }
   return(pictureLen);
 }
@@ -31,7 +33,8 @@ void setup() {
   FOSSASAT_DEBUG_PORT.println();
 
   FlashSPI.begin();
-  
+
+  pinMode(WATCHDOG_IN, OUTPUT);
   pinMode(FLASH_CS, OUTPUT);
   digitalWrite(FLASH_CS, HIGH);
   pinMode(FLASH_RESET, INPUT);
@@ -42,14 +45,22 @@ void setup() {
   PersistentStorage_Enter4ByteMode();
 
   digitalWrite(LED_BUILTIN, HIGH);
+}
 
 void loop() {
-  while(!FOSSASAT_DEBUG_PORT.available());
+  uint32_t lastBeat = millis();
+  while(!FOSSASAT_DEBUG_PORT.available()) {
+    if(millis() - lastBeat >= 1000) {
+      digitalWrite(WATCHDOG_IN, !digitalRead(WATCHDOG_IN));
+      lastBeat = millis();
+    }
+  }
   uint8_t slot = FOSSASAT_DEBUG_PORT.read();
 
   // erase slot
   for(uint32_t addr = FLASH_IMAGES_START + slot*FLASH_IMAGE_SLOT_SIZE; addr < FLASH_IMAGES_START + (slot + 1)*FLASH_IMAGE_SLOT_SIZE; addr += FLASH_64K_BLOCK_SIZE) {
     PersistentStorage_64kBlockErase(addr);
+    digitalWrite(WATCHDOG_IN, !digitalRead(WATCHDOG_IN));
   }
   
   // read data

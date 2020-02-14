@@ -1,8 +1,5 @@
 #include "Configuration.h"
 
-// debug-only stopwatch
-FOSSASAT_DEBUG_STOPWATCH_INIT_CPP
-
 // flag to signal interrupts enabled/disabled
 volatile bool interruptsEnabled = true;
 

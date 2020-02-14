@@ -343,9 +343,6 @@
     Global Variables
 */
 
-// debug-only stopwatch
-FOSSASAT_DEBUG_STOPWATCH_INIT_H
-
 // flag to signal interrupts enabled/disabled
 extern volatile bool interruptsEnabled;
 

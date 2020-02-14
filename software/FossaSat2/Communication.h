@@ -19,17 +19,7 @@ void Communication_CW_Beep(uint32_t len);
 void Communication_Send_Basic_System_Info();
 void Communication_Send_Full_System_Info();
 template <typename T>
-void Communication_Frame_Add(uint8_t** buffPtr, T val, const char* name, uint32_t mult, const char* unit) {
-  memcpy(*buffPtr, &val, sizeof(val));
-  (*buffPtr) += sizeof(val);
-  FOSSASAT_DEBUG_PRINT(name);
-  FOSSASAT_DEBUG_PRINT(F(" = "));
-  FOSSASAT_DEBUG_PRINT(val);
-  FOSSASAT_DEBUG_PRINT('*');
-  FOSSASAT_DEBUG_PRINT(mult);
-  FOSSASAT_DEBUG_PRINT(' ');
-  FOSSASAT_DEBUG_PRINTLN(unit);
-}
+void Communication_Frame_Add(uint8_t** buffPtr, T val, const char* name, uint32_t mult, const char* unit);
 
 // FOSSA Communication Protocol frame handling
 void Communication_Process_Packet();
