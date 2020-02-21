@@ -192,6 +192,7 @@ void printControls() {
   Serial.println(F("G - get GPS log (all blocks)"));
   Serial.println(F("b - add store and forward message"));
   Serial.println(F("B - request store and forward message"));
+  Serial.println(F("O - send route packet (retransmit, FS-2 to FS-1B)"));
   Serial.println(F("------------------------------------"));
 }
 
@@ -212,8 +213,6 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
     Serial.print(F("SNR: "));
     Serial.print(radio.getSNR());
     Serial.println(F(" dB"));
-    Serial.print(F("Frequency error: "));
-    Serial.println(radio.getFrequencyError());
     Serial.print(F("Function ID: 0x"));
     Serial.println(functionId, HEX);
     PRINT_BUFF(respFrame, respLen);
@@ -818,6 +817,18 @@ void requestStoreAndForward(uint32_t id) {
   uint8_t optData[4];
   memcpy(optData, &id, sizeof(uint32_t));
   sendFrame(CMD_STORE_AND_FORWARD_REQUEST, 4, optData);
+}
+
+void route(char* targetCallsign, uint8_t routeFuncId, uint8_t* routeOptData, uint8_t routeOptDataLen) {
+  Serial.print(F("Sending route frame ... "));
+  uint8_t optDataLen = strlen(targetCallsign) + 2 + routeOptDataLen;
+  uint8_t* optData = new uint8_t[optDataLen];
+  memcpy(optData, targetCallsign, strlen(targetCallsign));
+  memcpy(optData + strlen(targetCallsign), &routeFuncId, sizeof(uint8_t));
+  memcpy(optData + strlen(targetCallsign) + sizeof(uint8_t), &routeOptDataLen, sizeof(uint8_t));
+  memcpy(optData + strlen(targetCallsign) + 2*sizeof(uint8_t), routeOptData, routeOptDataLen);
+  sendFrameEncrypted(CMD_ROUTE, optDataLen, optData);
+  delete[] optData;
 }
 
 void setup() {

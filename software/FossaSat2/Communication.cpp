@@ -1329,6 +1329,11 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       }
     } break;
 
+    case CMD_ROUTE:
+      // just transmit the optional data
+      Communication_Transmit(optData, optDataLen);
+      break;
+
     default:
       FOSSASAT_DEBUG_PRINT(F("Unknown function ID!"));
       return;

@@ -10,22 +10,24 @@ The purpose of this document is to provide overview of the communication system 
 - Description: Simple ping/pong exchange.
 
 ### CMD_RETRANSMIT
-- Optional data length: 0 - 32
+- Optional data length: 4 - 32
 - Optional data:
-  - 0 - N: message to be repeated
+  - 0 - 3: sender ID, unsigned 32-bit integer, LSB first
+  - 4 - N: message to be repeated
 - Response: [RESP_REPEATED_MESSAGE](#RESP_REPEATED_MESSAGE)
 - Description: Satellite will retransmit the optional data provided in this command using the current radio configuration.
 
 ### CMD_RETRANSMIT_CUSTOM
-- Optional data length: 8 - 39
+- Optional data length: 11 - 43
 - Optional data:
-  - 0: bandwidth (0x00 for 7.8 kHz, 0x07 for 125 kHz)
-  - 1: spreading factor (0x00 for SF5, 0x07 for SF12)
-  - 2: coding rate (0x05 for 4/5, 0x08 for 4/8)
-  - 3 - 4: preamble length in symbols, LSB first
-  - 5: CRC enabled (0x01) or disabled (0x00)
-  - 6: output power in dBm (signed 8-bit integer, -17 to 22)
-  - 7 - N: message to be repeated
+  - 0 - 3: sender ID, unsigned 32-bit integer, LSB first
+  - 4: bandwidth (0x00 for 7.8 kHz, 0x07 for 125 kHz)
+  - 5: spreading factor (0x00 for SF5, 0x07 for SF12)
+  - 6: coding rate (0x05 for 4/5, 0x08 for 4/8)
+  - 7 - 8: preamble length in symbols, LSB first
+  - 9: CRC enabled (0x01) or disabled (0x00)
+  - 10: output power in dBm (signed 8-bit integer, -17 to 22)
+  - 11 - N: message to be repeated
 - Response: [RESP_REPEATED_MESSAGE_CUSTOM](#RESP_REPEATED_MESSAGE_CUSTOM)
 - Description: Satellite will retransmit the optional data provided in this command using the provided radio configuration.
 
@@ -239,6 +241,13 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 1 - 2: picture packet ID at which should the reading start, unsigned 16-bit integer, LSB first
 - Response: [RESP_CAMERA_PICTURE](#RESP_CAMERA_PICTURE)
 - Description: Requests burst downlink of picture from provided slot.
+
+### CMD_ROUTE
+- Optional data length: 0 - N
+- Optional data:
+  - 0 - N: FCP frame to route
+- Response: none
+- Description: Requests retransmission of the frame in optional data to the recipient satellite. Example for CMD_RETRANSMIT with route ground -> FOSSASAT-2 -> FOSSASAT-1B: `FOSSASAT-2<CMD_ROUTE><0x19>FOSSASAT-1B<CMD_RETRANSMIT><0x0C>Hello World!`
 
 ---
 # Responses
