@@ -95,7 +95,7 @@ void PersistentStorage_Set(uint8_t addr, T t) {
 
 template <typename T>
 void PersistentStorage_Update_Stat(uint32_t addr, T val) {
-  uint8_t statAddr = addr - FLASH_STATS;
+  uint32_t statAddr = addr - FLASH_STATS;
   
   // read the current page
   uint8_t statBuff[FLASH_EXT_PAGE_SIZE];
