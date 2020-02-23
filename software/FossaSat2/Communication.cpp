@@ -295,6 +295,7 @@ void Communication_Send_Full_System_Info() {
 }
 
 template <typename T>
+// cppcheck-suppress unusedFunction
 void Communication_Frame_Add(uint8_t** buffPtr, T val, const char* name, uint32_t mult, const char* unit) {
   memcpy(*buffPtr, &val, sizeof(val));
   (*buffPtr) += sizeof(val);
@@ -307,15 +308,10 @@ void Communication_Frame_Add(uint8_t** buffPtr, T val, const char* name, uint32_
   FOSSASAT_DEBUG_PRINTLN(unit);
 }
 
-// cppcheck-suppress unusedFunction
 template void Communication_Frame_Add<int8_t>(uint8_t**, int8_t, const char*, uint32_t, const char*);
-// cppcheck-suppress unusedFunction
 template void Communication_Frame_Add<uint8_t>(uint8_t**, uint8_t, const char*, uint32_t, const char*);
-// cppcheck-suppress unusedFunction
 template void Communication_Frame_Add<int16_t>(uint8_t**, int16_t, const char*, uint32_t, const char*);
-// cppcheck-suppress unusedFunction
 template void Communication_Frame_Add<uint16_t>(uint8_t**, uint16_t, const char*, uint32_t, const char*);
-// cppcheck-suppress unusedFunction
 template void Communication_Frame_Add<uint32_t>(uint8_t**, uint32_t, const char*, uint32_t, const char*);
 
 void Communication_Process_Packet() {
