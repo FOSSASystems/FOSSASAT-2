@@ -1,5 +1,6 @@
 #include "Communication.h"
 
+// cppcheck-suppress unusedFunction
 void Communication_Receive_Interrupt() {
   // check interrups are enabled
   if (!interruptsEnabled) {

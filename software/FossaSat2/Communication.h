@@ -4,7 +4,6 @@
 #include "FossaSat2.h"
 
 // interrupt functions
-// cppcheck-suppress unusedFunction
 void Communication_Receive_Interrupt();
 
 // modem configuration
