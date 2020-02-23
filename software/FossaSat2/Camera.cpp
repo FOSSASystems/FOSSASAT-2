@@ -83,13 +83,16 @@ uint8_t Camera_Init(uint8_t pictureSize, uint8_t lightMode, uint8_t saturation, 
     camera.wrSensorReg8_8(0xff, 0x01);
     camera.rdSensorReg8_8(OV2640_CHIPID_HIGH, &vid); //CD
     camera.rdSensorReg8_8(OV2640_CHIPID_LOW, &pid);  //CD
-    if((vid != 0x26) && ((pid != 0x41) || (pid != 0x42))){
-      FOSSASAT_DEBUG_PRINTLN(F("Unexpected vendor/product ID!"));
-      FOSSASAT_DEBUG_PRINT(F("Expected 0x26 0x41/0x42, got 0x"));
-      FOSSASAT_DEBUG_PRINT(vid, HEX);
-      FOSSASAT_DEBUG_PRINT(F(" 0x"));
-      FOSSASAT_DEBUG_PRINTLN(pid, HEX);
+    if(vid != 0x26) {
+      FOSSASAT_DEBUG_PRINTLN(F("Unexpected vendor ID!"));
+      FOSSASAT_DEBUG_PRINT(F("Expected 0x26, got 0x"));
+      FOSSASAT_DEBUG_PRINTLN(vid, HEX);
       state = 8;
+    } else if(!((pid == 0x41) || (pid == 0x42))) {
+      FOSSASAT_DEBUG_PRINTLN(F("Unexpected product ID!"));
+      FOSSASAT_DEBUG_PRINT(F("Expected 0x41/0x42, got 0x"));
+      FOSSASAT_DEBUG_PRINTLN(pid, HEX);
+      state = 9;
     } else {
       FOSSASAT_DEBUG_PRINTLN(F("Detected OV2640"));
       state = 0;
