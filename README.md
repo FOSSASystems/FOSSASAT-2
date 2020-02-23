@@ -9,4 +9,3 @@ Active pointing is carried out by using integrated solar panel magnetorquers, 2 
 
 ## Comms
 An SX1268T Chip is used to establish a Morse, 9k6 GFSK and LoRa Downlink and a LoRa and 9k6 GFSK uplink.
-
