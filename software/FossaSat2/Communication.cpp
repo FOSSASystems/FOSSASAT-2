@@ -752,7 +752,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_SET_CALLSIGN: {
         // check optional data is less than limit
-        if(optDataLen <= MAX_STRING_LENGTH) {
+        if(optDataLen < MAX_STRING_LENGTH) {
           // get callsign from frame
           char newCallsign[MAX_STRING_LENGTH];
           memcpy(newCallsign, optData, optDataLen);
