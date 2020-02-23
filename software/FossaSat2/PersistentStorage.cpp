@@ -335,6 +335,7 @@ void PersistentStorage_WriteDisable() {
   PersistentStorage_SPItranscation(MX25L51245G_CMD_WRDI);
 }
 
+// cppcheck-suppress unusedFunction
 uint8_t PersistentStorage_ReadManufacturerID() {
   uint8_t cmdBuf[] = {MX25L51245G_CMD_REMS, 0x00, 0x00, 0x00};
   uint8_t buf[2];
@@ -348,12 +349,14 @@ uint8_t PersistentStorage_ReadStatusRegister() {
   return(buf[0]);
 }
 
+// cppcheck-suppress unusedFunction
 uint8_t PersistentStorage_ReadConfigRegister() {
   uint8_t buf[1];
   PersistentStorage_SPItranscation(MX25L51245G_CMD_RDCR, false, buf, 1);
   return(buf[0]);
 }
 
+// cppcheck-suppress unusedFunction
 uint8_t PersistentStorage_ReadSecurityRegister() {
   uint8_t buf[1];
   PersistentStorage_SPItranscation(MX25L51245G_CMD_RDSCUR, false, buf, 1);
@@ -364,6 +367,7 @@ void PersistentStorage_Enter4ByteMode() {
   PersistentStorage_SPItranscation(MX25L51245G_CMD_EN4B);
 }
 
+// cppcheck-suppress unusedFunction
 void PersistentStorage_Exit4ByteMode() {
   PersistentStorage_SPItranscation(MX25L51245G_CMD_EX4B);
 }
@@ -375,6 +379,7 @@ void PersistentStorage_Reset() {
   pinMode(FLASH_RESET, INPUT);
 }
 
+// cppcheck-suppress unusedFunction
 void PersistentStorage_WriteStatusRegister(uint8_t sr, uint8_t cr) {
   uint8_t buf[] = {sr, cr};
   PersistentStorage_WaitForWriteEnable();
