@@ -95,28 +95,30 @@ void PersistentStorage_Set(uint8_t addr, T t) {
 
 template <typename T>
 void PersistentStorage_Update_Stat(uint32_t addr, T val) {
+  uint8_t statAddr = addr - FLASH_STATS;
+  
   // read the current page
   uint8_t statBuff[FLASH_EXT_PAGE_SIZE];
   PersistentStorage_Read(FLASH_STATS, statBuff, FLASH_EXT_PAGE_SIZE);
 
   // get min/avg/max
   T min;
-  memcpy(&min, statBuff + addr, sizeof(T));
+  memcpy(&min, statBuff + statAddr, sizeof(T));
   T avg;
-  memcpy(&avg, statBuff + addr + sizeof(T), sizeof(T));
+  memcpy(&avg, statBuff + statAddr + sizeof(T), sizeof(T));
   T max;
-  memcpy(&max, statBuff + addr + 2*sizeof(T), sizeof(T));
+  memcpy(&max, statBuff + statAddr + 2*sizeof(T), sizeof(T));
 
   // update stats
   if(val < min) {
-    memcpy(statBuff + addr, &val, sizeof(T));
+    memcpy(statBuff + statAddr, &val, sizeof(T));
   }
   
   avg = (avg + val)/2;
-  memcpy(statBuff + addr + sizeof(T), &avg, sizeof(T));
+  memcpy(statBuff + statAddr + sizeof(T), &avg, sizeof(T));
 
   if(val > max) {
-    memcpy(statBuff + addr + 2*sizeof(T), &val, sizeof(T));
+    memcpy(statBuff + statAddr + 2*sizeof(T), &val, sizeof(T));
   }
 
   // write the updated buffer
