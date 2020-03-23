@@ -42,6 +42,7 @@
 #define FSK_PREAMBLE_LEN      16      // bits
 #define DATA_SHAPING          0.5     // BT product
 #define TCXO_VOLTAGE          1.6
+#define WHITENING_INITIAL     0x1FF   // initial whitening LFSR value
 
 // camera configuration macros, from ArduCAM.h
 
@@ -152,7 +153,7 @@ void sendFrameEncrypted(uint8_t functionId, uint8_t optDataLen = 0, uint8_t* opt
   // send data
   int state = radio.transmit(frame, len);
   delete[] frame;
-  
+
   // check transmission success
   if (state == ERR_NONE) {
     Serial.println(F("sent successfully!"));
@@ -306,7 +307,7 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       Serial.print(F("boardTemp = "));
       Serial.print(FCP_System_Info_Get_Temperature(respOptData, 17));
       Serial.println(" deg C");
-      
+
     } break;
 
     case RESP_PACKET_INFO: {
@@ -324,15 +325,15 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       Serial.print(F("valid LoRa frames = "));
       memcpy(&counter, respOptData + 2, sizeof(uint16_t));
       Serial.println(counter);
-      
+
       Serial.print(F("invalid LoRa frames = "));
       memcpy(&counter, respOptData + 4, sizeof(uint16_t));
       Serial.println(counter);
-      
+
       Serial.print(F("valid FSK frames = "));
       memcpy(&counter, respOptData + 6, sizeof(uint16_t));
       Serial.println(counter);
-      
+
       Serial.print(F("invalid FSK frames = "));
       memcpy(&counter, respOptData + 8, sizeof(uint16_t));
       Serial.println(counter);
@@ -446,7 +447,7 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       memcpy(&lightVal, respOptData + 35, sizeof(float));
       Serial.print(F("lightPanelY = "));
       Serial.println(lightVal, 2);
-      
+
       memcpy(&lightVal, respOptData + 39, sizeof(float));
       Serial.print(F("lightTop = "));
       Serial.println(lightVal, 2);
@@ -455,15 +456,15 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       memcpy(&fault, respOptData + 43, sizeof(uint8_t));
       Serial.print(F("faultX = 0x"));
       Serial.println(fault, HEX);
-      
+
       memcpy(&fault, respOptData + 44, sizeof(uint8_t));
       Serial.print(F("faultY = 0x"));
       Serial.println(fault, HEX);
-      
+
       memcpy(&fault, respOptData + 45, sizeof(uint8_t));
       Serial.print(F("faultZ = 0x"));
       Serial.println(fault, HEX);
-      
+
     } break;
 
     case RESP_CAMERA_PICTURE: {
@@ -471,7 +472,7 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       memcpy(&packetId, respOptData, sizeof(uint16_t));
       Serial.print(F("Packet ID: "));
       Serial.println(packetId);
-      
+
       char buff[16];
       if(respOptDataLen < 16) {
         for(uint8_t i = 0; i < respOptDataLen; i++) {
@@ -494,11 +495,11 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       Serial.println(F("Unknown function ID!"));
       break;
   }
-  
+
   if(functionId != RESP_CAMERA_PICTURE) {
     printControls();
   }
-  
+
   if (respOptDataLen > 0) {
     delete[] respOptData;
   }
@@ -681,6 +682,9 @@ int16_t setLoRa() {
                           LORA_PREAMBLE_LEN,
                           TCXO_VOLTAGE);
   radio.setCRC(true);
+  #ifdef USE_SX126X
+  radio.setWhitening(true, WHITENING_INITIAL);
+  #endif
   return(state);
 }
 
@@ -698,6 +702,7 @@ int16_t setGFSK() {
   radio.setSyncWord(syncWordFSK, 2);
   #ifdef USE_SX126X
     radio.setCRC(2);
+    radio.setWhitening(true, WHITENING_INITIAL);
   #else
     radio.setCRC(true);
   #endif
@@ -855,7 +860,7 @@ void setup() {
   #else
     radio.setDio0Action(onInterrupt);
   #endif
-  
+
   // begin listening for packets
   radio.startReceive();
 
@@ -971,13 +976,17 @@ void loop() {
       case 'B':
         requestStoreAndForward(0x1337BEEF);
         break;
+      case 'O': {
+        char* data = "Hello there!";
+        route("FOSSASAT-1B", CMD_RETRANSMIT, (uint8_t*)data, strlen(data));
+      } break;
       default:
         Serial.print(F("Unknown command: "));
         Serial.println(serialCmd);
         break;
     }
 
-    // for some reason, when using SX126x GFSK and listening after transmission, 
+    // for some reason, when using SX126x GFSK and listening after transmission,
     // the next packet received will have bad CRC,
     // and the data will be the transmitted packet
     // the only workaround seems to be resetting the module
