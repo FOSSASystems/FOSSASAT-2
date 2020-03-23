@@ -22,7 +22,7 @@ SPIClass FlashSPI(FLASH_MOSI, FLASH_MISO, FLASH_SCK);
 HardwareSerial GpsSerial(GPS_RX, GPS_TX);
 
 // RadioLib instances
-SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_NRST, RADIO_BUSY, RadioSPI);
+SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_NRST, RADIO_BUSY, RadioSPI, SPISettings(2000000, MSBFIRST, SPI_MODE0));
 MorseClient morse(&radio);
 
 // camera instance
@@ -102,6 +102,7 @@ void Configuration_Setup() {
 
   // initialize SPI interfaces
   FlashSPI.begin();
+  RadioSPI.begin();
   SPI.setMOSI(CAMERA_MOSI);
   SPI.setMISO(CAMERA_MISO);
   SPI.setSCLK(CAMERA_SCK);

@@ -4,8 +4,8 @@
 // STM32:stm32:Nucleo_64:pnum=NUCLEO_L452REP
 
 // compile-time checks
-#if (!defined RADIOLIB_VERSION) || (RADIOLIB_VERSION < 0x03020300)
-  #error "Unsupported RadioLib version (< 3.2.3)!"
+#if (!defined RADIOLIB_VERSION) || (RADIOLIB_VERSION < 0x03040000)
+  #error "Unsupported RadioLib version (< 3.4.0)!"
 #endif
 
 #if (!defined(RADIOLIB_STATIC_ONLY))
