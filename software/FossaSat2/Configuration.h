@@ -9,26 +9,27 @@
 
 // RTC time to configure during interation
 #define RTC_YEAR                                        20    // offset from 2000
-#define RTC_MONTH                                       4
-#define RTC_DAY                                         1
-#define RTC_WEEKDAY                                     1     // Monday = 1
-#define RTC_HOURS                                       14    // 24-hour format, no leading 0s
-#define RTC_MINUTES                                     36
+#define RTC_MONTH                                       1
+#define RTC_DAY                                         30
+#define RTC_WEEKDAY                                     4     // Monday = 1
+#define RTC_HOURS                                       16    // 24-hour format, no leading 0s
+#define RTC_MINUTES                                     6
 #define RTC_SECONDS                                     0
 
 // uncomment to reset system info (callsing, configuration etc.) on start
 //#define RESET_SYSTEM_INFO
 
 // comment out to disable deployment sequence
-#define ENABLE_DEPLOYMENT_SEQUENCE
+//#define ENABLE_DEPLOYMENT_SEQUENCE
 
 // comment out to disable sleep during deployment sequence
-#define ENABLE_DEPLOYMENT_SLEEP
+//#define ENABLE_DEPLOYMENT_SLEEP
+
 // comment out to disable charging period during deployment sequence
 //#define ENABLE_DEPLOYMENT_CHARGING
 
 // comment out to disable transmission control (transmission disable and no transmissions in low power mode)
-#define ENABLE_TRANSMISSION_CONTROL
+//#define ENABLE_TRANSMISSION_CONTROL
 
 /*
     Array Length Limits
@@ -370,7 +371,7 @@ extern SX1268 radio;
 extern MorseClient morse;
 
 // camera instance
-extern ArduCAM camera;
+extern Camera* camera;
 
 // RTC instance
 extern STM32RTC& rtc;

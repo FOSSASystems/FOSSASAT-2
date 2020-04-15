@@ -26,7 +26,7 @@ SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_NRST, RADIO_BUSY, RadioSP
 MorseClient morse(&radio);
 
 // camera instance
-ArduCAM camera(OV2640, CAMERA_CS);
+Camera* camera = ArduCAM::createCamera(OV2640, CAMERA_CS);
 
 // RTC instance
 STM32RTC& rtc = STM32RTC::getInstance();

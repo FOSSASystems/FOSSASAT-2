@@ -1,15 +1,12 @@
 #include "FossaSat2.h"
 
-// Atom arduino-upload build configuration:
-// STM32:stm32:Nucleo_64:pnum=NUCLEO_L452REP
-
 // compile-time checks
 #if (!defined RADIOLIB_VERSION) || (RADIOLIB_VERSION < 0x03040000)
   #error "Unsupported RadioLib version (< 3.4.0)!"
 #endif
 
 #if (!defined(RADIOLIB_STATIC_ONLY))
-  #error "RadioLib is using dynamic memory management, enable static only in RadioLib/src/TypeDef.h"
+  #error "RadioLib is using dynamic memory management, enable static only in RadioLib/src/BuildOpt.h"
 #endif
 
 // cppcheck-suppress unusedFunction
@@ -48,7 +45,7 @@ void setup() {
   // initialize camera
   digitalWrite(CAMERA_POWER_FET, HIGH);
   FOSSASAT_DEBUG_PORT.print(F("Camera init:\t"));
-  FOSSASAT_DEBUG_PORT.println(Camera_Init(OV2640_320x240, Auto, Saturation0, Brightness0, Contrast0, Normal));
+  FOSSASAT_DEBUG_PORT.println(Camera_Init(p320x240, Auto, Saturation0, Brightness0, Contrast0, Normal));
   digitalWrite(CAMERA_POWER_FET, LOW);
 
   // initialize IMU
@@ -273,6 +270,13 @@ void setup() {
       }
     }
 
+    // increment deployment counter
+    attemptNumber++;
+    PersistentStorage_Set(FLASH_DEPLOYMENT_COUNTER, attemptNumber);
+
+  } else if(attemptNumber <= 3) {
+    // mid-flight reset, deploy
+  
     // sleep before deployment
 #ifdef ENABLE_DEPLOYMENT_SLEEP
     PowerControl_Wait(DEPLOYMENT_SLEEP_LENGTH, LOW_POWER_SLEEP);

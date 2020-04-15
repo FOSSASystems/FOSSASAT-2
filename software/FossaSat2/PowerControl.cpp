@@ -1,7 +1,7 @@
 #include "PowerControl.h"
 
 uint32_t PowerControl_Get_Sleep_Interval() {
-  // sleep interval in ms (default for battery > 3.7 V)
+  // sleep interval in ms
   uint32_t interval = 0;
 
   #ifdef ENABLE_INTERVAL_CONTROL

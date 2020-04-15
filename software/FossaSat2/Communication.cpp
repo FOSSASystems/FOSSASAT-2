@@ -841,7 +841,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         digitalWrite(CAMERA_POWER_FET, HIGH);
 
         // initialize
-        uint32_t cameraState = (uint32_t)Camera_Init(pictureSize, lightMode, saturation, brightness, contrast, special);
+        uint32_t cameraState = (uint32_t)Camera_Init((JPEG_Size)pictureSize, (Light_Mode)lightMode, (Color_Saturation)saturation, (Brightness)brightness, (Contrast)contrast, (Special_Effects)special);
         if(cameraState != 0) {
           // initialization failed, send the error
           digitalWrite(CAMERA_POWER_FET, LOW);
