@@ -58,7 +58,7 @@ The purpose of this document is to provide overview of the communication system 
 - Optional data length: 0
 - Optional data: none
 - Response: [RESP_FULL_SYSTEM_INFO](#RESP_FULL_SYSTEM_INFO)
-- Description: Request basic system information. Only available in FSK mode.
+- Description: Request full system information. Only available in FSK mode.
 
 ### CMD_STORE_AND_FORWARD_ADD
 - Optional data length: 4 - 32
