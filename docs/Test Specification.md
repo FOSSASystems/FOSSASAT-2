@@ -103,6 +103,7 @@ Test case shall be considered failed if any step of test case fails. All results
 * A separate sketch shall be provided to wipe persistent storage.
 
 ---
+
 ### MAINPROGT5 - Pin Mapping
 ### Steps
 1. Check pin configuration in software matches flight hardware.
@@ -578,6 +579,488 @@ Test case shall be considered failed if any step of test case fails. All results
 ---
 
 ## Communication
+
+### COMMST1 - Ping-Pong Exchange
+### Steps
+1. Send valid CMD_PING frame from ground station using LoRa modem.
+2. Repeat step 1 using FSK modem.
+3. Add valid optional data to CMD_PING frame and send it using LoRa modem.
+4. Repeat step 3 using CMD_PING frame with invalid optional data field (optDataLen field does not match number of bytes in optData field).
+
+### Expected Results
+1. Satellite shall respond with RESP_PONG frame using LoRa modem.
+2. Satellite shall respond with RESP_PONG frame using FSK modem.
+3. Satellite shall ignore optional data and respond with valid RESP_PONG frame.
+4. Satellite shall ignore optional data and respond with valid RESP_PONG frame. Mismatch between optDataLen and actual length of optData field shall be reported in debug console.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST2 - Relaying Messages
+### Steps
+1. Send valid CMD_RETRANSMIT frame from ground station using LoRa modem.
+2. Repeat step 1 using FSK modem.
+3. Send CMD_ RETRANSMIT frame with invalid optional data field (optDataLen field does not match number of bytes in optData field).
+
+
+### Expected Results
+1. Satellite shall respond with RESP_REPEATED_MESSAGE frame using LoRa modem.
+2. Satellite shall respond with RESP_REPEATED_MESSAGE frame using FSK modem.
+3. Satellite shall not respond with any frame. Mismatch between optDataLen and actual length of optData field shall be reported in debug console.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST3 - Relaying Messages with Custom Configuration
+### Steps
+1. Send valid CMD_RETRANSMIT_CUSTOM frame from ground station using LoRa modem. Set modulation parameters to any non-default settings.
+2. Wait for any transmission from the satellite.
+3. Repeat steps 1 – 2 for settings with lowest possible data rate (bandwidth 7.8 kHz, SF12).
+4. Repeat steps 1 – 2 for multiple different settings.
+5. Send invalid CMD_RETRANSMIT_CUSTOM frame with one of the modulation parameters outside accepted range.
+6. Repeat step 5 for all modulation parameters.
+
+### Expected Results
+1. Satellite shall respond with RESP_REPEATED_MESSAGE_CUSTOM frame using LoRa modem with the correct settings.
+2. Further transmissions from the satellite shall use the default modem configuration.
+3. Satellite shall always respond using correct settings. Satellite shall not reset when responding with very low data rates.
+4. Satellite shall always respond using correct settings.
+5. Satellite shall ignore this frame. Incorrect modulation parameter value shall be reported in debug console.
+6. Satellite shall always ignore the invalid frame.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST4 - Basic System Info Request
+### Steps
+1. Send valid CMD_TRANSMIT_SYSTEM_INFO frame from ground station using LoRa modem.
+2. Repeat step 1 using FSK modem.
+3. On the satellite, change as many variables contained in basic system info frame as possible and repeat step 1.
+
+### Expected Results
+1. Satellite shall respond with RESP_ SYSTEM_INFO frame using LoRa modem. All received values shall reflect the current satellite state.
+2. Satellite shall respond with RESP_ SYSTEM_INFO frame using FSK modem.
+3. All received values shall reflect the current satellite state.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST5 - Packet Info Request
+### Steps
+1. Send valid CMD_GET_PACKET_INFO frame from ground station using LoRa modem.
+2. Repeat step 1 using FSK modem.
+
+### Expected Results
+1. Satellite shall respond with RESP_PACKET_INFO frame using LoRa modem. The response shall contain correct values for SNR, RSSI and packet counters.
+2. Satellite shall respond with RESP_PACKET_INFO frame using FSK modem.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST6 - Statistics Request
+### Steps
+1. Send valid CMD_GET_STATISTICS frame from ground station using LoRa modem.
+2. Repeat step 1 using FSK modem with flags for all statistics.
+
+### Expected Results
+1. Satellite shall reject the frame due to LoRa modem being active. No response shall be sent.
+2. Satellite shall respond with RESP_STATISTICS frame using FSK modem. The response shall contain the expected set of statistics.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST7 - Full System Info Request
+### Steps
+1. Send valid CMD_GET_FULL_SYSTEM_INFO frame from ground station using LoRa modem.
+2. Repeat step 1 using FSK modem with flags for all statistics.
+
+### Expected Results
+1. Satellite shall reject the frame due to LoRa modem being active. No response shall be sent.
+2. Satellite shall respond with RESP_FULL_SYSTEM_INFO frame using FSK modem. All received values shall reflect the current satellite state.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST8 - Store & Forward
+### Steps
+1. Ensure store & forward storage is empty (e.g. by sending CMD_WIPE_EEPROM with the appropriate flag).
+2. Add a message to the store & forward storage using some 32-bit ID.
+3. Request the store & forward message using the ID from step 2.
+4. Request store & forward message for a non-existent message ID.
+5. Add another message using a new ID.
+6. Request the store & forward message using the ID from previous step.
+7. Add a different message using ID from step 5.
+8. Repeat step 6.
+
+### Expected Results
+1. Store & forward storage shall not contain any messages.
+2. New store & forward entry shall be created for the provided ID. Satellite shall respond with the 16-bit ID of the assigned slot.
+3. Satellite shall respond with the correct forwarded message.
+4. Satellite shall respond with forwarded message set to 0xFFFF (ID not found).
+5. New store & forward entry shall be created for the provided ID. Satellite shall respond with the 16-bit ID of the assigned slot. Assigned slot ID shall be different than the one in step 2.
+6. Satellite shall respond with the correct forwarded message.
+7. Stored message for that ID shall be overwritten. Satellite shall respond with the 16-bit ID of the assigned slot. Assigned slot ID shall be the same as in step 5.
+8. Satellite shall respond with the new forwarded message.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST9 - Encryption and Password Protection
+### Steps
+1. Send any valid private command without optional data (e.g. CMD_DEPLOY).
+2. Repeat step 1 using incorrect password.
+3. Repeat step 1 using incorrect encryption key.
+4. Repeat steps 1 – 3 using private command with optional data (e.g. CMD_SET_MPPT_MODE).
+
+### Expected Results
+1. Satellite shall perform the correct action (based on frame type).
+2. Satellite shall successfully decode frame and detect incorrect password. Password mismatch shall be reported in the debug console.
+3. Satellite shall fail in decoding the frame. Password mismatch shall be reported in the debug console.
+4. Satellite shall correctly check password and report any mismatch.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST10 - Restart Command
+### Steps
+1. Send valid CMD_RESTART frame from ground station using LoRa modem.
+2. Repeat step 1 using FSK modem.
+
+### Expected Results
+1. Satellite shall restart.
+2. Satellite shall always restart correctly.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST11 - Persistent Storage Wipe
+### Steps
+1. Change all possible persistent storage variables (system properties, store and forward, images, NMEA log, stats).
+2. Send CMD_WIPE_EEPROM with all flags set.
+
+### Expected Results
+1. All sections of persistent storage shall contain non-default values.
+2. Satellite shall wipe all sections of persistent storage. Satellite shall not reset during time-intensive operations (e.g. wiping images).
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST12 - Transmission Control Configuration
+### Steps
+1. Send any frame that will make satellite respond (e.g. CMD_PING).
+2. Send valid CMD_SET_TRANSMIT_ENABLE frame with optional data byte set to 0 from ground station using LoRa modem.
+3. Repeat step 1 using both modems.
+4. Wait for at least 20 minutes.
+5. Send valid CMD_SET_TRANSMIT_ENABLE frame with optional data byte set to 1.
+3. Repeat step 1 using both modems.
+7. Wait for at least 20 minutes.
+
+### Expected Results
+1. Satellite shall respond with the correct response frame.
+2. Satellite shall no longer send any transmissions.
+3. Satellite shall not send any response frames.
+4. Satellite shall not send any automated frames.
+5. Satellite shall resume sending transmissions.
+6. Satellite shall always respond with the correct response frame.
+7. Satellite shall send automated system info frames using LoRa and FSK.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST13 - Callsign Configuration
+### Steps
+1. Wipe persistent system configuration using CMD_WIPE_EEPROM frame.
+2. Send CMD_PING with callsign “FOSSASAT-2”.
+3. Send valid CMD_SET_CALLSIGN frame with callsign set to some other string (e.g. “NEWCALLSIGN-4”).
+4. Send CMD_PING with callsign “FOSSASAT-2”.
+5. Send CMD_PING with the new callsign.
+6. Send CMD_SET_CALLSIGN frame with new callsign longer than 32 bytes.
+
+### Expected Results
+1. Satellite callsign shall be set to default value (“FOSSASAT-2”).
+2. Satellite shall respond using the default callsign.
+3. Satellite shall set its callsign to the new value.
+4. Satellite shall not respond to frame with incorrect callsign. Callsign mismatch shall be reported in debug console.
+5. Satellite shall respond using the new callsign.
+6. Satellite shall not update its callsign. Callsign length error shall be reported in debug console.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST14 - Spreading Factor Configuration
+### Steps
+1. Wipe persistent system configuration using CMD_WIPE_EEPROM frame.
+2. Send any frame that will make satellite respond (e.g. CMD_PING).
+3. Send valid CMD_SET_SF_MODE frame with optional data byte set to 1.
+4. Repeat step 2 with ground station using standard spreading factor.
+5. Repeat step 2 with ground station using alternative spreading factor.
+6. Send valid CMD_SET_SF_MODE frame with optional data byte set to 0.
+7. Repeat steps 4 – 5.
+
+### Expected Results
+1. Spreading factor shall be set to standard value.
+2. Satellite shall respond using standard spreading factor.
+3. Satellite shall use alternative spreading factor.
+4. Satellite shall not be able to receive transmissions with standard spreading factor.
+5. Satellite shall correctly respond using alternative spreading factor.
+6. Spreading factor shall be set back to standard mode.
+7. Satellite shall only respond to transmissions with standard spreading factor.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST15 - Receive Window Length Configuration
+### Steps
+1. Restart satellite with wiped persistent storage and enabled RESET_SYSTEM_INFO macro.
+2. Set FSK window receive length to some non-default, non-zero value.
+3. Leave satellite running and check the FSK receive window length.
+4. Repeat steps 2 - 3 for LoRa receive window.
+5. Set FSK receive window length to 0.
+6. Set LoRa receive window length to 0.
+7. Attempt to set FSK receive window length to 0 again.
+
+### Expected Results
+1. All persistent variables shall be set to the default values.
+2. Receive window length for FSK modem shall be updated correctly.
+3. Satellite shall use the new FSK receive window length.
+4. Receive window for LoRa shall be correctly set and used.
+5. Satellite shall allow zero FSK receive window length.
+6. Satellite shall set LoRa window length to 0 and restore default FSK receive window length.
+7. Satellite shall not allow FSK receive window to be set to 0 and always restore default FSK receive window length.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST16 - Picture Download
+### Steps
+1. Take a picture using any picture parameter configuration.
+2. Request length of the picture taken in previous step.
+3. Request appropriate amount of picture bytes from slot used in step 1.
+4. Using hex editor, save the received data as .jpeg file.
+5. Repeat steps 1 - 3 for all possible picture sizes and some changed picture parameters (brightness, saturation etc.), always using new picture slot to save the picture.
+
+### Expected Results
+1. Picture shall be taken and saved to persistent storage.
+2. Satellite shall respond with the picture length.
+3. The request picture shall be transmitted as JPEG-encoded byte stream.
+4. The received file shall be a valid JPEG picture.
+5. The correct picture length and data bytes shall be transmitted for any possible picture size and parameters.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+### Notes
+* Separate sketch shall provided for picture downlink.
+
+---
+
+### COMMST17 - RTC Configuration
+### Steps
+1. Restart satellite with wiped persistent storage and enabled RESET_SYSTEM_INFO macro.
+2. Using CMD_SET_RTC, set RTC to some date and time.
+3. Keep satellite running for at least 20 minutes.
+
+### Expected Results
+1. All persistent variables shall be set to the default values.
+2. RTC configuration and persistent timestamp shall be updated.
+3. RTC timestamp shall always correctly update. The time elapsed shall be correctly recored.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST18 - Manual Magnetorquer Operation
+### Steps
+
+### Expected Results
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST19 - Packet Routing
+### Steps
+1. Send CMD_ROUTE frame targeting satellite with the callsign "FOSSASAT-1B" and payload CMD_PING.
+2. Repeat step 1 using payload frame with optional data (e.g. CMD_RETRANSMIT).
+
+### Expected Results
+1. Satellite shall retransmit the payload frame (CMD_PING) with the target callsign ("FOSSASAT-1B"). The target satellite shall respond to this frame.
+2. Satellite shall correctly retransmit the routed frame. The target satellite shall respond to the payload frame.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+### Notes
+* This test requires a FOSSASAT-1B setup to be withing range.
+
+---
+
+### COMMST20 - Morse Code Beacon
+### Steps
+1. Restart satellite with wiped persistent storage and enabled RESET_SYSTEM_INFO macro.
+2. Keep satellite running with battery above 3.8 V (default Morse beacon limit) for at least 10 minutes.
+3. Repeat step 2 using battery below 3.8 V (or with adjusted Morse beacon limit).
+
+### Expected Results
+1. All persistent variables shall be set to the default values.
+2. Satellite shall send automated Morse code beacon consisting of callsign and battery voltage, encoded as letter (A = 3.2 V, B = 3.25 V etc.).
+3. Satellite shall only send 3 500 ms long "beeps" at the carrier frequency, instead of the Morse code beacon.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
+### COMMST21 - Response Delay
+### Steps
+1. Send any frame that will make the satellite respond (e.g. CMD_PING) using LoRa modem.
+2. Repeat step 1 for at least 3 other frames.
+3. Repeat steps 1 - 3 for FSK modem.
+
+### Expected Results
+1. Satellite shall respond with the appropriate frame type. There shall be at least 1 second delay between end of command transmission and start of response transmission.
+2. Satellite shall always wait one second.
+3. Satellite shall wait one second regardless of currently active modem.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
 
 ---
 
