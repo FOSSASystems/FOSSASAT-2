@@ -1210,12 +1210,18 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_LOG_GPS: {
-      if(Communication_Check_OptDataLen(4, optDataLen)) {
+      if(Communication_Check_OptDataLen(8, optDataLen)) {
         // get parameters
         uint32_t duration = 0;
         memcpy(&duration, optData, sizeof(uint32_t));
         FOSSASAT_DEBUG_PRINT(F("GPS logging duration: "));
         FOSSASAT_DEBUG_PRINTLN(duration);
+        
+        // get parameters
+        uint32_t offset = 0;
+        memcpy(&offset, optData + sizeof(uint32_t), sizeof(uint32_t));
+        FOSSASAT_DEBUG_PRINT(F("GPS logging offset: "));
+        FOSSASAT_DEBUG_PRINTLN(offset);
 
         // check battery
         #ifdef ENABLE_TRANSMISSION_CONTROL
