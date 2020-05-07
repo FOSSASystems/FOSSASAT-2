@@ -1368,6 +1368,15 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       Communication_Transmit(optData, optDataLen);
       break;
 
+    case CMD_SET_FLASH_CONTENTS: {
+      if (optDataLen >= sizeof(uint32_t) + 1) {
+        uint32_t address = 0;
+        memcpy(&address, optData, sizeof(uint32_t));
+        PersistentStorage_Write(address, optData + sizeof(uint32_t), optDataLen - sizeof(uint32_t));
+      }
+      
+    } break;
+
     default:
       FOSSASAT_DEBUG_PRINT(F("Unknown function ID!"));
       return;

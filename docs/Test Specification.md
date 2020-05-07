@@ -1087,6 +1087,25 @@ Test case shall be considered failed if any step of test case fails. All results
 
 ---
 
+### COMMST23 - Write to external flash
+### Steps
+1. Read one of the flash pages using CMD_GET_FLASH_CONTENTS (e.g. the system info page).
+2. Change the contents of the flash page using CMD_SET_FLASH_CONTENTS.
+
+### Expected Results
+1. Flash shall contain the expected data.
+2. Flash page shall be updated on the correct address. The rest of the page shall remain unchanged.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
 ## ADCS
 
 ---

@@ -252,6 +252,14 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Response: none
 - Description: Requests retransmission of the frame in optional data to the recipient satellite. Example for CMD_RETRANSMIT with route ground -> FOSSASAT-2 -> FOSSASAT-1B: `FOSSASAT-2<CMD_ROUTE><0x19>FOSSASAT-1B<CMD_RETRANSMIT><0x0C>Hello World!`
 
+### CMD_SET_FLASH_CONTENTS
+- Optional data length: 5 - 132
+- Optional data:
+  - 0 - 3: flash address to write, unsigned 32-bit integer, LSB first
+  - 4 - N: data to be written to flash
+- Response: none
+- Description: Writes data to arbitrary address in external flash. This command should only be used in emergency situations, as it can be used to override some safety checks.
+
 ---
 # Responses
 
