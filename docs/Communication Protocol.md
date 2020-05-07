@@ -252,6 +252,20 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 ---
 # Responses
 
+### RESP_ACKNOWLEDGE
+- Optional data length: 2
+- Optional data:
+  - 0: Function ID of the acknowledged frame, or 0xFF if the decoder was unable to read function ID
+  - 1: Resulting of frame parsing operations:
+    - 0x00: success, command is being executed
+    - 0x01: callsign mismatch
+    - 0x02: Rx failed
+    - 0x03: unable to read function ID
+    - 0x04: decryption failed
+    - 0x05: optional data length extraction failed
+    - 0x06: unknown function ID
+- Description: This response frame is sent after receiving any command frame. It serves as acknowledgement of reception, and contains the result of parsing, decoding and decrypting steps taken during processing of the command frame. This result IS NOT the result of command execution, since RESP_ACKNOWLEDGE is sent prior to executing the frame function.
+
 ### RESP_PONG
 - Optional data length: 0
 - Optional data: none

@@ -317,6 +317,11 @@ template void Communication_Frame_Add<int16_t>(uint8_t**, int16_t, const char*, 
 template void Communication_Frame_Add<uint16_t>(uint8_t**, uint16_t, const char*, uint32_t, const char*);
 template void Communication_Frame_Add<uint32_t>(uint8_t**, uint32_t, const char*, uint32_t, const char*);
 
+void Communication_Acknowledge(uint8_t functionId, uint8_t result) {
+  uint8_t optData[] = { functionId, result };
+  Communication_Send_Response(RESP_ACKNOWLEDGE, optData, 2);
+}
+
 void Communication_Process_Packet() {
   // disable interrupts
   interruptsEnabled = false;
@@ -350,12 +355,14 @@ void Communication_Process_Packet() {
     } else {
       FOSSASAT_DEBUG_PRINTLN(F("Callsign mismatch!"));
       PersistentStorage_Increment_Frame_Counter(false);
+      Communication_Acknowledge(0xFF, 0x01);
     }
 
   } else {
     FOSSASAT_DEBUG_PRINT(F("Reception failed, code "));
     FOSSASAT_DEBUG_PRINT(state);
     PersistentStorage_Increment_Frame_Counter(false);
+    Communication_Acknowledge(0xFF, 0x02);
   }
 
   // reset flag
@@ -376,6 +383,7 @@ void Comunication_Parse_Frame(uint8_t* frame, uint8_t len) {
   if (functionId < 0) {
     FOSSASAT_DEBUG_PRINT(F("Unable to get function ID 0x"));
     FOSSASAT_DEBUG_PRINTLN(functionId, HEX);
+    Communication_Acknowledge(0xFF, 0x03);
     return;
   }
   FOSSASAT_DEBUG_PRINT(F("Function ID = 0x"));
@@ -396,6 +404,7 @@ void Comunication_Parse_Frame(uint8_t* frame, uint8_t len) {
 
       // decryption failed, increment invalid frame counter and return
       PersistentStorage_Increment_Frame_Counter(false);
+      Communication_Acknowledge(0xFF, 0x04);
       return;
     }
 
@@ -416,6 +425,7 @@ void Comunication_Parse_Frame(uint8_t* frame, uint8_t len) {
 
       // increment invalid frame counter
       PersistentStorage_Increment_Frame_Counter(false);
+      Communication_Acknowledge(0xFF, 0x05);
       return;
     }
 
@@ -428,6 +438,7 @@ void Comunication_Parse_Frame(uint8_t* frame, uint8_t len) {
     FOSSASAT_DEBUG_PRINT(F("Unknown function ID, 0x"));
     FOSSASAT_DEBUG_PRINTLN(functionId, HEX);
     PersistentStorage_Increment_Frame_Counter(false);
+    Communication_Acknowledge(0xFF, 0x06);
     return;
   }
 
@@ -450,9 +461,8 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
   // increment valid frame counter
   PersistentStorage_Increment_Frame_Counter(true);
 
-  // delay before responding
-  FOSSASAT_DEBUG_DELAY(100);
-  PowerControl_Wait(RESPONSE_DELAY, true);
+  // acknowledge frame
+  Communication_Acknowledge(functionId, 0x00);
 
   // execute function based on ID
   switch (functionId) {
@@ -1356,7 +1366,11 @@ int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData, size_t opt
   int16_t state = FCP_Encode(frame, callsign, respId, optDataLen, optData);
   FOSSASAT_DEBUG_PRINT(F("Encoding state: "));
   FOSSASAT_DEBUG_PRINTLN(state);
-
+  
+  // delay before responding
+  FOSSASAT_DEBUG_DELAY(100);
+  PowerControl_Wait(RESPONSE_DELAY, true);
+  
   // send response
   return (Communication_Transmit(frame, len, overrideModem));
 }
