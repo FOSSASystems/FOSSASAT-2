@@ -368,14 +368,23 @@ void loop() {
   #ifdef ENABLE_TRANSMISSION_CONTROL
   if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
     Communication_Send_Full_System_Info();
+
+    // send stats too (if it's enabled)
+    if(PersistentStorage_Get<uint8_t>(FLASH_AUTO_STATISTICS) == 1) {
+      PowerControl_Wait(500, LOW_POWER_SLEEP, true);
+      Communication_Send_Statistics(0xFF);
+    }
+    
   } else {
     // send only basic info in low power mode
     Communication_Send_Basic_System_Info();
   }
   #else
     Communication_Send_Full_System_Info();
+    PowerControl_Wait(500, LOW_POWER_SLEEP, true);
+    Communication_Send_Statistics(0xFF);
   #endif
-
+  
   // wait for a bit
   FOSSASAT_DEBUG_DELAY(10);
   PowerControl_Wait(500, LOW_POWER_SLEEP, true);

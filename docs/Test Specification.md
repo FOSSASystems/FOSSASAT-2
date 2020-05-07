@@ -825,12 +825,13 @@ Test case shall be considered failed if any step of test case fails. All results
 ### COMMST12 - Transmission Control Configuration
 ### Steps
 1. Send any frame that will make satellite respond (e.g. CMD_PING).
-2. Send valid CMD_SET_TRANSMIT_ENABLE frame with optional data byte set to 0 from ground station using LoRa modem.
+2. Send valid CMD_SET_TRANSMIT_ENABLE frame with first optional data byte set to 0 from ground station using LoRa modem.
 3. Repeat step 1 using both modems.
 4. Wait for at least 20 minutes.
-5. Send valid CMD_SET_TRANSMIT_ENABLE frame with optional data byte set to 1.
-3. Repeat step 1 using both modems.
+5. Send valid CMD_SET_TRANSMIT_ENABLE frame with first optional data byte set to 1.
+6. Repeat step 1 using both modems.
 7. Wait for at least 20 minutes.
+8. Repeat Steps 2 - 7 for the second optional data byte, which controls automated statistics transmissions.
 
 ### Expected Results
 1. Satellite shall respond with the correct response frame.
@@ -840,6 +841,7 @@ Test case shall be considered failed if any step of test case fails. All results
 5. Satellite shall resume sending transmissions.
 6. Satellite shall always respond with the correct response frame.
 7. Satellite shall send automated system info frames using LoRa and FSK.
+8. Automated statistics transmissions shall be enabled by default, disabled after executing step 2 and enabled again in step 7.
 
 ### Actual Results
 *  

@@ -51,6 +51,7 @@ The purpose of this document is to provide overview of the communication system 
     - 0x02: currents
     - 0x04: voltages
     - 0x08: light sensors
+    - 0x10: IMU
 - Response: [RESP_STATISTICS](#RESP_STATISTICS)
 - Description: Request satellite statistics according to the set flags. Only available in FSK mode.
 
@@ -107,8 +108,9 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Optional data length: 1
 - Optional data:
   - 0: transmit enable (0x01) or disable (0x00)
+  - 1: automated statistics transmission enable (0x01) or disable (0x00)
 - Response: none
-- Description: Can be used to completely disable all transmissions from satellite.
+- Description: Can be used to completely disable all transmissions from satellite. Additionally controls whether satellite transmits statistics automatically (enabled by default).
 
 ### CMD_SET_CALLSIGN
 - Optional data length: 0 - 32
@@ -313,13 +315,14 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 8 - 9: number of received invalid FSK frames, unsigned 16-bit integer
 
 ### RESP_STATISTICS
-- Optional data length: 1 - 109
+- Optional data length: 1 - 217
 - Optional data:
   - 0: flags of statistics included in the response
   - 30 bytes for temperatures * 0.01 deg. C, signed 16-bit integers
   - 36 bytes for currents * 10 uA, signed 16-bit integers
   - 18 bytes for voltages * 20 mV, unsigned 8-bit integers
   - 24 bytes for light sensors, floats
+  - 108 bytes for IMU, floats
 
 ### RESP_FULL_SYSTEM_INFO
 - Optional data length: 46

@@ -18,6 +18,7 @@ void Communication_CW_Beep(uint32_t len);
 // system info functions
 void Communication_Send_Basic_System_Info();
 void Communication_Send_Full_System_Info();
+void Communication_Send_Statistics(uint8_t flags);
 template <typename T>
 void Communication_Frame_Add(uint8_t** buffPtr, T val, const char* name, uint32_t mult, const char* unit);
 

@@ -297,6 +297,54 @@ void Communication_Send_Full_System_Info() {
   Communication_Send_Response(RESP_FULL_SYSTEM_INFO, optData, optDataLen);
 }
 
+void Communication_Send_Statistics(uint8_t flags) {
+  // response will have maximum of 217 bytes if all stats are included
+  uint8_t respOptData[217];
+  uint8_t respOptDataLen = 1;
+  uint8_t* respOptDataPtr = respOptData;
+
+  // copy stat flags
+  memcpy(respOptDataPtr, &flags, sizeof(uint8_t));
+  respOptDataPtr += sizeof(uint8_t);
+
+  if(flags & 0b00000001) {
+    // temperatures
+    PersistentStorage_Read(FLASH_STATS_TEMP_PANEL_Y, respOptDataPtr, 15*sizeof(int16_t));
+    respOptDataPtr += 15*sizeof(int16_t);
+    respOptDataLen += 15*sizeof(int16_t);
+  }
+
+  if(flags & 0b00000010) {
+    // currents
+    PersistentStorage_Read(FLASH_STATS_CURR_XA, respOptDataPtr, 18*sizeof(int16_t));
+    respOptDataPtr += 18*sizeof(int16_t);
+    respOptDataLen += 18*sizeof(int16_t);
+  }
+
+  if(flags & 0b00000100) {
+    // voltages
+    PersistentStorage_Read(FLASH_STATS_VOLT_XA, respOptDataPtr, 18*sizeof(uint8_t));
+    respOptDataPtr += 18*sizeof(uint8_t);
+    respOptDataLen += 18*sizeof(uint8_t);
+  }
+
+  if(flags & 0b00001000) {
+    // lights
+    PersistentStorage_Read(FLASH_STATS_LIGHT_PANEL_Y, respOptDataPtr, 6*sizeof(float));
+    respOptDataPtr += 6*sizeof(float);
+    respOptDataLen += 6*sizeof(float);
+  }
+
+  if(flags & 0b00010000) {
+    // IMU
+    PersistentStorage_Read(FLASH_STATS_GYRO_X, respOptDataPtr, 27*sizeof(float));
+    respOptDataPtr += 27*sizeof(float);
+    respOptDataLen += 27*sizeof(float);
+  }
+
+  Communication_Send_Response(RESP_STATISTICS, respOptData, respOptDataLen);
+}
+
 template <typename T>
 // cppcheck-suppress unusedFunction
 void Communication_Frame_Add(uint8_t** buffPtr, T val, const char* name, uint32_t mult, const char* unit) {
@@ -552,46 +600,8 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           FOSSASAT_DEBUG_PRINTLN(F("FSK is required to get stats"));
           return;
         }
-
-        // response will have maximum of 109 bytes if all stats are included
-        uint8_t respOptData[109];
-        uint8_t respOptDataLen = 1;
-        uint8_t* respOptDataPtr = respOptData;
-
-        // copy stat flags
-        uint8_t flags = optData[0];
-        memcpy(respOptDataPtr, &flags, sizeof(uint8_t));
-        respOptDataPtr += sizeof(uint8_t);
-
-        if(flags & 0b00000001) {
-          // temperatures
-          PersistentStorage_Read(FLASH_STATS_TEMP_PANEL_Y, respOptDataPtr, 15*sizeof(int16_t));
-          respOptDataPtr += 15*sizeof(int16_t);
-          respOptDataLen += 15*sizeof(int16_t);
-        }
-
-        if(flags & 0b00000010) {
-          // currents
-          PersistentStorage_Read(FLASH_STATS_CURR_XA, respOptDataPtr, 18*sizeof(int16_t));
-          respOptDataPtr += 18*sizeof(int16_t);
-          respOptDataLen += 18*sizeof(int16_t);
-        }
-
-        if(flags & 0b00000100) {
-          // voltages
-          PersistentStorage_Read(FLASH_STATS_VOLT_XA, respOptDataPtr, 18*sizeof(uint8_t));
-          respOptDataPtr += 18*sizeof(uint8_t);
-          respOptDataLen += 18*sizeof(uint8_t);
-        }
-
-        if(flags & 0b00001000) {
-          // lights
-          PersistentStorage_Read(FLASH_STATS_LIGHT_PANEL_Y, respOptDataPtr, 6*sizeof(float));
-          respOptDataPtr += 6*sizeof(float);
-          respOptDataLen += 6*sizeof(float);
-        }
-
-        Communication_Send_Response(RESP_STATISTICS, respOptData, respOptDataLen);
+        
+        Communication_Send_Statistics(optData[0]);
       }
     } break;
 
@@ -759,8 +769,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_SET_TRANSMIT_ENABLE: {
         // check optional data length
-        if(Communication_Check_OptDataLen(1, optDataLen)) {
+        if(Communication_Check_OptDataLen(2, optDataLen)) {
           PersistentStorage_Set(FLASH_TRANSMISSIONS_ENABLED, optData[0]);
+          PersistentStorage_Set(FLASH_AUTO_STATISTICS, optData[1]);
         }
       } break;
 
@@ -1235,6 +1246,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // wipe NMEA log
         PersistentStorage_64kBlockErase(FLASH_NMEA_LOG_START);
         PowerControl_Watchdog_Heartbeat();
+
+        // wait for offset to elapse
+        PowerControl_Wait(offset, LOW_POWER_SLEEP, true);
 
         // power up GPS
         digitalWrite(GPS_POWER_FET, HIGH);

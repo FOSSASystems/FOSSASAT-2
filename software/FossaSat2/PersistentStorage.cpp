@@ -66,6 +66,20 @@ void PersistentStorage_Update_Stats(uint8_t flags) {
     PersistentStorage_Update_Stat(FLASH_STATS_LIGHT_PANEL_Y, lightSensorPanelY.readLux());
     PersistentStorage_Update_Stat(FLASH_STATS_LIGHT_TOP, lightSensorTop.readLux());
   }
+
+  if(flags & 0b00010000) {
+    // IMU
+    Sensors_Update_IMU();
+    PersistentStorage_Update_Stat(FLASH_STATS_GYRO_X, imu.calcGyro(imu.gx));
+    PersistentStorage_Update_Stat(FLASH_STATS_GYRO_Y, imu.calcGyro(imu.gy));
+    PersistentStorage_Update_Stat(FLASH_STATS_GYRO_Z, imu.calcGyro(imu.gz));
+    PersistentStorage_Update_Stat(FLASH_STATS_ACCEL_X, imu.calcAccel(imu.ax));
+    PersistentStorage_Update_Stat(FLASH_STATS_ACCEL_Y, imu.calcAccel(imu.ay));
+    PersistentStorage_Update_Stat(FLASH_STATS_ACCEL_Z, imu.calcAccel(imu.az));
+    PersistentStorage_Update_Stat(FLASH_STATS_MAG_X, imu.calcMag(imu.mx));
+    PersistentStorage_Update_Stat(FLASH_STATS_MAG_Y, imu.calcMag(imu.my));
+    PersistentStorage_Update_Stat(FLASH_STATS_MAG_Z, imu.calcMag(imu.mz));
+  }
 }
 
 void PersistentStorage_Increment_Counter(uint16_t addr) {
@@ -217,6 +231,9 @@ void PersistentStorage_Reset_System_Info() {
 
   // set default MPPT temperature switch mode
   sysInfoPage[FLASH_MPPT_TEMP_SWITCH_ENABLED] = 1;
+
+  // set default statistics transmission
+  sysInfoPage[FLASH_AUTO_STATISTICS] = 1;
 
   // write the default system info
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
