@@ -1064,6 +1064,27 @@ Test case shall be considered failed if any step of test case fails. All results
 
 ---
 
+### COMMST22 - Frame acknowledgement
+### Steps
+1. Send valid CMD_PING frame from ground station using LoRa modem.
+2. Repeat step 1 using FSK modem.
+3. Repeat steps 1 - 2 for every possible frame type.
+
+### Expected Results
+1. Satellite shall acknowledge reception of the frame by transmitting RESP_ACKNOWLEDGE frame with appropriate function ID.
+2. Satellite shall acknowledge frame reception using FSK modem.
+3. Satellite shall always acknowledge frame reception using correct modem.
+
+### Actual Results
+*  
+*  
+*  
+
+### Verdict
+*  
+
+---
+
 ## ADCS
 
 ---
