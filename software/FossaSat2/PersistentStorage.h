@@ -24,7 +24,7 @@
 #define FLASH_EXT_PAGE_SIZE                             0x00000100
 #define FLASH_STATS                                     0x00001000
 #define FLASH_SYSTEM_INFO_START                         0x00000000
-#define FLASH_SYSTEM_INFO_LEN                          (0x0000004E + 1)  // final address in Flash map + 1 byte
+#define FLASH_SYSTEM_INFO_LEN                          (0x0000004F + 1)  // final address in Flash map + 1 byte
 
 void PersistentStorage_Increment_Counter(uint16_t addr);
 void PersistentStorage_Increment_Frame_Counter(bool valid);
