@@ -308,6 +308,10 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       Serial.print(FCP_System_Info_Get_Temperature(respOptData, 17));
       Serial.println(" deg C");
 
+      uint32_t errCounter = 0;
+      memcpy(&errCounter, respOptData + 19, sizeof(uint32_t));
+      Serial.print(F("errCounter = "));
+      Serial.println(errCounter);
     } break;
 
     case RESP_PACKET_INFO: {
@@ -465,6 +469,11 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       Serial.print(F("faultZ = 0x"));
       Serial.println(fault, HEX);
 
+      uint32_t errCounter = 0;
+      memcpy(&errCounter, respOptData + 19, sizeof(uint32_t));
+      Serial.print(F("errCounter = "));
+      Serial.println(errCounter);
+
     } break;
 
     case RESP_CAMERA_PICTURE: {
@@ -496,8 +505,7 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       Serial.print(respOptData[0], HEX);
       Serial.print(F(", result = 0x"));
       Serial.println(respOptData[1], HEX);
-      break;
-    }
+    } break;
 
     default:
       Serial.println(F("Unknown function ID!"));

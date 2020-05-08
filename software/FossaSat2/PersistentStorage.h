@@ -25,6 +25,8 @@
 #define FLASH_STATS                                     0x00001000
 #define FLASH_SYSTEM_INFO_START                         0x00000000
 #define FLASH_SYSTEM_INFO_LEN                          (FLASH_EXT_PAGE_SIZE)
+#define FLASH_SYSTEM_INFO_CRC                           0x000000F8  //  0x000000F8    0x000000FB
+#define FLASH_MEMORY_ERROR_COUNTER                      0x000000FC  //  0x000000FC    0x000000FF
 
 /*
     CRC32 Implementation based on GCC libiberty library, under the following license:
@@ -198,6 +200,17 @@ void PersistentStorage_Set(uint8_t addr, T t) {
   uint8_t currSysInfoPage[FLASH_SYSTEM_INFO_LEN];
   PersistentStorage_Read(FLASH_SYSTEM_INFO_START, currSysInfoPage, FLASH_SYSTEM_INFO_LEN);
 
+  // check CRC of the current page
+  uint32_t currCrc = 0;
+  memcpy(&currCrc, currSysInfoPage + FLASH_SYSTEM_INFO_CRC, sizeof(uint32_t));
+  if(currCrc != CRC32_Get(currSysInfoPage, FLASH_SYSTEM_INFO_CRC)) {
+    // memory error happened between last write and now, increment the counter
+    uint32_t errCounter = 0;
+    memcpy(&errCounter, currSysInfoPage + FLASH_MEMORY_ERROR_COUNTER, sizeof(uint32_t));
+    errCounter++;
+    memcpy(currSysInfoPage + FLASH_MEMORY_ERROR_COUNTER, &errCounter, sizeof(uint32_t));
+  }
+  
   // check if we need to update
   uint8_t newSysInfoPage[FLASH_SYSTEM_INFO_LEN];
   memcpy(newSysInfoPage, currSysInfoPage, FLASH_SYSTEM_INFO_LEN);
@@ -208,8 +221,8 @@ void PersistentStorage_Set(uint8_t addr, T t) {
   }
 
   // update CRC
-  uint32_t crc = CRC32_Get(newSysInfoPage, FLASH_SYSTEM_INFO_LEN - sizeof(uint32_t));
-  memcpy(newSysInfoPage + FLASH_SYSTEM_INFO_LEN - sizeof(uint32_t), &crc, sizeof(crc));
+  uint32_t crc = CRC32_Get(newSysInfoPage, FLASH_SYSTEM_INFO_CRC);
+  memcpy(newSysInfoPage + FLASH_SYSTEM_INFO_CRC, &crc, sizeof(uint32_t));
 
   // update the page
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, newSysInfoPage, FLASH_SYSTEM_INFO_LEN);

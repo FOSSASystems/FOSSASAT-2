@@ -164,7 +164,8 @@
 #define FLASH_NMEA_LOG_LENGTH                           0x00000049  //  0x00000049    0x0000004C
 #define FLASH_STORE_AND_FORWARD_LENGTH                  0x0000004D  //  0x0000004D    0x0000004E
 #define FLASH_AUTO_STATISTICS                           0x0000004F  //  0x0000004F    0x0000004F
-#define FLASH_SYSTEM_INFO_CRC                           0x000000FC  //  0x000000FC    0x000000FF
+#define FLASH_SYSTEM_INFO_CRC                           0x000000F8  //  0x000000F8    0x000000FB
+#define FLASH_MEMORY_ERROR_COUNTER                      0x000000FC  //  0x000000FC    0x000000FF
 
 // sector 1 page 0 - stats
 #define FLASH_STATS                                     0x00001000  //  0x00001000    0x000010FF

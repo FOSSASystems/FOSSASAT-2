@@ -180,6 +180,18 @@ void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, uint8_t len) {
   uint8_t currSysInfoPage[FLASH_SYSTEM_INFO_LEN];
   PersistentStorage_Read(FLASH_SYSTEM_INFO_START, currSysInfoPage, FLASH_SYSTEM_INFO_LEN);
 
+  // check CRC of the current page
+  uint32_t currCrc = 0;
+  memcpy(&currCrc, currSysInfoPage + FLASH_SYSTEM_INFO_CRC, sizeof(uint32_t));
+  if(currCrc != CRC32_Get(currSysInfoPage, FLASH_SYSTEM_INFO_CRC)) {
+    // memory error happened between last write and now, increment the counter
+    FOSSASAT_DEBUG_PRINTLN(F("System info CRC check failed!"));
+    uint32_t errCounter = 0;
+    memcpy(&errCounter, currSysInfoPage + FLASH_MEMORY_ERROR_COUNTER, sizeof(uint32_t));
+    errCounter++;
+    memcpy(currSysInfoPage + FLASH_MEMORY_ERROR_COUNTER, &errCounter, sizeof(uint32_t));
+  }
+
   // check if we need to update
   uint8_t newSysInfoPage[FLASH_SYSTEM_INFO_LEN];
   memcpy(newSysInfoPage, currSysInfoPage, FLASH_SYSTEM_INFO_LEN);
@@ -188,6 +200,10 @@ void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, uint8_t len) {
     // the value is already there, no need to write
     return;
   }
+
+  // update CRC
+  uint32_t crc = CRC32_Get(newSysInfoPage, FLASH_SYSTEM_INFO_CRC);
+  memcpy(newSysInfoPage + FLASH_SYSTEM_INFO_CRC, &crc, sizeof(uint32_t));
 
   // we need to update
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, newSysInfoPage, FLASH_SYSTEM_INFO_LEN);
@@ -246,8 +262,8 @@ void PersistentStorage_Reset_System_Info() {
   sysInfoPage[FLASH_AUTO_STATISTICS] = 1;
 
   // set CRC
-  uint32_t crc = CRC32_Get(sysInfoPage, FLASH_SYSTEM_INFO_LEN - sizeof(uint32_t));
-  memcpy(sysInfoPage + FLASH_SYSTEM_INFO_LEN - sizeof(uint32_t), &crc, sizeof(uint32_t));
+  uint32_t crc = CRC32_Get(sysInfoPage, FLASH_SYSTEM_INFO_CRC);
+  memcpy(sysInfoPage + FLASH_SYSTEM_INFO_CRC, &crc, sizeof(uint32_t));
 
   // write the default system info
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
