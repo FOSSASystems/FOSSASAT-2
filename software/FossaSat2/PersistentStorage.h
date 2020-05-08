@@ -155,8 +155,6 @@ void PersistentStorage_Reset_System_Info();
 uint8_t PersistentStorage_Get_Message(uint16_t slotNum, uint8_t* buff);
 void PersistentStorage_Set_Message(uint16_t slotNum, uint8_t* buff, uint8_t len);
 
-bool PersistentStorage_Check_CRC();
-
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len);
 void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool autoErase = true);
 

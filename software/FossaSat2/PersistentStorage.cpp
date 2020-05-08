@@ -299,22 +299,6 @@ void PersistentStorage_Set_Message(uint16_t slotNum, uint8_t* buff, uint8_t len)
   FOSSASAT_DEBUG_PRINT_FLASH(addr, FLASH_EXT_PAGE_SIZE);
 }
 
-bool PersistentStorage_Check_CRC() {
-  // read system info page
-  uint8_t sysInfoPage[FLASH_SYSTEM_INFO_LEN];
-  PersistentStorage_Read(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
-
-  // get saved CRC
-  uint32_t savedCrc = 0;
-  memcpy(&savedCrc, sysInfoPage + FLASH_SYSTEM_INFO_CRC, sizeof(uint32_t));
-
-  // calculate actual value
-  uint32_t realCrc = CRC32_Get(sysInfoPage, FLASH_SYSTEM_INFO_LEN - sizeof(uint32_t));
-
-  // compare the two
-  return(savedCrc == realCrc);
-}
-
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len) {
   uint8_t cmdBuff[] = {MX25L51245G_CMD_READ, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
   PersistentStorage_SPItransaction(cmdBuff, 5, false, buff, len);
