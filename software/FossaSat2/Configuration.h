@@ -42,7 +42,7 @@
 #define MAX_IMAGE_PACKET_LENGTH                         128
 
 // optional data length limit
-#define MAX_OPT_DATA_LENGTH                             128
+#define MAX_OPT_DATA_LENGTH                             220
 
 // radio buffer length limit
 #define MAX_RADIO_BUFFER_LENGTH                         (MAX_STRING_LENGTH + 2 + MAX_OPT_DATA_LENGTH)
@@ -164,6 +164,7 @@
 #define FLASH_NMEA_LOG_LENGTH                           0x00000049  //  0x00000049    0x0000004C
 #define FLASH_STORE_AND_FORWARD_LENGTH                  0x0000004D  //  0x0000004D    0x0000004E
 #define FLASH_AUTO_STATISTICS                           0x0000004F  //  0x0000004F    0x0000004F
+#define FLASH_SYSTEM_INFO_CRC                           0x000000FC  //  0x000000FC    0x000000FF
 
 // sector 1 page 0 - stats
 #define FLASH_STATS                                     0x00001000  //  0x00001000    0x000010FF
@@ -232,7 +233,7 @@
 #define MAX_NUM_OF_BLOCKS                               3           /*!< maximum number of AES128 blocks that will be accepted */
 #define LORA_RECEIVE_WINDOW_LENGTH                      40          /*!< How long to listen out for LoRa transmissions for (s) */
 #define FSK_RECEIVE_WINDOW_LENGTH                       20          /*!< How long to listen out for FSK transmissions for (s) */
-#define RESPONSE_DELAY                                  1000        /*!< How long to wait for before responding/processing a transmission (ms) */
+#define RESPONSE_DELAY                                  600         /*!< How long to wait for before responding to a transmission (ms) */
 #define WHITENING_INITIAL                               0x1FF       /*!< Whitening LFSR initial value, to ensure SX127x compatibility */
 
 // LoRa

@@ -1,5 +1,15 @@
 #include "PersistentStorage.h"
 
+uint32_t CRC32_Get(uint8_t* buff, size_t len, uint32_t initial) {
+  uint32_t crc = initial;
+  while (len--) {
+    crc = (crc << 8) ^ crc32_table[((crc >> 24) ^ *buff) & 255];
+    buff++;
+  }
+  
+  return crc;
+}
+
 void PersistentStorage_Update_Stats(uint8_t flags) {
   if(flags & 0b00000001) {
     // temperatures
@@ -235,6 +245,10 @@ void PersistentStorage_Reset_System_Info() {
   // set default statistics transmission
   sysInfoPage[FLASH_AUTO_STATISTICS] = 1;
 
+  // set CRC
+  uint32_t crc = CRC32_Get(sysInfoPage, FLASH_SYSTEM_INFO_LEN - sizeof(uint32_t));
+  memcpy(sysInfoPage + FLASH_SYSTEM_INFO_LEN - sizeof(uint32_t), &crc, sizeof(uint32_t));
+
   // write the default system info
   PersistentStorage_Write(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
 }
@@ -269,9 +283,25 @@ void PersistentStorage_Set_Message(uint16_t slotNum, uint8_t* buff, uint8_t len)
   FOSSASAT_DEBUG_PRINT_FLASH(addr, FLASH_EXT_PAGE_SIZE);
 }
 
+bool PersistentStorage_Check_CRC() {
+  // read system info page
+  uint8_t sysInfoPage[FLASH_SYSTEM_INFO_LEN];
+  PersistentStorage_Read(FLASH_SYSTEM_INFO_START, sysInfoPage, FLASH_SYSTEM_INFO_LEN);
+
+  // get saved CRC
+  uint32_t savedCrc = 0;
+  memcpy(&savedCrc, sysInfoPage + FLASH_SYSTEM_INFO_CRC, sizeof(uint32_t));
+
+  // calculate actual value
+  uint32_t realCrc = CRC32_Get(sysInfoPage, FLASH_SYSTEM_INFO_LEN - sizeof(uint32_t));
+
+  // compare the two
+  return(savedCrc == realCrc);
+}
+
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len) {
   uint8_t cmdBuff[] = {MX25L51245G_CMD_READ, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
-  PersistentStorage_SPItranscation(cmdBuff, 5, false, buff, len);
+  PersistentStorage_SPItransaction(cmdBuff, 5, false, buff, len);
 }
 
 void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool autoErase) {
@@ -288,7 +318,7 @@ void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool auto
   if(addrInPage <= FLASH_EXT_PAGE_SIZE) {
     // all bytes are in the same page, write it
     uint8_t cmdBuff[] = {MX25L51245G_CMD_PP, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
-    PersistentStorage_SPItranscation(cmdBuff, 5, true, buff, len);
+    PersistentStorage_SPItransaction(cmdBuff, 5, true, buff, len);
   } else {
     // some bytes are in the following page
     // TODO: extend for arbitrary number of pages in the same sector
@@ -299,7 +329,7 @@ void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool auto
     // write the first page
     uint32_t newAddr = addr;
     uint8_t cmdBuff[] = {MX25L51245G_CMD_PP, (uint8_t)((newAddr >> 24) & 0xFF), (uint8_t)((newAddr >> 16) & 0xFF), (uint8_t)((newAddr >> 8) & 0xFF), (uint8_t)(newAddr & 0xFF)};
-    PersistentStorage_SPItranscation(cmdBuff, 5, true, buff, firstPageLen);
+    PersistentStorage_SPItransaction(cmdBuff, 5, true, buff, firstPageLen);
 
     // wait until page is written
     PersistentStorage_WaitForWriteInProgress();
@@ -313,7 +343,7 @@ void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool auto
     cmdBuff[2] = (uint8_t)((newAddr >> 16) & 0xFF);
     cmdBuff[3] = (uint8_t)((newAddr >> 8) & 0xFF);
     cmdBuff[4] = (uint8_t)(newAddr & 0xFF);
-    PersistentStorage_SPItranscation(cmdBuff, 5, true, buff + firstPageLen, len - firstPageLen);
+    PersistentStorage_SPItransaction(cmdBuff, 5, true, buff + firstPageLen, len - firstPageLen);
   }
   
   // wait until page is written
@@ -326,7 +356,7 @@ void PersistentStorage_SectorErase(uint32_t addr) {
 
   // erase required sector
   uint8_t cmdBuf[] = {MX25L51245G_CMD_SE, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
-  PersistentStorage_SPItranscation(cmdBuf, 5, false, NULL, 0);
+  PersistentStorage_SPItransaction(cmdBuf, 5, false, NULL, 0);
 
   // wait until sector is erased
   PersistentStorage_WaitForWriteInProgress(1000);
@@ -338,55 +368,55 @@ void PersistentStorage_64kBlockErase(uint32_t addr) {
 
   // erase required sector
   uint8_t cmdBuf[] = {MX25L51245G_CMD_BE, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
-  PersistentStorage_SPItranscation(cmdBuf, 5, false, NULL, 0);
+  PersistentStorage_SPItransaction(cmdBuf, 5, false, NULL, 0);
 
   // wait until sector is erased
   PersistentStorage_WaitForWriteInProgress(3000);
 }
 
 void PersistentStorage_WriteEnable() {
-  PersistentStorage_SPItranscation(MX25L51245G_CMD_WREN);
+  PersistentStorage_SPItransaction(MX25L51245G_CMD_WREN);
 }
 
 void PersistentStorage_WriteDisable() {
-  PersistentStorage_SPItranscation(MX25L51245G_CMD_WRDI);
+  PersistentStorage_SPItransaction(MX25L51245G_CMD_WRDI);
 }
 
 // cppcheck-suppress unusedFunction
 uint8_t PersistentStorage_ReadManufacturerID() {
   uint8_t cmdBuf[] = {MX25L51245G_CMD_REMS, 0x00, 0x00, 0x00};
   uint8_t buf[2];
-  PersistentStorage_SPItranscation(cmdBuf, 4, false, buf, 2);
+  PersistentStorage_SPItransaction(cmdBuf, 4, false, buf, 2);
   return(buf[0]);
 }
 
 uint8_t PersistentStorage_ReadStatusRegister() {
   uint8_t buf[1];
-  PersistentStorage_SPItranscation(MX25L51245G_CMD_RDSR, false, buf, 1);
+  PersistentStorage_SPItransaction(MX25L51245G_CMD_RDSR, false, buf, 1);
   return(buf[0]);
 }
 
 // cppcheck-suppress unusedFunction
 uint8_t PersistentStorage_ReadConfigRegister() {
   uint8_t buf[1];
-  PersistentStorage_SPItranscation(MX25L51245G_CMD_RDCR, false, buf, 1);
+  PersistentStorage_SPItransaction(MX25L51245G_CMD_RDCR, false, buf, 1);
   return(buf[0]);
 }
 
 // cppcheck-suppress unusedFunction
 uint8_t PersistentStorage_ReadSecurityRegister() {
   uint8_t buf[1];
-  PersistentStorage_SPItranscation(MX25L51245G_CMD_RDSCUR, false, buf, 1);
+  PersistentStorage_SPItransaction(MX25L51245G_CMD_RDSCUR, false, buf, 1);
   return(buf[0]);
 }
 
 void PersistentStorage_Enter4ByteMode() {
-  PersistentStorage_SPItranscation(MX25L51245G_CMD_EN4B);
+  PersistentStorage_SPItransaction(MX25L51245G_CMD_EN4B);
 }
 
 // cppcheck-suppress unusedFunction
 void PersistentStorage_Exit4ByteMode() {
-  PersistentStorage_SPItranscation(MX25L51245G_CMD_EX4B);
+  PersistentStorage_SPItransaction(MX25L51245G_CMD_EX4B);
 }
 
 void PersistentStorage_Reset() {
@@ -400,7 +430,7 @@ void PersistentStorage_Reset() {
 void PersistentStorage_WriteStatusRegister(uint8_t sr, uint8_t cr) {
   uint8_t buf[] = {sr, cr};
   PersistentStorage_WaitForWriteEnable();
-  PersistentStorage_SPItranscation(MX25L51245G_CMD_WRSR, true, buf, 2);
+  PersistentStorage_SPItransaction(MX25L51245G_CMD_WRSR, true, buf, 2);
   PersistentStorage_WriteDisable();
 }
 
@@ -437,12 +467,12 @@ bool PersistentStorage_WaitForWriteInProgress(uint32_t timeout) {
   return(true);
 }
 
-void PersistentStorage_SPItranscation(uint8_t cmd, bool write, uint8_t* data, size_t numBytes) {
+void PersistentStorage_SPItransaction(uint8_t cmd, bool write, uint8_t* data, size_t numBytes) {
   uint8_t cmdBuf[] = {cmd};
-  PersistentStorage_SPItranscation(cmdBuf, 1, write, data, numBytes);
+  PersistentStorage_SPItransaction(cmdBuf, 1, write, data, numBytes);
 }
 
-void PersistentStorage_SPItranscation(uint8_t* cmd, uint8_t cmdLen, bool write, uint8_t* data, size_t numBytes) {
+void PersistentStorage_SPItransaction(uint8_t* cmd, uint8_t cmdLen, bool write, uint8_t* data, size_t numBytes) {
   digitalWrite(FLASH_CS, LOW);
   FlashSPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
 

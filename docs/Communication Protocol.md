@@ -292,7 +292,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 0 - N: repeated message
 
 ### RESP_SYSTEM_INFO
-- Optional data length: 19
+- Optional data length: 20
 - Optional data:
   - 0: MPPT output voltage * 20 mV, unsigned 8-bit integer
   - 1 - 2: MPPT output current * 10 uA, signed 16-bit integer
@@ -311,6 +311,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 14: solar panel Y voltage * 20 mV, unsigned 8-bit integer
   - 15 - 16: battery temperature * 0.01 deg. C, signed 16-bit integer
   - 17 - 18: OBC board temperature * 0.01 deg. C, signed 16-bit integer
+  - 19: external flash system info page CRC status (0x00 - memory OK, 0x01 - error detected)
 
 ### RESP_PACKET_INFO
 - Optional data length: 10
@@ -333,7 +334,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 108 bytes for IMU, floats
 
 ### RESP_FULL_SYSTEM_INFO
-- Optional data length: 46
+- Optional data length: 47
 - Optional data:
   - 0: MPPT output voltage * 20 mV, unsigned 8-bit integer
   - 1 - 2: MPPT output current * 10 uA, signed 16-bit integer
@@ -365,6 +366,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 43: last X axis H-bridge fault, unsigned 8-bit integer
   - 44: last Y axis H-bridge fault, unsigned 8-bit integer
   - 45: last Z axis H-bridge fault, unsigned 8-bit integer
+  - 46: external flash system info page CRC status (0x00 - memory OK, 0x01 - error detected)
 
 ### RESP_STORE_AND_FORWARD_ASSIGNED_SLOT
 - Optional data length: 2

@@ -150,7 +150,7 @@ void Communication_CW_Beep(uint32_t len) {
 
 void Communication_Send_Basic_System_Info() {
   // build response frame
-  static const uint8_t optDataLen = 7*sizeof(uint8_t) + 3*sizeof(int16_t) + sizeof(uint16_t) + sizeof(uint32_t);
+  static const uint8_t optDataLen = 8*sizeof(uint8_t) + 3*sizeof(int16_t) + sizeof(uint16_t) + sizeof(uint32_t);
   uint8_t optData[optDataLen];
   uint8_t* optDataPtr = optData;
 
@@ -197,6 +197,12 @@ void Communication_Send_Basic_System_Info() {
   int16_t boardTemperature = Sensors_Read_Temperature(tempSensorTop) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, boardTemperature, "boardTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
 
+  uint8_t systemInfoErr = 0x01;
+  if(PersistentStorage_Check_CRC()) {
+    systemInfoErr = 0x00;
+  }
+  Communication_Frame_Add(&optDataPtr, systemInfoErr, "systemInfoErr", 1, "");
+
   FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
 
   // send response
@@ -205,7 +211,7 @@ void Communication_Send_Basic_System_Info() {
 
 void Communication_Send_Full_System_Info() {
   // build response frame
-  static const uint8_t optDataLen = 10*sizeof(uint8_t) + 11*sizeof(int16_t) + sizeof(uint16_t) + sizeof(uint32_t) + 2*sizeof(float);
+  static const uint8_t optDataLen = 11*sizeof(uint8_t) + 11*sizeof(int16_t) + sizeof(uint16_t) + sizeof(uint32_t) + 2*sizeof(float);
   uint8_t optData[optDataLen];
   uint8_t* optDataPtr = optData;
 
@@ -291,6 +297,12 @@ void Communication_Send_Full_System_Info() {
   uint8_t bridgeZfault = bridgeZ.getFault();
   Communication_Frame_Add(&optDataPtr, bridgeZfault, "bridgeZfault", 1, "");
 
+  uint8_t systemInfoErr = 0x01;
+  if(PersistentStorage_Check_CRC()) {
+    systemInfoErr = 0x00;
+  }
+  Communication_Frame_Add(&optDataPtr, systemInfoErr, "systemInfoErr", 1, "");
+
   FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
 
   // send response
@@ -341,7 +353,7 @@ void Communication_Send_Statistics(uint8_t flags) {
     respOptDataPtr += 27*sizeof(float);
     respOptDataLen += 27*sizeof(float);
   }
-
+  
   Communication_Send_Response(RESP_STATISTICS, respOptData, respOptDataLen);
 }
 

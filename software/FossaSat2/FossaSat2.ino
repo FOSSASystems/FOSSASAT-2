@@ -34,7 +34,7 @@ void setup() {
 #endif
 
   // print system info page
-  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, 0x50);
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, FLASH_EXT_PAGE_SIZE);
 
   // initialize radio
   FOSSASAT_DEBUG_PORT.print(F("LoRa modem init: "));
@@ -328,7 +328,7 @@ void loop() {
   float battVoltage = PowerControl_Get_Battery_Voltage();
   FOSSASAT_DEBUG_PRINTLN(battVoltage, 2);
   PowerControl_Manage_Battery();
-  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, 0x50)
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, FLASH_EXT_PAGE_SIZE)
 
   // update all stats when not in low power mode
   if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
