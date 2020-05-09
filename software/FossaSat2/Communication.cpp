@@ -1380,7 +1380,18 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         memcpy(&address, optData, sizeof(uint32_t));
         PersistentStorage_Write(address, optData + sizeof(uint32_t), optDataLen - sizeof(uint32_t));
       }
-      
+    } break;
+
+    case CMD_SET_TLE: {
+      if(Communication_Check_OptDataLen(138, optDataLen)) {
+        char line[70];
+
+        // get the first TLE line
+        memcpy(line, optData, 69);
+        line[69] = '\0';
+
+        // parse TLE
+      }
     } break;
 
     default:

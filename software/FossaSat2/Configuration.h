@@ -125,6 +125,12 @@
 #define BATTERY_HEATER_DUTY_CYCLE                       255     // PWM duty cycle 0 - 255
 
 /*
+   Default TLE
+*/
+#define TLE_LINE_1                                      "1 00000U 20000A   20182.79906828 0.00000000  00000-0 -12345-3 0    10"
+#define TLE_LINE_2                                      "2 00000 137.0503 217.9687 0010435 173.7291 322.4297 15.88896416000000"
+
+/*
     Flash Configuration
 */
 
@@ -134,38 +140,50 @@
 #define FLASH_CHIP_SIZE                                 0x04000000
 #define FLASH_IMAGE_NUM_64K_BLOCKS                      8
 
-// Flash address map                                                    LSB           MSB
+// Flash address map                                                    LSB           MSB           type
 // 64kB block 0 - system info, stats, image lengths
 // sector 0 page 0 - system info and configuration
 #define FLASH_SYSTEM_INFO                               0x00000000  //  0x00000000    0x000000FF
-#define FLASH_RESTART_COUNTER                           0x00000000  //  0x00000000    0x00000001
-#define FLASH_DEPLOYMENT_COUNTER                        0x00000002  //  0x00000002    0x00000002
-#define FLASH_TRANSMISSIONS_ENABLED                     0x00000003  //  0x00000003    0x00000003
-#define FLASH_CALLSIGN_LEN                              0x00000004  //  0x00000004    0x00000004
-#define FLASH_CALLSIGN                                  0x00000005  //  0x00000005    0x00000025
-#define FLASH_FSK_RECEIVE_LEN                           0x00000026  //  0x00000026    0x00000026
-#define FLASH_LORA_RECEIVE_LEN                          0x00000027  //  0x00000027    0x00000027
-#define FLASH_RTC_EPOCH                                 0x00000028  //  0x00000028    0x0000002B
-#define FLASH_LORA_VALID_COUNTER                        0x0000002C  //  0x0000002C    0x0000002D
-#define FLASH_LORA_INVALID_COUNTER                      0x0000002E  //  0x0000002E    0x0000002F
-#define FLASH_FSK_VALID_COUNTER                         0x00000030  //  0x00000030    0x00000031
-#define FLASH_FSK_INVALID_COUNTER                       0x00000032  //  0x00000032    0x00000033
-#define FLASH_LOW_POWER_MODE_ENABLED                    0x00000034  //  0x00000034    0x00000034
-#define FLASH_LOW_POWER_MODE                            0x00000035  //  0x00000035    0x00000035
-#define FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT          0x00000036  //  0x00000036    0x00000037
-#define FLASH_HEATER_BATTERY_VOLTAGE_LIMIT              0x00000038  //  0x00000038    0x00000039
-#define FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT             0x0000003A  //  0x0000003A    0x0000003B
-#define FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT              0x0000003C  //  0x0000003C    0x0000003D
-#define FLASH_BATTERY_HEATER_TEMP_LIMIT                 0x0000003E  //  0x0000003E    0x00000041
-#define FLASH_MPPT_TEMP_LIMIT                           0x00000042  //  0x00000042    0x00000045
-#define FLASH_BATTERY_HEATER_DUTY_CYCLE                 0x00000046  //  0x00000046    0x00000046
-#define FLASH_MPPT_TEMP_SWITCH_ENABLED                  0x00000047  //  0x00000047    0x00000047
-#define FLASH_MPPT_KEEP_ALIVE_ENABLED                   0x00000048  //  0x00000048    0x00000048
-#define FLASH_NMEA_LOG_LENGTH                           0x00000049  //  0x00000049    0x0000004C
-#define FLASH_STORE_AND_FORWARD_LENGTH                  0x0000004D  //  0x0000004D    0x0000004E
-#define FLASH_AUTO_STATISTICS                           0x0000004F  //  0x0000004F    0x0000004F
-#define FLASH_SYSTEM_INFO_CRC                           0x000000F8  //  0x000000F8    0x000000FB
-#define FLASH_MEMORY_ERROR_COUNTER                      0x000000FC  //  0x000000FC    0x000000FF
+#define FLASH_RESTART_COUNTER                           0x00000000  //  0x00000000    0x00000001    uint16_t
+#define FLASH_DEPLOYMENT_COUNTER                        0x00000002  //  0x00000002    0x00000002    uint8_t
+#define FLASH_TRANSMISSIONS_ENABLED                     0x00000003  //  0x00000003    0x00000003    uint8_t
+#define FLASH_CALLSIGN_LEN                              0x00000004  //  0x00000004    0x00000004    uint8_t
+#define FLASH_CALLSIGN                                  0x00000005  //  0x00000005    0x00000025    char[]
+#define FLASH_FSK_RECEIVE_LEN                           0x00000026  //  0x00000026    0x00000026    uint8_t
+#define FLASH_LORA_RECEIVE_LEN                          0x00000027  //  0x00000027    0x00000027    uint8_t
+#define FLASH_RTC_EPOCH                                 0x00000028  //  0x00000028    0x0000002B    uint32_t
+#define FLASH_LORA_VALID_COUNTER                        0x0000002C  //  0x0000002C    0x0000002D    uint16_t
+#define FLASH_LORA_INVALID_COUNTER                      0x0000002E  //  0x0000002E    0x0000002F    uint16_t
+#define FLASH_FSK_VALID_COUNTER                         0x00000030  //  0x00000030    0x00000031    uint16_t
+#define FLASH_FSK_INVALID_COUNTER                       0x00000032  //  0x00000032    0x00000033    uint16_t
+#define FLASH_LOW_POWER_MODE_ENABLED                    0x00000034  //  0x00000034    0x00000034    uint8_t
+#define FLASH_LOW_POWER_MODE                            0x00000035  //  0x00000035    0x00000035    uint8_t
+#define FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT          0x00000036  //  0x00000036    0x00000037    int16_t
+#define FLASH_HEATER_BATTERY_VOLTAGE_LIMIT              0x00000038  //  0x00000038    0x00000039    int16_t
+#define FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT             0x0000003A  //  0x0000003A    0x0000003B    int16_t
+#define FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT              0x0000003C  //  0x0000003C    0x0000003D    int16_t
+#define FLASH_BATTERY_HEATER_TEMP_LIMIT                 0x0000003E  //  0x0000003E    0x00000041    float
+#define FLASH_MPPT_TEMP_LIMIT                           0x00000042  //  0x00000042    0x00000045    float
+#define FLASH_BATTERY_HEATER_DUTY_CYCLE                 0x00000046  //  0x00000046    0x00000046    uint8_t
+#define FLASH_MPPT_TEMP_SWITCH_ENABLED                  0x00000047  //  0x00000047    0x00000047    uint8_t
+#define FLASH_MPPT_KEEP_ALIVE_ENABLED                   0x00000048  //  0x00000048    0x00000048    uint8_t
+#define FLASH_NMEA_LOG_LENGTH                           0x00000049  //  0x00000049    0x0000004C    uint32_t
+#define FLASH_STORE_AND_FORWARD_LENGTH                  0x0000004D  //  0x0000004D    0x0000004E    int16_t
+#define FLASH_AUTO_STATISTICS                           0x0000004F  //  0x0000004F    0x0000004F    uint8_t
+#define FLASH_TLE_EPOCH_DAY                             0x00000050  //  0x00000050    0x00000057    double
+#define FLASH_TLE_BALLISTIC_COEFF                       0x00000058  //  0x00000058    0x0000005F    double
+#define FLASH_TLE_MEAN_MOTION_2ND                       0x00000060  //  0x00000060    0x00000067    double
+#define FLASH_TLE_DRAG_TERM                             0x00000068  //  0x00000068    0x0000006F    double
+#define FLASH_TLE_INCLINATION                           0x00000070  //  0x00000070    0x00000077    double
+#define FLASH_TLE_RIGHT_ASCENTION                       0x00000078  //  0x00000078    0x0000007F    double
+#define FLASH_TLE_ECCENTRICITY                          0x00000080  //  0x00000080    0x00000087    double
+#define FLASH_TLE_PERIGEE_ARGUMENT                      0x00000088  //  0x00000088    0x0000008F    double
+#define FLASH_TLE_MEAN_ANOMALY                          0x00000090  //  0x00000090    0x00000097    double
+#define FLASH_TLE_MEAN_MOTION                           0x00000098  //  0x00000098    0x0000009F    double
+#define FLASH_TLE_REVOLUTION_NUMBER                     0x000000A0  //  0x000000A0    0x000000A3    uint32_t
+#define FLASH_TLE_EPOCH_YEAR                            0x000000A4  //  0x000000A4    0x000000A4    uint8_t
+#define FLASH_SYSTEM_INFO_CRC                           0x000000F8  //  0x000000F8    0x000000FB    uint32_t
+#define FLASH_MEMORY_ERROR_COUNTER                      0x000000FC  //  0x000000FC    0x000000FF    uint32_t
 
 // sector 1 page 0 - stats
 #define FLASH_STATS                                     0x00001000  //  0x00001000    0x000010FF

@@ -260,6 +260,13 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Response: none
 - Description: Writes data to arbitrary address in external flash. This command should only be used in emergency situations, as it can be used to override some safety checks.
 
+### CMD_SET_TLE
+- Optional data length: 138
+- Optional data:
+  - 0 - 137: TLE to be set, excluding the title line.
+- Response: none
+- Description: Writes new TLE into non-volatile storage. The format is the same as standard ASCII TLE, 69 characters per line, without line ending characters, the title line is not included.
+
 ---
 # Responses
 

@@ -172,7 +172,7 @@ void PersistentStorage_Set_Image_Len(uint8_t slot, uint32_t len) {
 
 void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, uint8_t len) {
   // check address is in system info
-  if(addr > FLASH_SYSTEM_INFO_LEN) {
+  if(addr > (FLASH_SYSTEM_INFO_LEN - 1)) {
     return;
   }
   
@@ -260,6 +260,32 @@ void PersistentStorage_Reset_System_Info() {
 
   // set default statistics transmission
   sysInfoPage[FLASH_AUTO_STATISTICS] = 1;
+
+  // set default TLE
+  uint8_t b = Navigation_Get_EpochYear(TLE_LINE_1);
+  memcpy(sysInfoPagePtr + FLASH_TLE_EPOCH_YEAR, &b, sizeof(uint8_t));
+  double d = Navigation_Get_EpochDay(TLE_LINE_1);
+  memcpy(sysInfoPagePtr + FLASH_TLE_EPOCH_DAY, &d, sizeof(double));
+  d = Navigation_Get_BallisticCoeff(TLE_LINE_1);
+  memcpy(sysInfoPagePtr + FLASH_TLE_BALLISTIC_COEFF, &d, sizeof(double));
+  d = Navigation_Get_MeanMotion2nd(TLE_LINE_1);
+  memcpy(sysInfoPagePtr + FLASH_TLE_MEAN_MOTION_2ND, &d, sizeof(double));
+  d = Navigation_Get_DragTerm(TLE_LINE_1);
+  memcpy(sysInfoPagePtr + FLASH_TLE_DRAG_TERM, &d, sizeof(double));
+  d = Navigation_Get_Inclination(TLE_LINE_2);
+  memcpy(sysInfoPagePtr + FLASH_TLE_INCLINATION, &d, sizeof(double));
+  d = Navigation_Get_RightAscension(TLE_LINE_2);
+  memcpy(sysInfoPagePtr + FLASH_TLE_RIGHT_ASCENTION, &d, sizeof(double));
+  d = Navigation_Get_Eccentricity(TLE_LINE_2);
+  memcpy(sysInfoPagePtr + FLASH_TLE_ECCENTRICITY, &d, sizeof(double));
+  d = Navigation_Get_PerigeeArgument(TLE_LINE_2);
+  memcpy(sysInfoPagePtr + FLASH_TLE_PERIGEE_ARGUMENT, &d, sizeof(double));
+  d = Navigation_Get_MeanAnomaly(TLE_LINE_2);
+  memcpy(sysInfoPagePtr + FLASH_TLE_MEAN_ANOMALY, &d, sizeof(double));
+  d = Navigation_Get_MeanMotion(TLE_LINE_2);
+  memcpy(sysInfoPagePtr + FLASH_TLE_MEAN_MOTION, &d, sizeof(double));
+  uint32_t ul = Navigation_Get_RevolutionNumber(TLE_LINE_2);
+  memcpy(sysInfoPagePtr + FLASH_TLE_REVOLUTION_NUMBER, &ul, sizeof(uint32_t));
 
   // set CRC
   uint32_t crc = CRC32_Get(sysInfoPage, FLASH_SYSTEM_INFO_CRC);
