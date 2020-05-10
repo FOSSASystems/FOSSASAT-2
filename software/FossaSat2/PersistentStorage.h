@@ -235,11 +235,11 @@ void PersistentStorage_Update_Stat(uint32_t addr, T val) {
   PersistentStorage_Read(FLASH_STATS, statBuff, FLASH_EXT_PAGE_SIZE);
 
   // get min/avg/max
-  T min;
+  T min = 0;
   memcpy(&min, statBuff + statAddr, sizeof(T));
-  T avg;
+  T avg = 0;
   memcpy(&avg, statBuff + statAddr + sizeof(T), sizeof(T));
-  T max;
+  T max = 0;
   memcpy(&max, statBuff + statAddr + 2*sizeof(T), sizeof(T));
 
   // update stats
@@ -259,5 +259,6 @@ void PersistentStorage_Update_Stat(uint32_t addr, T val) {
 }
 
 void PersistentStorage_Update_Stats(uint8_t flags);
+void PersistentStorage_Reset_Stats();
 
 #endif

@@ -53,28 +53,30 @@ void PersistentStorage_Update_Stats(uint8_t flags) {
   if(flags & 0b00000100) {
     // voltages
     uint8_t voltageValue = currSensorXA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_CURR_XA, voltageValue);
+    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_XA, voltageValue);
 
     voltageValue = currSensorXB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_CURR_XB, voltageValue);
+    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_XB, voltageValue);
     
     voltageValue = currSensorZA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_CURR_ZA, voltageValue);
+    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_ZA, voltageValue);
     
     voltageValue = currSensorZB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_CURR_ZB, voltageValue);
+    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_ZB, voltageValue);
     
     voltageValue = currSensorY.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_CURR_Y, voltageValue);
+    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_Y, voltageValue);
     
     voltageValue = currSensorMPPT.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_CURR_MPPT, voltageValue);
+    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_MPPT, voltageValue);
   }
 
   if(flags & 0b00001000) {
     // lights
-    PersistentStorage_Update_Stat(FLASH_STATS_LIGHT_PANEL_Y, lightSensorPanelY.readLux());
-    PersistentStorage_Update_Stat(FLASH_STATS_LIGHT_TOP, lightSensorTop.readLux());
+    float lightValue = Sensors_Read_Light(lightSensorPanelY);
+    PersistentStorage_Update_Stat(FLASH_STATS_LIGHT_PANEL_Y, lightValue);
+    lightValue = Sensors_Read_Light(lightSensorTop);
+    PersistentStorage_Update_Stat(FLASH_STATS_LIGHT_TOP, lightValue);
   }
 
   if(flags & 0b00010000) {
@@ -90,6 +92,168 @@ void PersistentStorage_Update_Stats(uint8_t flags) {
     PersistentStorage_Update_Stat(FLASH_STATS_MAG_Y, imu.calcMag(imu.my));
     PersistentStorage_Update_Stat(FLASH_STATS_MAG_Z, imu.calcMag(imu.mz));
   }
+
+  FOSSASAT_DEBUG_PRINTLN(F("Stats:"));
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_STATS, FLASH_EXT_PAGE_SIZE);
+}
+
+void PersistentStorage_Reset_Stats() {
+  // build a completely stats page
+  uint8_t statsPage[FLASH_EXT_PAGE_SIZE];
+
+  // set everything to 0 by default
+  memset(statsPage, 0, FLASH_EXT_PAGE_SIZE);
+
+  // get minimum and maximum values for all used data types
+  int16_t intMax = 0x7FFF;
+  int16_t intVal = 0;
+  int16_t intMin = 0xFFFF;
+  uint8_t byteMax = 0xFF;
+  uint8_t byteVal = 0;
+  uint8_t byteMin = 0x00;
+  uint32_t floatMaxBits = 0x7F7FFFFF;
+  uint32_t floatMinBits = 0xFF7FFFFF;
+  float floatMax = 0;
+  float floatVal = 0;
+  float floatMin = 0;
+  memcpy(&floatMax, &floatMaxBits, sizeof(uint32_t));
+  memcpy(&floatMin, &floatMinBits, sizeof(uint32_t));
+
+  // set temperatures
+  memcpy(statsPage + (FLASH_STATS_TEMP_PANEL_Y - FLASH_STATS), &intMax, sizeof(intMax));
+  memcpy(statsPage + (FLASH_STATS_TEMP_TOP - FLASH_STATS), &intMax, sizeof(intMax));
+  memcpy(statsPage + (FLASH_STATS_TEMP_BOTTOM - FLASH_STATS), &intMax, sizeof(intMax));
+  memcpy(statsPage + (FLASH_STATS_TEMP_BATTERY - FLASH_STATS), &intMax, sizeof(intMax));
+  memcpy(statsPage + (FLASH_STATS_TEMP_SEC_BATTERY - FLASH_STATS), &intMax, sizeof(intMax));
+
+  intVal = Sensors_Read_Temperature(tempSensorPanelY) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_TEMP_PANEL_Y - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
+  intVal = Sensors_Read_Temperature(tempSensorTop) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_TEMP_TOP - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
+  intVal = Sensors_Read_Temperature(tempSensorBottom) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_TEMP_BOTTOM - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
+  intVal = Sensors_Read_Temperature(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_TEMP_BATTERY - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
+  intVal = Sensors_Read_Temperature(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_TEMP_SEC_BATTERY - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
+  
+  memcpy(statsPage + (FLASH_STATS_TEMP_PANEL_Y - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
+  memcpy(statsPage + (FLASH_STATS_TEMP_TOP - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
+  memcpy(statsPage + (FLASH_STATS_TEMP_BOTTOM - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
+  memcpy(statsPage + (FLASH_STATS_TEMP_BATTERY - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
+  memcpy(statsPage + (FLASH_STATS_TEMP_SEC_BATTERY - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
+
+  // set currents
+  memcpy(statsPage + (FLASH_STATS_CURR_XA - FLASH_STATS), &intMax, sizeof(intMax));
+  memcpy(statsPage + (FLASH_STATS_CURR_XB - FLASH_STATS), &intMax, sizeof(intMax));
+  memcpy(statsPage + (FLASH_STATS_CURR_ZA - FLASH_STATS), &intMax, sizeof(intMax));
+  memcpy(statsPage + (FLASH_STATS_CURR_ZB - FLASH_STATS), &intMax, sizeof(intMax));
+  memcpy(statsPage + (FLASH_STATS_CURR_Y - FLASH_STATS), &intMax, sizeof(intMax));
+  memcpy(statsPage + (FLASH_STATS_CURR_MPPT - FLASH_STATS), &intMax, sizeof(intMax));
+
+  intVal = currSensorXA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_CURR_XA - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
+  intVal = currSensorXB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_CURR_XB - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
+  intVal = currSensorZA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_CURR_ZA - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
+  intVal = currSensorZB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_CURR_ZB - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
+  intVal = currSensorY.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_CURR_Y - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
+  intVal = currSensorMPPT.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_CURR_MPPT - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
+  
+  memcpy(statsPage + (FLASH_STATS_CURR_XA - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
+  memcpy(statsPage + (FLASH_STATS_CURR_XB - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
+  memcpy(statsPage + (FLASH_STATS_CURR_ZA - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
+  memcpy(statsPage + (FLASH_STATS_CURR_ZB - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
+  memcpy(statsPage + (FLASH_STATS_CURR_Y - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
+  memcpy(statsPage + (FLASH_STATS_CURR_MPPT - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
+
+  // set voltages
+  memcpy(statsPage + (FLASH_STATS_VOLT_XA - FLASH_STATS), &byteMax, sizeof(byteMax));
+  memcpy(statsPage + (FLASH_STATS_VOLT_XB - FLASH_STATS), &byteMax, sizeof(byteMax));
+  memcpy(statsPage + (FLASH_STATS_VOLT_ZA - FLASH_STATS), &byteMax, sizeof(byteMax));
+  memcpy(statsPage + (FLASH_STATS_VOLT_ZB - FLASH_STATS), &byteMax, sizeof(byteMax));
+  memcpy(statsPage + (FLASH_STATS_VOLT_Y - FLASH_STATS), &byteMax, sizeof(byteMax));
+  memcpy(statsPage + (FLASH_STATS_VOLT_MPPT - FLASH_STATS), &byteMax, sizeof(byteMax));
+
+  byteVal = currSensorXA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_CURR_XA - FLASH_STATS) + sizeof(byteVal), &byteVal, sizeof(byteVal));
+  byteVal = currSensorXB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_VOLT_XB - FLASH_STATS) + sizeof(byteVal), &byteVal, sizeof(byteVal));
+  byteVal = currSensorZA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_VOLT_ZA - FLASH_STATS) + sizeof(byteVal), &byteVal, sizeof(byteVal));
+  byteVal = currSensorZB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_VOLT_ZB - FLASH_STATS) + sizeof(byteVal), &byteVal, sizeof(byteVal));
+  byteVal = currSensorY.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_VOLT_Y - FLASH_STATS) + sizeof(byteVal), &byteVal, sizeof(byteVal));
+  byteVal = currSensorMPPT.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_VOLT_Y - FLASH_STATS) + sizeof(byteVal), &byteVal, sizeof(byteVal));
+  
+  memcpy(statsPage + (FLASH_STATS_VOLT_XA - FLASH_STATS) + 2*sizeof(byteMin), &byteMin, sizeof(byteMin));
+  memcpy(statsPage + (FLASH_STATS_VOLT_XB - FLASH_STATS) + 2*sizeof(byteMin), &byteMin, sizeof(byteMin));
+  memcpy(statsPage + (FLASH_STATS_VOLT_ZA - FLASH_STATS) + 2*sizeof(byteMin), &byteMin, sizeof(byteMin));
+  memcpy(statsPage + (FLASH_STATS_VOLT_ZB - FLASH_STATS) + 2*sizeof(byteMin), &byteMin, sizeof(byteMin));
+  memcpy(statsPage + (FLASH_STATS_VOLT_Y - FLASH_STATS) + 2*sizeof(byteMin), &byteMin, sizeof(byteMin));
+  memcpy(statsPage + (FLASH_STATS_VOLT_MPPT - FLASH_STATS) + 2*sizeof(byteMin), &byteMin, sizeof(byteMin));
+
+  // set light sensors
+  memcpy(statsPage + (FLASH_STATS_LIGHT_PANEL_Y - FLASH_STATS), &floatMax, sizeof(floatMax));
+  memcpy(statsPage + (FLASH_STATS_LIGHT_TOP - FLASH_STATS), &floatMax, sizeof(floatMax));
+
+  floatVal = Sensors_Read_Light(lightSensorPanelY);
+  memcpy(statsPage + (FLASH_STATS_LIGHT_PANEL_Y - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  floatVal = Sensors_Read_Light(lightSensorTop);
+  memcpy(statsPage + (FLASH_STATS_LIGHT_TOP - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  
+  memcpy(statsPage + (FLASH_STATS_LIGHT_PANEL_Y - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+  memcpy(statsPage + (FLASH_STATS_LIGHT_TOP - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+
+  // set IMU
+  memcpy(statsPage + (FLASH_STATS_GYRO_X - FLASH_STATS), &floatMax, sizeof(floatMax));
+  memcpy(statsPage + (FLASH_STATS_GYRO_Y - FLASH_STATS), &floatMax, sizeof(floatMax));
+  memcpy(statsPage + (FLASH_STATS_GYRO_Z - FLASH_STATS), &floatMax, sizeof(floatMax));
+  memcpy(statsPage + (FLASH_STATS_ACCEL_X - FLASH_STATS), &floatMax, sizeof(floatMax));
+  memcpy(statsPage + (FLASH_STATS_ACCEL_Y - FLASH_STATS), &floatMax, sizeof(floatMax));
+  memcpy(statsPage + (FLASH_STATS_ACCEL_Z - FLASH_STATS), &floatMax, sizeof(floatMax));
+  memcpy(statsPage + (FLASH_STATS_MAG_X - FLASH_STATS), &floatMax, sizeof(floatMax));
+  memcpy(statsPage + (FLASH_STATS_MAG_Y - FLASH_STATS), &floatMax, sizeof(floatMax));
+  memcpy(statsPage + (FLASH_STATS_MAG_Z - FLASH_STATS), &floatMax, sizeof(floatMax));
+  
+  Sensors_Update_IMU();
+  floatVal = imu.calcGyro(imu.gx);
+  memcpy(statsPage + (FLASH_STATS_GYRO_X - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  floatVal = imu.calcGyro(imu.gy);
+  memcpy(statsPage + (FLASH_STATS_GYRO_Y - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  floatVal = imu.calcGyro(imu.gz);
+  memcpy(statsPage + (FLASH_STATS_GYRO_Z - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  floatVal = imu.calcAccel(imu.ax);
+  memcpy(statsPage + (FLASH_STATS_ACCEL_X - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  floatVal = imu.calcAccel(imu.ay);
+  memcpy(statsPage + (FLASH_STATS_ACCEL_Y - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  floatVal = imu.calcAccel(imu.az);
+  memcpy(statsPage + (FLASH_STATS_ACCEL_Z - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  floatVal = imu.calcMag(imu.mx);
+  memcpy(statsPage + (FLASH_STATS_MAG_X - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  floatVal = imu.calcMag(imu.my);
+  memcpy(statsPage + (FLASH_STATS_MAG_Y - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  floatVal = imu.calcMag(imu.mz);
+  memcpy(statsPage + (FLASH_STATS_MAG_Z - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  
+  memcpy(statsPage + (FLASH_STATS_GYRO_X - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+  memcpy(statsPage + (FLASH_STATS_GYRO_Y - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+  memcpy(statsPage + (FLASH_STATS_GYRO_Z - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+  memcpy(statsPage + (FLASH_STATS_ACCEL_X - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+  memcpy(statsPage + (FLASH_STATS_ACCEL_Y - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+  memcpy(statsPage + (FLASH_STATS_ACCEL_Z - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+  memcpy(statsPage + (FLASH_STATS_MAG_X - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+  memcpy(statsPage + (FLASH_STATS_MAG_Y - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+  memcpy(statsPage + (FLASH_STATS_MAG_Z - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+
+  // write all at once
+  PersistentStorage_Write(FLASH_STATS, statsPage, FLASH_EXT_PAGE_SIZE);
 }
 
 void PersistentStorage_Increment_Counter(uint16_t addr) {

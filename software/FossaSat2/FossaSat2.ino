@@ -109,6 +109,11 @@ void setup() {
   FOSSASAT_DEBUG_PORT.print(F("Z: "));
   FOSSASAT_DEBUG_PORT.println(bridgeZ.getFault());
 
+#ifdef RESET_SYSTEM_INFO
+  // reset stats
+  PersistentStorage_Reset_Stats();
+#endif
+
   // check deployment
 #ifdef ENABLE_DEPLOYMENT_SEQUENCE
   uint8_t attemptNumber = PersistentStorage_Get<uint8_t>(FLASH_DEPLOYMENT_COUNTER);
@@ -331,31 +336,36 @@ void loop() {
   FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, FLASH_EXT_PAGE_SIZE)
 
   // update all stats when not in low power mode
+  #ifdef ENABLE_TRANSMISSION_CONTROL
   if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
     PersistentStorage_Update_Stats(0xFF);
   }
+  #else
+  PersistentStorage_Update_Stats(0xFF);
+  #endif
 
   // CW beacon
   Communication_Set_Modem(MODEM_FSK);
   FOSSASAT_DEBUG_DELAY(10);
+  
   #ifdef ENABLE_TRANSMISSION_CONTROL
   if(PersistentStorage_Get<uint8_t>(FLASH_TRANSMISSIONS_ENABLED) == 0) {
     FOSSASAT_DEBUG_PRINTLN(F("Tx off by cmd"));
   } else {
-  #endif
-
-  if(battVoltage >= PersistentStorage_Get<int16_t>(FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT)) {
+    if(battVoltage >= PersistentStorage_Get<int16_t>(FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT)) {
     // transmit full Morse beacon
+  #endif
+  
     Communication_Send_Morse_Beacon(battVoltage);
-  } else {
-    // battery is low, transmit CW beeps
-    for(uint8_t i = 0; i < NUM_CW_BEEPS; i++) {
-      Communication_CW_Beep(500);
-      PowerControl_Wait(500, LOW_POWER_SLEEP);
-    }
-  }
-
+  
   #ifdef ENABLE_TRANSMISSION_CONTROL
+    } else {
+      // battery is low, transmit CW beeps
+      for(uint8_t i = 0; i < NUM_CW_BEEPS; i++) {
+        Communication_CW_Beep(500);
+        PowerControl_Wait(500, LOW_POWER_SLEEP);
+      }
+    }
   }
   #endif
 

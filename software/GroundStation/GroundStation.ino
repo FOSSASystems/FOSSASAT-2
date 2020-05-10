@@ -18,7 +18,7 @@
 #include <RadioLib.h>
 #include <FOSSA-Comms.h>
 
-//#define USE_GFSK                    // uncomment to use GFSK
+#define USE_GFSK                    // uncomment to use GFSK
 #define USE_SX126X                    // uncomment to use SX126x
 
 // pin definitions
@@ -28,17 +28,17 @@
 #define BUSY                  9       // BUSY pin (SX126x-only)
 
 // modem configuration
-#define FREQUENCY             436.7   // MHz
+#define FREQUENCY             436.7027   // MHz
 #define BANDWIDTH             125.0   // kHz
 #define SPREADING_FACTOR      11      // -
 #define CODING_RATE           8       // 4/8
 #define SYNC_WORD             0x12    // used as LoRa "sync word", or twice repeated as FSK sync word (0x1212)
-#define OUTPUT_POWER          20      // dBm
+#define OUTPUT_POWER          10      // dBm
 #define CURRENT_LIMIT         140     // mA
 #define LORA_PREAMBLE_LEN     8       // symbols
 #define BIT_RATE              9.6     // kbps
 #define FREQ_DEV              5.0     // kHz SSB
-#define RX_BANDWIDTH          39.0    // kHz SSB
+#define RX_BANDWIDTH          19.5//39.0    // kHz SSB
 #define FSK_PREAMBLE_LEN      16      // bits
 #define DATA_SHAPING          0.5     // BT product
 #define TCXO_VOLTAGE          1.6
@@ -357,124 +357,278 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       break;
 
     case RESP_STATISTICS: {
-      Serial.println(F("Got stats:\t\tunit\tmin\tavg\tmax"));
-      // TODO stats parsing
-    } break;
+        Serial.println(F("Got stats:\t\tunit\tmin\tavg\tmax"));
+        uint8_t flags = respOptData[0];
+        uint8_t pos = sizeof(flags);
+        float f = 0;
+
+        if (flags & 0x01) {
+          Serial.print(F("Temp panel Y\t\tdeg C\t"));
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\n');
+
+          Serial.print(F("Temp top\t\tdeg C\t"));
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\n');
+
+          Serial.print(F("Temp bottom\t\tdeg C\t"));
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\n');
+
+          Serial.print(F("Temp battery\t\tdeg C\t"));
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\n');
+
+          Serial.print(F("Temp sec. battery\tdeg C\t"));
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Temperature(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\n');
+        }
+        
+        if (flags & 0x02) {
+          Serial.print(F("Current XA\t\tmA\t"));
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\n');
+          
+          Serial.print(F("Current XB\t\tmA\t"));
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\n');
+          
+          Serial.print(F("Current ZA\t\tmA\t"));
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\n');
+          
+          Serial.print(F("Current ZB\t\tmA\t"));
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\n');
+          
+          Serial.print(F("Current Y\t\tmA\t"));
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\n');
+          
+          Serial.print(F("Current MPPT\t\tmA\t"));
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Current(respOptData, pos), 2); pos += sizeof(int16_t); Serial.print('\n');
+        }
+        
+        if (flags & 0x04) {
+          Serial.print(F("Voltage XA\t\tV\t"));
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\n');
+          
+          Serial.print(F("Voltage XB\t\tV\t"));
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\n');
+          
+          Serial.print(F("Voltage ZA\t\tV\t"));
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\n');
+          
+          Serial.print(F("Voltage ZB\t\tV\t"));
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\n');
+          
+          Serial.print(F("Voltage Y\t\tV\t"));
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\n');
+          
+          Serial.print(F("Voltage MPPT\t\tV\t"));
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\t');
+          Serial.print(FCP_System_Info_Get_Voltage(respOptData, pos), 2); pos += sizeof(uint8_t); Serial.print('\n');
+        }
+        
+        if (flags & 0x08) {
+          Serial.print(F("Light panel Y\t\tlux\t"));
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\n');
+          
+          Serial.print(F("Light top\t\tlux\t"));
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\n');
+        }
+        
+        if (flags & 0x10) {
+          Serial.print(F("Acceleration X\t\tm/s^2\t"));
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\n');
+          
+          Serial.print(F("Acceleration Y\t\tm/s^2\t"));
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\n');
+          
+          Serial.print(F("Acceleration Z\t\tm/s^2\t"));
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\n');
+          
+          Serial.print(F("Angle velocity X\tdeg/s\t"));
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\n');
+          
+          Serial.print(F("Angle velocity Y\tdeg/s\t"));
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\n');
+          
+          Serial.print(F("Angle velocity Z\tdeg/s\t"));
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\n');
+          
+          Serial.print(F("Magn. induction X\tgauss\t"));
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\n');
+          
+          Serial.print(F("Magn. induction Y\tgauss\t"));
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\n');
+          
+          Serial.print(F("Magn. induction Z\tgauss\t"));
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\t');
+          memcpy(&f, respOptData + pos, sizeof(float)); pos += sizeof(float); Serial.print(f, 2); Serial.print('\n');
+        }
+
+
+      } break;
 
     case RESP_FULL_SYSTEM_INFO: {
-      Serial.println(F("System info:"));
+        Serial.println(F("System info:"));
 
-      Serial.print(F("batteryVoltage = "));
-      Serial.print(FCP_Get_Battery_Voltage(respOptData));
-      Serial.println(" V");
+        Serial.print(F("batteryVoltage = "));
+        Serial.print(FCP_Get_Battery_Voltage(respOptData));
+        Serial.println(" V");
 
-      Serial.print(F("batteryChargingCurrent = "));
-      Serial.print(FCP_Get_Battery_Charging_Current(respOptData), 4);
-      Serial.println(" mA");
+        Serial.print(F("batteryChargingCurrent = "));
+        Serial.print(FCP_Get_Battery_Charging_Current(respOptData), 4);
+        Serial.println(" mA");
 
-      uint32_t onboardTime = 0;
-      memcpy(&onboardTime, respOptData + 3, sizeof(uint32_t));
-      Serial.print(F("onboardTime = "));
-      Serial.println(onboardTime);
+        uint32_t onboardTime = 0;
+        memcpy(&onboardTime, respOptData + 3, sizeof(uint32_t));
+        Serial.print(F("onboardTime = "));
+        Serial.println(onboardTime);
 
-      uint8_t powerConfig = 0;
-      memcpy(&powerConfig, respOptData + 7, sizeof(uint8_t));
-      Serial.print(F("powerConfig = 0b"));
-      Serial.println(powerConfig, BIN);
+        uint8_t powerConfig = 0;
+        memcpy(&powerConfig, respOptData + 7, sizeof(uint8_t));
+        Serial.print(F("powerConfig = 0b"));
+        Serial.println(powerConfig, BIN);
 
-      uint16_t resetCounter = 0;
-      memcpy(&resetCounter, respOptData + 8, sizeof(uint16_t));
-      Serial.print(F("resetCounter = "));
-      Serial.println(resetCounter);
+        uint16_t resetCounter = 0;
+        memcpy(&resetCounter, respOptData + 8, sizeof(uint16_t));
+        Serial.print(F("resetCounter = "));
+        Serial.println(resetCounter);
 
-      Serial.print(F("voltageXA = "));
-      Serial.print(FCP_System_Info_Get_Voltage(respOptData, 10));
-      Serial.println(" V");
+        Serial.print(F("voltageXA = "));
+        Serial.print(FCP_System_Info_Get_Voltage(respOptData, 10));
+        Serial.println(" V");
 
-      Serial.print(F("currentXA = "));
-      Serial.print(FCP_System_Info_Get_Current(respOptData, 11));
-      Serial.println(" mA");
+        Serial.print(F("currentXA = "));
+        Serial.print(FCP_System_Info_Get_Current(respOptData, 11));
+        Serial.println(" mA");
 
-      Serial.print(F("voltageXB = "));
-      Serial.print(FCP_System_Info_Get_Voltage(respOptData, 13));
-      Serial.println(" V");
+        Serial.print(F("voltageXB = "));
+        Serial.print(FCP_System_Info_Get_Voltage(respOptData, 13));
+        Serial.println(" V");
 
-      Serial.print(F("currentXB = "));
-      Serial.print(FCP_System_Info_Get_Current(respOptData, 14));
-      Serial.println(" mA");
+        Serial.print(F("currentXB = "));
+        Serial.print(FCP_System_Info_Get_Current(respOptData, 14));
+        Serial.println(" mA");
 
-      Serial.print(F("voltageZA = "));
-      Serial.print(FCP_System_Info_Get_Voltage(respOptData, 16));
-      Serial.println(" V");
+        Serial.print(F("voltageZA = "));
+        Serial.print(FCP_System_Info_Get_Voltage(respOptData, 16));
+        Serial.println(" V");
 
-      Serial.print(F("currentZA = "));
-      Serial.print(FCP_System_Info_Get_Current(respOptData, 17));
-      Serial.println(" mA");
+        Serial.print(F("currentZA = "));
+        Serial.print(FCP_System_Info_Get_Current(respOptData, 17));
+        Serial.println(" mA");
 
-      Serial.print(F("voltageZB = "));
-      Serial.print(FCP_System_Info_Get_Voltage(respOptData, 19));
-      Serial.println(" V");
+        Serial.print(F("voltageZB = "));
+        Serial.print(FCP_System_Info_Get_Voltage(respOptData, 19));
+        Serial.println(" V");
 
-      Serial.print(F("currentZB = "));
-      Serial.print(FCP_System_Info_Get_Current(respOptData, 20));
-      Serial.println(" mA");
+        Serial.print(F("currentZB = "));
+        Serial.print(FCP_System_Info_Get_Current(respOptData, 20));
+        Serial.println(" mA");
 
-      Serial.print(F("voltageY = "));
-      Serial.print(FCP_System_Info_Get_Voltage(respOptData, 22));
-      Serial.println(" V");
+        Serial.print(F("voltageY = "));
+        Serial.print(FCP_System_Info_Get_Voltage(respOptData, 22));
+        Serial.println(" V");
 
-      Serial.print(F("currentY = "));
-      Serial.print(FCP_System_Info_Get_Current(respOptData, 23));
-      Serial.println(" mA");
+        Serial.print(F("currentY = "));
+        Serial.print(FCP_System_Info_Get_Current(respOptData, 23));
+        Serial.println(" mA");
 
-      Serial.print(F("tempPanelY = "));
-      Serial.print(FCP_System_Info_Get_Temperature(respOptData, 25));
-      Serial.println(" deg C");
+        Serial.print(F("tempPanelY = "));
+        Serial.print(FCP_System_Info_Get_Temperature(respOptData, 25));
+        Serial.println(" deg C");
 
-      Serial.print(F("boardTemp = "));
-      Serial.print(FCP_System_Info_Get_Temperature(respOptData, 27));
-      Serial.println(" deg C");
+        Serial.print(F("boardTemp = "));
+        Serial.print(FCP_System_Info_Get_Temperature(respOptData, 27));
+        Serial.println(" deg C");
 
-      Serial.print(F("tempBottom = "));
-      Serial.print(FCP_System_Info_Get_Temperature(respOptData, 29));
-      Serial.println(" deg C");
+        Serial.print(F("tempBottom = "));
+        Serial.print(FCP_System_Info_Get_Temperature(respOptData, 29));
+        Serial.println(" deg C");
 
-      Serial.print(F("batteryTemp = "));
-      Serial.print(FCP_System_Info_Get_Temperature(respOptData, 31));
-      Serial.println(" deg C");
+        Serial.print(F("batteryTemp = "));
+        Serial.print(FCP_System_Info_Get_Temperature(respOptData, 31));
+        Serial.println(" deg C");
 
-      Serial.print(F("secBatteryTemp = "));
-      Serial.print(FCP_System_Info_Get_Temperature(respOptData, 33));
-      Serial.println(" deg C");
+        Serial.print(F("secBatteryTemp = "));
+        Serial.print(FCP_System_Info_Get_Temperature(respOptData, 33));
+        Serial.println(" deg C");
 
-      float lightVal = 0;
-      memcpy(&lightVal, respOptData + 35, sizeof(float));
-      Serial.print(F("lightPanelY = "));
-      Serial.println(lightVal, 2);
+        float lightVal = 0;
+        memcpy(&lightVal, respOptData + 35, sizeof(float));
+        Serial.print(F("lightPanelY = "));
+        Serial.println(lightVal, 2);
 
-      memcpy(&lightVal, respOptData + 39, sizeof(float));
-      Serial.print(F("lightTop = "));
-      Serial.println(lightVal, 2);
+        memcpy(&lightVal, respOptData + 39, sizeof(float));
+        Serial.print(F("lightTop = "));
+        Serial.println(lightVal, 2);
 
-      uint8_t fault = 0;
-      memcpy(&fault, respOptData + 43, sizeof(uint8_t));
-      Serial.print(F("faultX = 0x"));
-      Serial.println(fault, HEX);
+        uint8_t fault = 0;
+        memcpy(&fault, respOptData + 43, sizeof(uint8_t));
+        Serial.print(F("faultX = 0x"));
+        Serial.println(fault, HEX);
 
-      memcpy(&fault, respOptData + 44, sizeof(uint8_t));
-      Serial.print(F("faultY = 0x"));
-      Serial.println(fault, HEX);
+        memcpy(&fault, respOptData + 44, sizeof(uint8_t));
+        Serial.print(F("faultY = 0x"));
+        Serial.println(fault, HEX);
 
-      memcpy(&fault, respOptData + 45, sizeof(uint8_t));
-      Serial.print(F("faultZ = 0x"));
-      Serial.println(fault, HEX);
+        memcpy(&fault, respOptData + 45, sizeof(uint8_t));
+        Serial.print(F("faultZ = 0x"));
+        Serial.println(fault, HEX);
 
-      uint32_t errCounter = 0;
-      memcpy(&errCounter, respOptData + 19, sizeof(uint32_t));
-      Serial.print(F("errCounter = "));
-      Serial.println(errCounter);
+        uint32_t errCounter = 0;
+        memcpy(&errCounter, respOptData + 46, sizeof(uint32_t));
+        Serial.print(F("errCounter = "));
+        Serial.println(errCounter);
 
-    } break;
+      } break;
 
     case RESP_CAMERA_PICTURE: {
       uint16_t packetId = 0;

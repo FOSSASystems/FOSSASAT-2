@@ -188,38 +188,38 @@
 // sector 1 page 0 - stats
 #define FLASH_STATS                                     0x00001000  //  0x00001000    0x000010FF
 
-#define FLASH_STATS_TEMP_PANEL_Y                        0x00001000  //  0x00001000    0x00001005
-#define FLASH_STATS_TEMP_TOP                            0x00001006  //  0x00001006    0x0000100B
-#define FLASH_STATS_TEMP_BOTTOM                         0x0000100C  //  0x0000100C    0x00001011
-#define FLASH_STATS_TEMP_BATTERY                        0x00001012  //  0x00001012    0x00001017
-#define FLASH_STATS_TEMP_SEC_BATTERY                    0x00001018  //  0x00001018    0x0000101D
+#define FLASH_STATS_TEMP_PANEL_Y                        0x00001000  //  0x00001000    0x00001005    3x int16_t
+#define FLASH_STATS_TEMP_TOP                            0x00001006  //  0x00001006    0x0000100B    3x int16_t
+#define FLASH_STATS_TEMP_BOTTOM                         0x0000100C  //  0x0000100C    0x00001011    3x int16_t
+#define FLASH_STATS_TEMP_BATTERY                        0x00001012  //  0x00001012    0x00001017    3x int16_t
+#define FLASH_STATS_TEMP_SEC_BATTERY                    0x00001018  //  0x00001018    0x0000101D    3x int16_t
 
-#define FLASH_STATS_CURR_XA                             0x0000101E  //  0x0000101E    0x00001023
-#define FLASH_STATS_CURR_XB                             0x00001024  //  0x00001024    0x00001029
-#define FLASH_STATS_CURR_ZA                             0x0000102A  //  0x0000102A    0x0000102F
-#define FLASH_STATS_CURR_ZB                             0x00001030  //  0x00001030    0x00001035
-#define FLASH_STATS_CURR_Y                              0x00001036  //  0x00001036    0x0000103B
-#define FLASH_STATS_CURR_MPPT                           0x0000103C  //  0x0000103C    0x00001041
+#define FLASH_STATS_CURR_XA                             0x0000101E  //  0x0000101E    0x00001023    3x int16_t
+#define FLASH_STATS_CURR_XB                             0x00001024  //  0x00001024    0x00001029    3x int16_t
+#define FLASH_STATS_CURR_ZA                             0x0000102A  //  0x0000102A    0x0000102F    3x int16_t
+#define FLASH_STATS_CURR_ZB                             0x00001030  //  0x00001030    0x00001035    3x int16_t
+#define FLASH_STATS_CURR_Y                              0x00001036  //  0x00001036    0x0000103B    3x int16_t
+#define FLASH_STATS_CURR_MPPT                           0x0000103C  //  0x0000103C    0x00001041    3x int16_t
 
-#define FLASH_STATS_VOLT_XA                             0x00001042  //  0x00001042    0x00001044
-#define FLASH_STATS_VOLT_XB                             0x00001045  //  0x00001045    0x00001047
-#define FLASH_STATS_VOLT_ZA                             0x00001048  //  0x00001048    0x0000104A
-#define FLASH_STATS_VOLT_ZB                             0x0000104B  //  0x0000104B    0x0000104D
-#define FLASH_STATS_VOLT_Y                              0x0000104E  //  0x0000104E    0x00001050
-#define FLASH_STATS_VOLT_MPPT                           0x00001051  //  0x00001051    0x00001053
+#define FLASH_STATS_VOLT_XA                             0x00001042  //  0x00001042    0x00001044    3x uint8_t
+#define FLASH_STATS_VOLT_XB                             0x00001045  //  0x00001045    0x00001047    3x uint8_t
+#define FLASH_STATS_VOLT_ZA                             0x00001048  //  0x00001048    0x0000104A    3x uint8_t
+#define FLASH_STATS_VOLT_ZB                             0x0000104B  //  0x0000104B    0x0000104D    3x uint8_t
+#define FLASH_STATS_VOLT_Y                              0x0000104E  //  0x0000104E    0x00001050    3x uint8_t
+#define FLASH_STATS_VOLT_MPPT                           0x00001051  //  0x00001051    0x00001053    3x uint8_t
 
-#define FLASH_STATS_LIGHT_PANEL_Y                       0x00001054  //  0x00001054    0x0000105F
-#define FLASH_STATS_LIGHT_TOP                           0x00001060  //  0x00001060    0x0000106B
+#define FLASH_STATS_LIGHT_PANEL_Y                       0x00001054  //  0x00001054    0x0000105F    3x float
+#define FLASH_STATS_LIGHT_TOP                           0x00001060  //  0x00001060    0x0000106B    3x float
 
-#define FLASH_STATS_GYRO_X                              0x0000106C  //  0x0000106C    0x00001077
-#define FLASH_STATS_GYRO_Y                              0x00001078  //  0x00001078    0x00001083
-#define FLASH_STATS_GYRO_Z                              0x00001084  //  0x00001084    0x0000108F
-#define FLASH_STATS_ACCEL_X                             0x00001090  //  0x00001090    0x0000109B
-#define FLASH_STATS_ACCEL_Y                             0x0000109C  //  0x0000109C    0x000010A7
-#define FLASH_STATS_ACCEL_Z                             0x000010A8  //  0x000010A8    0x000010B3
-#define FLASH_STATS_MAG_X                               0x000010B4  //  0x000010B4    0x000010BF
-#define FLASH_STATS_MAG_Y                               0x000010C0  //  0x000010C0    0x000010CB
-#define FLASH_STATS_MAG_Z                               0x000010CC  //  0x000010CC    0x000010D7
+#define FLASH_STATS_GYRO_X                              0x0000106C  //  0x0000106C    0x00001077    3x float
+#define FLASH_STATS_GYRO_Y                              0x00001078  //  0x00001078    0x00001083    3x float
+#define FLASH_STATS_GYRO_Z                              0x00001084  //  0x00001084    0x0000108F    3x float
+#define FLASH_STATS_ACCEL_X                             0x00001090  //  0x00001090    0x0000109B    3x float
+#define FLASH_STATS_ACCEL_Y                             0x0000109C  //  0x0000109C    0x000010A7    3x float
+#define FLASH_STATS_ACCEL_Z                             0x000010A8  //  0x000010A8    0x000010B3    3x float
+#define FLASH_STATS_MAG_X                               0x000010B4  //  0x000010B4    0x000010BF    3x float
+#define FLASH_STATS_MAG_Y                               0x000010C0  //  0x000010C0    0x000010CB    3x float
+#define FLASH_STATS_MAG_Z                               0x000010CC  //  0x000010CC    0x000010D7    3x float
 
 // sectors 2 + 3 - image lengths: 4 bytes per length
 #define FLASH_IMAGE_LENGTHS_1                           0x00002000  //  0x00002000    0x00002FFF

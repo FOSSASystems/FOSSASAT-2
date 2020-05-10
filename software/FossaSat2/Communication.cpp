@@ -732,8 +732,8 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           if(optData[0] & 0b00000010) {
             // wipe stats
-            FOSSASAT_DEBUG_PRINTLN(F("Wiping stats"));
-            PersistentStorage_SectorErase(FLASH_STATS);
+            FOSSASAT_DEBUG_PRINTLN(F("Resetting stats"));
+            PersistentStorage_Reset_Stats();
             PowerControl_Watchdog_Heartbeat();
           }
 
