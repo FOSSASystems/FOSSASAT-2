@@ -279,10 +279,10 @@ void Communication_Send_Full_System_Info() {
   int16_t secBatteryTemperature = Sensors_Read_Temperature(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, secBatteryTemperature, "secBatteryTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
 
-  float lightPanelY = lightSensorPanelY.readLux();
+  float lightPanelY = Sensors_Read_Light(lightSensorPanelY);
   Communication_Frame_Add(&optDataPtr, lightPanelY, "lightPanelY", 1, "lux");
 
-  float lightTop = lightSensorTop.readLux();
+  float lightTop = Sensors_Read_Light(lightSensorTop);
   Communication_Frame_Add(&optDataPtr, lightTop, "lightTop", 1, "lux");
 
   uint8_t bridgeXfault = bridgeX.getFault();

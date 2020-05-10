@@ -248,9 +248,9 @@ void setup() {
         FOSSASAT_DEBUG_PORT.println(F("Device\t\tE [lx]"));
         FOSSASAT_DEBUG_PORT.println(F("-------------------------------------------------------------"));
         FOSSASAT_DEBUG_PORT.print(F("Y panel \t"));
-        FOSSASAT_DEBUG_PORT.println(lightSensorPanelY.readLux());
+        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Light(lightSensorPanelY));
         FOSSASAT_DEBUG_PORT.print(F("Top panel\t"));
-        FOSSASAT_DEBUG_PORT.println(lightSensorTop.readLux());
+        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Light(lightSensorTop));
         FOSSASAT_DEBUG_PORT.println();
 
         // ADCS H-bridge drivers

@@ -86,3 +86,14 @@ bool Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire) {
   sensor.setIntegrationTime(LIGHT_SENSOR_INTEGRATION_TIME);
   return(true);
 }
+
+float Sensors_Read_Light(Adafruit_VEML7700& sensor) {
+  float val = sensor.readLux();
+
+  // sometimes the sensor returns nonsense value
+  if(val > 100000000) {
+    return(0);
+  }
+
+  return(val);
+}

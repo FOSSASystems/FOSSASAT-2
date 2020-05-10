@@ -12,5 +12,6 @@ void Sensors_Update_IMU();
 bool Sensors_Setup_Current(Adafruit_INA260& sensor, TwoWire& wire, uint8_t addr);
 
 bool Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire);
+float Sensors_Read_Light(Adafruit_VEML7700& sensor);
 
 #endif
