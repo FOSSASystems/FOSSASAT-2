@@ -369,10 +369,6 @@ void loop() {
   }
   #endif
 
-  // wait for a bit
-  FOSSASAT_DEBUG_DELAY(10);
-  PowerControl_Wait(500, LOW_POWER_SLEEP, true);
-
   // send FSK system info
   Communication_Set_Modem(MODEM_FSK);
   #ifdef ENABLE_TRANSMISSION_CONTROL
@@ -381,7 +377,6 @@ void loop() {
 
     // send stats too (if it's enabled)
     if(PersistentStorage_Get<uint8_t>(FLASH_AUTO_STATISTICS) == 1) {
-      PowerControl_Wait(500, LOW_POWER_SLEEP, true);
       Communication_Send_Statistics(0xFF);
     }
     
@@ -391,13 +386,8 @@ void loop() {
   }
   #else
     Communication_Send_Full_System_Info();
-    PowerControl_Wait(500, LOW_POWER_SLEEP, true);
     Communication_Send_Statistics(0xFF);
   #endif
-  
-  // wait for a bit
-  FOSSASAT_DEBUG_DELAY(10);
-  PowerControl_Wait(500, LOW_POWER_SLEEP, true);
 
   // send LoRa system info if not in low power mode
   Communication_Set_Modem(MODEM_LORA);
@@ -408,10 +398,6 @@ void loop() {
   #else
     Communication_Send_Basic_System_Info();
   #endif
-
-  // wait for a bit
-  FOSSASAT_DEBUG_DELAY(10);
-  PowerControl_Wait(500, LOW_POWER_SLEEP, true);
 
   // LoRa receive
   uint8_t windowLenLoRa = PersistentStorage_Get<uint8_t>(FLASH_LORA_RECEIVE_LEN);
