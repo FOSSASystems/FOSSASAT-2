@@ -131,7 +131,7 @@
 #define TLE_LINE_2                                      "2 00000 137.0503 217.9687 0010435 173.7291 322.4297 15.88896416000000"
 
 /*
-    Flash Configuration
+   Flash Configuration
 */
 
 #define FLASH_EXT_PAGE_SIZE                             0x00000100

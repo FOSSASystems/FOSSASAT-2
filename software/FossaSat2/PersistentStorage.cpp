@@ -11,75 +11,42 @@ uint32_t CRC32_Get(uint8_t* buff, size_t len, uint32_t initial) {
 }
 
 void PersistentStorage_Update_Stats(uint8_t flags) {
-  if(flags & 0b00000001) {
+  if(flags & STATS_FLAGS_TEMPERATURES) {
     // temperatures
-    int16_t tempValue = Sensors_Read_Temperature(tempSensorPanelY) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_PANEL_Y, tempValue);
-    
-    tempValue = Sensors_Read_Temperature(tempSensorTop) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_TOP, tempValue);
-    
-    tempValue = Sensors_Read_Temperature(tempSensorBottom) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_BOTTOM, tempValue);
-    
-    tempValue = Sensors_Read_Temperature(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_BATTERY, tempValue);
-    
-    tempValue = Sensors_Read_Temperature(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_SEC_BATTERY, tempValue);
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_PANEL_Y, (int16_t)(Sensors_Read_Temperature(tempSensorPanelY) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_TOP, (int16_t)(Sensors_Read_Temperature(tempSensorTop) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_BOTTOM, (int16_t)(Sensors_Read_Temperature(tempSensorBottom) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_BATTERY, (int16_t)(Sensors_Read_Temperature(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_SEC_BATTERY, (int16_t)(Sensors_Read_Temperature(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER)));
   }
 
-  if(flags & 0b00000010) {
+  if(flags & STATS_FLAGS_CURRENTS) {
     // currents
-    int16_t currentValue = currSensorXA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_CURR_XA, currentValue);
-
-    currentValue = currSensorXB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_CURR_XB, currentValue);
-
-    currentValue = currSensorZA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_CURR_ZA, currentValue);
-
-    currentValue = currSensorZB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_CURR_ZB, currentValue);
-
-    currentValue = currSensorY.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_CURR_Y, currentValue);
-
-    currentValue = currSensorMPPT.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_CURR_MPPT, currentValue);
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_XA, (int16_t)(currSensorXA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_XB, (int16_t)(currSensorXB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_ZA, (int16_t)(currSensorZA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_ZB, (int16_t)(currSensorZB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_Y, (int16_t)(currSensorY.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_CURR_MPPT, (int16_t)(currSensorMPPT.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER)));
   }
 
-  if(flags & 0b00000100) {
+  if(flags & STATS_FLAGS_VOLTAGES) {
     // voltages
-    uint8_t voltageValue = currSensorXA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_XA, voltageValue);
-
-    voltageValue = currSensorXB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_XB, voltageValue);
-    
-    voltageValue = currSensorZA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_ZA, voltageValue);
-    
-    voltageValue = currSensorZB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_ZB, voltageValue);
-    
-    voltageValue = currSensorY.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_Y, voltageValue);
-    
-    voltageValue = currSensorMPPT.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
-    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_MPPT, voltageValue);
+    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_XA, (uint8_t)(currSensorXA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_XB, (uint8_t)(currSensorXB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_ZA, (uint8_t)(currSensorZA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_ZB, (uint8_t)(currSensorZB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_Y, (uint8_t)(currSensorY.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_VOLT_MPPT, (uint8_t)(currSensorMPPT.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER)));
   }
 
-  if(flags & 0b00001000) {
+  if(flags & STATS_FLAGS_LIGHT) {
     // lights
-    float lightValue = Sensors_Read_Light(lightSensorPanelY);
-    PersistentStorage_Update_Stat(FLASH_STATS_LIGHT_PANEL_Y, lightValue);
-    lightValue = Sensors_Read_Light(lightSensorTop);
-    PersistentStorage_Update_Stat(FLASH_STATS_LIGHT_TOP, lightValue);
+    PersistentStorage_Update_Stat(FLASH_STATS_LIGHT_PANEL_Y, Sensors_Read_Light(lightSensorPanelY));
+    PersistentStorage_Update_Stat(FLASH_STATS_LIGHT_TOP, Sensors_Read_Light(lightSensorTop));
   }
 
-  if(flags & 0b00010000) {
+  if(flags & STATS_FLAGS_IMU) {
     // IMU
     Sensors_Update_IMU();
     PersistentStorage_Update_Stat(FLASH_STATS_GYRO_X, imu.calcGyro(imu.gx));

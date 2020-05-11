@@ -313,35 +313,35 @@ void Communication_Send_Statistics(uint8_t flags) {
   memcpy(respOptDataPtr, &flags, sizeof(uint8_t));
   respOptDataPtr += sizeof(uint8_t);
 
-  if(flags & 0b00000001) {
+  if(flags & STATS_FLAGS_TEMPERATURES) {
     // temperatures
     PersistentStorage_Read(FLASH_STATS_TEMP_PANEL_Y, respOptDataPtr, 15*sizeof(int16_t));
     respOptDataPtr += 15*sizeof(int16_t);
     respOptDataLen += 15*sizeof(int16_t);
   }
 
-  if(flags & 0b00000010) {
+  if(flags & STATS_FLAGS_CURRENTS) {
     // currents
     PersistentStorage_Read(FLASH_STATS_CURR_XA, respOptDataPtr, 18*sizeof(int16_t));
     respOptDataPtr += 18*sizeof(int16_t);
     respOptDataLen += 18*sizeof(int16_t);
   }
 
-  if(flags & 0b00000100) {
+  if(flags & STATS_FLAGS_VOLTAGES) {
     // voltages
     PersistentStorage_Read(FLASH_STATS_VOLT_XA, respOptDataPtr, 18*sizeof(uint8_t));
     respOptDataPtr += 18*sizeof(uint8_t);
     respOptDataLen += 18*sizeof(uint8_t);
   }
 
-  if(flags & 0b00001000) {
+  if(flags & STATS_FLAGS_LIGHT) {
     // lights
     PersistentStorage_Read(FLASH_STATS_LIGHT_PANEL_Y, respOptDataPtr, 6*sizeof(float));
     respOptDataPtr += 6*sizeof(float);
     respOptDataLen += 6*sizeof(float);
   }
 
-  if(flags & 0b00010000) {
+  if(flags & STATS_FLAGS_IMU) {
     // IMU
     PersistentStorage_Read(FLASH_STATS_GYRO_X, respOptDataPtr, 27*sizeof(float));
     respOptDataPtr += 27*sizeof(float);
