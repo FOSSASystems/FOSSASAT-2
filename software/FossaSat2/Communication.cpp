@@ -1384,7 +1384,11 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       if (optDataLen >= sizeof(uint32_t) + 1) {
         uint32_t address = 0;
         memcpy(&address, optData, sizeof(uint32_t));
-        PersistentStorage_Write(address, optData + sizeof(uint32_t), optDataLen - sizeof(uint32_t));
+        uint8_t dataLen = optDataLen - sizeof(uint32_t);
+        uint8_t flashBuff[FLASH_EXT_PAGE_SIZE];
+        PersistentStorage_Read(address / FLASH_EXT_PAGE_SIZE, flashBuff, FLASH_EXT_PAGE_SIZE);
+        memcpy(flashBuff + (address % FLASH_EXT_PAGE_SIZE), optData + sizeof(uint32_t), dataLen);
+        PersistentStorage_Write(address / FLASH_EXT_PAGE_SIZE, flashBuff, FLASH_EXT_PAGE_SIZE);
       }
     } break;
 

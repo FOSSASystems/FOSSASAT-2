@@ -223,6 +223,7 @@ void printControls() {
   Serial.println(F("b - add store and forward message"));
   Serial.println(F("B - request store and forward message"));
   Serial.println(F("O - send route packet (retransmit, FS-2 to FS-1B)"));
+  Serial.println(F("h - induce memory error in system info page"));
   Serial.println(F("------------------------------------"));
 }
 
@@ -935,6 +936,15 @@ void route(char* targetCallsign, uint8_t routeFuncId, uint8_t* routeOptData, uin
   delete[] optData;
 }
 
+void writeFlash(uint32_t addr, uint8_t* data, uint8_t len) {
+  Serial.print(F("Sending flash write request ... "));
+  uint8_t optDataLen = 4 + len;
+  uint8_t* optData = new uint8_t[optDataLen];
+  memcpy(optData, &addr, sizeof(uint32_t));
+  memcpy(optData + sizeof(uint32_t), data, len);
+  sendFrameEncrypted(CMD_SET_FLASH_CONTENTS, optDataLen, optData);
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println(F("FOSSASAT-2 Ground Station Demo Code"));
@@ -1078,6 +1088,12 @@ void loop() {
       case 'O': {
         char* data = "Hello there!";
         route("FOSSASAT-1B", CMD_RETRANSMIT, (uint8_t*)data, strlen(data));
+      } break;
+      case 'h': {
+        uint8_t data[4];
+        uint32_t num = random();
+        memcpy(data, &num, sizeof(uint32_t));
+        writeFlash(0x000000B0, data, 2);
       } break;
       default:
         Serial.print(F("Unknown command: "));
