@@ -341,7 +341,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 108 bytes for IMU, floats
 
 ### RESP_FULL_SYSTEM_INFO
-- Optional data length: 47
+- Optional data length: 52
 - Optional data:
   - 0: MPPT output voltage * 20 mV, unsigned 8-bit integer
   - 1 - 2: MPPT output current * 10 uA, signed 16-bit integer
@@ -374,6 +374,8 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 44: last Y axis H-bridge fault, unsigned 8-bit integer
   - 45: last Z axis H-bridge fault, unsigned 8-bit integer
   - 46 - 49: external flash system info page CRC error counter, unsigned 32-bit integer
+  - 50: FSK window receive length in seconds
+  - 51: LoRa window receive length in seconds
 
 ### RESP_STORE_AND_FORWARD_ASSIGNED_SLOT
 - Optional data length: 2

@@ -208,7 +208,7 @@ void Communication_Send_Basic_System_Info() {
 
 void Communication_Send_Full_System_Info() {
   // build response frame
-  static const uint8_t optDataLen = 10*sizeof(uint8_t) + 11*sizeof(int16_t) + sizeof(uint16_t) + 2*sizeof(uint32_t) + 2*sizeof(float);
+  static const uint8_t optDataLen = 12*sizeof(uint8_t) + 11*sizeof(int16_t) + sizeof(uint16_t) + 2*sizeof(uint32_t) + 2*sizeof(float);
   uint8_t optData[optDataLen];
   uint8_t* optDataPtr = optData;
 
@@ -296,6 +296,12 @@ void Communication_Send_Full_System_Info() {
 
   uint32_t errCounter = PersistentStorage_Get<uint32_t>(FLASH_MEMORY_ERROR_COUNTER);
   Communication_Frame_Add(&optDataPtr, errCounter, "errCounter", 1, "");
+
+  uint8_t fskRxLen = PersistentStorage_Get<uint8_t>(FLASH_FSK_RECEIVE_LEN);
+  Communication_Frame_Add(&optDataPtr, fskRxLen, "fskRxLen", 1, "");
+
+  uint8_t loraRxLen = PersistentStorage_Get<uint8_t>(FLASH_LORA_RECEIVE_LEN);
+  Communication_Frame_Add(&optDataPtr, loraRxLen, "loraRxLen", 1, "");
 
   FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
 

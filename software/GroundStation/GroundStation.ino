@@ -548,6 +548,15 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
         Serial.print(F("errCounter = "));
         Serial.println(errCounter);
 
+        uint8_t rxLen = 0;
+        memcpy(&rxLen, respOptData + 50, sizeof(uint8_t));
+        Serial.print(F("fskRxLen = "));
+        Serial.println(rxLen);
+        
+        memcpy(&rxLen, respOptData + 51, sizeof(uint8_t));
+        Serial.print(F("loraRxLen = "));
+        Serial.println(rxLen);
+
       } break;
 
     case RESP_CAMERA_PICTURE: {
