@@ -748,6 +748,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             FOSSASAT_DEBUG_PRINTLN(F("Wiping store & forward"));
             PersistentStorage_64kBlockErase(FLASH_STORE_AND_FORWARD_START);
             PowerControl_Watchdog_Heartbeat();
+            
             // reset store & forward length
             PersistentStorage_Set<uint32_t>(FLASH_STORE_AND_FORWARD_LENGTH, 0);
           }
@@ -755,10 +756,14 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           if(optData[0] & 0b00001000) {
             // wipe NMEA
             FOSSASAT_DEBUG_PRINTLN(F("Wiping NMEA storage"));
-            PersistentStorage_64kBlockErase(FLASH_NMEA_LOG_START);
-            PowerControl_Watchdog_Heartbeat();
-            // reset NMEA log length
+            for(uint32_t addr = FLASH_NMEA_LOG_START; addr < FLASH_NMEA_LOG_END; addr += FLASH_64K_BLOCK_SIZE) {
+              PersistentStorage_64kBlockErase(addr);
+              PowerControl_Watchdog_Heartbeat();
+            }
+            
+            // reset NMEA log length and latest entry
             PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, 0);
+            PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY, FLASH_NMEA_LOG_START);
           }
 
           if(optData[0] & 0b00010000) {
@@ -1239,8 +1244,6 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         memcpy(&duration, optData, sizeof(uint32_t));
         FOSSASAT_DEBUG_PRINT(F("GPS logging duration: "));
         FOSSASAT_DEBUG_PRINTLN(duration);
-        
-        // get parameters
         uint32_t offset = 0;
         memcpy(&offset, optData + sizeof(uint32_t), sizeof(uint32_t));
         FOSSASAT_DEBUG_PRINT(F("GPS logging offset: "));
@@ -1256,46 +1259,86 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         #endif
 
         // wipe NMEA log
-        PersistentStorage_64kBlockErase(FLASH_NMEA_LOG_START);
-        PowerControl_Watchdog_Heartbeat();
+        FOSSASAT_DEBUG_PRINTLN(F("Wiping NMEA storage"));
+        for(uint32_t addr = FLASH_NMEA_LOG_START; addr < FLASH_NMEA_LOG_END; addr += FLASH_64K_BLOCK_SIZE) {
+          PersistentStorage_64kBlockErase(addr);
+          PowerControl_Watchdog_Heartbeat();
+        }
 
         // wait for offset to elapse
+        FOSSASAT_DEBUG_PRINTLN(F("Waiting for offset to elapse"));
         PowerControl_Wait(offset, LOW_POWER_SLEEP, true);
+        
+        FOSSASAT_DEBUG_PRINTLN(F("GPS logging start"));
 
         // power up GPS
         digitalWrite(GPS_POWER_FET, HIGH);
 
+        // log entries are saved in 128-byte chunks (to fit two chunks in one flash page)
+        uint8_t buff[FLASH_NMEA_LOG_SLOT_SIZE];
+        uint16_t buffPos = sizeof(uint32_t);
+
+        // log starts from the first address
+        uint32_t flashPos = FLASH_NMEA_LOG_START;
+
+        // whether we need to overwrite the current page
+        bool overwrite = false;
+
         // run for the requested duration
         uint32_t start = millis();
-        uint8_t buff[MAX_IMAGE_PACKET_LENGTH];
-        uint16_t buffPos = sizeof(uint32_t);
-        uint32_t flashPos = FLASH_NMEA_LOG_START;
         while(millis() - start < duration) {
           // read GPS data to buffer
           while(GpsSerial.available() > 0) {
             char c = GpsSerial.read();
 
-            // check if we got line ending
-            if(c != '\n') {
-              // add to buffer
-              buff[buffPos] = c;
-              buffPos++;
-            } else {
+            // check if we got line ending or the buffer is full
+            if((c == '\n') || (buffPos == FLASH_NMEA_LOG_SLOT_SIZE)) {
               // add timestamp
               uint32_t stamp = millis() - start;
               memcpy(buff, &stamp, sizeof(uint32_t));
               FOSSASAT_DEBUG_PRINTLN(stamp, HEX);
+              FOSSASAT_DEBUG_PRINTLN(buffPos);
 
               // add null terminator instead of CR
               buff[buffPos - 1] = '\0';
               FOSSASAT_DEBUG_PRINTLN((char*)buff + 4);
+              FOSSASAT_DEBUG_PRINTLN(flashPos, HEX);
 
-              //  write buffer to flash
+              // check if we are overwriting old data
+              if(overwrite && (flashPos % FLASH_SECTOR_SIZE == 0)) {
+                // reading sector to RAM, erasing and then writing back to flash would be too slow
+                PersistentStorage_SectorErase(flashPos);
+                PowerControl_Watchdog_Heartbeat();
+                FOSSASAT_DEBUG_PRINTLN(F("Erased sector "));
+                FOSSASAT_DEBUG_PRINTLN(flashPos, HEX);
+              }
+
+              // write the buffer
               PersistentStorage_Write(flashPos, buff, buffPos, false);
-              flashPos += MAX_IMAGE_PACKET_LENGTH;
+              FOSSASAT_DEBUG_PRINTLN(F("-----"));
+              
+              // update address of the latest log entry
+              PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY, flashPos);
+
+              // reset buffer position
               buffPos = sizeof(uint32_t);
+
+              // check there's still space left
+              flashPos += FLASH_NMEA_LOG_SLOT_SIZE;
+              if(flashPos >= FLASH_NMEA_LOG_END) {
+                // reached end of flash reserved for GPS log, set overwrite flag and start over
+                flashPos = FLASH_NMEA_LOG_START;
+                overwrite = true;
+              }
+              
+            } else {
+              // add to buffer
+              buff[buffPos] = c;
+              buffPos++;
             }
           }
+
+          // TODO: sleep for a short period of time?
 
           // check battery
           PowerControl_Watchdog_Heartbeat();
@@ -1312,6 +1355,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // save the number of logged bytes and send it
         uint32_t logged = flashPos - FLASH_NMEA_LOG_START;
+        if(overwrite) {
+          // log is full when the overwrite flag is set
+          logged = FLASH_NMEA_LOG_END - FLASH_NMEA_LOG_START;
+        }
         FOSSASAT_DEBUG_PRINT(F("Logged total of (bytes): "));
         FOSSASAT_DEBUG_PRINTLN(logged);
         PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, logged);
@@ -1324,7 +1371,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_GET_GPS_LOG: {
-      if(Communication_Check_OptDataLen(4, optDataLen)) {
+      if(Communication_Check_OptDataLen(5, optDataLen)) {
         // check FSK is active
         if(currentModem != MODEM_FSK) {
           FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer GPS log"));
@@ -1332,17 +1379,28 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         }
 
         // get parameters
-        uint32_t offset = 0;
-        memcpy(&offset, optData, sizeof(uint32_t));
+        uint8_t dir = optData[0];
+        uint16_t offset = 0;
+        memcpy(&offset, optData + sizeof(uint8_t), sizeof(uint16_t));
+        uint32_t len = 0;
+        memcpy(&len, optData + sizeof(uint8_t) + sizeof(uint16_t), sizeof(uint16_t));
+        FOSSASAT_DEBUG_PRINT(F("GPS log download direction: "));
+        FOSSASAT_DEBUG_PRINTLN(dir);
         FOSSASAT_DEBUG_PRINT(F("GPS log download offset: "));
         FOSSASAT_DEBUG_PRINTLN(offset);
-        uint32_t addr = FLASH_NMEA_LOG_START + offset;
-        FOSSASAT_DEBUG_PRINT(F("Starting from address: 0x"));
-        FOSSASAT_DEBUG_PRINTLN(addr, HEX);
+        offset *= FLASH_NMEA_LOG_SLOT_SIZE;
 
         // read log length from flash
+        FOSSASAT_DEBUG_PRINT(F("GPS log download length: "));
         uint32_t logged = PersistentStorage_Get<uint32_t>(FLASH_NMEA_LOG_LENGTH);
-        FOSSASAT_DEBUG_PRINT(F("GPS log length: "));
+        if((len == 0) || (len > logged)) {
+          FOSSASAT_DEBUG_PRINT(logged);
+          FOSSASAT_DEBUG_PRINTLN(F(" (full log)"));
+          len = logged / FLASH_NMEA_LOG_SLOT_SIZE;
+        } else {
+          FOSSASAT_DEBUG_PRINTLN(len);
+        }
+        FOSSASAT_DEBUG_PRINT(F("Total GPS log length: "));
         FOSSASAT_DEBUG_PRINTLN(logged);
         if(logged == 0) {
           FOSSASAT_DEBUG_PRINT(F("No GPS data logged"));
@@ -1351,14 +1409,76 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           return;
         }
 
+        // get the starting address (all address are offset from FLASH_NMEA_LOG_START, to allow modulo calculations)
+        uint32_t latestAddr = PersistentStorage_Get<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY) - FLASH_NMEA_LOG_START;
+        uint32_t startAddr = 0;
+        if(logged < (FLASH_NMEA_LOG_END - FLASH_NMEA_LOG_START)) {
+          if(dir == 0) {
+            // log is not full AND downlink from oldest - start at log space start
+            startAddr = 0;
+          } else {
+            // log is not full AND downlink from newest - start at last logged address
+            startAddr = latestAddr;
+          }
+          
+        } else {
+          // log is full, so it might have wrapped around
+          if(dir == 0) {
+            // log is full AND downlink from oldest - start at address next to the latest
+            startAddr = (latestAddr + 1) % (FLASH_NMEA_LOG_END - FLASH_NMEA_LOG_START);
+          } else {
+            // log is full AND downlink from newest - start at last logged address
+            startAddr = latestAddr;
+          }
+          
+        }
+
+        // move by the reqested offset
+        uint32_t addr = 0;
+        if(dir == 0) {
+          // possible overflow is handled by modulo
+          addr = (startAddr + offset) % (FLASH_NMEA_LOG_END - FLASH_NMEA_LOG_START);
+        } else {
+          // check underflow
+          if(offset > startAddr) {
+            addr = (FLASH_NMEA_LOG_END - FLASH_NMEA_LOG_START - 1) - (offset - startAddr);
+          } else {
+            addr = startAddr - offset;
+          }
+        }
+
+        // translate address back to global format
+        addr += FLASH_NMEA_LOG_START;
+        FOSSASAT_DEBUG_PRINT(F("Starting from address: 0x"));
+        FOSSASAT_DEBUG_PRINTLN(addr, HEX);
+        FOSSASAT_DEBUG_PRINT(F("Number of packets: "));
+        FOSSASAT_DEBUG_PRINTLN(len);
+
         // read data from flash
         uint8_t respOptData[MAX_IMAGE_PACKET_LENGTH];
-        for(; addr < FLASH_NMEA_LOG_START + logged; addr += MAX_IMAGE_PACKET_LENGTH) {
+        for(uint16_t packetNum = 0; packetNum < len; packetNum++) {
           // read data into buffer
-          PersistentStorage_Read(addr, respOptData, MAX_IMAGE_PACKET_LENGTH);
+          FOSSASAT_DEBUG_PRINTLN(addr, HEX);
+          PersistentStorage_Read(addr, respOptData, FLASH_NMEA_LOG_SLOT_SIZE);
+
+          // get the next address
+          if(dir == 0) {
+            addr = addr + FLASH_NMEA_LOG_SLOT_SIZE;
+            if(addr >= FLASH_NMEA_LOG_END) {
+              addr = FLASH_NMEA_LOG_START;
+            }
+          } else {
+            addr = addr - FLASH_NMEA_LOG_SLOT_SIZE;
+            if(addr < FLASH_NMEA_LOG_START) {
+              addr = FLASH_NMEA_LOG_END - FLASH_NMEA_LOG_SLOT_SIZE;
+            }
+          }
 
           // get the number of bytes in log entry
           uint8_t respOptDataLen = 4 + strlen((char*)respOptData + 4);
+          if(respOptDataLen > FLASH_NMEA_LOG_SLOT_SIZE) {
+            respOptDataLen = FLASH_NMEA_LOG_SLOT_SIZE;
+          }
 
           // send response
           Communication_Send_Response(RESP_GPS_LOG, respOptData, respOptDataLen);
@@ -1395,12 +1515,46 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     case CMD_SET_TLE: {
       if(Communication_Check_OptDataLen(138, optDataLen)) {
         char line[70];
+        uint8_t tleBuff[FLASH_EXT_PAGE_SIZE];
 
         // get the first TLE line
         memcpy(line, optData, 69);
         line[69] = '\0';
 
-        // parse TLE
+        // parse first TLE line
+        uint8_t b = Navigation_Get_EpochYear(line);
+        memcpy(tleBuff + FLASH_TLE_EPOCH_YEAR, &b, sizeof(uint8_t));
+        double d = Navigation_Get_EpochDay(line);
+        memcpy(tleBuff + FLASH_TLE_EPOCH_DAY, &d, sizeof(double));
+        d = Navigation_Get_BallisticCoeff(line);
+        memcpy(tleBuff + FLASH_TLE_BALLISTIC_COEFF, &d, sizeof(double));
+        d = Navigation_Get_MeanMotion2nd(line);
+        memcpy(tleBuff + FLASH_TLE_MEAN_MOTION_2ND, &d, sizeof(double));
+        d = Navigation_Get_DragTerm(line);
+        memcpy(tleBuff + FLASH_TLE_DRAG_TERM, &d, sizeof(double));
+
+        // get the second TLE line
+        memcpy(line, optData + 69, 69);
+        line[69] = '\0';
+
+        // parse second TLE line
+        d = Navigation_Get_Inclination(line);
+        memcpy(tleBuff + FLASH_TLE_INCLINATION, &d, sizeof(double));
+        d = Navigation_Get_RightAscension(line);
+        memcpy(tleBuff + FLASH_TLE_RIGHT_ASCENTION, &d, sizeof(double));
+        d = Navigation_Get_Eccentricity(line);
+        memcpy(tleBuff + FLASH_TLE_ECCENTRICITY, &d, sizeof(double));
+        d = Navigation_Get_PerigeeArgument(line);
+        memcpy(tleBuff + FLASH_TLE_PERIGEE_ARGUMENT, &d, sizeof(double));
+        d = Navigation_Get_MeanAnomaly(line);
+        memcpy(tleBuff + FLASH_TLE_MEAN_ANOMALY, &d, sizeof(double));
+        d = Navigation_Get_MeanMotion(line);
+        memcpy(tleBuff + FLASH_TLE_MEAN_MOTION, &d, sizeof(double));
+        uint32_t ul = Navigation_Get_RevolutionNumber(line);
+        memcpy(tleBuff + FLASH_TLE_REVOLUTION_NUMBER, &ul, sizeof(uint32_t));
+
+        // update system info page
+        PersistentStorage_Set_Buffer(FLASH_TLE_EPOCH_DAY, tleBuff + FLASH_TLE_EPOCH_DAY, FLASH_TLE_EPOCH_YEAR - FLASH_TLE_EPOCH_DAY + sizeof(uint8_t));
       }
     } break;
 

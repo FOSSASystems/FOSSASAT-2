@@ -584,6 +584,14 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       }
     } break;
 
+    case RESP_GPS_LOG: {
+      for(uint8_t i = 0; i < respOptDataLen; i++) {
+        Serial.write(respOptData[i]);
+      }
+      Serial.println();
+      
+    } break;
+
     case RESP_ACKNOWLEDGE: {
       Serial.print(F("Frame ACK, functionId = 0x"));
       Serial.print(respOptData[0], HEX);
@@ -895,21 +903,24 @@ void readFlash(uint32_t addr, uint8_t len) {
   sendFrameEncrypted(CMD_GET_FLASH_CONTENTS, 5, optData);
 }
 
-void logGps(uint32_t duration) {
+void logGps(uint32_t duration, uint32_t offset) {
   Serial.print(F("Sending GPS logging request ... "));
-  uint8_t optData[4];
+  uint8_t optData[8];
   memcpy(optData, &duration, sizeof(uint32_t));
-  sendFrameEncrypted(CMD_LOG_GPS, 4, optData);
+  memcpy(optData + sizeof(uint32_t), &offset, sizeof(uint32_t));
+  sendFrameEncrypted(CMD_LOG_GPS, 8, optData);
 }
 
-void getGpsLog(uint32_t offset) {
+void getGpsLog(uint8_t dir, uint16_t offset, uint16_t len) {
   Serial.print(F("Sending GPS log downlink request ... "));
-  uint8_t optData[4];
-  memcpy(optData, &offset, sizeof(uint32_t));
-  sendFrameEncrypted(CMD_GET_GPS_LOG, 4, optData);
+  uint8_t optData[5];
+  optData[0] = dir;
+  memcpy(optData + sizeof(uint8_t), &offset, sizeof(uint16_t));
+  memcpy(optData + sizeof(uint8_t) + sizeof(uint16_t), &len, sizeof(uint16_t));
+  sendFrameEncrypted(CMD_GET_GPS_LOG, 5, optData);
 }
 
-void addStoreAndForward(uint32_t id, char* msg) {
+void addStoreAndForward(uint32_t id, const char* msg) {
   Serial.print(F("Adding store and forward message ... "));
   uint8_t optData[32];
   memcpy(optData, &id, sizeof(uint32_t));
@@ -924,7 +935,7 @@ void requestStoreAndForward(uint32_t id) {
   sendFrame(CMD_STORE_AND_FORWARD_REQUEST, 4, optData);
 }
 
-void route(char* targetCallsign, uint8_t routeFuncId, uint8_t* routeOptData, uint8_t routeOptDataLen) {
+void route(const char* targetCallsign, uint8_t routeFuncId, uint8_t* routeOptData, uint8_t routeOptDataLen) {
   Serial.print(F("Sending route frame ... "));
   uint8_t optDataLen = strlen(targetCallsign) + 2 + routeOptDataLen;
   uint8_t* optData = new uint8_t[optDataLen];
@@ -1074,10 +1085,10 @@ void loop() {
         readFlash(0, 128);
         break;
       case 'g':
-        logGps(10000);
+        logGps(10000, 0);
         break;
       case 'G':
-        getGpsLog(0);
+        getGpsLog(1, 0, 50);
         break;
       case 'b':
         addStoreAndForward(0x1337BEEF, "Hello there!");
@@ -1086,14 +1097,14 @@ void loop() {
         requestStoreAndForward(0x1337BEEF);
         break;
       case 'O': {
-        char* data = "Hello there!";
+        const char* data = "Hello there!";
         route("FOSSASAT-1B", CMD_RETRANSMIT, (uint8_t*)data, strlen(data));
       } break;
       case 'h': {
         uint8_t data[4];
         uint32_t num = random();
         memcpy(data, &num, sizeof(uint32_t));
-        writeFlash(0x000000B0, data, 2);
+        writeFlash(0x000000C0, data, 2);
       } break;
       default:
         Serial.print(F("Unknown command: "));

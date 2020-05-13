@@ -343,7 +343,6 @@ void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, uint8_t len) {
 void PersistentStorage_Reset_System_Info() {
   // build a completely new system info page
   uint8_t sysInfoPage[FLASH_SYSTEM_INFO_LEN];
-  uint8_t* sysInfoPagePtr = sysInfoPage;
 
   // set everything to 0 by default
   memset(sysInfoPage, 0, FLASH_SYSTEM_INFO_LEN);
@@ -357,7 +356,7 @@ void PersistentStorage_Reset_System_Info() {
   sysInfoPage[FLASH_CALLSIGN_LEN] = strlen(CALLSIGN_DEFAULT);
 
   // set default callsign
-  memcpy(sysInfoPagePtr + FLASH_CALLSIGN, CALLSIGN_DEFAULT, strlen(CALLSIGN_DEFAULT));
+  memcpy(sysInfoPage + FLASH_CALLSIGN, CALLSIGN_DEFAULT, strlen(CALLSIGN_DEFAULT));
 
   // set default receive windows
   sysInfoPage[FLASH_FSK_RECEIVE_LEN] = FSK_RECEIVE_WINDOW_LENGTH;
@@ -368,23 +367,23 @@ void PersistentStorage_Reset_System_Info() {
 
   // set default voltage limits
   int16_t voltageLimit = DEPLOYMENT_BATTERY_VOLTAGE_LIMIT;
-  memcpy(sysInfoPagePtr + FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
+  memcpy(sysInfoPage + FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
   voltageLimit = HEATER_BATTERY_VOLTAGE_LIMIT;
-  memcpy(sysInfoPagePtr + FLASH_HEATER_BATTERY_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
+  memcpy(sysInfoPage + FLASH_HEATER_BATTERY_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
   voltageLimit = BATTERY_CW_BEEP_VOLTAGE_LIMIT;
-  memcpy(sysInfoPagePtr + FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
+  memcpy(sysInfoPage + FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
   voltageLimit = LOW_POWER_MODE_VOLTAGE_LIMIT;
-  memcpy(sysInfoPagePtr + FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
+  memcpy(sysInfoPage + FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT, &voltageLimit, sizeof(int16_t));
 
   // set default temperature limits
   float tempLimit = BATTERY_HEATER_TEMP_LIMIT;
-  memcpy(sysInfoPagePtr + FLASH_BATTERY_HEATER_TEMP_LIMIT, &tempLimit, sizeof(float));
+  memcpy(sysInfoPage + FLASH_BATTERY_HEATER_TEMP_LIMIT, &tempLimit, sizeof(float));
   tempLimit = MPPT_TEMP_LIMIT;
-  memcpy(sysInfoPagePtr + FLASH_MPPT_TEMP_LIMIT, &tempLimit, sizeof(float));
+  memcpy(sysInfoPage + FLASH_MPPT_TEMP_LIMIT, &tempLimit, sizeof(float));
 
   // set default heater duty cycle
   uint8_t dutyCycle = BATTERY_HEATER_DUTY_CYCLE;
-  memcpy(sysInfoPagePtr + FLASH_BATTERY_HEATER_DUTY_CYCLE, &dutyCycle, sizeof(uint8_t));
+  memcpy(sysInfoPage + FLASH_BATTERY_HEATER_DUTY_CYCLE, &dutyCycle, sizeof(uint8_t));
 
   // set default MPPT temperature switch mode
   sysInfoPage[FLASH_MPPT_TEMP_SWITCH_ENABLED] = 1;
@@ -394,29 +393,33 @@ void PersistentStorage_Reset_System_Info() {
 
   // set default TLE
   uint8_t b = Navigation_Get_EpochYear(TLE_LINE_1);
-  memcpy(sysInfoPagePtr + FLASH_TLE_EPOCH_YEAR, &b, sizeof(uint8_t));
+  memcpy(sysInfoPage + FLASH_TLE_EPOCH_YEAR, &b, sizeof(uint8_t));
   double d = Navigation_Get_EpochDay(TLE_LINE_1);
-  memcpy(sysInfoPagePtr + FLASH_TLE_EPOCH_DAY, &d, sizeof(double));
+  memcpy(sysInfoPage + FLASH_TLE_EPOCH_DAY, &d, sizeof(double));
   d = Navigation_Get_BallisticCoeff(TLE_LINE_1);
-  memcpy(sysInfoPagePtr + FLASH_TLE_BALLISTIC_COEFF, &d, sizeof(double));
+  memcpy(sysInfoPage + FLASH_TLE_BALLISTIC_COEFF, &d, sizeof(double));
   d = Navigation_Get_MeanMotion2nd(TLE_LINE_1);
-  memcpy(sysInfoPagePtr + FLASH_TLE_MEAN_MOTION_2ND, &d, sizeof(double));
+  memcpy(sysInfoPage + FLASH_TLE_MEAN_MOTION_2ND, &d, sizeof(double));
   d = Navigation_Get_DragTerm(TLE_LINE_1);
-  memcpy(sysInfoPagePtr + FLASH_TLE_DRAG_TERM, &d, sizeof(double));
+  memcpy(sysInfoPage + FLASH_TLE_DRAG_TERM, &d, sizeof(double));
   d = Navigation_Get_Inclination(TLE_LINE_2);
-  memcpy(sysInfoPagePtr + FLASH_TLE_INCLINATION, &d, sizeof(double));
+  memcpy(sysInfoPage + FLASH_TLE_INCLINATION, &d, sizeof(double));
   d = Navigation_Get_RightAscension(TLE_LINE_2);
-  memcpy(sysInfoPagePtr + FLASH_TLE_RIGHT_ASCENTION, &d, sizeof(double));
+  memcpy(sysInfoPage + FLASH_TLE_RIGHT_ASCENTION, &d, sizeof(double));
   d = Navigation_Get_Eccentricity(TLE_LINE_2);
-  memcpy(sysInfoPagePtr + FLASH_TLE_ECCENTRICITY, &d, sizeof(double));
+  memcpy(sysInfoPage + FLASH_TLE_ECCENTRICITY, &d, sizeof(double));
   d = Navigation_Get_PerigeeArgument(TLE_LINE_2);
-  memcpy(sysInfoPagePtr + FLASH_TLE_PERIGEE_ARGUMENT, &d, sizeof(double));
+  memcpy(sysInfoPage + FLASH_TLE_PERIGEE_ARGUMENT, &d, sizeof(double));
   d = Navigation_Get_MeanAnomaly(TLE_LINE_2);
-  memcpy(sysInfoPagePtr + FLASH_TLE_MEAN_ANOMALY, &d, sizeof(double));
+  memcpy(sysInfoPage + FLASH_TLE_MEAN_ANOMALY, &d, sizeof(double));
   d = Navigation_Get_MeanMotion(TLE_LINE_2);
-  memcpy(sysInfoPagePtr + FLASH_TLE_MEAN_MOTION, &d, sizeof(double));
+  memcpy(sysInfoPage + FLASH_TLE_MEAN_MOTION, &d, sizeof(double));
   uint32_t ul = Navigation_Get_RevolutionNumber(TLE_LINE_2);
-  memcpy(sysInfoPagePtr + FLASH_TLE_REVOLUTION_NUMBER, &ul, sizeof(uint32_t));
+  memcpy(sysInfoPage + FLASH_TLE_REVOLUTION_NUMBER, &ul, sizeof(uint32_t));
+
+  // set default latest NMEA address
+  uint32_t lastNmea = FLASH_NMEA_LOG_START;
+  memcpy(sysInfoPage + FLASH_NMEA_LOG_LATEST_ENTRY, &lastNmea, sizeof(uint32_t));
 
   // set CRC
   uint32_t crc = CRC32_Get(sysInfoPage, FLASH_SYSTEM_INFO_CRC);

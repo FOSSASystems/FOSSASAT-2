@@ -216,9 +216,11 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Description: Records GPS output. Logging will be stopped if battery voltage drops below low power mode level.
 
 ### CMD_GET_GPS_LOG
-- Optional data length: 4
+- Optional data length: 5
 - Optional data:
-  - 0 - 3: offset from GPS log start, unsigned 32-bit integer, LSB first
+  - 0: whether to download GPS log from start (0x00 - oldest entries sent first) or start (0x01 - newest entries sent first)
+  - 1 - 2: offset from GPS log start (as a number of NMEA sequences), unsigned 16-bit integer, LSB first
+  - 3 - 4: number of NMEA sentences do downlink, or 0 to downlink the entire log, unsigned 16-bit integer, LSB first
 - Response: [RESP_GPS_LOG](#RESP_GPS_LOG)
 - Description: Request downlink of logged GPS data. Only available in FSK mode.
 

@@ -16,7 +16,7 @@
 #define RTC_MINUTES                                     6
 #define RTC_SECONDS                                     0
 
-// uncomment to reset system info (callsing, configuration etc.) on start
+// uncomment to reset system info (callsign, configuration etc.) on start
 //#define RESET_SYSTEM_INFO
 
 // comment out to disable deployment sequence
@@ -182,6 +182,7 @@
 #define FLASH_TLE_MEAN_MOTION                           0x00000098  //  0x00000098    0x0000009F    double
 #define FLASH_TLE_REVOLUTION_NUMBER                     0x000000A0  //  0x000000A0    0x000000A3    uint32_t
 #define FLASH_TLE_EPOCH_YEAR                            0x000000A4  //  0x000000A4    0x000000A4    uint8_t
+#define FLASH_NMEA_LOG_LATEST_ENTRY                     0x000000A5  //  0x000000A5    0x000000A8    uint32_t
 #define FLASH_SYSTEM_INFO_CRC                           0x000000F8  //  0x000000F8    0x000000FB    uint32_t
 #define FLASH_MEMORY_ERROR_COUNTER                      0x000000FC  //  0x000000FC    0x000000FF    uint32_t
 
@@ -230,7 +231,9 @@
 #define FLASH_STORE_AND_FORWARD_NUM_SLOTS               (FLASH_64K_BLOCK_SIZE / MAX_STRING_LENGTH)
 
 // 64kB blocks 2 - 31 - NMEA sentences: null-terminated C-strings, each starts with 4-byte timestamp (offset since recording start)
-#define FLASH_NMEA_LOG_START                            0x00020000  //  0x00020000    0x001FFFFF
+#define FLASH_NMEA_LOG_START                            0x00020000  //  0x00030000    0x001FFFFF
+#define FLASH_NMEA_LOG_END                              (FLASH_IMAGES_START)
+#define FLASH_NMEA_LOG_SLOT_SIZE                        (MAX_IMAGE_PACKET_LENGTH)
 
 // 64kB blocks 32 - 1023 - image slots: 8 blocks per slot
 #define FLASH_IMAGES_START                              0x00200000  //  0x00200000    0x03FFFFFF
