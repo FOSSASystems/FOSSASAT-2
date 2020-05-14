@@ -1271,6 +1271,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         
         FOSSASAT_DEBUG_PRINTLN(F("GPS logging start"));
 
+        // initialize UART interface
+        GpsSerial.begin(9600);
+
         // power up GPS
         digitalWrite(GPS_POWER_FET, HIGH);
 
@@ -1353,6 +1356,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // turn GPS off
         digitalWrite(GPS_POWER_FET, LOW);
 
+        // stop UART interface (to prevent it from waking up the MCU)
+        GpsSerial.end();
+
         // save the number of logged bytes and send it
         uint32_t logged = flashPos - FLASH_NMEA_LOG_START;
         if(overwrite) {
@@ -1363,7 +1369,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINTLN(logged);
         PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, logged);
 
-        static const uint8_t respOptDataLen = sizeof(uint32_t);
+        const uint8_t respOptDataLen = sizeof(uint32_t);
         uint8_t respOptData[respOptDataLen];
         memcpy(respOptData, &logged, sizeof(uint32_t));
         Communication_Send_Response(RESP_GPS_LOG_LENGTH, respOptData, respOptDataLen);
@@ -1578,6 +1584,7 @@ int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData, size_t opt
   FOSSASAT_DEBUG_PRINTLN(state);
   
   // delay before responding
+  // TODO: skip (or shorter) waiting for certain frames (e.g. picture downlink)?
   FOSSASAT_DEBUG_DELAY(100);
   PowerControl_Wait(RESPONSE_DELAY, true);
   

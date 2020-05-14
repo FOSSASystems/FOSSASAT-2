@@ -108,9 +108,6 @@ void Configuration_Setup() {
   SPI.setSCLK(CAMERA_SCK);
   SPI.begin();
 
-  // initialize UART interfaces
-  GpsSerial.begin(9600);
-
   // initialize RTC
   rtc.setClockSource(STM32RTC::LSE_CLOCK);
   rtc.begin();
