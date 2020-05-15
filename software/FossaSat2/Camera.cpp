@@ -115,7 +115,12 @@ uint8_t Camera_Init(JPEG_Size pictureSize, Light_Mode lightMode, Color_Saturatio
   PowerControl_Wait(1000);
   camera->clear_fifo_flag();
 
-  // TODO set the rest of parameters
+  // set the rest of parameters
+  camera->SetLightMode(lightMode);
+  camera->SetColorSaturation(saturation);
+  camera->SetBrightness(brightness);
+  camera->SetContrast(contrast);
+  camera->SetSpecialEffects(special);
 
   return(state);
 }
