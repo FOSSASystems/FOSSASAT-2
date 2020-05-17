@@ -17,8 +17,8 @@
 #define I2C2_SCL                                        PB10
 
 // Light Sensors
-#define LIGHT_SENSOR_GAIN                               VEML7700_GAIN_1
-#define LIGHT_SENSOR_INTEGRATION_TIME                   VEML7700_IT_800MS
+#define LIGHT_SENSOR_GAIN                               VEML7700_GAIN_1_8
+#define LIGHT_SENSOR_INTEGRATION_TIME                   VEML7700_IT_25MS
 #define LIGHT_SENSOR_Y_PANEL_BUS                        Wire
 #define LIGHT_SENSOR_TOP_PANEL_BUS                      Wire2
 
@@ -82,5 +82,5 @@ void loop() {
   FOSSASAT_DEBUG_PORT.print('\t');
   FOSSASAT_DEBUG_PORT.println(lightSensorTop.readLux());
 
-  delay(1000);
+  delay(100);
 }
