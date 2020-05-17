@@ -39,35 +39,71 @@ void setup() {
   Wire.begin();
 
   FOSSASAT_DEBUG_PRINTLN();
-  FOSSASAT_DEBUG_PORT.println(F("X axis\tY axis\tZ axis\tFault #"));
+  FOSSASAT_DEBUG_PORT.println(F("Action\t\tDevice\tFault #"));
   FOSSASAT_DEBUG_PORT.println(F("-------------------------------------------------------------"));
+  
+  FOSSASAT_DEBUG_PORT.print(F("Init\t"));
+  FOSSASAT_DEBUG_PORT.print(F("\tX axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeX.getFault());
+  FOSSASAT_DEBUG_PORT.print(F("\t\tY axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeY.getFault());
+  FOSSASAT_DEBUG_PORT.print(F("\t\tZ axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeZ.getFault());
+  delay(1000);
 }
 
 void loop() {
-  FOSSASAT_DEBUG_PORT.print(bridgeX.getFault());
-  FOSSASAT_DEBUG_PORT.print('\t');
-  FOSSASAT_DEBUG_PORT.print(bridgeY.getFault());
-  FOSSASAT_DEBUG_PORT.print('\t');
-  FOSSASAT_DEBUG_PORT.println(bridgeZ.getFault());
-  delay(1000);
-
   bridgeX.drive(speedVal);
   bridgeY.drive(speedVal);
   bridgeZ.drive(speedVal);
+  
+  FOSSASAT_DEBUG_PORT.print(F("Drive +"));
+  FOSSASAT_DEBUG_PORT.print(speedVal);
+  FOSSASAT_DEBUG_PORT.print(F("\tX axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeX.getFault());
+  FOSSASAT_DEBUG_PORT.print(F("\t\tY axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeY.getFault());
+  FOSSASAT_DEBUG_PORT.print(F("\t\tZ axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeZ.getFault());
   delay(1000);
   
   bridgeX.stop();
   bridgeY.stop();
   bridgeZ.stop();
+  
+  FOSSASAT_DEBUG_PORT.print(F("Stop\t"));
+  FOSSASAT_DEBUG_PORT.print(F("\tX axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeX.getFault());
+  FOSSASAT_DEBUG_PORT.print(F("\t\tY axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeY.getFault());
+  FOSSASAT_DEBUG_PORT.print(F("\t\tZ axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeZ.getFault());
   delay(1000);
 
   bridgeX.drive(-1 * speedVal);
   bridgeY.drive(-1 * speedVal);
   bridgeZ.drive(-1 * speedVal);
+  
+  FOSSASAT_DEBUG_PORT.print(F("Drive -"));
+  FOSSASAT_DEBUG_PORT.print(speedVal);
+  FOSSASAT_DEBUG_PORT.print(F("\tX axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeX.getFault());
+  FOSSASAT_DEBUG_PORT.print(F("\t\tY axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeY.getFault());
+  FOSSASAT_DEBUG_PORT.print(F("\t\tZ axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeZ.getFault());
   delay(1000);
   
   bridgeX.stop();
   bridgeY.stop();
   bridgeZ.stop();
+  
+  FOSSASAT_DEBUG_PORT.print(F("Stop\t"));
+  FOSSASAT_DEBUG_PORT.print(F("\tX axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeX.getFault());
+  FOSSASAT_DEBUG_PORT.print(F("\t\tY axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeY.getFault());
+  FOSSASAT_DEBUG_PORT.print(F("\t\tZ axis \t"));
+  FOSSASAT_DEBUG_PORT.println(bridgeZ.getFault());
   delay(1000);
 }
