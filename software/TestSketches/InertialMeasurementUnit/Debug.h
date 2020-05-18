@@ -1,7 +1,7 @@
 #ifndef _FOSSASAT_DEBUG_H
 #define _FOSSASAT_DEBUG_H
 
-HardwareSerial debugSerial(PA3, PA2);
+HardwareSerial debugSerial((uint32_t)PA3, PA2);
 
 // uncomment to enable debug output
 // RadioLib debug can be enabled in RadioLib/src/TypeDef.h

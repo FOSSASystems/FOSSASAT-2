@@ -17,7 +17,7 @@
 // ADCS H-bridges
 #define ADCS_X_BRIDGE_ADDRESS                           0b1100100 // A1 float, A0 float
 #define ADCS_Y_BRIDGE_ADDRESS                           0b1100101 // A1 float, A0 high
-#define ADCS_Z_BRIDGE_ADDRESS                           0b1100010 // A1 low, A0 high
+#define ADCS_Z_BRIDGE_ADDRESS                           0b1100110 // A1 low, A0 high
 
 /*
     Configuration.cpp
@@ -27,7 +27,7 @@ MiniMoto bridgeX(ADCS_X_BRIDGE_ADDRESS);
 MiniMoto bridgeY(ADCS_Y_BRIDGE_ADDRESS);
 MiniMoto bridgeZ(ADCS_Z_BRIDGE_ADDRESS);
 
-const int speedVal = 32;
+const int speedVal = 50;
 
 void setup() {
   FOSSASAT_DEBUG_PORT.begin(FOSSASAT_DEBUG_SPEED);
@@ -59,7 +59,7 @@ void loop() {
   
   FOSSASAT_DEBUG_PORT.print(F("Drive +"));
   FOSSASAT_DEBUG_PORT.print(speedVal);
-  FOSSASAT_DEBUG_PORT.print(F("\tX axis \t"));
+  FOSSASAT_DEBUG_PORT.print(F("\t\tX axis \t"));
   FOSSASAT_DEBUG_PORT.println(bridgeX.getFault());
   FOSSASAT_DEBUG_PORT.print(F("\t\tY axis \t"));
   FOSSASAT_DEBUG_PORT.println(bridgeY.getFault());
