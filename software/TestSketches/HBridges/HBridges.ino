@@ -17,7 +17,7 @@
 // ADCS H-bridges
 #define ADCS_X_BRIDGE_ADDRESS                           0b1100100 // A1 float, A0 float
 #define ADCS_Y_BRIDGE_ADDRESS                           0b1100101 // A1 float, A0 high
-#define ADCS_Z_BRIDGE_ADDRESS                           0b1100010 // A1 low, A0 high
+#define ADCS_Z_BRIDGE_ADDRESS                           0b1100110 // A1 low, A0 high
 
 /*
     Configuration.cpp
