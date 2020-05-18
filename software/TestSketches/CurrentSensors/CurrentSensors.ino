@@ -20,7 +20,7 @@
 #define CURR_SENSOR_X_A_BUS                             Wire
 #define CURR_SENSOR_X_A_ADDRESS                         0b1000001 // A1 low, A0 high
 #define CURR_SENSOR_X_B_BUS                             Wire
-#define CURR_SENSOR_X_B_ADDRESS                         0b1000000 // A1 low, A0 SDA
+#define CURR_SENSOR_X_B_ADDRESS                         0b1000010 // A1 low, A0 SDA
 
 // Z axis solar cells
 #define CURR_SENSOR_Z_A_BUS                             Wire
@@ -106,7 +106,7 @@ void loop() {
   FOSSASAT_DEBUG_PORT.print(currSensorXB.readBusVoltage());
   FOSSASAT_DEBUG_PORT.print('\t');
   FOSSASAT_DEBUG_PORT.print("ZA");
-  
+
   FOSSASAT_DEBUG_PORT.print(currSensorZA.readCurrent());
   FOSSASAT_DEBUG_PORT.print('\t');
   FOSSASAT_DEBUG_PORT.print(currSensorZA.readBusVoltage());
@@ -125,6 +125,6 @@ void loop() {
   FOSSASAT_DEBUG_PORT.print(currSensorMPPT.readCurrent());
   FOSSASAT_DEBUG_PORT.print('\t');
   FOSSASAT_DEBUG_PORT.println(currSensorMPPT.readBusVoltage());
-  
+
   delay(1000);
 }

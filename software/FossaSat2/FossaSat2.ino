@@ -1,8 +1,8 @@
 #include "FossaSat2.h"
 
 // compile-time checks
-#if (!defined(RADIOLIB_VERSION)) || (RADIOLIB_VERSION < 0x03060000)
-  #error "Unsupported RadioLib version (< 3.6.0)!"
+#if (!defined(RADIOLIB_VERSION)) || (RADIOLIB_VERSION < 0x03060200)
+  #error "Unsupported RadioLib version (< 3.6.2)!"
 #endif
 
 #if (!defined(RADIOLIB_STATIC_ONLY))

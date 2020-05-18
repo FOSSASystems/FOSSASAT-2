@@ -34,14 +34,8 @@ LSM9DS1 imu;
 */
 
 uint16_t Sensors_Setup_IMU() {
-  // set configuration
-  imu.settings.device.commInterface = IMU_MODE_I2C;
-  imu.settings.device.agAddress = IMU_ACCEL_GYRO_ADDRESS;
-  imu.settings.device.mAddress = IMU_MAG_ADDRESS;
-  imu.settings.device.i2c = &IMU_BUS;
-
   // initialize IMU
-  return(imu.begin());
+  return(imu.begin(IMU_ACCEL_GYRO_ADDRESS, IMU_MAG_ADDRESS, IMU_BUS));
 }
 
 void Sensors_Update_IMU() {
