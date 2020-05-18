@@ -42,7 +42,7 @@
 
 // second battery temperature sensor
 #define TEMP_SENSOR_SEC_BATTERY_BUS                     Wire2
-#define TEMP_SENSOR_SEC_BATTERY_ADDRESS                 0b1001100 // ADD1 float, ADD0 float ?????????
+#define TEMP_SENSOR_SEC_BATTERY_ADDRESS                 0b1001010 // ADD1 low, ADD0 high
 
 /*
     Types.h
