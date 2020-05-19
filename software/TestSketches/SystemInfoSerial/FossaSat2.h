@@ -16,14 +16,18 @@
 #include <aes.h>
 #include <ArduCAM.h>
 #include <GroveMiniMoto.h>
-#include <RadioLib.h>
 #include <SparkFunLSM9DS1.h>
+
+// RadioLib
+#define RADIOLIB_STATIC_ONLY
+#include <RadioLib.h>
 
 // files
 #include "Camera.h"
 #include "Communication.h"
 #include "Configuration.h"
 #include "Debug.h"
+#include "Navigation.h"
 #include "PersistentStorage.h"
 #include "PowerControl.h"
 #include "Sensors.h"

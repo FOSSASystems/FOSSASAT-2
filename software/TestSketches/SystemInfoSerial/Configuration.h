@@ -16,7 +16,7 @@
 #define RTC_MINUTES                                     6
 #define RTC_SECONDS                                     0
 
-// uncomment to reset system info (callsing, configuration etc.) on start
+// uncomment to reset system info (callsign, configuration etc.) on start
 //#define RESET_SYSTEM_INFO
 
 // comment out to disable deployment sequence
@@ -42,7 +42,7 @@
 #define MAX_IMAGE_PACKET_LENGTH                         128
 
 // optional data length limit
-#define MAX_OPT_DATA_LENGTH                             128
+#define MAX_OPT_DATA_LENGTH                             220
 
 // radio buffer length limit
 #define MAX_RADIO_BUFFER_LENGTH                         (MAX_STRING_LENGTH + 2 + MAX_OPT_DATA_LENGTH)
@@ -125,7 +125,13 @@
 #define BATTERY_HEATER_DUTY_CYCLE                       255     // PWM duty cycle 0 - 255
 
 /*
-    Flash Configuration
+   Default TLE
+*/
+#define TLE_LINE_1                                      "1 00000U 20000A   20182.79906828 0.00000000  00000-0 -12345-3 0    10"
+#define TLE_LINE_2                                      "2 00000 137.0503 217.9687 0010435 173.7291 322.4297 15.88896416000000"
+
+/*
+   Flash Configuration
 */
 
 #define FLASH_EXT_PAGE_SIZE                             0x00000100
@@ -134,71 +140,87 @@
 #define FLASH_CHIP_SIZE                                 0x04000000
 #define FLASH_IMAGE_NUM_64K_BLOCKS                      8
 
-// Flash address map                                                    LSB           MSB
+// Flash address map                                                    LSB           MSB           type
 // 64kB block 0 - system info, stats, image lengths
 // sector 0 page 0 - system info and configuration
 #define FLASH_SYSTEM_INFO                               0x00000000  //  0x00000000    0x000000FF
-#define FLASH_RESTART_COUNTER                           0x00000000  //  0x00000000    0x00000001
-#define FLASH_DEPLOYMENT_COUNTER                        0x00000002  //  0x00000002    0x00000002
-#define FLASH_TRANSMISSIONS_ENABLED                     0x00000003  //  0x00000003    0x00000003
-#define FLASH_CALLSIGN_LEN                              0x00000004  //  0x00000004    0x00000004
-#define FLASH_CALLSIGN                                  0x00000005  //  0x00000005    0x00000025
-#define FLASH_FSK_RECEIVE_LEN                           0x00000026  //  0x00000026    0x00000026
-#define FLASH_LORA_RECEIVE_LEN                          0x00000027  //  0x00000027    0x00000027
-#define FLASH_RTC_EPOCH                                 0x00000028  //  0x00000028    0x0000002B
-#define FLASH_LORA_VALID_COUNTER                        0x0000002C  //  0x0000002C    0x0000002D
-#define FLASH_LORA_INVALID_COUNTER                      0x0000002E  //  0x0000002E    0x0000002F
-#define FLASH_FSK_VALID_COUNTER                         0x00000030  //  0x00000030    0x00000031
-#define FLASH_FSK_INVALID_COUNTER                       0x00000032  //  0x00000032    0x00000033
-#define FLASH_LOW_POWER_MODE_ENABLED                    0x00000034  //  0x00000034    0x00000034
-#define FLASH_LOW_POWER_MODE                            0x00000035  //  0x00000035    0x00000035
-#define FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT          0x00000036  //  0x00000036    0x00000037
-#define FLASH_HEATER_BATTERY_VOLTAGE_LIMIT              0x00000038  //  0x00000038    0x00000039
-#define FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT             0x0000003A  //  0x0000003A    0x0000003B
-#define FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT              0x0000003C  //  0x0000003C    0x0000003D
-#define FLASH_BATTERY_HEATER_TEMP_LIMIT                 0x0000003E  //  0x0000003E    0x00000041
-#define FLASH_MPPT_TEMP_LIMIT                           0x00000042  //  0x00000042    0x00000045
-#define FLASH_BATTERY_HEATER_DUTY_CYCLE                 0x00000046  //  0x00000046    0x00000046
-#define FLASH_MPPT_TEMP_SWITCH_ENABLED                  0x00000047  //  0x00000047    0x00000047
-#define FLASH_MPPT_KEEP_ALIVE_ENABLED                   0x00000048  //  0x00000048    0x00000048
-#define FLASH_NMEA_LOG_LENGTH                           0x00000049  //  0x00000049    0x0000004C
-#define FLASH_STORE_AND_FORWARD_LENGTH                  0x0000004D  //  0x0000004D    0x0000004E
+#define FLASH_RESTART_COUNTER                           0x00000000  //  0x00000000    0x00000001    uint16_t
+#define FLASH_DEPLOYMENT_COUNTER                        0x00000002  //  0x00000002    0x00000002    uint8_t
+#define FLASH_TRANSMISSIONS_ENABLED                     0x00000003  //  0x00000003    0x00000003    uint8_t
+#define FLASH_CALLSIGN_LEN                              0x00000004  //  0x00000004    0x00000004    uint8_t
+#define FLASH_CALLSIGN                                  0x00000005  //  0x00000005    0x00000025    char[]
+#define FLASH_FSK_RECEIVE_LEN                           0x00000026  //  0x00000026    0x00000026    uint8_t
+#define FLASH_LORA_RECEIVE_LEN                          0x00000027  //  0x00000027    0x00000027    uint8_t
+#define FLASH_RTC_EPOCH                                 0x00000028  //  0x00000028    0x0000002B    uint32_t
+#define FLASH_LORA_VALID_COUNTER                        0x0000002C  //  0x0000002C    0x0000002D    uint16_t
+#define FLASH_LORA_INVALID_COUNTER                      0x0000002E  //  0x0000002E    0x0000002F    uint16_t
+#define FLASH_FSK_VALID_COUNTER                         0x00000030  //  0x00000030    0x00000031    uint16_t
+#define FLASH_FSK_INVALID_COUNTER                       0x00000032  //  0x00000032    0x00000033    uint16_t
+#define FLASH_LOW_POWER_MODE_ENABLED                    0x00000034  //  0x00000034    0x00000034    uint8_t
+#define FLASH_LOW_POWER_MODE                            0x00000035  //  0x00000035    0x00000035    uint8_t
+#define FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT          0x00000036  //  0x00000036    0x00000037    int16_t
+#define FLASH_HEATER_BATTERY_VOLTAGE_LIMIT              0x00000038  //  0x00000038    0x00000039    int16_t
+#define FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT             0x0000003A  //  0x0000003A    0x0000003B    int16_t
+#define FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT              0x0000003C  //  0x0000003C    0x0000003D    int16_t
+#define FLASH_BATTERY_HEATER_TEMP_LIMIT                 0x0000003E  //  0x0000003E    0x00000041    float
+#define FLASH_MPPT_TEMP_LIMIT                           0x00000042  //  0x00000042    0x00000045    float
+#define FLASH_BATTERY_HEATER_DUTY_CYCLE                 0x00000046  //  0x00000046    0x00000046    uint8_t
+#define FLASH_MPPT_TEMP_SWITCH_ENABLED                  0x00000047  //  0x00000047    0x00000047    uint8_t
+#define FLASH_MPPT_KEEP_ALIVE_ENABLED                   0x00000048  //  0x00000048    0x00000048    uint8_t
+#define FLASH_NMEA_LOG_LENGTH                           0x00000049  //  0x00000049    0x0000004C    uint32_t
+#define FLASH_STORE_AND_FORWARD_LENGTH                  0x0000004D  //  0x0000004D    0x0000004E    int16_t
+#define FLASH_AUTO_STATISTICS                           0x0000004F  //  0x0000004F    0x0000004F    uint8_t
+#define FLASH_TLE_EPOCH_DAY                             0x00000050  //  0x00000050    0x00000057    double
+#define FLASH_TLE_BALLISTIC_COEFF                       0x00000058  //  0x00000058    0x0000005F    double
+#define FLASH_TLE_MEAN_MOTION_2ND                       0x00000060  //  0x00000060    0x00000067    double
+#define FLASH_TLE_DRAG_TERM                             0x00000068  //  0x00000068    0x0000006F    double
+#define FLASH_TLE_INCLINATION                           0x00000070  //  0x00000070    0x00000077    double
+#define FLASH_TLE_RIGHT_ASCENTION                       0x00000078  //  0x00000078    0x0000007F    double
+#define FLASH_TLE_ECCENTRICITY                          0x00000080  //  0x00000080    0x00000087    double
+#define FLASH_TLE_PERIGEE_ARGUMENT                      0x00000088  //  0x00000088    0x0000008F    double
+#define FLASH_TLE_MEAN_ANOMALY                          0x00000090  //  0x00000090    0x00000097    double
+#define FLASH_TLE_MEAN_MOTION                           0x00000098  //  0x00000098    0x0000009F    double
+#define FLASH_TLE_REVOLUTION_NUMBER                     0x000000A0  //  0x000000A0    0x000000A3    uint32_t
+#define FLASH_TLE_EPOCH_YEAR                            0x000000A4  //  0x000000A4    0x000000A4    uint8_t
+#define FLASH_NMEA_LOG_LATEST_ENTRY                     0x000000A5  //  0x000000A5    0x000000A8    uint32_t
+#define FLASH_SYSTEM_INFO_CRC                           0x000000F8  //  0x000000F8    0x000000FB    uint32_t
+#define FLASH_MEMORY_ERROR_COUNTER                      0x000000FC  //  0x000000FC    0x000000FF    uint32_t
 
 // sector 1 page 0 - stats
 #define FLASH_STATS                                     0x00001000  //  0x00001000    0x000010FF
 
-#define FLASH_STATS_TEMP_PANEL_Y                        0x00001000  //  0x00001000    0x00001005
-#define FLASH_STATS_TEMP_TOP                            0x00001006  //  0x00001006    0x0000100B
-#define FLASH_STATS_TEMP_BOTTOM                         0x0000100C  //  0x0000100C    0x00001011
-#define FLASH_STATS_TEMP_BATTERY                        0x00001012  //  0x00001012    0x00001017
-#define FLASH_STATS_TEMP_SEC_BATTERY                    0x00001018  //  0x00001018    0x0000101D
+#define FLASH_STATS_TEMP_PANEL_Y                        0x00001000  //  0x00001000    0x00001005    3x int16_t
+#define FLASH_STATS_TEMP_TOP                            0x00001006  //  0x00001006    0x0000100B    3x int16_t
+#define FLASH_STATS_TEMP_BOTTOM                         0x0000100C  //  0x0000100C    0x00001011    3x int16_t
+#define FLASH_STATS_TEMP_BATTERY                        0x00001012  //  0x00001012    0x00001017    3x int16_t
+#define FLASH_STATS_TEMP_SEC_BATTERY                    0x00001018  //  0x00001018    0x0000101D    3x int16_t
 
-#define FLASH_STATS_CURR_XA                             0x0000101E  //  0x0000101E    0x00001023
-#define FLASH_STATS_CURR_XB                             0x00001024  //  0x00001024    0x00001029
-#define FLASH_STATS_CURR_ZA                             0x0000102A  //  0x0000102A    0x0000102F
-#define FLASH_STATS_CURR_ZB                             0x00001030  //  0x00001030    0x00001035
-#define FLASH_STATS_CURR_Y                              0x00001036  //  0x00001036    0x0000103B
-#define FLASH_STATS_CURR_MPPT                           0x0000103C  //  0x0000103C    0x00001041
+#define FLASH_STATS_CURR_XA                             0x0000101E  //  0x0000101E    0x00001023    3x int16_t
+#define FLASH_STATS_CURR_XB                             0x00001024  //  0x00001024    0x00001029    3x int16_t
+#define FLASH_STATS_CURR_ZA                             0x0000102A  //  0x0000102A    0x0000102F    3x int16_t
+#define FLASH_STATS_CURR_ZB                             0x00001030  //  0x00001030    0x00001035    3x int16_t
+#define FLASH_STATS_CURR_Y                              0x00001036  //  0x00001036    0x0000103B    3x int16_t
+#define FLASH_STATS_CURR_MPPT                           0x0000103C  //  0x0000103C    0x00001041    3x int16_t
 
-#define FLASH_STATS_VOLT_XA                             0x00001042  //  0x00001042    0x00001044
-#define FLASH_STATS_VOLT_XB                             0x00001045  //  0x00001045    0x00001047
-#define FLASH_STATS_VOLT_ZA                             0x00001048  //  0x00001048    0x0000104A
-#define FLASH_STATS_VOLT_ZB                             0x0000104B  //  0x0000104B    0x0000104D
-#define FLASH_STATS_VOLT_Y                              0x0000104E  //  0x0000104E    0x00001050
-#define FLASH_STATS_VOLT_MPPT                           0x00001051  //  0x00001051    0x00001053
+#define FLASH_STATS_VOLT_XA                             0x00001042  //  0x00001042    0x00001044    3x uint8_t
+#define FLASH_STATS_VOLT_XB                             0x00001045  //  0x00001045    0x00001047    3x uint8_t
+#define FLASH_STATS_VOLT_ZA                             0x00001048  //  0x00001048    0x0000104A    3x uint8_t
+#define FLASH_STATS_VOLT_ZB                             0x0000104B  //  0x0000104B    0x0000104D    3x uint8_t
+#define FLASH_STATS_VOLT_Y                              0x0000104E  //  0x0000104E    0x00001050    3x uint8_t
+#define FLASH_STATS_VOLT_MPPT                           0x00001051  //  0x00001051    0x00001053    3x uint8_t
 
-#define FLASH_STATS_LIGHT_PANEL_Y                       0x00001054  //  0x00001054    0x0000105F
-#define FLASH_STATS_LIGHT_TOP                           0x00001060  //  0x00001060    0x0000106B
+#define FLASH_STATS_LIGHT_PANEL_Y                       0x00001054  //  0x00001054    0x0000105F    3x float
+#define FLASH_STATS_LIGHT_TOP                           0x00001060  //  0x00001060    0x0000106B    3x float
 
-#define FLASH_STATS_GYRO_X                              0x0000106C  //  0x0000106C    0x00001077
-#define FLASH_STATS_GYRO_Y                              0x00001078  //  0x00001078    0x00001083
-#define FLASH_STATS_GYRO_Z                              0x00001084  //  0x00001084    0x0000108F
-#define FLASH_STATS_ACCEL_X                             0x00001090  //  0x00001090    0x0000109B
-#define FLASH_STATS_ACCEL_Y                             0x0000109C  //  0x0000109C    0x000010A7
-#define FLASH_STATS_ACCEL_Z                             0x000010A8  //  0x000010A8    0x000010B3
-#define FLASH_STATS_MAG_X                               0x000010B4  //  0x000010B4    0x000010BF
-#define FLASH_STATS_MAG_Y                               0x000010C0  //  0x000010C0    0x000010CB
-#define FLASH_STATS_MAG_Z                               0x000010CC  //  0x000010CC    0x000010D7
+#define FLASH_STATS_GYRO_X                              0x0000106C  //  0x0000106C    0x00001077    3x float
+#define FLASH_STATS_GYRO_Y                              0x00001078  //  0x00001078    0x00001083    3x float
+#define FLASH_STATS_GYRO_Z                              0x00001084  //  0x00001084    0x0000108F    3x float
+#define FLASH_STATS_ACCEL_X                             0x00001090  //  0x00001090    0x0000109B    3x float
+#define FLASH_STATS_ACCEL_Y                             0x0000109C  //  0x0000109C    0x000010A7    3x float
+#define FLASH_STATS_ACCEL_Z                             0x000010A8  //  0x000010A8    0x000010B3    3x float
+#define FLASH_STATS_MAG_X                               0x000010B4  //  0x000010B4    0x000010BF    3x float
+#define FLASH_STATS_MAG_Y                               0x000010C0  //  0x000010C0    0x000010CB    3x float
+#define FLASH_STATS_MAG_Z                               0x000010CC  //  0x000010CC    0x000010D7    3x float
 
 // sectors 2 + 3 - image lengths: 4 bytes per length
 #define FLASH_IMAGE_LENGTHS_1                           0x00002000  //  0x00002000    0x00002FFF
@@ -209,7 +231,9 @@
 #define FLASH_STORE_AND_FORWARD_NUM_SLOTS               (FLASH_64K_BLOCK_SIZE / MAX_STRING_LENGTH)
 
 // 64kB blocks 2 - 31 - NMEA sentences: null-terminated C-strings, each starts with 4-byte timestamp (offset since recording start)
-#define FLASH_NMEA_LOG_START                            0x00020000  //  0x00020000    0x001FFFFF
+#define FLASH_NMEA_LOG_START                            0x00020000  //  0x00030000    0x001FFFFF
+#define FLASH_NMEA_LOG_END                              (FLASH_IMAGES_START)
+#define FLASH_NMEA_LOG_SLOT_SIZE                        (MAX_IMAGE_PACKET_LENGTH)
 
 // 64kB blocks 32 - 1023 - image slots: 8 blocks per slot
 #define FLASH_IMAGES_START                              0x00200000  //  0x00200000    0x03FFFFFF
@@ -231,7 +255,8 @@
 #define MAX_NUM_OF_BLOCKS                               3           /*!< maximum number of AES128 blocks that will be accepted */
 #define LORA_RECEIVE_WINDOW_LENGTH                      40          /*!< How long to listen out for LoRa transmissions for (s) */
 #define FSK_RECEIVE_WINDOW_LENGTH                       20          /*!< How long to listen out for FSK transmissions for (s) */
-#define RESPONSE_DELAY                                  1000        /*!< How long to wait for before responding/processing a transmission (ms) */
+#define RESPONSE_DELAY                                  600         /*!< How long to wait for before responding to a transmission (ms) */
+#define WHITENING_INITIAL                               0x1FF       /*!< Whitening LFSR initial value, to ensure SX127x compatibility */
 
 // LoRa
 #define LORA_BANDWIDTH                                  125.0       /*!< kHz dual sideband */
@@ -344,9 +369,6 @@
     Global Variables
 */
 
-// debug-only stopwatch
-FOSSASAT_DEBUG_STOPWATCH_INIT_H
-
 // flag to signal interrupts enabled/disabled
 extern volatile bool interruptsEnabled;
 
@@ -373,7 +395,7 @@ extern SX1268 radio;
 extern MorseClient morse;
 
 // camera instance
-extern ArduCAM camera;
+extern Camera* camera;
 
 // RTC instance
 extern STM32RTC& rtc;

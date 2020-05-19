@@ -1,7 +1,7 @@
 #include "PowerControl.h"
 
 uint32_t PowerControl_Get_Sleep_Interval() {
-  // sleep interval in ms (default for battery > 3.7 V)
+  // sleep interval in ms
   uint32_t interval = 0;
 
   #ifdef ENABLE_INTERVAL_CONTROL
@@ -113,7 +113,7 @@ void PowerControl_Manage_Battery() {
   // check battery voltage
   if((PowerControl_Get_Battery_Voltage() <= PersistentStorage_Get<uint16_t>(FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT)) && (PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED) == 1)) {
     // activate low power mode
-   PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE, LOW_POWER_SLEEP);
+    PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE, LOW_POWER_SLEEP);
   } else {
     // deactivate low power mode
     PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE, LOW_POWER_NONE);

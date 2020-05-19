@@ -1,15 +1,12 @@
 #include "FossaSat2.h"
 
-// Atom arduino-upload build configuration:
-// STM32:stm32:Nucleo_64:pnum=NUCLEO_L452REP
-
 // compile-time checks
-#if (!defined RADIOLIB_VERSION) || (RADIOLIB_VERSION < 0x03020300)
-  #error "Unsupported RadioLib version (< 3.2.3)!"
+#if (!defined(RADIOLIB_VERSION)) || (RADIOLIB_VERSION < 0x03060200)
+  #error "Unsupported RadioLib version (< 3.6.2)!"
 #endif
 
 #if (!defined(RADIOLIB_STATIC_ONLY))
-  #error "RadioLib is using dynamic memory management, enable static only in RadioLib/src/TypeDef.h"
+  #error "RadioLib is using dynamic memory management, make sure static only is enabled in FossaSat2.h"
 #endif
 
 void setup() {
@@ -36,7 +33,7 @@ void setup() {
 #endif
 
   // print system info page
-  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, 0x50);
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, FLASH_EXT_PAGE_SIZE);
 
   // initialize radio
   FOSSASAT_DEBUG_PORT.print(F("LoRa modem init: "));
@@ -47,7 +44,7 @@ void setup() {
   // initialize camera
   digitalWrite(CAMERA_POWER_FET, HIGH);
   FOSSASAT_DEBUG_PORT.print(F("Camera init:\t"));
-  FOSSASAT_DEBUG_PORT.println(Camera_Init(OV2640_320x240, Auto, Saturation0, Brightness0, Contrast0, Normal));
+  FOSSASAT_DEBUG_PORT.println(Camera_Init(p320x240, Auto, Saturation0, Brightness0, Contrast0, Normal));
   digitalWrite(CAMERA_POWER_FET, LOW);
 
   // initialize IMU
