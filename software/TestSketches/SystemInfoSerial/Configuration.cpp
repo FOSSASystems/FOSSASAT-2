@@ -1,8 +1,5 @@
 #include "Configuration.h"
 
-// debug-only stopwatch
-FOSSASAT_DEBUG_STOPWATCH_INIT_CPP
-
 // flag to signal interrupts enabled/disabled
 volatile bool interruptsEnabled = true;
 
@@ -25,11 +22,11 @@ SPIClass FlashSPI(FLASH_MOSI, FLASH_MISO, FLASH_SCK);
 HardwareSerial GpsSerial(GPS_RX, GPS_TX);
 
 // RadioLib instances
-SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_NRST, RADIO_BUSY, RadioSPI);
+SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_NRST, RADIO_BUSY, RadioSPI, SPISettings(2000000, MSBFIRST, SPI_MODE0));
 MorseClient morse(&radio);
 
 // camera instance
-ArduCAM camera(OV2640, CAMERA_CS);
+Camera* camera = ArduCAM::createCamera(OV2640, CAMERA_CS);
 
 // RTC instance
 STM32RTC& rtc = STM32RTC::getInstance();
@@ -105,13 +102,11 @@ void Configuration_Setup() {
 
   // initialize SPI interfaces
   FlashSPI.begin();
+  RadioSPI.begin();
   SPI.setMOSI(CAMERA_MOSI);
   SPI.setMISO(CAMERA_MISO);
   SPI.setSCLK(CAMERA_SCK);
   SPI.begin();
-
-  // initialize UART interfaces
-  GpsSerial.begin(9600);
 
   // initialize RTC
   rtc.setClockSource(STM32RTC::LSE_CLOCK);

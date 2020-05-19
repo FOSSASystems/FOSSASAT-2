@@ -3,7 +3,7 @@
 
 #include "FossaSat2.h"
 
-uint8_t Camera_Init(uint8_t pictureSize, uint8_t lightMode, uint8_t saturation, uint8_t brightness, uint8_t contrast, uint8_t special);
+uint8_t Camera_Init(JPEG_Size pictureSize, Light_Mode lightMode, Color_Saturation saturation, Brightness brightness, Contrast contrast, Special_Effects special);
 uint32_t Camera_Capture(uint8_t slot);
 
 #endif

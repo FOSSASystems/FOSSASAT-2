@@ -26,14 +26,8 @@ float Sensors_Read_Temperature(wireSensor_t& sensor) {
 }
 
 uint16_t Sensors_Setup_IMU() {
-  // set configuration
-  imu.settings.device.commInterface = IMU_MODE_I2C;
-  imu.settings.device.agAddress = IMU_ACCEL_GYRO_ADDRESS;
-  imu.settings.device.mAddress = IMU_MAG_ADDRESS;
-  imu.settings.device.i2c = &IMU_BUS;
-
   // initialize IMU
-  return(imu.begin());
+  return(imu.begin(IMU_ACCEL_GYRO_ADDRESS, IMU_MAG_ADDRESS, IMU_BUS));
 }
 
 void Sensors_Update_IMU() {
@@ -85,4 +79,15 @@ bool Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire) {
   sensor.setGain(LIGHT_SENSOR_GAIN);
   sensor.setIntegrationTime(LIGHT_SENSOR_INTEGRATION_TIME);
   return(true);
+}
+
+float Sensors_Read_Light(Adafruit_VEML7700& sensor) {
+  float val = sensor.readLux();
+
+  // sometimes the sensor returns nonsense value
+  if(val > 100000000) {
+    return(0);
+  }
+
+  return(val);
 }

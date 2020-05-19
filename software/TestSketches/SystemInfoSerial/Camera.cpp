@@ -1,8 +1,8 @@
 #include "Camera.h"
 
-uint8_t Camera_Init(uint8_t pictureSize, uint8_t lightMode, uint8_t saturation, uint8_t brightness, uint8_t contrast, uint8_t special) {
+uint8_t Camera_Init(JPEG_Size pictureSize, Light_Mode lightMode, Color_Saturation saturation, Brightness brightness, Contrast contrast, Special_Effects special) {
   // check provided values
-  if(!((pictureSize >= OV2640_160x120) && (pictureSize <= OV2640_1600x1200))) {
+  if(!((pictureSize >= p160x120) && (pictureSize <= p1600x1200))) {
     FOSSASAT_DEBUG_PRINT(F("Error - invalid picture size: "));
     FOSSASAT_DEBUG_PRINTLN(pictureSize);
     return 1;
@@ -42,9 +42,9 @@ uint8_t Camera_Init(uint8_t pictureSize, uint8_t lightMode, uint8_t saturation, 
   FOSSASAT_DEBUG_PRINTLN(pictureSize);
   
   // reset CPLD
-  camera.write_reg(0x07, 0x80);
+  camera->write_reg(0x07, 0x80);
   PowerControl_Wait(500);
-  camera.write_reg(0x07, 0x00);
+  camera->write_reg(0x07, 0x00);
   PowerControl_Wait(500);
 
   // check camera SPI
@@ -54,10 +54,10 @@ uint8_t Camera_Init(uint8_t pictureSize, uint8_t lightMode, uint8_t saturation, 
     PowerControl_Watchdog_Heartbeat();
     
     // write to test register
-    camera.write_reg(ARDUCHIP_TEST1, 0x55);
+    camera->write_reg(ARDUCHIP_TEST1, 0x55);
 
     // read the value back
-    uint8_t testValue = camera.read_reg(ARDUCHIP_TEST1);
+    uint8_t testValue = camera->read_reg(ARDUCHIP_TEST1);
     if(testValue != 0x55){
       FOSSASAT_DEBUG_PRINT(F("Camera SPI test failed, got 0x"));
       FOSSASAT_DEBUG_PRINTLN(testValue, HEX);
@@ -80,16 +80,19 @@ uint8_t Camera_Init(uint8_t pictureSize, uint8_t lightMode, uint8_t saturation, 
   while(millis() - start <= 5000) {
     uint8_t vid = 0;
     uint8_t pid = 0;
-    camera.wrSensorReg8_8(0xff, 0x01);
-    camera.rdSensorReg8_8(OV2640_CHIPID_HIGH, &vid); //CD
-    camera.rdSensorReg8_8(OV2640_CHIPID_LOW, &pid);  //CD
-    if((vid != 0x26) && ((pid != 0x41) || (pid != 0x42))){
-      FOSSASAT_DEBUG_PRINTLN(F("Unexpected vendor/product ID!"));
-      FOSSASAT_DEBUG_PRINT(F("Expected 0x26 0x41/0x42, got 0x"));
-      FOSSASAT_DEBUG_PRINT(vid, HEX);
-      FOSSASAT_DEBUG_PRINT(F(" 0x"));
-      FOSSASAT_DEBUG_PRINTLN(pid, HEX);
+    camera->wrSensorReg8_8(0xff, 0x01);
+    camera->rdSensorReg8_8(OV2640_CHIPID_HIGH, &vid); //CD
+    camera->rdSensorReg8_8(OV2640_CHIPID_LOW, &pid);  //CD
+    if(vid != 0x26) {
+      FOSSASAT_DEBUG_PRINTLN(F("Unexpected vendor ID!"));
+      FOSSASAT_DEBUG_PRINT(F("Expected 0x26, got 0x"));
+      FOSSASAT_DEBUG_PRINTLN(vid, HEX);
       state = 8;
+    } else if(!((pid == 0x41) || (pid == 0x42))) {
+      FOSSASAT_DEBUG_PRINTLN(F("Unexpected product ID!"));
+      FOSSASAT_DEBUG_PRINT(F("Expected 0x41/0x42, got 0x"));
+      FOSSASAT_DEBUG_PRINTLN(pid, HEX);
+      state = 9;
     } else {
       FOSSASAT_DEBUG_PRINTLN(F("Detected OV2640"));
       state = 0;
@@ -104,29 +107,36 @@ uint8_t Camera_Init(uint8_t pictureSize, uint8_t lightMode, uint8_t saturation, 
   }
   
   // set JPEG mode and initialize
-  camera.set_format(JPEG);
-  camera.InitCAM();
+  camera->SetFormat(JPEG_FMT);
+  camera->InitCAM();
 
-  // set default size
-  camera.OV2640_set_JPEG_size(pictureSize);
+  // set size
+  camera->SetJPEGsize(pictureSize);
   PowerControl_Wait(1000);
-  camera.clear_fifo_flag();
+  camera->clear_fifo_flag();
+
+  // set the rest of parameters
+  camera->SetLightMode(lightMode);
+  camera->SetColorSaturation(saturation);
+  camera->SetBrightness(brightness);
+  camera->SetContrast(contrast);
+  camera->SetSpecialEffects(special);
 
   return(state);
 }
 
 uint32_t Camera_Capture(uint8_t slot) {
   // flush FIFO
-  camera.flush_fifo();
-  camera.clear_fifo_flag();
+  camera->flush_fifo();
+  camera->clear_fifo_flag();
   
   // start capture
   FOSSASAT_DEBUG_PRINTLN(F("Capture start."));
-  camera.start_capture();
+  camera->start_capture();
 
   // wait for capture done
   uint32_t start = millis();
-  while(!camera.get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK)) {
+  while(!camera->get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK)) {
     PowerControl_Wait(500);
     if(millis() - start >= 5000) {
       FOSSASAT_DEBUG_PRINTLN(F("Timed out waiting for capture end!"));
@@ -136,7 +146,7 @@ uint32_t Camera_Capture(uint8_t slot) {
 
   // read image length
   FOSSASAT_DEBUG_PRINTLN(F("Capture done, reading data."));
-  uint32_t len = camera.read_fifo_length();
+  uint32_t len = camera->read_fifo_length();
   if(len >= MAX_FIFO_SIZE) {
     FOSSASAT_DEBUG_PRINT(F("Image size is too large ("));
     FOSSASAT_DEBUG_PRINT(len)
@@ -165,8 +175,8 @@ uint32_t Camera_Capture(uint8_t slot) {
   }
 
   // read data and write them to flash
-  camera.CS_LOW();
-  camera.set_fifo_burst();
+  digitalWrite(CAMERA_CS, LOW);
+  camera->set_fifo_burst();
 
   // write the complete pages first
   uint8_t dataBuffer[FLASH_EXT_PAGE_SIZE];
@@ -188,7 +198,7 @@ uint32_t Camera_Capture(uint8_t slot) {
   PersistentStorage_Write(imgAddress + i*FLASH_EXT_PAGE_SIZE, dataBuffer, remLen, false);
   FOSSASAT_DEBUG_PRINTLN(F("Writing done"));
   
-  camera.CS_HIGH();
-  camera.clear_fifo_flag();
+  digitalWrite(CAMERA_CS, HIGH);
+  camera->clear_fifo_flag();
   return(len);
 }
