@@ -98,17 +98,20 @@ void setup() {
 
 void loop() {
 
-Serial.println("Battery Heater ON");
+Serial.print("Battery Heater ON");
 Serial.println("");
 digitalWrite(BATTERY_RESISTOR_1, HIGH);
 
 delay(5000);          
 
-Serial.println(Sensors_Read_Temperature(tempSensorSecBattery));
+Serial.print(Sensors_Read_Temperature(tempSensorSecBattery));
 Serial.print(" Cº");
-Serial.println(Sensors_Read_Temperature(tempSensorBattery));
+Serial.println("");
+Serial.print(Sensors_Read_Temperature(tempSensorBattery));
 Serial.print(" Cº");
-Serial.println("Battery Heater OFF");
+Serial.println("");
+Serial.print("Battery Heater OFF");
+Serial.println("");
 digitalWrite(BATTERY_RESISTOR_1, LOW);
  delay(5000);    
 
