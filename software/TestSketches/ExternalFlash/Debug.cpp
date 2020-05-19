@@ -1,3 +1,3 @@
 #include "Debug.h"
 
-HardwareSerial debugSerial(PA3, PA2);
+HardwareSerial debugSerial((uint32_t)PA3, PA2);
