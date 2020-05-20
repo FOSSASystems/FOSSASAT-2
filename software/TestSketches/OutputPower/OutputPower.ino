@@ -128,7 +128,7 @@ int16_t Communication_Set_Modem(uint8_t modem) {
   return(state);
 }
 
-static uint8_t dummyPacket[256];
+static uint8_t dummyPacket[255];
 
 void setup() {
   FOSSASAT_DEBUG_PORT.begin(FOSSASAT_DEBUG_SPEED);
