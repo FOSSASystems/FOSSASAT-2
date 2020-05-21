@@ -159,7 +159,7 @@ void Communication_Send_Basic_System_Info() {
   uint8_t mpptOutputVoltage = currSensorMPPT.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mpptOutputVoltage, "batteryVoltage", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t mpptOutputCurrent = currSensorMPPT.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  int16_t mpptOutputCurrent = currSensorMPPT.readCurrent() * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mpptOutputCurrent, "mpptOutputCurrent", CURRENT_MULTIPLIER, "uA");
 
   uint32_t onboardTime = rtc.getEpoch();
@@ -217,7 +217,7 @@ void Communication_Send_Full_System_Info() {
   uint8_t mpptOutputVoltage = currSensorMPPT.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mpptOutputVoltage, "batteryVoltage", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t mpptOutputCurrent = currSensorMPPT.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  int16_t mpptOutputCurrent = currSensorMPPT.readCurrent() * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mpptOutputCurrent, "mpptOutputCurrent", CURRENT_MULTIPLIER, "uA");
 
   uint32_t onboardTime = rtc.getEpoch();
@@ -237,31 +237,31 @@ void Communication_Send_Full_System_Info() {
   uint8_t voltageXA = currSensorXA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageXA, "voltageXA", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentXA = currSensorXA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  int16_t currentXA = currSensorXA.readCurrent() * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentXA, "currentXA", CURRENT_MULTIPLIER, "uA");
 
   uint8_t voltageXB = currSensorXB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageXB, "voltageXB", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentXB = currSensorXB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  int16_t currentXB = currSensorXB.readCurrent() * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentXB, "currentXB", CURRENT_MULTIPLIER, "uA");
 
   uint8_t voltageZA = currSensorZA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageZA, "voltageZA", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentZA = currSensorZA.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  int16_t currentZA = currSensorZA.readCurrent() * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentZA, "currentZA", CURRENT_MULTIPLIER, "uA");
 
   uint8_t voltageZB = currSensorZB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageZB, "voltageZB", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentZB = currSensorZB.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  int16_t currentZB = currSensorZB.readCurrent() * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentZB, "currentZB", CURRENT_MULTIPLIER, "uA");
 
   uint8_t voltageY = currSensorY.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageY, "voltageY", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentY = currSensorY.readCurrent() * (CURRENT_UNIT / CURRENT_MULTIPLIER);
+  int16_t currentY = currSensorY.readCurrent() * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentY, "currentY", CURRENT_MULTIPLIER, "uA");
 
   int16_t tempPanelY = Sensors_Read_Temperature(tempSensorPanelY) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
