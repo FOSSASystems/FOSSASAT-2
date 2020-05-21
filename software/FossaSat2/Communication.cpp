@@ -51,7 +51,7 @@ int16_t Communication_Set_Modem(uint8_t modem) {
   // initialize requested modem
   switch (modem) {
     case MODEM_LORA:
-        state = radio.begin(CARRIER_FREQUENCY,
+        state = radio.begin(LORA_FREQUENCY,
                             LORA_BANDWIDTH,
                             LORA_SPREADING_FACTOR,
                             LORA_CODING_RATE,
@@ -63,7 +63,7 @@ int16_t Communication_Set_Modem(uint8_t modem) {
         radio.setCRC(true);
       break;
     case MODEM_FSK: {
-        state = radio.beginFSK(CARRIER_FREQUENCY,
+        state = radio.beginFSK(FSK_FREQUENCY,
                                FSK_BIT_RATE,
                                FSK_FREQUENCY_DEVIATION,
                                FSK_RX_BANDWIDTH,
@@ -103,7 +103,7 @@ int16_t Communication_Set_Modem(uint8_t modem) {
 
 void Communication_Send_Morse_Beacon(float battVoltage) {
   // initialize Morse client
-  morse.begin(CARRIER_FREQUENCY, MORSE_SPEED);
+  morse.begin(FSK_FREQUENCY, MORSE_SPEED);
 
   // read callsign
   uint8_t callsignLen = PersistentStorage_Get<uint8_t>(FLASH_CALLSIGN_LEN);
