@@ -258,6 +258,7 @@
 #define WHITENING_INITIAL                               0x1FF       /*!< Whitening LFSR initial value, to ensure SX127x compatibility */
 
 // LoRa
+#define LORA_FREQUENCY                                  436.7       /*!< MHz */
 #define LORA_BANDWIDTH                                  125.0       /*!< kHz dual sideband */
 #define LORA_SPREADING_FACTOR                           11
 #define LORA_SPREADING_FACTOR_ALT                       10
