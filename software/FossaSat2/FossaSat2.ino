@@ -100,12 +100,15 @@ void setup() {
   // initialize H-bridges
   FOSSASAT_DEBUG_PORT.println(F("H-bridges init:"));
   bridgeX.begin();
+  bridgeX.stop();
   FOSSASAT_DEBUG_PORT.print(F("X: "));
   FOSSASAT_DEBUG_PORT.println(bridgeX.getFault());
   bridgeY.begin();
+  bridgeY.stop();
   FOSSASAT_DEBUG_PORT.print(F("Y: "));
   FOSSASAT_DEBUG_PORT.println(bridgeY.getFault());
   bridgeZ.begin();
+  bridgeZ.stop();
   FOSSASAT_DEBUG_PORT.print(F("Z: "));
   FOSSASAT_DEBUG_PORT.println(bridgeZ.getFault());
 
