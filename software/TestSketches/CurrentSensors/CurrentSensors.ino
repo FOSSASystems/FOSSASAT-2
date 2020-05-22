@@ -88,43 +88,40 @@ void setup() {
   Sensors_Setup_Current(currSensorZB, CURR_SENSOR_Z_B_BUS, CURR_SENSOR_Z_B_ADDRESS);
   Sensors_Setup_Current(currSensorY, CURR_SENSOR_Y_BUS, CURR_SENSOR_Y_ADDRESS);
   Sensors_Setup_Current(currSensorMPPT, CURR_SENSOR_MPPT_OUTPUT_BUS, CURR_SENSOR_MPPT_OUTPUT_ADDRESS);
-
-  FOSSASAT_DEBUG_PRINTLN();
-  FOSSASAT_DEBUG_PORT.println(F("X panel A\tX panel B\tZ panel A\tZ panel B\tY panel\t\tMPPT output\tI [mA]\tV [mV]"));
+  
+  FOSSASAT_DEBUG_PORT.println(F("Device\t\tI [mA]\t\tV [mV]"));
   FOSSASAT_DEBUG_PORT.println(F("-------------------------------------------------------------"));
 }
 
 void loop() {
-    FOSSASAT_DEBUG_PORT.print("XA");
+  FOSSASAT_DEBUG_PORT.print(F("X panel A\t"));
   FOSSASAT_DEBUG_PORT.print(currSensorXA.readCurrent());
-  FOSSASAT_DEBUG_PORT.print('\t');
-  FOSSASAT_DEBUG_PORT.print(currSensorXA.readBusVoltage());
-  FOSSASAT_DEBUG_PORT.print('\t');
-      FOSSASAT_DEBUG_PORT.print("XB");
+  FOSSASAT_DEBUG_PORT.print(F("\t\t"));
+  FOSSASAT_DEBUG_PORT.println(currSensorXA.readBusVoltage());
+  FOSSASAT_DEBUG_PORT.print(F("X panel B\t"));
   FOSSASAT_DEBUG_PORT.print(currSensorXB.readCurrent());
-  FOSSASAT_DEBUG_PORT.print('\t');
-  FOSSASAT_DEBUG_PORT.print(currSensorXB.readBusVoltage());
-  FOSSASAT_DEBUG_PORT.print('\t');
-  FOSSASAT_DEBUG_PORT.print("ZA");
+  FOSSASAT_DEBUG_PORT.print(F("\t\t"));
+  FOSSASAT_DEBUG_PORT.println(currSensorXB.readBusVoltage());
 
+  FOSSASAT_DEBUG_PORT.print(F("Z panel A\t"));
   FOSSASAT_DEBUG_PORT.print(currSensorZA.readCurrent());
-  FOSSASAT_DEBUG_PORT.print('\t');
-  FOSSASAT_DEBUG_PORT.print(currSensorZA.readBusVoltage());
-  FOSSASAT_DEBUG_PORT.print('\t');
-    FOSSASAT_DEBUG_PORT.print("ZB");
+  FOSSASAT_DEBUG_PORT.print(F("\t\t"));
+  FOSSASAT_DEBUG_PORT.println(currSensorZA.readBusVoltage());
+  FOSSASAT_DEBUG_PORT.print(F("Z panel B\t"));
   FOSSASAT_DEBUG_PORT.print(currSensorZB.readCurrent());
-  FOSSASAT_DEBUG_PORT.print('\t');
-  FOSSASAT_DEBUG_PORT.print(currSensorZB.readBusVoltage());
-  FOSSASAT_DEBUG_PORT.print('\t');
-    FOSSASAT_DEBUG_PORT.print("Y");
+  FOSSASAT_DEBUG_PORT.print(F("\t\t"));
+  FOSSASAT_DEBUG_PORT.println(currSensorZB.readBusVoltage());
+
+  FOSSASAT_DEBUG_PORT.print(F("Y panel \t"));
   FOSSASAT_DEBUG_PORT.print(currSensorY.readCurrent());
-  FOSSASAT_DEBUG_PORT.print('\t');
-  FOSSASAT_DEBUG_PORT.print(currSensorY.readBusVoltage());
-  FOSSASAT_DEBUG_PORT.print('\t');
-    FOSSASAT_DEBUG_PORT.print("MPPT");
+  FOSSASAT_DEBUG_PORT.print(F("\t\t"));
+  FOSSASAT_DEBUG_PORT.println(currSensorY.readBusVoltage());
+
+  FOSSASAT_DEBUG_PORT.print(F("MPPT output\t"));
   FOSSASAT_DEBUG_PORT.print(currSensorMPPT.readCurrent());
-  FOSSASAT_DEBUG_PORT.print('\t');
+  FOSSASAT_DEBUG_PORT.print(F("\t\t"));
   FOSSASAT_DEBUG_PORT.println(currSensorMPPT.readBusVoltage());
+  FOSSASAT_DEBUG_PORT.println();
 
   delay(1000);
 }

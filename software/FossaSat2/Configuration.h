@@ -249,7 +249,6 @@
 
 // common
 #define CALLSIGN_DEFAULT                                "FOSSASAT-2"
-#define CARRIER_FREQUENCY                               436.7       /*!< MHz */
 #define SYNC_WORD                                       0x12        /*!< Ensure this sync word is compatable with all devices. */
 #define TCXO_VOLTAGE                                    1.6         /*!< Sets the radio's TCX0 voltage. (V) */
 #define MAX_NUM_OF_BLOCKS                               3           /*!< maximum number of AES128 blocks that will be accepted */
@@ -259,15 +258,17 @@
 #define WHITENING_INITIAL                               0x1FF       /*!< Whitening LFSR initial value, to ensure SX127x compatibility */
 
 // LoRa
+#define LORA_FREQUENCY                                  436.7       /*!< MHz */
 #define LORA_BANDWIDTH                                  125.0       /*!< kHz dual sideband */
 #define LORA_SPREADING_FACTOR                           11
 #define LORA_SPREADING_FACTOR_ALT                       10
 #define LORA_CODING_RATE                                8           /*!< 4/8, Extended Hamming */
 #define LORA_OUTPUT_POWER                               20          /*!< dBm */
 #define LORA_CURRENT_LIMIT                              140.0       /*!< mA */
-#define LORA_PREAMBLE_LENGTH                            8       // symbols
+#define LORA_PREAMBLE_LENGTH                            8           /*!< symbols */
 
 // GFSK
+#define FSK_FREQUENCY                                   436.9       /*!< MHz */
 #define FSK_BIT_RATE                                    9.6         /*!< kbps nominal */
 #define FSK_FREQUENCY_DEVIATION                         5.0         /*!< kHz single-sideband */
 #define FSK_RX_BANDWIDTH                                39.0        /*!< kHz single-sideband */
@@ -321,8 +322,8 @@
 */
 
 #define ADCS_X_BRIDGE_ADDRESS                           0b1100100 // A1 float, A0 float
-#define ADCS_Y_BRIDGE_ADDRESS                           0b1100101 // A1 float, A0 high
-#define ADCS_Z_BRIDGE_ADDRESS                           0b1100110 // A1 high, A0 low
+#define ADCS_Y_BRIDGE_ADDRESS                           0b1100110 // A1 float, A0 high
+#define ADCS_Z_BRIDGE_ADDRESS                           0b1100101 // A1 low, A0 high
 
 /*
    IMU
