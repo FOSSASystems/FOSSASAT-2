@@ -265,7 +265,7 @@
 #define LORA_CODING_RATE                                8           /*!< 4/8, Extended Hamming */
 #define LORA_OUTPUT_POWER                               20          /*!< dBm */
 #define LORA_CURRENT_LIMIT                              140.0       /*!< mA */
-#define LORA_PREAMBLE_LENGTH                            8       // symbols
+#define LORA_PREAMBLE_LENGTH                            8           /*!< symbols */
 
 // GFSK
 #define FSK_FREQUENCY                                   436.9       /*!< MHz */
@@ -322,8 +322,8 @@
 */
 
 #define ADCS_X_BRIDGE_ADDRESS                           0b1100100 // A1 float, A0 float
-#define ADCS_Y_BRIDGE_ADDRESS                           0b1100101 // A1 float, A0 high
-#define ADCS_Z_BRIDGE_ADDRESS                           0b1100110 // A1 high, A0 low
+#define ADCS_Y_BRIDGE_ADDRESS                           0b1100110 // A1 float, A0 high
+#define ADCS_Z_BRIDGE_ADDRESS                           0b1100101 // A1 low, A0 high
 
 /*
    IMU
