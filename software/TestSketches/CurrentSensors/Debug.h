@@ -8,7 +8,7 @@ HardwareSerial debugSerial((uint32_t)PA3, PA2);
 #define FOSSASAT_DEBUG
 
 #define FOSSASAT_DEBUG_PORT   debugSerial
-#define FOSSASAT_DEBUG_SPEED  9600
+#define FOSSASAT_DEBUG_SPEED  115200
 
 #ifdef FOSSASAT_DEBUG
 #define FOSSASAT_DEBUG_BEGIN(...) { FOSSASAT_DEBUG_PORT.begin(__VA_ARGS__); delay(500); while(!FOSSASAT_DEBUG_PORT); }

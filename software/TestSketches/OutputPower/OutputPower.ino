@@ -144,7 +144,7 @@ void loop() {
   // CW beep
   Communication_Set_Modem(MODEM_FSK);
   radio.transmitDirect();
-  delay(1000);
+  delay(5000);
   radio.standby();
   digitalWrite(WATCHDOG_IN, !digitalRead(WATCHDOG_IN));
   delay(1000);
@@ -158,6 +158,14 @@ void loop() {
   // FSK Tx
   Communication_Set_Modem(MODEM_FSK);
   radio.transmit(dummyPacket, sizeof(dummyPacket));
+    radio.transmit(dummyPacket, sizeof(dummyPacket));
+      radio.transmit(dummyPacket, sizeof(dummyPacket));
+      radio.transmit(dummyPacket, sizeof(dummyPacket));
+    radio.transmit(dummyPacket, sizeof(dummyPacket));
+      radio.transmit(dummyPacket, sizeof(dummyPacket));
+      radio.transmit(dummyPacket, sizeof(dummyPacket));
+    radio.transmit(dummyPacket, sizeof(dummyPacket));
+      radio.transmit(dummyPacket, sizeof(dummyPacket));
   digitalWrite(WATCHDOG_IN, !digitalRead(WATCHDOG_IN));
   delay(1000);
 }
