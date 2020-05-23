@@ -274,6 +274,13 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Response: [RESP_GPS_LOG_STATE](#RESP_GPS_LOG_STATE)
 - Description: Requests state of GPS log (length, last entry address, last fix address).
 
+### CMD_RUN_GPS_COMMAND
+- Optional data length: 0 - N
+- Optional data:
+  - 0 - N: SkyTraq binary protocol message to be sent (payload only, without sequence start/stop bytes, payload length or checksum)
+- Response: [RESP_GPS_COMMAND_RESPONSE](#RESP_GPS_COMMAND_RESPONSE)
+- Description: Requests state of GPS log (length, last entry address, last fix address).
+
 ---
 # Responses
 
@@ -447,3 +454,8 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Optional data length: 4
 - Optional data:
   - 0 - 3: length of image in requested slot
+
+### RESP_GPS_COMMAND_RESPONSE
+- Optional data length: 0 - N
+- Optional data:
+  - 0 - N: response to GPS command

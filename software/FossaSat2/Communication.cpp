@@ -1601,6 +1601,23 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       Communication_Send_Response(RESP_GPS_LOG_STATE, respOptData, respOptDataLen);
     } break;
 
+    case CMD_RUN_GPS_COMMAND: {
+      // create response buffer
+      uint8_t respOptData[MAX_OPT_DATA_LENGTH];
+
+      // run the command
+      uint16_t respOptDataLen = Navigation_GNSS_Run_Cmd(optData, optDataLen, respOptData);
+
+      // send the response
+      // TODO: send ACK/NACK state?
+      if((respOptDataLen == 0) || (respOptDataLen == 0xFFFF)) {
+        Communication_Send_Response(RESP_GPS_COMMAND_RESPONSE);
+      } else {
+        Communication_Send_Response(RESP_GPS_COMMAND_RESPONSE, respOptData, respOptDataLen);
+      }
+      
+    } break;
+
     default:
       FOSSASAT_DEBUG_PRINT(F("Unknown function ID!"));
       return;
