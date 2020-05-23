@@ -212,7 +212,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Optional data:
   - 0 - 3: GPS logging duration in ms, unsigned 32-bit integer, LSB first
   - 4 - 7: GPS logging start offset in ms, unsigned 32-bit integer, LSB first
-- Response: [RESP_GPS_LOG_LENGTH](#RESP_GPS_LOG_LENGTH)
+- Response: [RESP_GPS_LOG_STATE](#RESP_GPS_LOG_STATE)
 - Description: Records GPS output. Logging will be stopped if battery voltage drops below low power mode level.
 
 ### CMD_GET_GPS_LOG
@@ -268,6 +268,11 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 0 - 137: TLE to be set, excluding the title line.
 - Response: none
 - Description: Writes new TLE into non-volatile storage. The format is the same as standard ASCII TLE, 69 characters per line, without line ending characters, the title line is not included.
+
+### CMD_GET_GPS_LOG_STATE
+- Optional data length: 0
+- Response: [RESP_GPS_LOG_STATE](#RESP_GPS_LOG_STATE)
+- Description: Requests state of GPS log (length, last entry address, last fix address).
 
 ---
 # Responses
@@ -420,10 +425,12 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 0 - 3: GPS log entry timestamps as offset since measurement start, unsigned 32-bit integer
   - 4 - N: GPS log entry
 
-### RESP_GPS_LOG_LENGTH
-- Optional data length: 4
+### RESP_GPS_LOG_STATE
+- Optional data length: 12
 - Optional data:
   - 0 - 3: GPS log length
+  - 4 - 7: address of the last NMEA entry
+  - 8 - 11: address of the last NMEA fix
 
 ### RESP_FLASH_CONTENTS
 - Optional data length: 0 - 128

@@ -421,6 +421,10 @@ void PersistentStorage_Reset_System_Info() {
   uint32_t lastNmea = FLASH_NMEA_LOG_START;
   memcpy(sysInfoPage + FLASH_NMEA_LOG_LATEST_ENTRY, &lastNmea, sizeof(uint32_t));
 
+  // set default latest NMEA fix
+  uint32_t lastNmeaFix = 0;
+  memcpy(sysInfoPage + FLASH_NMEA_LOG_LATEST_FIX, &lastNmeaFix, sizeof(uint32_t));
+
   // set CRC
   uint32_t crc = CRC32_Get(sysInfoPage, FLASH_SYSTEM_INFO_CRC);
   memcpy(sysInfoPage + FLASH_SYSTEM_INFO_CRC, &crc, sizeof(uint32_t));

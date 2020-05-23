@@ -411,7 +411,7 @@ void loop() {
     FOSSASAT_DEBUG_PRINT(F("(halved due to LP mode) "));
   }
   FOSSASAT_DEBUG_PRINTLN(windowLenLoRa);
-  FOSSASAT_DEBUG_DELAY(10);
+  FOSSASAT_DEBUG_DELAY(100);
   radio.startReceive();
 
   for(uint8_t i = 0; i < windowLenLoRa; i++) {
@@ -433,7 +433,7 @@ void loop() {
     FOSSASAT_DEBUG_PRINT(F("(halved due to LP mode) "));
   }
   FOSSASAT_DEBUG_PRINTLN(windowLenFsk);
-  FOSSASAT_DEBUG_DELAY(10);
+  FOSSASAT_DEBUG_DELAY(100);
   radio.startReceive();
 
   for(uint8_t i = 0; i < windowLenFsk; i++) {

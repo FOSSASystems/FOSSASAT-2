@@ -761,9 +761,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
               PowerControl_Watchdog_Heartbeat();
             }
             
-            // reset NMEA log length and latest entry
+            // reset NMEA log length, latest entry and latest fix
             PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, 0);
             PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY, FLASH_NMEA_LOG_START);
+            PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, 0);
           }
 
           if(optData[0] & 0b00010000) {
@@ -1264,6 +1265,11 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           PersistentStorage_64kBlockErase(addr);
           PowerControl_Watchdog_Heartbeat();
         }
+            
+        // reset NMEA log length, latest entry and latest fix
+        PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, 0);
+        PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY, FLASH_NMEA_LOG_START);
+        PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, 0);
 
         // wait for offset to elapse
         FOSSASAT_DEBUG_PRINTLN(F("Waiting for offset to elapse"));
@@ -1289,6 +1295,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // run for the requested duration
         uint32_t start = millis();
+        uint32_t lastFixAddr = 0;
         while(millis() - start < duration) {
           // read GPS data to buffer
           while(GpsSerial.available() > 0) {
@@ -1306,6 +1313,16 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
               buff[buffPos - 1] = '\0';
               FOSSASAT_DEBUG_PRINTLN((char*)buff + 4);
               FOSSASAT_DEBUG_PRINTLN(flashPos, HEX);
+
+              // check if we got GPS fix
+              if(memcmp(buff + 7, "GSA", 3) == 0) {
+                // GSA message, check fix value
+                if((buff[13] == '2') || (buff[13] == '3')) {
+                  // got fix, save last fix address
+                  lastFixAddr = flashPos;
+                  FOSSASAT_DEBUG_PRINTLN(F("Got fix"));
+                }
+              }
 
               // check if we are overwriting old data
               if(overwrite && (flashPos % FLASH_SECTOR_SIZE == 0)) {
@@ -1353,6 +1370,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           #endif
         }
 
+        // update last fix addres
+        PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, lastFixAddr);
+
         // turn GPS off
         digitalWrite(GPS_POWER_FET, LOW);
 
@@ -1369,10 +1389,12 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINTLN(logged);
         PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, logged);
 
-        const uint8_t respOptDataLen = sizeof(uint32_t);
+        const uint8_t respOptDataLen = 3*sizeof(uint32_t);
         uint8_t respOptData[respOptDataLen];
         memcpy(respOptData, &logged, sizeof(uint32_t));
-        Communication_Send_Response(RESP_GPS_LOG_LENGTH, respOptData, respOptDataLen);
+        memcpy(respOptData + sizeof(uint32_t), &flashPos, sizeof(uint32_t));
+        memcpy(respOptData + 2*sizeof(uint32_t), &lastFixAddr, sizeof(uint32_t));
+        Communication_Send_Response(RESP_GPS_LOG_STATE, respOptData, respOptDataLen);
       }
     } break;
 
@@ -1562,6 +1584,21 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // update system info page
         PersistentStorage_Set_Buffer(FLASH_TLE_EPOCH_DAY, tleBuff + FLASH_TLE_EPOCH_DAY, FLASH_TLE_EPOCH_YEAR - FLASH_TLE_EPOCH_DAY + sizeof(uint8_t));
       }
+    } break;
+
+    case CMD_GET_GPS_LOG_STATE: {
+      // fetch GPS log state information
+      uint32_t logged = PersistentStorage_Get<uint32_t>(FLASH_NMEA_LOG_LENGTH);
+      uint32_t flashPos = PersistentStorage_Get<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY);
+      uint32_t lastFixAddr = PersistentStorage_Get<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX);
+
+      // send the response
+      const uint8_t respOptDataLen = 3*sizeof(uint32_t);
+      uint8_t respOptData[respOptDataLen];
+      memcpy(respOptData, &logged, sizeof(uint32_t));
+      memcpy(respOptData + sizeof(uint32_t), &flashPos, sizeof(uint32_t));
+      memcpy(respOptData + 2*sizeof(uint32_t), &lastFixAddr, sizeof(uint32_t));
+      Communication_Send_Response(RESP_GPS_LOG_STATE, respOptData, respOptDataLen);
     } break;
 
     default:
