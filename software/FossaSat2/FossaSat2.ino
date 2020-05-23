@@ -366,7 +366,7 @@ void loop() {
       // battery is low, transmit CW beeps
       for(uint8_t i = 0; i < NUM_CW_BEEPS; i++) {
         Communication_CW_Beep(500);
-        PowerControl_Wait(500, LOW_POWER_SLEEP);
+        PowerControl_Wait(1000, LOW_POWER_SLEEP);
       }
     }
   }

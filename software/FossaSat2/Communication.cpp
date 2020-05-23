@@ -1623,7 +1623,7 @@ int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData, size_t opt
   // delay before responding
   // TODO: skip (or shorter) waiting for certain frames (e.g. picture downlink)?
   FOSSASAT_DEBUG_DELAY(100);
-  PowerControl_Wait(RESPONSE_DELAY, true);
+  PowerControl_Wait(RESPONSE_DELAY, LOW_POWER_NONE);
   
   // send response
   return (Communication_Transmit(frame, len, overrideModem));
