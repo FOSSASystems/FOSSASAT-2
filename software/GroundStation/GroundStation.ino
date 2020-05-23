@@ -28,7 +28,8 @@
 #define BUSY                  9       // BUSY pin (SX126x-only)
 
 // modem configuration
-#define FREQUENCY             436.7   // MHz
+#define LORA_FREQUENCY        436.7   // MHz
+#define FSK_FREQUENCY         436.9   // MHz
 #define BANDWIDTH             125.0   // kHz
 #define SPREADING_FACTOR      11      // -
 #define CODING_RATE           8       // 4/8
@@ -224,6 +225,8 @@ void printControls() {
   Serial.println(F("B - request store and forward message"));
   Serial.println(F("O - send route packet (retransmit, FS-2 to FS-1B)"));
   Serial.println(F("h - induce memory error in system info page"));
+  Serial.println(F("H - get GPS log state"));
+  Serial.println(F("j - run GPS command"));
   Serial.println(F("------------------------------------"));
 }
 
@@ -592,6 +595,23 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       
     } break;
 
+    case RESP_GPS_LOG_STATE: {
+      Serial.println(F("GPS log state:"));
+      uint32_t ul = 0;
+      
+      memcpy(&ul, respOptData, sizeof(uint32_t));
+      Serial.print(F("length = "));
+      Serial.println(ul);
+      
+      memcpy(&ul, respOptData + sizeof(uint32_t), sizeof(uint32_t));
+      Serial.print(F("last entry = "));
+      Serial.println(ul, HEX);
+      
+      memcpy(&ul, respOptData + 2*sizeof(uint32_t), sizeof(uint32_t));
+      Serial.print(F("last fix = "));
+      Serial.println(ul, HEX);
+    } break;
+
     case RESP_ACKNOWLEDGE: {
       Serial.print(F("Frame ACK, functionId = 0x"));
       Serial.print(respOptData[0], HEX);
@@ -780,7 +800,7 @@ void requestRetransmitCustom() {
 }
 
 int16_t setLoRa() {
-  int state = radio.begin(FREQUENCY,
+  int state = radio.begin(LORA_FREQUENCY,
                           BANDWIDTH,
                           SPREADING_FACTOR,
                           CODING_RATE,
@@ -797,7 +817,7 @@ int16_t setLoRa() {
 }
 
 int16_t setGFSK() {
-  int state = radio.beginFSK(FREQUENCY,
+  int state = radio.beginFSK(FSK_FREQUENCY,
                              BIT_RATE,
                              FREQ_DEV,
                              RX_BANDWIDTH,
@@ -956,6 +976,14 @@ void writeFlash(uint32_t addr, uint8_t* data, uint8_t len) {
   sendFrameEncrypted(CMD_SET_FLASH_CONTENTS, optDataLen, optData);
 }
 
+void getGpsLogState() {
+  sendFrameEncrypted(CMD_GET_GPS_LOG_STATE);
+}
+
+void runGpsCmd(uint8_t* cmd, uint8_t cmdLen) {
+  sendFrameEncrypted(CMD_RUN_GPS_COMMAND, cmdLen, cmd);
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println(F("FOSSASAT-2 Ground Station Demo Code"));
@@ -1082,10 +1110,10 @@ void loop() {
         getPictureBurst(0, 0);
         break;
       case 'F':
-        readFlash(0, 128);
+        readFlash(0x80, 128);
         break;
       case 'g':
-        logGps(10000, 0);
+        logGps(120*60*1000UL, 0);
         break;
       case 'G':
         getGpsLog(1, 0, 50);
@@ -1105,6 +1133,14 @@ void loop() {
         uint32_t num = random();
         memcpy(data, &num, sizeof(uint32_t));
         writeFlash(0x000000C0, data, 2);
+      } break;
+      case 'H':
+        getGpsLogState();
+        break;
+      case 'j': {
+        uint8_t gpsCmd[] = { 0x64, 0x02, 0x01, 0x01, 0x03, 0x01, 0x01, 0x01,
+                             0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        runGpsCmd(gpsCmd, 15);
       } break;
       default:
         Serial.print(F("Unknown command: "));
