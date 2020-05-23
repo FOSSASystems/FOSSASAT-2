@@ -1109,15 +1109,15 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // check faults
           respOptData[0] = bridgeX.getFault();
-          if((x != 0) && (respOptData[0] != 0)) {
+          if((x != 0) && (respOptData[0] & FAULT) && (respOptData[0] != 0)) {
             break;
           }
           respOptData[1] = bridgeY.getFault();
-          if((y != 0) && (respOptData[1] != 0)) {
+          if((y != 0) && (respOptData[1] & FAULT) && (respOptData[1] != 0)) {
             break;
           }
           respOptData[2] = bridgeZ.getFault();
-          if((z != 0) && (respOptData[2] != 0)) {
+          if((z != 0) && (respOptData[2] & FAULT) && (respOptData[2] != 0)) {
             break;
           }
 
