@@ -7,13 +7,13 @@
     Configuration Macros
 */
 
-// RTC time to configure during interation
+// expected deployment time and date
 #define RTC_YEAR                                        20    // offset from 2000
-#define RTC_MONTH                                       1
-#define RTC_DAY                                         30
-#define RTC_WEEKDAY                                     4     // Monday = 1
-#define RTC_HOURS                                       16    // 24-hour format, no leading 0s
-#define RTC_MINUTES                                     6
+#define RTC_MONTH                                       7
+#define RTC_DAY                                         27
+#define RTC_WEEKDAY                                     1     // Monday = 1
+#define RTC_HOURS                                       13    // 24-hour format, no leading 0s
+#define RTC_MINUTES                                     0
 #define RTC_SECONDS                                     0
 
 // uncomment to reset system info (callsign, configuration etc.) on start
