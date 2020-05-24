@@ -280,7 +280,7 @@
 
 // Morse Code
 #define NUM_CW_BEEPS                                    3           /*!< number of CW sync beeps in low power mode */
-#define MORSE_PREAMBLE_LENGTH                           3           /*!< number of start signal repetitions */
+#define MORSE_PREAMBLE_LENGTH                           0           /*!< number of start signal repetitions */
 #define MORSE_SPEED                                     20          /*!< words per minute */
 #define MORSE_BATTERY_MIN                               3200.0      /*!< minimum voltage value that can be send via Morse (corresponds to 'A'), mV*/
 #define MORSE_BATTERY_STEP                              50.0        /*!< voltage step in Morse, mV*/
