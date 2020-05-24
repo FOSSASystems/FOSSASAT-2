@@ -121,7 +121,7 @@
 */
 
 #define BATTERY_HEATER_TEMP_LIMIT                       5.0     // deg. C
-#define MPPT_TEMP_LIMIT                                 0.0     // deg. C
+#define MPPT_TEMP_LIMIT                                -0.7     // deg. C
 #define BATTERY_HEATER_DUTY_CYCLE                       255     // PWM duty cycle 0 - 255
 
 /*
