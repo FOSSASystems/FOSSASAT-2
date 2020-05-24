@@ -11,7 +11,6 @@
 #define LOW_POWER_IDLE                                  1
 #define LOW_POWER_SLEEP                                 2
 #define LOW_POWER_DEEP_SLEEP                            3
-#define LOW_POWER_SHUTDOWN                              4
 
 uint32_t PowerControl_Get_Sleep_Interval();
 void PowerControl_Wait(uint32_t ms, uint8_t type = LOW_POWER_NONE, bool radioSleep = false);

@@ -60,9 +60,6 @@ void PowerControl_Wait(uint32_t ms, uint8_t type, bool radioSleep) {
       case LOW_POWER_DEEP_SLEEP:
         LowPower.deepSleep((uint32_t)stepSize);
         break;
-      case LOW_POWER_SHUTDOWN:
-        LowPower.shutdown((uint32_t)stepSize);
-        break;
       default:
         return;
     }
