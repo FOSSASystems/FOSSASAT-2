@@ -115,7 +115,7 @@ void PowerControl_Manage_Battery() {
     }
   } else {
     // deactivate low power mode (if it is active)
-    if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
+    if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_SLEEP) {
       PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE, LOW_POWER_NONE);
     }
   }
