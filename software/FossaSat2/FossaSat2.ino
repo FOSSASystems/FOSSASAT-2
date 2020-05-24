@@ -332,23 +332,12 @@ void loop() {
 
   // send FSK system info
   Communication_Set_Modem(MODEM_FSK);
-  #ifdef ENABLE_TRANSMISSION_CONTROL
-  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
-    Communication_Send_Full_System_Info();
-
-    // send stats too (if it's enabled)
-    if(PersistentStorage_Get<uint8_t>(FLASH_AUTO_STATISTICS) == 1) {
-      Communication_Send_Statistics(0xFF);
-    }
-    
-  } else {
-    // send only basic info in low power mode
-    Communication_Send_Basic_System_Info();
-  }
-  #else
-    Communication_Send_Full_System_Info();
+  Communication_Send_Full_System_Info(); 
+  
+  // send stats too (if it's enabled)
+  if(PersistentStorage_Get<uint8_t>(FLASH_AUTO_STATISTICS) == 1) {
     Communication_Send_Statistics(0xFF);
-  #endif
+  }
 
   // send LoRa system info if not in low power mode
   Communication_Set_Modem(MODEM_LORA);
