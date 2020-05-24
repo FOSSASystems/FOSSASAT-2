@@ -111,7 +111,7 @@ void Communication_Send_Morse_Beacon(float battVoltage) {
   PersistentStorage_Get_Callsign(callsign, callsignLen);
 
   // send start signals
-  for(uint8_t i = 0; i < MORSE_PREAMBLE_LENGTH; i++) {
+  for(int8_t i = 0; i < MORSE_PREAMBLE_LENGTH; i++) {
     morse.startSignal();
     FOSSASAT_DEBUG_PRINT('*');
     FOSSASAT_DEBUG_DELAY(10);
