@@ -128,48 +128,6 @@ void setup() {
     // integration, reset system info
     PersistentStorage_Reset_System_Info();
     
-    // ask for RTC configuration
-    FOSSASAT_DEBUG_PORT.print(F("Do you wish to update RTC time to: ("));
-    FOSSASAT_DEBUG_PORT.print(RTC_WEEKDAY);
-    FOSSASAT_DEBUG_PORT.print(") ");
-    FOSSASAT_DEBUG_PORT.print(RTC_DAY);
-    FOSSASAT_DEBUG_PORT.print(". ");
-    FOSSASAT_DEBUG_PORT.print(RTC_MONTH);
-    FOSSASAT_DEBUG_PORT.print(". 20");
-    FOSSASAT_DEBUG_PORT.print(RTC_YEAR);
-    FOSSASAT_DEBUG_PORT.print(' ');
-    FOSSASAT_DEBUG_PORT.print(RTC_HOURS);
-    FOSSASAT_DEBUG_PORT.print(':');
-    FOSSASAT_DEBUG_PORT.print(RTC_MINUTES);
-    FOSSASAT_DEBUG_PORT.print(':');
-    FOSSASAT_DEBUG_PORT.print(RTC_SECONDS);
-    FOSSASAT_DEBUG_PORT.println('?');
-    
-    FOSSASAT_DEBUG_PORT.println(F(" - 'y' (lower case) to update"));
-    FOSSASAT_DEBUG_PORT.println(F(" - anything else to skip or wait 10 minutes"));
-    delay(10);
-
-    uint32_t start = millis();
-    while(!FOSSASAT_DEBUG_PORT.available()) {
-      PowerControl_Watchdog_Heartbeat(false);
-      delay(1000);
-      if(millis() - start >= (uint32_t)600000) {
-        FOSSASAT_DEBUG_PORT.println(F("No input for 10 minutes, skipping"));
-        break;
-      }
-    }
-
-    char c = FOSSASAT_DEBUG_PORT.read();
-    if(c == 'y') {
-      rtc.setDate(RTC_WEEKDAY, RTC_DAY, RTC_MONTH, RTC_YEAR);
-      rtc.setTime(RTC_HOURS, RTC_MINUTES, RTC_SECONDS);
-      PersistentStorage_Set<uint32_t>(FLASH_RTC_EPOCH, rtc.getEpoch());
-    }
-
-    while(FOSSASAT_DEBUG_PORT.available()) {
-      FOSSASAT_DEBUG_PORT.read();
-    }
-    
     // print data for integration purposes (independently of FOSSASAT_DEBUG macro!)
     start = millis();
     uint32_t lastSample = 0;

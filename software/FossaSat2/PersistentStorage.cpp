@@ -362,6 +362,11 @@ void PersistentStorage_Reset_System_Info() {
   sysInfoPage[FLASH_FSK_RECEIVE_LEN] = FSK_RECEIVE_WINDOW_LENGTH;
   sysInfoPage[FLASH_LORA_RECEIVE_LEN] = LORA_RECEIVE_WINDOW_LENGTH;
 
+  // set default RTC epoch
+  rtc.setDate(RTC_WEEKDAY, RTC_DAY, RTC_MONTH, RTC_YEAR);
+  rtc.setTime(RTC_HOURS, RTC_MINUTES, RTC_SECONDS);
+  sysInfoPage[FLASH_RTC_EPOCH] = rtc.getEpoch();
+
   // set default low power mode configuration
   sysInfoPage[FLASH_LOW_POWER_MODE_ENABLED] = 1;
 
