@@ -82,10 +82,10 @@ void PowerControl_Watchdog_Heartbeat(bool manageBattery) {
 }
 
 void PowerControl_Watchdog_Restart() {
-  // do not pet watchdog for more than 15 seconds to restart
-  FOSSASAT_DEBUG_PRINTLN(F("Restart in 15 seconds ..."));
+  // do not pet watchdog for more than 30 seconds to restart
+  FOSSASAT_DEBUG_PRINTLN(F("Restart in 30 seconds ..."));
   FOSSASAT_DEBUG_DELAY(10);
-  LowPower.deepSleep(16000);
+  LowPower.deepSleep(30000);
 }
 
 void PowerControl_Deploy() {
