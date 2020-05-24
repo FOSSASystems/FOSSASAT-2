@@ -382,14 +382,15 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 29 - 30: bottom board temperature * 0.01 deg. C, signed 16-bit integer
   - 31 - 32: battery temperature * 0.01 deg. C, signed 16-bit integer
   - 33 - 34: second battery temperature * 0.01 deg. C, signed 16-bit integer
-  - 35 - 38: Y panel light sensor * 1 lux, float
-  - 39 - 42: top board light sensor * 1 lux, float
-  - 43: last X axis H-bridge fault, unsigned 8-bit integer
-  - 44: last Y axis H-bridge fault, unsigned 8-bit integer
-  - 45: last Z axis H-bridge fault, unsigned 8-bit integer
-  - 46 - 49: external flash system info page CRC error counter, unsigned 32-bit integer
-  - 50: FSK window receive length in seconds
-  - 51: LoRa window receive length in seconds
+  - 35 - 36: MCU temperature * 0.01 deg. C, signed 16-bit integer
+  - 37 - 40: Y panel light sensor * 1 lux, float
+  - 41 - 44: top board light sensor * 1 lux, float
+  - 45: last X axis H-bridge fault, unsigned 8-bit integer
+  - 46: last Y axis H-bridge fault, unsigned 8-bit integer
+  - 47: last Z axis H-bridge fault, unsigned 8-bit integer
+  - 48 - 51: external flash system info page CRC error counter, unsigned 32-bit integer
+  - 52: FSK window receive length in seconds
+  - 53: LoRa window receive length in seconds
 
 ### RESP_STORE_AND_FORWARD_ASSIGNED_SLOT
 - Optional data length: 2

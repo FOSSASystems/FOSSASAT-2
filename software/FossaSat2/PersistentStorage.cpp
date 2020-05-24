@@ -18,6 +18,7 @@ void PersistentStorage_Update_Stats(uint8_t flags) {
     PersistentStorage_Update_Stat(FLASH_STATS_TEMP_BOTTOM, (int16_t)(Sensors_Read_Temperature(tempSensorBottom) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER)));
     PersistentStorage_Update_Stat(FLASH_STATS_TEMP_BATTERY, (int16_t)(Sensors_Read_Temperature(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER)));
     PersistentStorage_Update_Stat(FLASH_STATS_TEMP_SEC_BATTERY, (int16_t)(Sensors_Read_Temperature(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER)));
+    PersistentStorage_Update_Stat(FLASH_STATS_TEMP_MCU, (int16_t)(Sensors_Read_Temperature(tempSensorMCU) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER)));
   }
 
   if(flags & STATS_FLAGS_CURRENTS) {
@@ -92,6 +93,7 @@ void PersistentStorage_Reset_Stats() {
   memcpy(statsPage + (FLASH_STATS_TEMP_BOTTOM - FLASH_STATS), &intMax, sizeof(intMax));
   memcpy(statsPage + (FLASH_STATS_TEMP_BATTERY - FLASH_STATS), &intMax, sizeof(intMax));
   memcpy(statsPage + (FLASH_STATS_TEMP_SEC_BATTERY - FLASH_STATS), &intMax, sizeof(intMax));
+  memcpy(statsPage + (FLASH_STATS_TEMP_MCU - FLASH_STATS), &intMax, sizeof(intMax));
 
   intVal = Sensors_Read_Temperature(tempSensorPanelY) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   memcpy(statsPage + (FLASH_STATS_TEMP_PANEL_Y - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
@@ -103,12 +105,15 @@ void PersistentStorage_Reset_Stats() {
   memcpy(statsPage + (FLASH_STATS_TEMP_BATTERY - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
   intVal = Sensors_Read_Temperature(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   memcpy(statsPage + (FLASH_STATS_TEMP_SEC_BATTERY - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
+  intVal = Sensors_Read_Temperature(tempSensorMCU) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  memcpy(statsPage + (FLASH_STATS_TEMP_MCU - FLASH_STATS) + sizeof(intVal), &intMax, sizeof(intMax));
   
   memcpy(statsPage + (FLASH_STATS_TEMP_PANEL_Y - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
   memcpy(statsPage + (FLASH_STATS_TEMP_TOP - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
   memcpy(statsPage + (FLASH_STATS_TEMP_BOTTOM - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
   memcpy(statsPage + (FLASH_STATS_TEMP_BATTERY - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
   memcpy(statsPage + (FLASH_STATS_TEMP_SEC_BATTERY - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
+  memcpy(statsPage + (FLASH_STATS_TEMP_MCU - FLASH_STATS) + 2*sizeof(intVal), &intMax, sizeof(intMax));
 
   // set currents
   memcpy(statsPage + (FLASH_STATS_CURR_XA - FLASH_STATS), &intMax, sizeof(intMax));

@@ -195,33 +195,34 @@
 #define FLASH_STATS_TEMP_BOTTOM                         0x0000100C  //  0x0000100C    0x00001011    3x int16_t
 #define FLASH_STATS_TEMP_BATTERY                        0x00001012  //  0x00001012    0x00001017    3x int16_t
 #define FLASH_STATS_TEMP_SEC_BATTERY                    0x00001018  //  0x00001018    0x0000101D    3x int16_t
+#define FLASH_STATS_TEMP_MCU                            0x0000101E  //  0x0000101E    0x00001023    3x int16_t
 
-#define FLASH_STATS_CURR_XA                             0x0000101E  //  0x0000101E    0x00001023    3x int16_t
-#define FLASH_STATS_CURR_XB                             0x00001024  //  0x00001024    0x00001029    3x int16_t
-#define FLASH_STATS_CURR_ZA                             0x0000102A  //  0x0000102A    0x0000102F    3x int16_t
-#define FLASH_STATS_CURR_ZB                             0x00001030  //  0x00001030    0x00001035    3x int16_t
-#define FLASH_STATS_CURR_Y                              0x00001036  //  0x00001036    0x0000103B    3x int16_t
-#define FLASH_STATS_CURR_MPPT                           0x0000103C  //  0x0000103C    0x00001041    3x int16_t
+#define FLASH_STATS_CURR_XA                             0x00001024  //  0x00001024    0x00001029    3x int16_t
+#define FLASH_STATS_CURR_XB                             0x0000102A  //  0x0000102A    0x0000102F    3x int16_t
+#define FLASH_STATS_CURR_ZA                             0x00001030  //  0x00001030    0x00001035    3x int16_t
+#define FLASH_STATS_CURR_ZB                             0x00001036  //  0x00001036    0x0000103B    3x int16_t
+#define FLASH_STATS_CURR_Y                              0x0000103C  //  0x0000103C    0x00001041    3x int16_t
+#define FLASH_STATS_CURR_MPPT                           0x00001042  //  0x00001042    0x00001047    3x int16_t
 
-#define FLASH_STATS_VOLT_XA                             0x00001042  //  0x00001042    0x00001044    3x uint8_t
-#define FLASH_STATS_VOLT_XB                             0x00001045  //  0x00001045    0x00001047    3x uint8_t
-#define FLASH_STATS_VOLT_ZA                             0x00001048  //  0x00001048    0x0000104A    3x uint8_t
-#define FLASH_STATS_VOLT_ZB                             0x0000104B  //  0x0000104B    0x0000104D    3x uint8_t
-#define FLASH_STATS_VOLT_Y                              0x0000104E  //  0x0000104E    0x00001050    3x uint8_t
-#define FLASH_STATS_VOLT_MPPT                           0x00001051  //  0x00001051    0x00001053    3x uint8_t
+#define FLASH_STATS_VOLT_XA                             0x00001048  //  0x00001048    0x0000104A    3x uint8_t
+#define FLASH_STATS_VOLT_XB                             0x0000104B  //  0x0000104B    0x0000104D    3x uint8_t
+#define FLASH_STATS_VOLT_ZA                             0x0000104E  //  0x0000104E    0x00001050    3x uint8_t
+#define FLASH_STATS_VOLT_ZB                             0x00001051  //  0x00001051    0x00001053    3x uint8_t
+#define FLASH_STATS_VOLT_Y                              0x00001054  //  0x00001054    0x00001056    3x uint8_t
+#define FLASH_STATS_VOLT_MPPT                           0x00001057  //  0x00001057    0x00001059    3x uint8_t
 
-#define FLASH_STATS_LIGHT_PANEL_Y                       0x00001054  //  0x00001054    0x0000105F    3x float
-#define FLASH_STATS_LIGHT_TOP                           0x00001060  //  0x00001060    0x0000106B    3x float
+#define FLASH_STATS_LIGHT_PANEL_Y                       0x0000105A  //  0x0000105A    0x0000105F    3x float
+#define FLASH_STATS_LIGHT_TOP                           0x00001066  //  0x00001066    0x00001071    3x float
 
-#define FLASH_STATS_GYRO_X                              0x0000106C  //  0x0000106C    0x00001077    3x float
-#define FLASH_STATS_GYRO_Y                              0x00001078  //  0x00001078    0x00001083    3x float
-#define FLASH_STATS_GYRO_Z                              0x00001084  //  0x00001084    0x0000108F    3x float
-#define FLASH_STATS_ACCEL_X                             0x00001090  //  0x00001090    0x0000109B    3x float
-#define FLASH_STATS_ACCEL_Y                             0x0000109C  //  0x0000109C    0x000010A7    3x float
-#define FLASH_STATS_ACCEL_Z                             0x000010A8  //  0x000010A8    0x000010B3    3x float
-#define FLASH_STATS_MAG_X                               0x000010B4  //  0x000010B4    0x000010BF    3x float
-#define FLASH_STATS_MAG_Y                               0x000010C0  //  0x000010C0    0x000010CB    3x float
-#define FLASH_STATS_MAG_Z                               0x000010CC  //  0x000010CC    0x000010D7    3x float
+#define FLASH_STATS_GYRO_X                              0x00001072  //  0x00001072    0x0000107D    3x float
+#define FLASH_STATS_GYRO_Y                              0x0000107E  //  0x0000107E    0x00001089    3x float
+#define FLASH_STATS_GYRO_Z                              0x0000108A  //  0x0000108A    0x00001095    3x float
+#define FLASH_STATS_ACCEL_X                             0x00001096  //  0x00001096    0x000010A1    3x float
+#define FLASH_STATS_ACCEL_Y                             0x000010A2  //  0x000010A2    0x000010AD    3x float
+#define FLASH_STATS_ACCEL_Z                             0x000010AE  //  0x000010AE    0x000010B9    3x float
+#define FLASH_STATS_MAG_X                               0x000010BA  //  0x000010BA    0x000010C5    3x float
+#define FLASH_STATS_MAG_Y                               0x000010C6  //  0x000010C6    0x000010D1    3x float
+#define FLASH_STATS_MAG_Z                               0x000010D2  //  0x000010D2    0x000010DD    3x float
 
 // sectors 2 + 3 - image lengths: 4 bytes per length
 #define FLASH_IMAGE_LENGTHS_1                           0x00002000  //  0x00002000    0x00002FFF
@@ -317,6 +318,10 @@
 // second battery temperature sensor
 #define TEMP_SENSOR_SEC_BATTERY_BUS                     Wire2
 #define TEMP_SENSOR_SEC_BATTERY_ADDRESS                 0b1001010 // ADD1 low, ADD0 high
+
+// MCU temperature sensor
+#define TEMP_SENSOR_MCU_BUS                             Wire2
+#define TEMP_SENSOR_MCU_ADDRESS                         0b1001010 // ADD1 low, ADD0 high
 
 /*
     ADCS H-bridges
@@ -414,6 +419,7 @@ extern struct wireSensor_t tempSensorTop;
 extern struct wireSensor_t tempSensorBottom;
 extern struct wireSensor_t tempSensorBattery;
 extern struct wireSensor_t tempSensorSecBattery;
+extern struct wireSensor_t tempSensorMCU;
 
 // ADCS H-bridges
 extern MiniMoto bridgeX;

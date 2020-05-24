@@ -208,7 +208,7 @@ void Communication_Send_Basic_System_Info() {
 
 void Communication_Send_Full_System_Info() {
   // build response frame
-  static const uint8_t optDataLen = 12*sizeof(uint8_t) + 11*sizeof(int16_t) + sizeof(uint16_t) + 2*sizeof(uint32_t) + 2*sizeof(float);
+  static const uint8_t optDataLen = 12*sizeof(uint8_t) + 12*sizeof(int16_t) + sizeof(uint16_t) + 2*sizeof(uint32_t) + 2*sizeof(float);
   uint8_t optData[optDataLen];
   uint8_t* optDataPtr = optData;
 
@@ -278,6 +278,9 @@ void Communication_Send_Full_System_Info() {
 
   int16_t secBatteryTemperature = Sensors_Read_Temperature(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, secBatteryTemperature, "secBatteryTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
+
+  int16_t mcuTemperature = Sensors_Read_Temperature(tempSensorMCU) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, mcuTemperature, "mcuTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
 
   float lightPanelY = Sensors_Read_Light(lightSensorPanelY);
   Communication_Frame_Add(&optDataPtr, lightPanelY, "lightPanelY", 1, "lux");

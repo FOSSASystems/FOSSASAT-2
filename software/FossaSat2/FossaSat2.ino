@@ -75,6 +75,10 @@ void setup() {
   Sensors_Setup_Temp(tempSensorSecBattery, TMP_100_RESOLUTION_12_BITS);
   FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorSecBattery));
 
+  FOSSASAT_DEBUG_PORT.print(F("MCU: "));
+  Sensors_Setup_Temp(tempSensorMCU, TMP_100_RESOLUTION_12_BITS);
+  FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorMCU));
+
   // initialize current sensors
   FOSSASAT_DEBUG_PORT.println(F("Current sensors init:"));
   FOSSASAT_DEBUG_PORT.print(F("XA: "));
@@ -153,6 +157,8 @@ void setup() {
         FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorBattery));
         FOSSASAT_DEBUG_PORT.print(F("Second Battery\t"));
         FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorSecBattery));
+        FOSSASAT_DEBUG_PORT.print(F("MCU\t\t"));
+        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorMCU));
         FOSSASAT_DEBUG_PORT.println();
 
         // IMU
