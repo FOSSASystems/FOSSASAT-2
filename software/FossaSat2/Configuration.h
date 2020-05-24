@@ -102,8 +102,8 @@
 
 #define DEPLOYMENT_DEBUG_LENGTH                         60      // s
 #define DEPLOYMENT_DEBUG_SAMPLE_PERIOD                  1000    // ms
-#define DEPLOYMENT_SLEEP_LENGTH                         1500000 // ms
-#define DEPLOYMENT_CHARGE_LIMIT                         12      // h
+#define DEPLOYMENT_SLEEP_LENGTH                         1800000 // ms
+#define DEPLOYMENT_CHARGE_LIMIT                         3       // h
 #define DEPLOYMENT_PULSE_LENGTH                         1200    // ms
 #define WATCHDOG_LOOP_HEARTBEAT_PERIOD                  1000    // ms
 
