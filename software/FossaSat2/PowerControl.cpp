@@ -110,10 +110,14 @@ void PowerControl_Manage_Battery() {
   // check battery voltage
   if((PowerControl_Get_Battery_Voltage() <= PersistentStorage_Get<uint16_t>(FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT)) && (PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED) == 1)) {
     // activate low power mode
-    PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE, LOW_POWER_SLEEP);
+    if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
+      PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE, LOW_POWER_SLEEP);
+    }
   } else {
-    // deactivate low power mode
-    PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE, LOW_POWER_NONE);
+    // deactivate low power mode (if it is active)
+    if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
+      PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE, LOW_POWER_NONE);
+    }
   }
 
   // check temperature limit to enable/disable charging
