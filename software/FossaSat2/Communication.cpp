@@ -1621,6 +1621,38 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       
     } break;
 
+    case CMD_SET_SLEEP_INTERVALS: {
+      // parse the number of sleep intervals
+      uint8_t intervalSize = sizeof(int16_t) + sizeof(uint16_t);
+      uint8_t numIntervals = optDataLen / intervalSize;
+
+      // check optDataLen is multiple of intervalSize, and the number of intervals is with limits
+      if(!((optDataLen % intervalSize != 0) || (numIntervals == 0) || (numIntervals > 8))) {
+        FOSSASAT_DEBUG_PRINT(F("numIntervals = "));
+        FOSSASAT_DEBUG_PRINTLN(numIntervals);
+        systemInfoBuffer[FLASH_NUM_SLEEP_INTERVALS] = numIntervals;
+        
+        // parse voltage thresholds and interval lengths
+        for(uint8_t i = 0; i < numIntervals; i++) {
+          FOSSASAT_DEBUG_PRINT(i);
+          FOSSASAT_DEBUG_PRINT('\t');
+          
+          int16_t voltage = 0;
+          memcpy(&voltage, optData + i*intervalSize, sizeof(int16_t));
+          FOSSASAT_DEBUG_PRINT(voltage);
+          FOSSASAT_DEBUG_PRINT('\t');
+          memcpy(systemInfoBuffer + FLASH_SLEEP_INTERVALS + i*intervalSize, &voltage, sizeof(int16_t));
+          
+          uint16_t intervalLen = 0;
+          memcpy(&intervalLen, optData + sizeof(int16_t) + i*intervalSize, sizeof(uint16_t));
+          FOSSASAT_DEBUG_PRINTLN(intervalLen);
+          memcpy(systemInfoBuffer + FLASH_SLEEP_INTERVALS + sizeof(int16_t) + i*intervalSize, &intervalLen, sizeof(uint16_t));
+          
+        }
+      }
+      
+    } break;
+
     default:
       FOSSASAT_DEBUG_PRINT(F("Unknown function ID!"));
       return;

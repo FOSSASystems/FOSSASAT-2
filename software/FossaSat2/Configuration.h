@@ -125,6 +125,13 @@
 #define BATTERY_HEATER_DUTY_CYCLE                       255     // PWM duty cycle 0 - 255
 
 /*
+   Default sleep intervals
+*/
+#define DEFAULT_NUMBER_OF_SLEEP_INTERVALS               6
+#define DEFAULT_SLEEP_INTERVAL_VOLTAGES                 { 4050, 4000, 3900, 3800, 3700,    0 }    // mV
+#define DEFAULT_SLEEP_INTERVAL_LENGTHS                  {   20,   35,  100,  160,  180,  240 }    // sec
+
+/*
    Default TLE
 */
 #define TLE_LINE_1                                      "1 00000U 20000A   20182.79906828 0.00000000  00000-0 -12345-3 0    10"
@@ -185,6 +192,8 @@
 #define FLASH_NMEA_LOG_LATEST_ENTRY                     0x000000A5  //  0x000000A5    0x000000A8    uint32_t
 #define FLASH_NMEA_LOG_LATEST_FIX                       0x000000A9  //  0x000000A9    0x000000AC    uint32_t
 #define FLASH_LOOP_COUNTER                              0x000000AD  //  0x000000AD    0x000000AD    uint8_t
+#define FLASH_NUM_SLEEP_INTERVALS                       0x000000AE  //  0x000000AE    0x000000AE    uint8_t
+#define FLASH_SLEEP_INTERVALS                           0x000000B0  //  0x000000B0    0x000000BF    FLASH_NUM_SLEEP_INTERVALS x (int16_t + uint16_t)
 #define FLASH_SYSTEM_INFO_CRC                           0x000000F8  //  0x000000F8    0x000000FB    uint32_t
 #define FLASH_MEMORY_ERROR_COUNTER                      0x000000FC  //  0x000000FC    0x000000FF    uint32_t
 

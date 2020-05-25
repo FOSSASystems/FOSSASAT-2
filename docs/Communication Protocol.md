@@ -281,6 +281,16 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Response: [RESP_GPS_COMMAND_RESPONSE](#RESP_GPS_COMMAND_RESPONSE)
 - Description: Requests state of GPS log (length, last entry address, last fix address).
 
+### CMD_SET_SLEEP_INTERVALS
+- Optional data length: N x 4 (maximum N = 8)
+- Optional data:
+  - 0 - 1: voltage level of the first sleep interval in mV, signed 16-bit integer, LSB first
+  - 2 - 3: first sleep interval length in seconds, unsigned 16-bit integer, LSB first
+  - 4 - 7: second sleep interval voltage level and length
+  - 8 - 11: third sleep interval voltage level and length etc.
+- Response: none
+- Description: Sets new sleep interval voltage levels and sleep durations. Maximum of 8 intervals can be set, MUST be ordered by voltage threshold (highest to lowest).
+
 ---
 # Responses
 

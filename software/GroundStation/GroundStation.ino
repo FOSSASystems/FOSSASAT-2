@@ -227,6 +227,7 @@ void printControls() {
   Serial.println(F("h - induce memory error in system info page"));
   Serial.println(F("H - get GPS log state"));
   Serial.println(F("j - run GPS command"));
+  Serial.println(F("J - set sleep intervals"));
   Serial.println(F("------------------------------------"));
 }
 
@@ -978,6 +979,7 @@ void writeFlash(uint32_t addr, uint8_t* data, uint8_t len) {
   memcpy(optData, &addr, sizeof(uint32_t));
   memcpy(optData + sizeof(uint32_t), data, len);
   sendFrameEncrypted(CMD_SET_FLASH_CONTENTS, optDataLen, optData);
+  delete[] optData;
 }
 
 void getGpsLogState() {
@@ -986,6 +988,14 @@ void getGpsLogState() {
 
 void runGpsCmd(uint8_t* cmd, uint8_t cmdLen) {
   sendFrameEncrypted(CMD_RUN_GPS_COMMAND, cmdLen, cmd);
+}
+
+void setSleepIntervals(uint16_t* sleepIntervals, uint8_t numIntervals) {
+  uint8_t optDataLen = numIntervals * 4;
+  uint8_t* optData = new uint8_t[optDataLen];
+  memcpy(optData, sleepIntervals, optDataLen);
+  sendFrameEncrypted(CMD_SET_SLEEP_INTERVALS, optDataLen, optData);
+  delete[] optData;
 }
 
 void setup() {
@@ -1142,9 +1152,13 @@ void loop() {
         getGpsLogState();
         break;
       case 'j': {
-        uint8_t gpsCmd[] = { 0x64, 0x02, 0x01, 0x01, 0x03, 0x01, 0x01, 0x01,
-                             0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
+        uint8_t gpsCmd[] = { 0x64, 0x02, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00,
+                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
         runGpsCmd(gpsCmd, 15);
+      } break;
+      case 'J': {
+        uint16_t sleepIntervals[] = { 4050, 20, 4000, 35, 3900, 100, 3800, 160, 3700, 180, 3300, 200, 0, 20};
+        setSleepIntervals(sleepIntervals, 7);
       } break;
       default:
         Serial.print(F("Unknown command: "));

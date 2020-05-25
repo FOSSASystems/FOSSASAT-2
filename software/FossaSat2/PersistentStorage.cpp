@@ -458,6 +458,19 @@ void PersistentStorage_Reset_System_Info() {
   uint32_t lastNmeaFix = 0;
   memcpy(systemInfoBuffer + FLASH_NMEA_LOG_LATEST_FIX, &lastNmeaFix, sizeof(uint32_t));
 
+  // set default sleep intervals
+  uint8_t numIntervals = DEFAULT_NUMBER_OF_SLEEP_INTERVALS;
+  memcpy(systemInfoBuffer + FLASH_NUM_SLEEP_INTERVALS, &numIntervals, sizeof(uint8_t));
+  uint8_t intervalSize = sizeof(int16_t) + sizeof(uint16_t);
+  int16_t voltages[] = DEFAULT_SLEEP_INTERVAL_VOLTAGES;
+  uint16_t lengths[] = DEFAULT_SLEEP_INTERVAL_LENGTHS;
+  for(uint8_t i = 0; i < numIntervals; i++) {
+    int16_t v = voltages[i];
+    memcpy(systemInfoBuffer + FLASH_SLEEP_INTERVALS + i*intervalSize, &v, sizeof(int16_t));
+    uint16_t l = lengths[i];
+    memcpy(systemInfoBuffer + FLASH_SLEEP_INTERVALS + sizeof(int16_t) + i*intervalSize, &l, sizeof(uint16_t));
+  }
+
   // set CRC
   uint32_t crc = CRC32_Get(systemInfoBuffer, FLASH_SYSTEM_INFO_CRC);
   memcpy(systemInfoBuffer + FLASH_SYSTEM_INFO_CRC, &crc, sizeof(uint32_t));
