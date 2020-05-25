@@ -525,39 +525,43 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
         Serial.print(FCP_System_Info_Get_Temperature(respOptData, 33));
         Serial.println(" deg C");
 
+        Serial.print(F("mcuTemp = "));
+        Serial.print(FCP_System_Info_Get_Temperature(respOptData, 35));
+        Serial.println(" deg C");
+
         float lightVal = 0;
-        memcpy(&lightVal, respOptData + 35, sizeof(float));
+        memcpy(&lightVal, respOptData + 37, sizeof(float));
         Serial.print(F("lightPanelY = "));
         Serial.println(lightVal, 2);
 
-        memcpy(&lightVal, respOptData + 39, sizeof(float));
+        memcpy(&lightVal, respOptData + 41, sizeof(float));
         Serial.print(F("lightTop = "));
         Serial.println(lightVal, 2);
 
         uint8_t fault = 0;
-        memcpy(&fault, respOptData + 43, sizeof(uint8_t));
+        memcpy(&fault, respOptData + 45, sizeof(uint8_t));
         Serial.print(F("faultX = 0x"));
         Serial.println(fault, HEX);
 
-        memcpy(&fault, respOptData + 44, sizeof(uint8_t));
+        memcpy(&fault, respOptData + 46, sizeof(uint8_t));
         Serial.print(F("faultY = 0x"));
         Serial.println(fault, HEX);
 
-        memcpy(&fault, respOptData + 45, sizeof(uint8_t));
+        memcpy(&fault, respOptData + 47, sizeof(uint8_t));
         Serial.print(F("faultZ = 0x"));
         Serial.println(fault, HEX);
 
         uint32_t errCounter = 0;
-        memcpy(&errCounter, respOptData + 46, sizeof(uint32_t));
+        memcpy(&errCounter, respOptData + 48, sizeof(uint32_t));
         Serial.print(F("errCounter = "));
         Serial.println(errCounter);
 
         uint8_t rxLen = 0;
-        memcpy(&rxLen, respOptData + 50, sizeof(uint8_t));
+        memcpy(&rxLen, respOptData + 52, sizeof(uint8_t));
         Serial.print(F("fskRxLen = "));
         Serial.println(rxLen);
         
-        memcpy(&rxLen, respOptData + 51, sizeof(uint8_t));
+        memcpy(&rxLen, respOptData + 53, sizeof(uint8_t));
         Serial.print(F("loraRxLen = "));
         Serial.println(rxLen);
 
