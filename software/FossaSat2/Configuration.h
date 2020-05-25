@@ -184,6 +184,7 @@
 #define FLASH_TLE_EPOCH_YEAR                            0x000000A4  //  0x000000A4    0x000000A4    uint8_t
 #define FLASH_NMEA_LOG_LATEST_ENTRY                     0x000000A5  //  0x000000A5    0x000000A8    uint32_t
 #define FLASH_NMEA_LOG_LATEST_FIX                       0x000000A9  //  0x000000A9    0x000000AC    uint32_t
+#define FLASH_LOOP_COUNTER                              0x000000AD  //  0x000000AD    0x000000AD    uint8_t
 #define FLASH_SYSTEM_INFO_CRC                           0x000000F8  //  0x000000F8    0x000000FB    uint32_t
 #define FLASH_MEMORY_ERROR_COUNTER                      0x000000FC  //  0x000000FC    0x000000FF    uint32_t
 
@@ -283,8 +284,9 @@
 #define NUM_CW_BEEPS                                    3           /*!< number of CW sync beeps in low power mode */
 #define MORSE_PREAMBLE_LENGTH                           0           /*!< number of start signal repetitions */
 #define MORSE_SPEED                                     20          /*!< words per minute */
-#define MORSE_BATTERY_MIN                               3200.0      /*!< minimum voltage value that can be send via Morse (corresponds to 'A'), mV*/
-#define MORSE_BATTERY_STEP                              50.0        /*!< voltage step in Morse, mV*/
+#define MORSE_BATTERY_MIN                               3200.0      /*!< minimum voltage value that can be send via Morse (corresponds to 'A'), mV */
+#define MORSE_BATTERY_STEP                              50.0        /*!< voltage step in Morse, mV */
+#define MORSE_BEACON_LOOP_FREQ                          2           /*!< how often to transmit full Morse code beacon (e.g. transmit every second main loop when set to 2) */
 
 /*
     Temperature Sensors

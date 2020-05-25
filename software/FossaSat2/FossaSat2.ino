@@ -315,11 +315,14 @@ void loop() {
   Communication_Set_Modem(MODEM_FSK);
   FOSSASAT_DEBUG_DELAY(10);
   
+  // get loop number
+  uint8_t numLoops = PersistentStorage_Get<uint8_t>(FLASH_LOOP_COUNTER);
+  
   #ifdef ENABLE_TRANSMISSION_CONTROL
   if(PersistentStorage_Get<uint8_t>(FLASH_TRANSMISSIONS_ENABLED) == 0) {
     FOSSASAT_DEBUG_PRINTLN(F("Tx off by cmd"));
   } else {
-    if(battVoltage >= PersistentStorage_Get<int16_t>(FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT)) {
+    if((battVoltage >= PersistentStorage_Get<int16_t>(FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT)) && (numLoops % MORSE_BEACON_LOOP_FREQ == 0)) {
     // transmit full Morse beacon
   #endif
   
@@ -402,6 +405,9 @@ void loop() {
 
   // update saved epoch
   PersistentStorage_Set<uint32_t>(FLASH_RTC_EPOCH, rtc.getEpoch());
+  // update loop counter
+  numLoops++;
+  memcpy(systemInfoBuffer + FLASH_LOOP_COUNTER, &numLoops, sizeof(numLoops));
 
   // set everything to sleep
   uint32_t interval = PowerControl_Get_Sleep_Interval();
