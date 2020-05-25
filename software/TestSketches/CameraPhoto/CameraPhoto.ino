@@ -1,5 +1,20 @@
 #include "FossaSat2.h"
 
+/*
+ * To turn the Serial dump into an actual JPEG:
+ * 
+ * 1. Make sure timetamp is disabled in Serial Monitor
+ * 2. Take a picture
+ * 3. Ctrl+C all the non-FF bytes
+ * 4. Go to https://hexed.it/
+ * 5. Insert clipboard data (Ctrl+V anywhere)
+ * 6. Select "Create a new file" and specify data as "Hexadecimal values"
+ * 7. In the top bar, click Export
+ * 8. Rename the downloaded file .jpeg
+ * 
+ */
+
+
 void setup() {
   // initialize debug port
   FOSSASAT_DEBUG_PORT.begin(FOSSASAT_DEBUG_SPEED);
