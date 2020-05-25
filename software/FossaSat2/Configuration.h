@@ -378,6 +378,9 @@
     Global Variables
 */
 
+// RAM buffer for system info page
+extern uint8_t systemInfoBuffer[];
+
 // flag to signal interrupts enabled/disabled
 extern volatile bool interruptsEnabled;
 

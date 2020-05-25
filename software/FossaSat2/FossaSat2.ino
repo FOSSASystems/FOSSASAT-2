@@ -285,12 +285,21 @@ void setup() {
 
 // cppcheck-suppress unusedFunction
 void loop() {
+  // load system info page
+  PersistentStorage_Read(FLASH_SYSTEM_INFO, systemInfoBuffer, FLASH_EXT_PAGE_SIZE);
+
+  // check CRC
+  if(!PersistentStorage_Check_CRC(systemInfoBuffer, FLASH_SYSTEM_INFO_CRC)) {
+    FOSSASAT_DEBUG_PRINTLN(F("CRC check failed!"));
+  }
+  
   // check RTC time
   if(!rtc.isTimeSet()) {
     FOSSASAT_DEBUG_PRINTLN(F("RTC time not set, restoring last saved epoch"));
     rtc.setEpoch(PersistentStorage_Get<uint32_t>(FLASH_RTC_EPOCH));
   } else {
-    PersistentStorage_Set<uint32_t>(FLASH_RTC_EPOCH, rtc.getEpoch());
+    uint32_t rtcEpoch = rtc.getEpoch();
+    memcpy(systemInfoBuffer + FLASH_RTC_EPOCH, &rtcEpoch, sizeof(rtcEpoch));
   }
   FOSSASAT_DEBUG_PRINT(F("On-board time: "));
   FOSSASAT_DEBUG_PRINT_RTC_TIME();
@@ -404,10 +413,15 @@ void loop() {
   radio.standby();
 
   // update saved epoch
-  PersistentStorage_Set<uint32_t>(FLASH_RTC_EPOCH, rtc.getEpoch());
+  uint32_t rtcEpoch = rtc.getEpoch();
+  memcpy(systemInfoBuffer + FLASH_RTC_EPOCH, &rtcEpoch, sizeof(rtcEpoch));
+
   // update loop counter
   numLoops++;
   memcpy(systemInfoBuffer + FLASH_LOOP_COUNTER, &numLoops, sizeof(numLoops));
+
+  // update system info flash page
+  PersistentStorage_Set_Buffer(FLASH_SYSTEM_INFO, systemInfoBuffer, FLASH_EXT_PAGE_SIZE);
 
   // set everything to sleep
   uint32_t interval = PowerControl_Get_Sleep_Interval();

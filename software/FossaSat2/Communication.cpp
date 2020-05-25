@@ -944,7 +944,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         #endif
 
         // write all at once
-        PersistentStorage_Set_Buffer(FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT, optData, optDataLen);
+        memcpy(systemInfoBuffer + FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT, optData, optDataLen);
       }
     } break;
 

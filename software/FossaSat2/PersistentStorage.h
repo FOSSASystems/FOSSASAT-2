@@ -143,15 +143,18 @@ static const uint32_t crc32_table[] PROGMEM =
  */
 
 uint32_t CRC32_Get(uint8_t* buff, size_t len, uint32_t initial = 0xFFFFFFFF);
+bool PersistentStorage_Check_CRC(uint8_t* buff, uint32_t crcPos);
 
+// system info functions - these only change the RAM buffer
 void PersistentStorage_Increment_Counter(uint16_t addr);
 void PersistentStorage_Increment_Frame_Counter(bool valid);
 void PersistentStorage_Get_Callsign(char* buff, uint8_t len);
 void PersistentStorage_Set_Callsign(char* newCallsign);
+void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, size_t len);
+void PersistentStorage_Reset_System_Info();
+
 uint32_t PersistentStorage_Get_Image_Len(uint8_t slot);
 void PersistentStorage_Set_Image_Len(uint8_t slot, uint32_t len);
-void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, uint8_t len);
-void PersistentStorage_Reset_System_Info();
 uint8_t PersistentStorage_Get_Message(uint16_t slotNum, uint8_t* buff);
 void PersistentStorage_Set_Message(uint16_t slotNum, uint8_t* buff, uint8_t len);
 
@@ -177,13 +180,12 @@ bool PersistentStorage_WaitForWriteInProgress(uint32_t timeout = 50);
 void PersistentStorage_SPItransaction(uint8_t cmd, bool write = true, uint8_t* data = NULL, size_t numBytes = 0);
 void PersistentStorage_SPItransaction(uint8_t* cmd, uint8_t cmdLen, bool write, uint8_t* data, size_t numBytes);
 
-// get/set only works in system info page!
+// get/set only affect RAM buffer, changed values will be saved to flash only on main loop end!
+extern uint8_t systemInfoBuffer[];
 template<typename T>
 T PersistentStorage_Get(uint8_t addr) {
-  uint8_t buff[FLASH_SYSTEM_INFO_LEN];
-  PersistentStorage_Read(FLASH_SYSTEM_INFO_START + addr, buff, sizeof(T));
   T t;
-  memcpy(&t, buff, sizeof(T));
+  memcpy(&t, systemInfoBuffer + addr, sizeof(T));
   return(t);
 }
 
@@ -194,46 +196,14 @@ void PersistentStorage_Set(uint8_t addr, T t) {
     return;
   }
 
-  // read the current system info page
-  uint8_t currSysInfoPage[FLASH_SYSTEM_INFO_LEN];
-  PersistentStorage_Read(FLASH_SYSTEM_INFO_START, currSysInfoPage, FLASH_SYSTEM_INFO_LEN);
-
-  // check CRC of the current page
-  uint32_t currCrc = 0;
-  memcpy(&currCrc, currSysInfoPage + FLASH_SYSTEM_INFO_CRC, sizeof(uint32_t));
-  if(currCrc != CRC32_Get(currSysInfoPage, FLASH_SYSTEM_INFO_CRC)) {
-    // memory error happened between last write and now, increment the counter
-    uint32_t errCounter = 0;
-    memcpy(&errCounter, currSysInfoPage + FLASH_MEMORY_ERROR_COUNTER, sizeof(uint32_t));
-    errCounter++;
-    memcpy(currSysInfoPage + FLASH_MEMORY_ERROR_COUNTER, &errCounter, sizeof(uint32_t));
-  }
-  
-  // check if we need to update
-  uint8_t newSysInfoPage[FLASH_SYSTEM_INFO_LEN];
-  memcpy(newSysInfoPage, currSysInfoPage, FLASH_SYSTEM_INFO_LEN);
-  memcpy(newSysInfoPage + addr, &t, sizeof(T));
-  if(memcmp(currSysInfoPage, newSysInfoPage, FLASH_SYSTEM_INFO_LEN) == 0) {
-    // the value is already there, no need to write
-    return;
-  }
-
-  // update CRC
-  uint32_t crc = CRC32_Get(newSysInfoPage, FLASH_SYSTEM_INFO_CRC);
-  memcpy(newSysInfoPage + FLASH_SYSTEM_INFO_CRC, &crc, sizeof(uint32_t));
-
-  // update the page
-  PersistentStorage_Write(FLASH_SYSTEM_INFO_START, newSysInfoPage, FLASH_SYSTEM_INFO_LEN);
+  // set the new value to RAM buffer
+  memcpy(systemInfoBuffer + addr, &t, sizeof(T));
 }
 
 template <typename T>
-void PersistentStorage_Update_Stat(uint32_t addr, T val) {
+void PersistentStorage_Update_Stat(uint8_t* statBuff, uint32_t addr, T val) {
   uint32_t statAddr = addr - FLASH_STATS;
   size_t typeSize = sizeof(T);
-  
-  // read the current page
-  uint8_t statBuff[FLASH_EXT_PAGE_SIZE];
-  PersistentStorage_Read(FLASH_STATS, statBuff, FLASH_EXT_PAGE_SIZE);
 
   // get min/avg/max
   T min = 0;
@@ -254,9 +224,6 @@ void PersistentStorage_Update_Stat(uint32_t addr, T val) {
   if(val > max) {
     memcpy(statBuff + statAddr + 2*typeSize, &val, typeSize);
   }
-
-  // write the updated buffer
-  PersistentStorage_Write(FLASH_STATS, statBuff, FLASH_EXT_PAGE_SIZE);
 }
 
 void PersistentStorage_Update_Stats(uint8_t flags);

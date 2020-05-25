@@ -1,5 +1,8 @@
 #include "Configuration.h"
 
+// RAM buffer for system info page
+uint8_t systemInfoBuffer[FLASH_EXT_PAGE_SIZE];
+
 // flag to signal interrupts enabled/disabled
 volatile bool interruptsEnabled = true;
 
