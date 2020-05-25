@@ -55,7 +55,55 @@ bool Sensors_Setup_Current(Adafruit_INA260& sensor, TwoWire& wire, uint8_t addr)
     return(false);
   }
   FOSSASAT_DEBUG_PRINTLN(F("success!"));
+
+  // set sensor to sleep by default
+  sensor.setMode(INA260_MODE_SHUTDOWN);
+  
   return(true);
+}
+
+float Sensors_Read_Current(Adafruit_INA260& sensor) {
+  #ifdef OVERRIDE_INA
+    if(&sensor == &OVERRIDE_INA) {
+      return(0);
+    }
+  #endif
+  
+  // wake up the sensor
+  sensor.setMode(INA260_MODE_CONTINUOUS);
+
+  // wait for full recovery
+  delayMicroseconds(60);
+  
+  // read the value
+  float current = sensor.readCurrent();
+  
+  // set the sensor back to sleep
+  sensor.setMode(INA260_MODE_SHUTDOWN);
+
+  return(current);
+}
+
+float Sensors_Read_Voltage(Adafruit_INA260& sensor) {
+  #ifdef OVERRIDE_INA
+    if(&sensor == &OVERRIDE_INA) {
+      return(0);
+    }
+  #endif
+  
+  // wake up the sensor
+  sensor.setMode(INA260_MODE_CONTINUOUS);
+
+  // wait for full recovery
+  delayMicroseconds(60);
+
+  // read the value
+  float voltage = sensor.readBusVoltage();
+  
+  // set the sensor back to sleep
+  sensor.setMode(INA260_MODE_SHUTDOWN);
+
+  return(voltage);
 }
 
 bool Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire) {
@@ -82,12 +130,5 @@ bool Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire) {
 }
 
 float Sensors_Read_Light(Adafruit_VEML7700& sensor) {
-  float val = sensor.readLux();
-
-  // sometimes the sensor returns nonsense value
-  if(val > 100000000) {
-    return(0);
-  }
-
-  return(val);
+  return(sensor.readLux());
 }

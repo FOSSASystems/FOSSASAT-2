@@ -172,6 +172,7 @@ uint32_t Camera_Capture(uint8_t slot) {
   // erase image blocks in flash
   for(uint32_t i = 0; i < FLASH_IMAGE_NUM_64K_BLOCKS; i++) {
     PersistentStorage_64kBlockErase(imgAddress + i*FLASH_64K_BLOCK_SIZE);
+    PowerControl_Watchdog_Heartbeat();
   }
 
   // read data and write them to flash

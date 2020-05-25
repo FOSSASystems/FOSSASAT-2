@@ -7,13 +7,13 @@
     Configuration Macros
 */
 
-// RTC time to configure during interation
+// expected deployment time and date
 #define RTC_YEAR                                        20    // offset from 2000
-#define RTC_MONTH                                       1
-#define RTC_DAY                                         30
-#define RTC_WEEKDAY                                     4     // Monday = 1
-#define RTC_HOURS                                       16    // 24-hour format, no leading 0s
-#define RTC_MINUTES                                     6
+#define RTC_MONTH                                       7
+#define RTC_DAY                                         27
+#define RTC_WEEKDAY                                     1     // Monday = 1
+#define RTC_HOURS                                       13    // 24-hour format, no leading 0s
+#define RTC_MINUTES                                     0
 #define RTC_SECONDS                                     0
 
 // uncomment to reset system info (callsign, configuration etc.) on start
@@ -102,8 +102,8 @@
 
 #define DEPLOYMENT_DEBUG_LENGTH                         60      // s
 #define DEPLOYMENT_DEBUG_SAMPLE_PERIOD                  1000    // ms
-#define DEPLOYMENT_SLEEP_LENGTH                         1500000 // ms
-#define DEPLOYMENT_CHARGE_LIMIT                         12      // h
+#define DEPLOYMENT_SLEEP_LENGTH                         1800000 // ms
+#define DEPLOYMENT_CHARGE_LIMIT                         3       // h
 #define DEPLOYMENT_PULSE_LENGTH                         1200    // ms
 #define WATCHDOG_LOOP_HEARTBEAT_PERIOD                  1000    // ms
 
@@ -119,10 +119,16 @@
 /*
    Temperature Limits
 */
-
 #define BATTERY_HEATER_TEMP_LIMIT                       5.0     // deg. C
-#define MPPT_TEMP_LIMIT                                 0.0     // deg. C
+#define MPPT_TEMP_LIMIT                                -0.7     // deg. C
 #define BATTERY_HEATER_DUTY_CYCLE                       255     // PWM duty cycle 0 - 255
+
+/*
+   Default sleep intervals
+*/
+#define DEFAULT_NUMBER_OF_SLEEP_INTERVALS               6
+#define DEFAULT_SLEEP_INTERVAL_VOLTAGES                 { 4050, 4000, 3900, 3800, 3700,    0 }    // mV
+#define DEFAULT_SLEEP_INTERVAL_LENGTHS                  {   20,   35,  100,  160,  180,  240 }    // sec
 
 /*
    Default TLE
@@ -183,6 +189,10 @@
 #define FLASH_TLE_REVOLUTION_NUMBER                     0x000000A0  //  0x000000A0    0x000000A3    uint32_t
 #define FLASH_TLE_EPOCH_YEAR                            0x000000A4  //  0x000000A4    0x000000A4    uint8_t
 #define FLASH_NMEA_LOG_LATEST_ENTRY                     0x000000A5  //  0x000000A5    0x000000A8    uint32_t
+#define FLASH_NMEA_LOG_LATEST_FIX                       0x000000A9  //  0x000000A9    0x000000AC    uint32_t
+#define FLASH_LOOP_COUNTER                              0x000000AD  //  0x000000AD    0x000000AD    uint8_t
+#define FLASH_NUM_SLEEP_INTERVALS                       0x000000AE  //  0x000000AE    0x000000AE    uint8_t
+#define FLASH_SLEEP_INTERVALS                           0x000000B0  //  0x000000B0    0x000000BF    FLASH_NUM_SLEEP_INTERVALS x (int16_t + uint16_t)
 #define FLASH_SYSTEM_INFO_CRC                           0x000000F8  //  0x000000F8    0x000000FB    uint32_t
 #define FLASH_MEMORY_ERROR_COUNTER                      0x000000FC  //  0x000000FC    0x000000FF    uint32_t
 
@@ -194,33 +204,34 @@
 #define FLASH_STATS_TEMP_BOTTOM                         0x0000100C  //  0x0000100C    0x00001011    3x int16_t
 #define FLASH_STATS_TEMP_BATTERY                        0x00001012  //  0x00001012    0x00001017    3x int16_t
 #define FLASH_STATS_TEMP_SEC_BATTERY                    0x00001018  //  0x00001018    0x0000101D    3x int16_t
+#define FLASH_STATS_TEMP_MCU                            0x0000101E  //  0x0000101E    0x00001023    3x int16_t
 
-#define FLASH_STATS_CURR_XA                             0x0000101E  //  0x0000101E    0x00001023    3x int16_t
-#define FLASH_STATS_CURR_XB                             0x00001024  //  0x00001024    0x00001029    3x int16_t
-#define FLASH_STATS_CURR_ZA                             0x0000102A  //  0x0000102A    0x0000102F    3x int16_t
-#define FLASH_STATS_CURR_ZB                             0x00001030  //  0x00001030    0x00001035    3x int16_t
-#define FLASH_STATS_CURR_Y                              0x00001036  //  0x00001036    0x0000103B    3x int16_t
-#define FLASH_STATS_CURR_MPPT                           0x0000103C  //  0x0000103C    0x00001041    3x int16_t
+#define FLASH_STATS_CURR_XA                             0x00001024  //  0x00001024    0x00001029    3x int16_t
+#define FLASH_STATS_CURR_XB                             0x0000102A  //  0x0000102A    0x0000102F    3x int16_t
+#define FLASH_STATS_CURR_ZA                             0x00001030  //  0x00001030    0x00001035    3x int16_t
+#define FLASH_STATS_CURR_ZB                             0x00001036  //  0x00001036    0x0000103B    3x int16_t
+#define FLASH_STATS_CURR_Y                              0x0000103C  //  0x0000103C    0x00001041    3x int16_t
+#define FLASH_STATS_CURR_MPPT                           0x00001042  //  0x00001042    0x00001047    3x int16_t
 
-#define FLASH_STATS_VOLT_XA                             0x00001042  //  0x00001042    0x00001044    3x uint8_t
-#define FLASH_STATS_VOLT_XB                             0x00001045  //  0x00001045    0x00001047    3x uint8_t
-#define FLASH_STATS_VOLT_ZA                             0x00001048  //  0x00001048    0x0000104A    3x uint8_t
-#define FLASH_STATS_VOLT_ZB                             0x0000104B  //  0x0000104B    0x0000104D    3x uint8_t
-#define FLASH_STATS_VOLT_Y                              0x0000104E  //  0x0000104E    0x00001050    3x uint8_t
-#define FLASH_STATS_VOLT_MPPT                           0x00001051  //  0x00001051    0x00001053    3x uint8_t
+#define FLASH_STATS_VOLT_XA                             0x00001048  //  0x00001048    0x0000104A    3x uint8_t
+#define FLASH_STATS_VOLT_XB                             0x0000104B  //  0x0000104B    0x0000104D    3x uint8_t
+#define FLASH_STATS_VOLT_ZA                             0x0000104E  //  0x0000104E    0x00001050    3x uint8_t
+#define FLASH_STATS_VOLT_ZB                             0x00001051  //  0x00001051    0x00001053    3x uint8_t
+#define FLASH_STATS_VOLT_Y                              0x00001054  //  0x00001054    0x00001056    3x uint8_t
+#define FLASH_STATS_VOLT_MPPT                           0x00001057  //  0x00001057    0x00001059    3x uint8_t
 
-#define FLASH_STATS_LIGHT_PANEL_Y                       0x00001054  //  0x00001054    0x0000105F    3x float
-#define FLASH_STATS_LIGHT_TOP                           0x00001060  //  0x00001060    0x0000106B    3x float
+#define FLASH_STATS_LIGHT_PANEL_Y                       0x0000105A  //  0x0000105A    0x0000105F    3x float
+#define FLASH_STATS_LIGHT_TOP                           0x00001066  //  0x00001066    0x00001071    3x float
 
-#define FLASH_STATS_GYRO_X                              0x0000106C  //  0x0000106C    0x00001077    3x float
-#define FLASH_STATS_GYRO_Y                              0x00001078  //  0x00001078    0x00001083    3x float
-#define FLASH_STATS_GYRO_Z                              0x00001084  //  0x00001084    0x0000108F    3x float
-#define FLASH_STATS_ACCEL_X                             0x00001090  //  0x00001090    0x0000109B    3x float
-#define FLASH_STATS_ACCEL_Y                             0x0000109C  //  0x0000109C    0x000010A7    3x float
-#define FLASH_STATS_ACCEL_Z                             0x000010A8  //  0x000010A8    0x000010B3    3x float
-#define FLASH_STATS_MAG_X                               0x000010B4  //  0x000010B4    0x000010BF    3x float
-#define FLASH_STATS_MAG_Y                               0x000010C0  //  0x000010C0    0x000010CB    3x float
-#define FLASH_STATS_MAG_Z                               0x000010CC  //  0x000010CC    0x000010D7    3x float
+#define FLASH_STATS_GYRO_X                              0x00001072  //  0x00001072    0x0000107D    3x float
+#define FLASH_STATS_GYRO_Y                              0x0000107E  //  0x0000107E    0x00001089    3x float
+#define FLASH_STATS_GYRO_Z                              0x0000108A  //  0x0000108A    0x00001095    3x float
+#define FLASH_STATS_ACCEL_X                             0x00001096  //  0x00001096    0x000010A1    3x float
+#define FLASH_STATS_ACCEL_Y                             0x000010A2  //  0x000010A2    0x000010AD    3x float
+#define FLASH_STATS_ACCEL_Z                             0x000010AE  //  0x000010AE    0x000010B9    3x float
+#define FLASH_STATS_MAG_X                               0x000010BA  //  0x000010BA    0x000010C5    3x float
+#define FLASH_STATS_MAG_Y                               0x000010C6  //  0x000010C6    0x000010D1    3x float
+#define FLASH_STATS_MAG_Z                               0x000010D2  //  0x000010D2    0x000010DD    3x float
 
 // sectors 2 + 3 - image lengths: 4 bytes per length
 #define FLASH_IMAGE_LENGTHS_1                           0x00002000  //  0x00002000    0x00002FFF
@@ -249,7 +260,6 @@
 
 // common
 #define CALLSIGN_DEFAULT                                "FOSSASAT-2"
-#define CARRIER_FREQUENCY                               436.7       /*!< MHz */
 #define SYNC_WORD                                       0x12        /*!< Ensure this sync word is compatable with all devices. */
 #define TCXO_VOLTAGE                                    1.6         /*!< Sets the radio's TCX0 voltage. (V) */
 #define MAX_NUM_OF_BLOCKS                               3           /*!< maximum number of AES128 blocks that will be accepted */
@@ -259,6 +269,7 @@
 #define WHITENING_INITIAL                               0x1FF       /*!< Whitening LFSR initial value, to ensure SX127x compatibility */
 
 // LoRa
+#define LORA_FREQUENCY                                  436.7       /*!< MHz */
 #define LORA_BANDWIDTH                                  125.0       /*!< kHz dual sideband */
 #define LORA_SPREADING_FACTOR                           11
 #define LORA_SPREADING_FACTOR_ALT                       10
@@ -268,6 +279,7 @@
 #define LORA_PREAMBLE_LENGTH                            8       // symbols
 
 // GFSK
+#define FSK_FREQUENCY                                   436.9       /*!< MHz */
 #define FSK_BIT_RATE                                    9.6         /*!< kbps nominal */
 #define FSK_FREQUENCY_DEVIATION                         5.0         /*!< kHz single-sideband */
 #define FSK_RX_BANDWIDTH                                39.0        /*!< kHz single-sideband */
@@ -316,13 +328,17 @@
 #define TEMP_SENSOR_SEC_BATTERY_BUS                     Wire2
 #define TEMP_SENSOR_SEC_BATTERY_ADDRESS                 0b1001010 // ADD1 low, ADD0 high
 
+// MCU temperature sensor
+#define TEMP_SENSOR_MCU_BUS                             Wire2
+#define TEMP_SENSOR_MCU_ADDRESS                         0b1001010 // ADD1 low, ADD0 high
+
 /*
     ADCS H-bridges
 */
 
 #define ADCS_X_BRIDGE_ADDRESS                           0b1100100 // A1 float, A0 float
-#define ADCS_Y_BRIDGE_ADDRESS                           0b1100101 // A1 float, A0 high
-#define ADCS_Z_BRIDGE_ADDRESS                           0b1100110 // A1 high, A0 low
+#define ADCS_Y_BRIDGE_ADDRESS                           0b1100110 // A1 float, A0 high
+#define ADCS_Z_BRIDGE_ADDRESS                           0b1100101 // A1 low, A0 high
 
 /*
    IMU
@@ -369,6 +385,9 @@
     Global Variables
 */
 
+// RAM buffer for system info page
+extern uint8_t systemInfoBuffer[];
+
 // flag to signal interrupts enabled/disabled
 extern volatile bool interruptsEnabled;
 
@@ -412,6 +431,7 @@ extern struct wireSensor_t tempSensorTop;
 extern struct wireSensor_t tempSensorBottom;
 extern struct wireSensor_t tempSensorBattery;
 extern struct wireSensor_t tempSensorSecBattery;
+extern struct wireSensor_t tempSensorMCU;
 
 // ADCS H-bridges
 extern MiniMoto bridgeX;

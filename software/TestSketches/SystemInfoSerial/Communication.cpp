@@ -32,7 +32,7 @@ int16_t Communication_Set_SpreadingFactor(uint8_t sfMode) {
 
 int16_t Communication_Set_LoRa_Configuration(float bw, uint8_t sf, uint8_t cr, uint16_t preambleLen, bool crc, int8_t power) {
   // set LoRa radio config
-  int16_t state = radio.begin(CARRIER_FREQUENCY, bw, sf, cr, SYNC_WORD, power, LORA_CURRENT_LIMIT, preambleLen, TCXO_VOLTAGE);
+  int16_t state = radio.begin(LORA_FREQUENCY, bw, sf, cr, SYNC_WORD, power, LORA_CURRENT_LIMIT, preambleLen, TCXO_VOLTAGE);
   if (state != ERR_NONE) {
     return (state);
   }
@@ -51,7 +51,7 @@ int16_t Communication_Set_Modem(uint8_t modem) {
   // initialize requested modem
   switch (modem) {
     case MODEM_LORA:
-        state = radio.begin(CARRIER_FREQUENCY,
+        state = radio.begin(LORA_FREQUENCY,
                             LORA_BANDWIDTH,
                             LORA_SPREADING_FACTOR,
                             LORA_CODING_RATE,
@@ -63,7 +63,7 @@ int16_t Communication_Set_Modem(uint8_t modem) {
         radio.setCRC(true);
       break;
     case MODEM_FSK: {
-        state = radio.beginFSK(CARRIER_FREQUENCY,
+        state = radio.beginFSK(FSK_FREQUENCY,
                                FSK_BIT_RATE,
                                FSK_FREQUENCY_DEVIATION,
                                FSK_RX_BANDWIDTH,
@@ -103,7 +103,7 @@ int16_t Communication_Set_Modem(uint8_t modem) {
 
 void Communication_Send_Morse_Beacon(float battVoltage) {
   // initialize Morse client
-  morse.begin(CARRIER_FREQUENCY, MORSE_SPEED);
+  morse.begin(FSK_FREQUENCY, MORSE_SPEED);
 
   // read callsign
   uint8_t callsignLen = PersistentStorage_Get<uint8_t>(FLASH_CALLSIGN_LEN);
@@ -111,7 +111,7 @@ void Communication_Send_Morse_Beacon(float battVoltage) {
   PersistentStorage_Get_Callsign(callsign, callsignLen);
 
   // send start signals
-  for(uint8_t i = 0; i < MORSE_PREAMBLE_LENGTH; i++) {
+  for(int8_t i = 0; i < MORSE_PREAMBLE_LENGTH; i++) {
     morse.startSignal();
     FOSSASAT_DEBUG_PRINT('*');
     FOSSASAT_DEBUG_DELAY(10);
@@ -156,10 +156,10 @@ void Communication_Send_Basic_System_Info() {
 
   FOSSASAT_DEBUG_PRINTLN(F("--- System info: ---"));
 
-  uint8_t mpptOutputVoltage = currSensorMPPT.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t mpptOutputVoltage = Sensors_Read_Voltage(currSensorMPPT) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mpptOutputVoltage, "batteryVoltage", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t mpptOutputCurrent = currSensorMPPT.readCurrent() * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
+  int16_t mpptOutputCurrent = Sensors_Read_Current(currSensorMPPT) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mpptOutputCurrent, "mpptOutputCurrent", CURRENT_MULTIPLIER, "uA");
 
   uint32_t onboardTime = rtc.getEpoch();
@@ -176,19 +176,19 @@ void Communication_Send_Basic_System_Info() {
   uint16_t resetCounter = PersistentStorage_Get<uint16_t>(FLASH_RESTART_COUNTER);
   Communication_Frame_Add(&optDataPtr, resetCounter, "resetCounter", 1, "");
 
-  uint8_t voltageXA = currSensorXA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageXA = Sensors_Read_Voltage(currSensorXA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageXA, "voltageXA", VOLTAGE_MULTIPLIER, "mV");
 
-  uint8_t voltageXB = currSensorXB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageXB = Sensors_Read_Voltage(currSensorXB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageXB, "voltageXB", VOLTAGE_MULTIPLIER, "mV");
 
-  uint8_t voltageZA = currSensorZA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageZA = Sensors_Read_Voltage(currSensorZA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageZA, "voltageZA", VOLTAGE_MULTIPLIER, "mV");
 
-  uint8_t voltageZB = currSensorZB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageZB = Sensors_Read_Voltage(currSensorZB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageZB, "voltageZB", VOLTAGE_MULTIPLIER, "mV");
 
-  uint8_t voltageY = currSensorY.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageY = Sensors_Read_Voltage(currSensorY) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageY, "voltageY", VOLTAGE_MULTIPLIER, "mV");
 
   int16_t batteryTemperature = Sensors_Read_Temperature(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
@@ -208,16 +208,16 @@ void Communication_Send_Basic_System_Info() {
 
 void Communication_Send_Full_System_Info() {
   // build response frame
-  static const uint8_t optDataLen = 12*sizeof(uint8_t) + 11*sizeof(int16_t) + sizeof(uint16_t) + 2*sizeof(uint32_t) + 2*sizeof(float);
+  static const uint8_t optDataLen = 12*sizeof(uint8_t) + 12*sizeof(int16_t) + sizeof(uint16_t) + 2*sizeof(uint32_t) + 2*sizeof(float);
   uint8_t optData[optDataLen];
   uint8_t* optDataPtr = optData;
 
   FOSSASAT_DEBUG_PRINTLN(F("--- System info: ---"));
 
-  uint8_t mpptOutputVoltage = currSensorMPPT.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t mpptOutputVoltage = Sensors_Read_Voltage(currSensorMPPT) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mpptOutputVoltage, "batteryVoltage", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t mpptOutputCurrent = currSensorMPPT.readCurrent() * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
+  int16_t mpptOutputCurrent = Sensors_Read_Current(currSensorMPPT) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mpptOutputCurrent, "mpptOutputCurrent", CURRENT_MULTIPLIER, "uA");
 
   uint32_t onboardTime = rtc.getEpoch();
@@ -234,34 +234,34 @@ void Communication_Send_Full_System_Info() {
   uint16_t resetCounter = PersistentStorage_Get<uint16_t>(FLASH_RESTART_COUNTER);
   Communication_Frame_Add(&optDataPtr, resetCounter, "resetCounter", 1, "");
 
-  uint8_t voltageXA = currSensorXA.readBusVoltage() * ((CURRENT_UNIT / 1000) / VOLTAGE_MULTIPLIER);
+  uint8_t voltageXA = Sensors_Read_Voltage(currSensorXA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageXA, "voltageXA", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentXA = currSensorXA.readCurrent() * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
+  int16_t currentXA = Sensors_Read_Current(currSensorXA) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentXA, "currentXA", CURRENT_MULTIPLIER, "uA");
 
-  uint8_t voltageXB = currSensorXB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageXB = Sensors_Read_Voltage(currSensorXB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageXB, "voltageXB", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentXB = currSensorXB.readCurrent() * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
+  int16_t currentXB = Sensors_Read_Current(currSensorXB) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentXB, "currentXB", CURRENT_MULTIPLIER, "uA");
 
-  uint8_t voltageZA = currSensorZA.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageZA = Sensors_Read_Voltage(currSensorZA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageZA, "voltageZA", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentZA = currSensorZA.readCurrent() * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
+  int16_t currentZA = Sensors_Read_Current(currSensorZA) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentZA, "currentZA", CURRENT_MULTIPLIER, "uA");
 
-  uint8_t voltageZB = currSensorZB.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageZB = Sensors_Read_Voltage(currSensorZB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageZB, "voltageZB", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentZB = currSensorZB.readCurrent() * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
+  int16_t currentZB = Sensors_Read_Current(currSensorZB) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentZB, "currentZB", CURRENT_MULTIPLIER, "uA");
 
-  uint8_t voltageY = currSensorY.readBusVoltage() * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageY = Sensors_Read_Voltage(currSensorY) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageY, "voltageY", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentY = currSensorY.readCurrent() * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
+  int16_t currentY = Sensors_Read_Current(currSensorY) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentY, "currentY", CURRENT_MULTIPLIER, "uA");
 
   int16_t tempPanelY = Sensors_Read_Temperature(tempSensorPanelY) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
@@ -278,6 +278,9 @@ void Communication_Send_Full_System_Info() {
 
   int16_t secBatteryTemperature = Sensors_Read_Temperature(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, secBatteryTemperature, "secBatteryTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
+
+  int16_t mcuTemperature = Sensors_Read_Temperature(tempSensorMCU) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  Communication_Frame_Add(&optDataPtr, mcuTemperature, "mcuTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
 
   float lightPanelY = Sensors_Read_Light(lightSensorPanelY);
   Communication_Frame_Add(&optDataPtr, lightPanelY, "lightPanelY", 1, "lux");
@@ -761,9 +764,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
               PowerControl_Watchdog_Heartbeat();
             }
             
-            // reset NMEA log length and latest entry
+            // reset NMEA log length, latest entry and latest fix
             PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, 0);
             PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY, FLASH_NMEA_LOG_START);
+            PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, 0);
           }
 
           if(optData[0] & 0b00010000) {
@@ -940,7 +944,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         #endif
 
         // write all at once
-        PersistentStorage_Set_Buffer(FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT, optData, optDataLen);
+        memcpy(systemInfoBuffer + FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT, optData, optDataLen);
       }
     } break;
 
@@ -1108,15 +1112,15 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // check faults
           respOptData[0] = bridgeX.getFault();
-          if((x != 0) && (respOptData[0] != 0)) {
+          if((x != 0) && (respOptData[0] & FAULT) && (respOptData[0] != 0)) {
             break;
           }
           respOptData[1] = bridgeY.getFault();
-          if((y != 0) && (respOptData[1] != 0)) {
+          if((y != 0) && (respOptData[1] & FAULT) && (respOptData[1] != 0)) {
             break;
           }
           respOptData[2] = bridgeZ.getFault();
-          if((z != 0) && (respOptData[2] != 0)) {
+          if((z != 0) && (respOptData[2] & FAULT) && (respOptData[2] != 0)) {
             break;
           }
 
@@ -1264,6 +1268,11 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           PersistentStorage_64kBlockErase(addr);
           PowerControl_Watchdog_Heartbeat();
         }
+            
+        // reset NMEA log length, latest entry and latest fix
+        PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, 0);
+        PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY, FLASH_NMEA_LOG_START);
+        PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, 0);
 
         // wait for offset to elapse
         FOSSASAT_DEBUG_PRINTLN(F("Waiting for offset to elapse"));
@@ -1289,6 +1298,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // run for the requested duration
         uint32_t start = millis();
+        uint32_t lastFixAddr = 0;
         while(millis() - start < duration) {
           // read GPS data to buffer
           while(GpsSerial.available() > 0) {
@@ -1306,6 +1316,16 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
               buff[buffPos - 1] = '\0';
               FOSSASAT_DEBUG_PRINTLN((char*)buff + 4);
               FOSSASAT_DEBUG_PRINTLN(flashPos, HEX);
+
+              // check if we got GPS fix
+              if(memcmp(buff + 7, "GSA", 3) == 0) {
+                // GSA message, check fix value
+                if((buff[13] == '2') || (buff[13] == '3')) {
+                  // got fix, save last fix address
+                  lastFixAddr = flashPos;
+                  FOSSASAT_DEBUG_PRINTLN(F("Got fix"));
+                }
+              }
 
               // check if we are overwriting old data
               if(overwrite && (flashPos % FLASH_SECTOR_SIZE == 0)) {
@@ -1353,6 +1373,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           #endif
         }
 
+        // update last fix addres
+        PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, lastFixAddr);
+
         // turn GPS off
         digitalWrite(GPS_POWER_FET, LOW);
 
@@ -1369,10 +1392,12 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINTLN(logged);
         PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, logged);
 
-        const uint8_t respOptDataLen = sizeof(uint32_t);
+        const uint8_t respOptDataLen = 3*sizeof(uint32_t);
         uint8_t respOptData[respOptDataLen];
         memcpy(respOptData, &logged, sizeof(uint32_t));
-        Communication_Send_Response(RESP_GPS_LOG_LENGTH, respOptData, respOptDataLen);
+        memcpy(respOptData + sizeof(uint32_t), &flashPos, sizeof(uint32_t));
+        memcpy(respOptData + 2*sizeof(uint32_t), &lastFixAddr, sizeof(uint32_t));
+        Communication_Send_Response(RESP_GPS_LOG_STATE, respOptData, respOptDataLen);
       }
     } break;
 
@@ -1564,6 +1589,70 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       }
     } break;
 
+    case CMD_GET_GPS_LOG_STATE: {
+      // fetch GPS log state information
+      uint32_t logged = PersistentStorage_Get<uint32_t>(FLASH_NMEA_LOG_LENGTH);
+      uint32_t flashPos = PersistentStorage_Get<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY);
+      uint32_t lastFixAddr = PersistentStorage_Get<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX);
+
+      // send the response
+      const uint8_t respOptDataLen = 3*sizeof(uint32_t);
+      uint8_t respOptData[respOptDataLen];
+      memcpy(respOptData, &logged, sizeof(uint32_t));
+      memcpy(respOptData + sizeof(uint32_t), &flashPos, sizeof(uint32_t));
+      memcpy(respOptData + 2*sizeof(uint32_t), &lastFixAddr, sizeof(uint32_t));
+      Communication_Send_Response(RESP_GPS_LOG_STATE, respOptData, respOptDataLen);
+    } break;
+
+    case CMD_RUN_GPS_COMMAND: {
+      // create response buffer
+      uint8_t respOptData[MAX_OPT_DATA_LENGTH];
+
+      // run the command
+      uint16_t respOptDataLen = Navigation_GNSS_Run_Cmd(optData, optDataLen, respOptData);
+
+      // send the response
+      // TODO: send ACK/NACK state?
+      if((respOptDataLen == 0) || (respOptDataLen == 0xFFFF)) {
+        Communication_Send_Response(RESP_GPS_COMMAND_RESPONSE);
+      } else {
+        Communication_Send_Response(RESP_GPS_COMMAND_RESPONSE, respOptData, respOptDataLen);
+      }
+      
+    } break;
+
+    case CMD_SET_SLEEP_INTERVALS: {
+      // parse the number of sleep intervals
+      uint8_t intervalSize = sizeof(int16_t) + sizeof(uint16_t);
+      uint8_t numIntervals = optDataLen / intervalSize;
+
+      // check optDataLen is multiple of intervalSize, and the number of intervals is with limits
+      if(!((optDataLen % intervalSize != 0) || (numIntervals == 0) || (numIntervals > 8))) {
+        FOSSASAT_DEBUG_PRINT(F("numIntervals = "));
+        FOSSASAT_DEBUG_PRINTLN(numIntervals);
+        systemInfoBuffer[FLASH_NUM_SLEEP_INTERVALS] = numIntervals;
+        
+        // parse voltage thresholds and interval lengths
+        for(uint8_t i = 0; i < numIntervals; i++) {
+          FOSSASAT_DEBUG_PRINT(i);
+          FOSSASAT_DEBUG_PRINT('\t');
+          
+          int16_t voltage = 0;
+          memcpy(&voltage, optData + i*intervalSize, sizeof(int16_t));
+          FOSSASAT_DEBUG_PRINT(voltage);
+          FOSSASAT_DEBUG_PRINT('\t');
+          memcpy(systemInfoBuffer + FLASH_SLEEP_INTERVALS + i*intervalSize, &voltage, sizeof(int16_t));
+          
+          uint16_t intervalLen = 0;
+          memcpy(&intervalLen, optData + sizeof(int16_t) + i*intervalSize, sizeof(uint16_t));
+          FOSSASAT_DEBUG_PRINTLN(intervalLen);
+          memcpy(systemInfoBuffer + FLASH_SLEEP_INTERVALS + sizeof(int16_t) + i*intervalSize, &intervalLen, sizeof(uint16_t));
+          
+        }
+      }
+      
+    } break;
+
     default:
       FOSSASAT_DEBUG_PRINT(F("Unknown function ID!"));
       return;
@@ -1586,7 +1675,7 @@ int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData, size_t opt
   // delay before responding
   // TODO: skip (or shorter) waiting for certain frames (e.g. picture downlink)?
   FOSSASAT_DEBUG_DELAY(100);
-  PowerControl_Wait(RESPONSE_DELAY, true);
+  PowerControl_Wait(RESPONSE_DELAY, LOW_POWER_NONE);
   
   // send response
   return (Communication_Transmit(frame, len, overrideModem));

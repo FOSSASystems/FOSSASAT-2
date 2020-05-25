@@ -2,28 +2,36 @@
 
 uint32_t PowerControl_Get_Sleep_Interval() {
   // sleep interval in ms
-  uint32_t interval = 0;
+  uint16_t interval = 0;
 
   #ifdef ENABLE_INTERVAL_CONTROL
     // get battery voltage
-    float batt = PowerControl_Get_Battery_Voltage();
+    int16_t batt = PowerControl_Get_Battery_Voltage() * 1000.0;
 
-    if(batt > 4.05f) {
-      interval = (uint32_t)20 * (uint32_t)1000;
-    } else if(batt > 4.0f) {
-      interval = (uint32_t)35 * (uint32_t)1000;
-    } else if(batt > 3.9f) {
-      interval = (uint32_t)100 * (uint32_t)1000;
-    } else if(batt > 3.8f) {
-      interval = (uint32_t)160 * (uint32_t)1000;
-    } else if(batt > 3.7f) {
-      interval = (uint32_t)180 * (uint32_t)1000;
-    } else {
-      interval = (uint32_t)240 * (uint32_t)1000;
+    // get number of intervals
+    uint8_t numIntervals = systemInfoBuffer[FLASH_NUM_SLEEP_INTERVALS];
+
+    // get the applicable interval
+    uint8_t intervalSize = sizeof(int16_t) + sizeof(uint16_t);
+    bool intervalFound = false;
+    for(uint8_t i = 0; i < numIntervals; i++) {
+      int16_t voltage = 0;
+      memcpy(&voltage, systemInfoBuffer + FLASH_SLEEP_INTERVALS + i*intervalSize, sizeof(int16_t));
+      if(batt > voltage) {
+        memcpy(&interval, systemInfoBuffer + FLASH_SLEEP_INTERVALS + sizeof(int16_t) + i*intervalSize, sizeof(uint16_t));
+        intervalFound = true;
+        break;
+      }
+    }
+
+    // check if interval was found
+    if(!intervalFound) {
+      // set to last inteval length in that case
+      memcpy(&interval, systemInfoBuffer + FLASH_SLEEP_INTERVALS + sizeof(int16_t) + (numIntervals - 1)*intervalSize, sizeof(uint16_t));
     }
   #endif
 
-  return(interval);
+  return((uint32_t)interval * (uint32_t)1000);
 }
 
 void PowerControl_Wait(uint32_t ms, uint8_t type, bool radioSleep) {
@@ -32,10 +40,10 @@ void PowerControl_Wait(uint32_t ms, uint8_t type, bool radioSleep) {
   }
 
   // calculate number of required loops (rounded up)
-  float stepSize = 500.0;
+  float stepSize = 1000.0;
   if (type == LOW_POWER_NONE) {
-    // 10 ms steps when no sleep mode is active
-    stepSize = 10.0;
+    // 50 ms steps when no sleep mode is active
+    stepSize = 50.0;
   }
   float numLoops = 0.5 + (float)ms / stepSize;
 
@@ -60,9 +68,6 @@ void PowerControl_Wait(uint32_t ms, uint8_t type, bool radioSleep) {
       case LOW_POWER_DEEP_SLEEP:
         LowPower.deepSleep((uint32_t)stepSize);
         break;
-      case LOW_POWER_SHUTDOWN:
-        LowPower.shutdown((uint32_t)stepSize);
-        break;
       default:
         return;
     }
@@ -85,10 +90,10 @@ void PowerControl_Watchdog_Heartbeat(bool manageBattery) {
 }
 
 void PowerControl_Watchdog_Restart() {
-  // do not pet watchdog for more than 15 seconds to restart
-  FOSSASAT_DEBUG_PRINTLN(F("Restart in 15 seconds ..."));
+  // do not pet watchdog for more than 30 seconds to restart
+  FOSSASAT_DEBUG_PRINTLN(F("Restart in 30 seconds ..."));
   FOSSASAT_DEBUG_DELAY(10);
-  LowPower.deepSleep(16000);
+  LowPower.deepSleep(30000);
 }
 
 void PowerControl_Deploy() {
@@ -106,17 +111,23 @@ void PowerControl_Deploy() {
 }
 
 float PowerControl_Get_Battery_Voltage() {
-  return(currSensorMPPT.readBusVoltage());
+  return(Sensors_Read_Voltage(currSensorMPPT));
 }
 
 void PowerControl_Manage_Battery() {
   // check battery voltage
   if((PowerControl_Get_Battery_Voltage() <= PersistentStorage_Get<uint16_t>(FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT)) && (PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED) == 1)) {
     // activate low power mode
-    PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE, LOW_POWER_SLEEP);
+    systemInfoBuffer[FLASH_LOW_POWER_MODE] = LOW_POWER_SLEEP;
+
+    // write the change immediately if power mode changed
+    if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
+      PersistentStorage_Set_Buffer(FLASH_SYSTEM_INFO, systemInfoBuffer, FLASH_EXT_PAGE_SIZE);
+    }
+    
   } else {
     // deactivate low power mode
-    PersistentStorage_Set<uint8_t>(FLASH_LOW_POWER_MODE, LOW_POWER_NONE);
+    systemInfoBuffer[FLASH_LOW_POWER_MODE] = LOW_POWER_NONE;
   }
 
   // check temperature limit to enable/disable charging

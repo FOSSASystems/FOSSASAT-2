@@ -1,5 +1,8 @@
 #include "Configuration.h"
 
+// RAM buffer for system info page
+uint8_t systemInfoBuffer[FLASH_EXT_PAGE_SIZE];
+
 // flag to signal interrupts enabled/disabled
 volatile bool interruptsEnabled = true;
 
@@ -44,6 +47,7 @@ struct wireSensor_t tempSensorTop = { .bus = TEMP_SENSOR_TOP_BUS, .addr = TEMP_S
 struct wireSensor_t tempSensorBottom = { .bus = TEMP_SENSOR_BOTTOM_BUS, .addr = TEMP_SENSOR_BOTTOM_ADDRESS};
 struct wireSensor_t tempSensorBattery = { .bus = TEMP_SENSOR_BATTERY_BUS, .addr = TEMP_SENSOR_BATTERY_ADDRESS};
 struct wireSensor_t tempSensorSecBattery = { .bus = TEMP_SENSOR_SEC_BATTERY_BUS, .addr = TEMP_SENSOR_SEC_BATTERY_ADDRESS};
+struct wireSensor_t tempSensorMCU = { .bus = TEMP_SENSOR_MCU_BUS, .addr = TEMP_SENSOR_MCU_ADDRESS };
 
 // ADCS H-bridges
 MiniMoto bridgeX(ADCS_X_BRIDGE_ADDRESS);
