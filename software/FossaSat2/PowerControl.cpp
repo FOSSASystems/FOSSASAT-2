@@ -42,8 +42,8 @@ void PowerControl_Wait(uint32_t ms, uint8_t type, bool radioSleep) {
   // calculate number of required loops (rounded up)
   float stepSize = 1000.0;
   if (type == LOW_POWER_NONE) {
-    // 10 ms steps when no sleep mode is active
-    stepSize = 10.0;
+    // 50 ms steps when no sleep mode is active
+    stepSize = 50.0;
   }
   float numLoops = 0.5 + (float)ms / stepSize;
 
