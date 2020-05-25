@@ -31,6 +31,8 @@
 // comment out to disable transmission control (transmission disable and no transmissions in low power mode)
 //#define ENABLE_TRANSMISSION_CONTROL
 
+#define OVERRIDE_INA                                    currSensorZB
+
 /*
     Array Length Limits
 */

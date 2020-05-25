@@ -111,7 +111,7 @@ void PowerControl_Deploy() {
 }
 
 float PowerControl_Get_Battery_Voltage() {
-  return(currSensorMPPT.readBusVoltage());
+  return(Sensors_Read_Voltage(currSensorMPPT));
 }
 
 void PowerControl_Manage_Battery() {
