@@ -46,7 +46,7 @@ void setup() {
   FOSSASAT_DEBUG_PORT.println(F("-------"));
   FOSSASAT_DEBUG_PRINT_FLASH(FLASH_STATS, FLASH_EXT_PAGE_SIZE);
   FOSSASAT_DEBUG_PORT.println(F("Stats wipe start"));
-  PersistentStorage_SectorErase(FLASH_STATS);
+  PersistentStorage_Reset_Stats();
   PowerControl_Watchdog_Heartbeat();
   FOSSASAT_DEBUG_PORT.println(F("Stats wipe done"));
   FOSSASAT_DEBUG_PRINT_FLASH(FLASH_STATS, FLASH_EXT_PAGE_SIZE);
