@@ -133,9 +133,19 @@ bool Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire) {
   // set default properties
   sensor.setGain(LIGHT_SENSOR_GAIN);
   sensor.setIntegrationTime(LIGHT_SENSOR_INTEGRATION_TIME);
+  sensor.enable(false);
   return(true);
 }
 
 float Sensors_Read_Light(Adafruit_VEML7700& sensor) {
-  return(sensor.readLux());
+  // wake up sensor
+  sensor.enable(true);
+
+  // wait for new data
+  delay(30);
+  float lux = sensor.readLux();
+  
+  // shut down again
+  sensor.enable(false);
+  return(lux);
 }
