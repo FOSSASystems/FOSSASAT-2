@@ -34,10 +34,21 @@ float Sensors_Temperature_Read(wireSensor_t& sensor) {
 
 uint16_t Sensors_IMU_Setup() {
   // initialize IMU
-  return(imu.begin(IMU_ACCEL_GYRO_ADDRESS, IMU_MAG_ADDRESS, IMU_BUS));
+  uint16_t state = imu.begin(IMU_ACCEL_GYRO_ADDRESS, IMU_MAG_ADDRESS, IMU_BUS);
+
+  // set to sleep by default
+  Sensors_IMU_Sleep(true);
+  
+  return(state);
 }
 
 void Sensors_IMU_Update() {
+  // wake up IMU
+  Sensors_IMU_Sleep(false);
+
+  // wait for everything to wake up
+  delay(10);
+  
   if (imu.gyroAvailable()) {
     imu.readGyro();
   }
@@ -49,6 +60,13 @@ void Sensors_IMU_Update() {
   if (imu.magAvailable()) {
     imu.readMag();
   }
+  
+  // put IMU back to sleep
+  Sensors_IMU_Sleep(false);
+}
+
+void Sensors_IMU_Sleep(bool sleep) {
+  imu.sleepGyro(sleep);
 }
 
 bool Sensors_Current_Setup(Adafruit_INA260& sensor, TwoWire& wire, uint8_t addr) {
