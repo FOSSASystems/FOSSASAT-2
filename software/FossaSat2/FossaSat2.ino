@@ -71,27 +71,27 @@ void setup() {
   FOSSASAT_DEBUG_PORT.println(F("Temperature sensors init:"));
   
   FOSSASAT_DEBUG_PORT.print(F("Y panel: "));
-  Sensors_Temperature_Setup(tempSensorPanelY, TMP_100_RESOLUTION_12_BITS);
+  Sensors_Temperature_Setup(tempSensorPanelY);
   FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorPanelY));
 
   FOSSASAT_DEBUG_PORT.print(F("Top: "));
-  Sensors_Temperature_Setup(tempSensorTop, TMP_100_RESOLUTION_12_BITS);
+  Sensors_Temperature_Setup(tempSensorTop);
   FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorTop));
 
   FOSSASAT_DEBUG_PORT.print(F("Bottom: "));
-  Sensors_Temperature_Setup(tempSensorBottom, TMP_100_RESOLUTION_12_BITS);
+  Sensors_Temperature_Setup(tempSensorBottom);
   FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorBottom));
 
   FOSSASAT_DEBUG_PORT.print(F("Battery: "));
-  Sensors_Temperature_Setup(tempSensorBattery, TMP_100_RESOLUTION_12_BITS);
+  Sensors_Temperature_Setup(tempSensorBattery);
   FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorBattery));
 
   FOSSASAT_DEBUG_PORT.print(F("Secondary battery: "));
-  Sensors_Temperature_Setup(tempSensorSecBattery, TMP_100_RESOLUTION_12_BITS);
+  Sensors_Temperature_Setup(tempSensorSecBattery);
   FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorSecBattery));
 
   FOSSASAT_DEBUG_PORT.print(F("MCU: "));
-  Sensors_Temperature_Setup(tempSensorMCU, TMP_100_RESOLUTION_12_BITS);
+  Sensors_Temperature_Setup(tempSensorMCU);
   FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorMCU));
   
   // initialize light sensors

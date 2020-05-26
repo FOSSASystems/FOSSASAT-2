@@ -7,6 +7,8 @@
 struct wireSensor_t {
   TwoWire& bus;
   uint8_t addr;
+  uint8_t res;
+  uint8_t mode;
 };
 
 #endif

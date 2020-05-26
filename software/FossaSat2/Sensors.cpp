@@ -1,19 +1,25 @@
 #include "Sensors.h"
 
-void Sensors_Temperature_Setup(wireSensor_t& sensor, uint8_t res) {
-  // set resolution
+void Sensors_Temperature_Setup(wireSensor_t& sensor) {
+  // set resolution and mode
   sensor.bus.beginTransmission(sensor.addr);
   sensor.bus.write(TMP_100_REG_CONFIG);
-  sensor.bus.write(res);
-  sensor.bus.endTransmission();
-
-  // set mode back to temperature reading
-  sensor.bus.beginTransmission(sensor.addr);
-  sensor.bus.write(TMP_100_REG_TEMPERATURE);
+  sensor.bus.write(sensor.res | sensor.mode);
   sensor.bus.endTransmission();
 }
 
 float Sensors_Temperature_Read(wireSensor_t& sensor) {
+  // start one-shot conversion
+  sensor.bus.beginTransmission(sensor.addr);
+  sensor.bus.write(TMP_100_REG_CONFIG);
+  sensor.bus.write(TMP_100_START_ONE_SHOT | sensor.res | sensor.mode);
+  sensor.bus.endTransmission();
+
+  // set mode to temperature reading
+  sensor.bus.beginTransmission(sensor.addr);
+  sensor.bus.write(TMP_100_REG_TEMPERATURE);
+  sensor.bus.endTransmission();
+  
   // read data from I2C sensor
   sensor.bus.requestFrom(sensor.addr, (uint8_t)2);
   uint8_t msb = sensor.bus.read();
@@ -22,6 +28,7 @@ float Sensors_Temperature_Read(wireSensor_t& sensor) {
   // convert raw data to temperature
   int16_t tempRaw = ((msb << 8) | lsb) >> 4;
   float temp = tempRaw * TMP_100_LSB_RESOLUTION;
+  
   return (temp);
 }
 

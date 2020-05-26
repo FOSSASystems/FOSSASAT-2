@@ -42,12 +42,12 @@ const uint8_t encryptionKey[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                                  0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x00};
 
 // temperature sensors
-struct wireSensor_t tempSensorPanelY = { .bus = TEMP_SENSOR_Y_PANEL_BUS, .addr = TEMP_SENSOR_Y_PANEL_ADDRESS };
-struct wireSensor_t tempSensorTop = { .bus = TEMP_SENSOR_TOP_BUS, .addr = TEMP_SENSOR_TOP_ADDRESS };
-struct wireSensor_t tempSensorBottom = { .bus = TEMP_SENSOR_BOTTOM_BUS, .addr = TEMP_SENSOR_BOTTOM_ADDRESS };
-struct wireSensor_t tempSensorBattery = { .bus = TEMP_SENSOR_BATTERY_BUS, .addr = TEMP_SENSOR_BATTERY_ADDRESS };
-struct wireSensor_t tempSensorSecBattery = { .bus = TEMP_SENSOR_SEC_BATTERY_BUS, .addr = TEMP_SENSOR_SEC_BATTERY_ADDRESS };
-struct wireSensor_t tempSensorMCU = { .bus = TEMP_SENSOR_MCU_BUS, .addr = TEMP_SENSOR_MCU_ADDRESS };
+struct wireSensor_t tempSensorPanelY =      { .bus = TEMP_SENSOR_Y_PANEL_BUS,     .addr = TEMP_SENSOR_Y_PANEL_ADDRESS,      .res = TMP_100_RESOLUTION_12_BITS, .mode = TMP_100_MODE_SHUTDOWN };
+struct wireSensor_t tempSensorTop =         { .bus = TEMP_SENSOR_TOP_BUS,         .addr = TEMP_SENSOR_TOP_ADDRESS,          .res = TMP_100_RESOLUTION_12_BITS, .mode = TMP_100_MODE_SHUTDOWN };
+struct wireSensor_t tempSensorBottom =      { .bus = TEMP_SENSOR_BOTTOM_BUS,      .addr = TEMP_SENSOR_BOTTOM_ADDRESS,       .res = TMP_100_RESOLUTION_12_BITS, .mode = TMP_100_MODE_SHUTDOWN };
+struct wireSensor_t tempSensorBattery =     { .bus = TEMP_SENSOR_BATTERY_BUS,     .addr = TEMP_SENSOR_BATTERY_ADDRESS,      .res = TMP_100_RESOLUTION_12_BITS, .mode = TMP_100_MODE_SHUTDOWN };
+struct wireSensor_t tempSensorSecBattery =  { .bus = TEMP_SENSOR_SEC_BATTERY_BUS, .addr = TEMP_SENSOR_SEC_BATTERY_ADDRESS,  .res = TMP_100_RESOLUTION_12_BITS, .mode = TMP_100_MODE_SHUTDOWN };
+struct wireSensor_t tempSensorMCU =         { .bus = TEMP_SENSOR_MCU_BUS,         .addr = TEMP_SENSOR_MCU_ADDRESS,          .res = TMP_100_RESOLUTION_12_BITS, .mode = TMP_100_MODE_SHUTDOWN };
 
 // ADCS H-bridges
 MiniMoto bridgeX(ADCS_X_BRIDGE_ADDRESS);

@@ -311,6 +311,9 @@
 #define TMP_100_RESOLUTION_11_BITS                      0b01000000  // 0.125 deg. C
 #define TMP_100_RESOLUTION_12_BITS                      0b01100000  // 0.0625 deg. C (default)
 #define TMP_100_LSB_RESOLUTION                          0.0625  // deg. C
+#define TMP_100_MODE_CONTINUOUS                         0b00000000
+#define TMP_100_MODE_SHUTDOWN                           0b00000001
+#define TMP_100_START_ONE_SHOT                          0b10000000
 
 // Y panel temperature sensor
 #define TEMP_SENSOR_Y_PANEL_BUS                         Wire
