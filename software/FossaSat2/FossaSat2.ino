@@ -39,17 +39,17 @@ void setup() {
   // initialize current sensors
   FOSSASAT_DEBUG_PORT.println(F("Current sensors init:"));
   FOSSASAT_DEBUG_PORT.print(F("XA: "));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Current(currSensorXA, CURR_SENSOR_X_A_BUS, CURR_SENSOR_X_A_ADDRESS));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorXA, CURR_SENSOR_X_A_BUS, CURR_SENSOR_X_A_ADDRESS));
   FOSSASAT_DEBUG_PORT.print(F("XB: "));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Current(currSensorXB, CURR_SENSOR_X_B_BUS, CURR_SENSOR_X_B_ADDRESS));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorXB, CURR_SENSOR_X_B_BUS, CURR_SENSOR_X_B_ADDRESS));
   FOSSASAT_DEBUG_PORT.print(F("ZA: "));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Current(currSensorZA, CURR_SENSOR_Z_A_BUS, CURR_SENSOR_Z_A_ADDRESS));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorZA, CURR_SENSOR_Z_A_BUS, CURR_SENSOR_Z_A_ADDRESS));
   FOSSASAT_DEBUG_PORT.print(F("ZB: "));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Current(currSensorZB, CURR_SENSOR_Z_B_BUS, CURR_SENSOR_Z_B_ADDRESS));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorZB, CURR_SENSOR_Z_B_BUS, CURR_SENSOR_Z_B_ADDRESS));
   FOSSASAT_DEBUG_PORT.print(F("Y: "));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Current(currSensorY, CURR_SENSOR_Y_BUS, CURR_SENSOR_Y_ADDRESS));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorY, CURR_SENSOR_Y_BUS, CURR_SENSOR_Y_ADDRESS));
   FOSSASAT_DEBUG_PORT.print(F("MPPT: "));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Current(currSensorMPPT, CURR_SENSOR_MPPT_OUTPUT_BUS, CURR_SENSOR_MPPT_OUTPUT_ADDRESS));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorMPPT, CURR_SENSOR_MPPT_OUTPUT_BUS, CURR_SENSOR_MPPT_OUTPUT_ADDRESS));
 
   // initialize radio
   FOSSASAT_DEBUG_PORT.print(F("LoRa modem init: "));
@@ -65,34 +65,34 @@ void setup() {
 
   // initialize IMU
   FOSSASAT_DEBUG_PORT.print(F("IMU init (expected 0x683D):\t0x"));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_IMU(), HEX);
+  FOSSASAT_DEBUG_PORT.println(Sensors_IMU_Setup(), HEX);
 
   // initialize temperature sensors
   FOSSASAT_DEBUG_PORT.println(F("Temperature sensors init:"));
   
   FOSSASAT_DEBUG_PORT.print(F("Y panel: "));
-  Sensors_Setup_Temp(tempSensorPanelY, TMP_100_RESOLUTION_12_BITS);
-  FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorPanelY));
+  Sensors_Temperature_Setup(tempSensorPanelY, TMP_100_RESOLUTION_12_BITS);
+  FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorPanelY));
 
   FOSSASAT_DEBUG_PORT.print(F("Top: "));
-  Sensors_Setup_Temp(tempSensorTop, TMP_100_RESOLUTION_12_BITS);
-  FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorTop));
+  Sensors_Temperature_Setup(tempSensorTop, TMP_100_RESOLUTION_12_BITS);
+  FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorTop));
 
   FOSSASAT_DEBUG_PORT.print(F("Bottom: "));
-  Sensors_Setup_Temp(tempSensorBottom, TMP_100_RESOLUTION_12_BITS);
-  FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorBottom));
+  Sensors_Temperature_Setup(tempSensorBottom, TMP_100_RESOLUTION_12_BITS);
+  FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorBottom));
 
   FOSSASAT_DEBUG_PORT.print(F("Battery: "));
-  Sensors_Setup_Temp(tempSensorBattery, TMP_100_RESOLUTION_12_BITS);
-  FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorBattery));
+  Sensors_Temperature_Setup(tempSensorBattery, TMP_100_RESOLUTION_12_BITS);
+  FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorBattery));
 
   FOSSASAT_DEBUG_PORT.print(F("Secondary battery: "));
-  Sensors_Setup_Temp(tempSensorSecBattery, TMP_100_RESOLUTION_12_BITS);
-  FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorSecBattery));
+  Sensors_Temperature_Setup(tempSensorSecBattery, TMP_100_RESOLUTION_12_BITS);
+  FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorSecBattery));
 
   FOSSASAT_DEBUG_PORT.print(F("MCU: "));
-  Sensors_Setup_Temp(tempSensorMCU, TMP_100_RESOLUTION_12_BITS);
-  FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorMCU));
+  Sensors_Temperature_Setup(tempSensorMCU, TMP_100_RESOLUTION_12_BITS);
+  FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorMCU));
   
   // initialize light sensors
   FOSSASAT_DEBUG_PORT.println(F("Light sensors init:"));
@@ -137,7 +137,7 @@ void setup() {
     uint32_t lastSample = 0;
     while (millis() - start <= (uint32_t)DEPLOYMENT_DEBUG_LENGTH * (uint32_t)1000) {
       // update IMU
-      Sensors_Update_IMU();
+      Sensors_IMU_Update();
 
       // check if its time for next measurement
       if (millis() - lastSample >= (uint32_t)DEPLOYMENT_DEBUG_SAMPLE_PERIOD) {
@@ -148,17 +148,17 @@ void setup() {
         FOSSASAT_DEBUG_PORT.println(F("Device\t\tT [deg. C]"));
         FOSSASAT_DEBUG_PORT.println(F("-------------------------------------------------------------"));
         FOSSASAT_DEBUG_PORT.print(F("Y panel \t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorPanelY));
+        FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorPanelY));
         FOSSASAT_DEBUG_PORT.print(F("Top panel\t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorTop));
+        FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorTop));
         FOSSASAT_DEBUG_PORT.print(F("Bottom panel\t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorBottom));
+        FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorBottom));
         FOSSASAT_DEBUG_PORT.print(F("Battery \t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorBattery));
+        FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorBattery));
         FOSSASAT_DEBUG_PORT.print(F("Second Battery\t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorSecBattery));
+        FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorSecBattery));
         FOSSASAT_DEBUG_PORT.print(F("MCU\t\t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Temperature(tempSensorMCU));
+        FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorMCU));
         FOSSASAT_DEBUG_PORT.println();
 
         // IMU
@@ -188,32 +188,32 @@ void setup() {
         FOSSASAT_DEBUG_PORT.println(F("Device\t\tI [mA]\t\tV [mV]"));
         FOSSASAT_DEBUG_PORT.println(F("-------------------------------------------------------------"));
         FOSSASAT_DEBUG_PORT.print(F("X panel A\t"));
-        FOSSASAT_DEBUG_PORT.print(Sensors_Read_Current(currSensorXA));
+        FOSSASAT_DEBUG_PORT.print(Sensors_Current_Read(currSensorXA));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Voltage(currSensorXA));
+        FOSSASAT_DEBUG_PORT.println(Sensors_Current_ReadVoltage(currSensorXA));
         FOSSASAT_DEBUG_PORT.print(F("X panel B\t"));
-        FOSSASAT_DEBUG_PORT.print(Sensors_Read_Current(currSensorXB));
+        FOSSASAT_DEBUG_PORT.print(Sensors_Current_Read(currSensorXB));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Voltage(currSensorXB));
+        FOSSASAT_DEBUG_PORT.println(Sensors_Current_ReadVoltage(currSensorXB));
 
         FOSSASAT_DEBUG_PORT.print(F("Z panel A\t"));
-        FOSSASAT_DEBUG_PORT.print(Sensors_Read_Current(currSensorZA));
+        FOSSASAT_DEBUG_PORT.print(Sensors_Current_Read(currSensorZA));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Voltage(currSensorZA));
+        FOSSASAT_DEBUG_PORT.println(Sensors_Current_ReadVoltage(currSensorZA));
         FOSSASAT_DEBUG_PORT.print(F("Z panel B\t"));
-        FOSSASAT_DEBUG_PORT.print(Sensors_Read_Current(currSensorZB));
+        FOSSASAT_DEBUG_PORT.print(Sensors_Current_Read(currSensorZB));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Voltage(currSensorZB));
+        FOSSASAT_DEBUG_PORT.println(Sensors_Current_ReadVoltage(currSensorZB));
 
         FOSSASAT_DEBUG_PORT.print(F("Y panel \t"));
-        FOSSASAT_DEBUG_PORT.print(Sensors_Read_Current(currSensorY));
+        FOSSASAT_DEBUG_PORT.print(Sensors_Current_Read(currSensorY));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Voltage(currSensorY));
+        FOSSASAT_DEBUG_PORT.println(Sensors_Current_ReadVoltage(currSensorY));
 
         FOSSASAT_DEBUG_PORT.print(F("MPPT output\t"));
-        FOSSASAT_DEBUG_PORT.print(Sensors_Read_Current(currSensorMPPT));
+        FOSSASAT_DEBUG_PORT.print(Sensors_Current_Read(currSensorMPPT));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_Read_Voltage(currSensorMPPT));
+        FOSSASAT_DEBUG_PORT.println(Sensors_Current_ReadVoltage(currSensorMPPT));
         FOSSASAT_DEBUG_PORT.println();
 
         // light sensors

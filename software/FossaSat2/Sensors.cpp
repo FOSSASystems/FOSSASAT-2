@@ -1,6 +1,6 @@
 #include "Sensors.h"
 
-void Sensors_Setup_Temp(wireSensor_t& sensor, uint8_t res) {
+void Sensors_Temperature_Setup(wireSensor_t& sensor, uint8_t res) {
   // set resolution
   sensor.bus.beginTransmission(sensor.addr);
   sensor.bus.write(TMP_100_REG_CONFIG);
@@ -13,7 +13,7 @@ void Sensors_Setup_Temp(wireSensor_t& sensor, uint8_t res) {
   sensor.bus.endTransmission();
 }
 
-float Sensors_Read_Temperature(wireSensor_t& sensor) {
+float Sensors_Temperature_Read(wireSensor_t& sensor) {
   // read data from I2C sensor
   sensor.bus.requestFrom(sensor.addr, (uint8_t)2);
   uint8_t msb = sensor.bus.read();
@@ -25,12 +25,12 @@ float Sensors_Read_Temperature(wireSensor_t& sensor) {
   return (temp);
 }
 
-uint16_t Sensors_Setup_IMU() {
+uint16_t Sensors_IMU_Setup() {
   // initialize IMU
   return(imu.begin(IMU_ACCEL_GYRO_ADDRESS, IMU_MAG_ADDRESS, IMU_BUS));
 }
 
-void Sensors_Update_IMU() {
+void Sensors_IMU_Update() {
   if (imu.gyroAvailable()) {
     imu.readGyro();
   }
@@ -44,7 +44,7 @@ void Sensors_Update_IMU() {
   }
 }
 
-bool Sensors_Setup_Current(Adafruit_INA260& sensor, TwoWire& wire, uint8_t addr) {
+bool Sensors_Current_Setup(Adafruit_INA260& sensor, TwoWire& wire, uint8_t addr) {
   FOSSASAT_DEBUG_PRINT(F("Current sensor 0b"));
   FOSSASAT_DEBUG_PRINT(addr, BIN);
   FOSSASAT_DEBUG_PRINT(F(" init ... "));
@@ -62,7 +62,7 @@ bool Sensors_Setup_Current(Adafruit_INA260& sensor, TwoWire& wire, uint8_t addr)
   return(true);
 }
 
-float Sensors_Read_Current(Adafruit_INA260& sensor) {
+float Sensors_Current_Read(Adafruit_INA260& sensor) {
   #ifdef OVERRIDE_INA
     if(&sensor == &OVERRIDE_INA) {
       return(0);
@@ -84,7 +84,7 @@ float Sensors_Read_Current(Adafruit_INA260& sensor) {
   return(current);
 }
 
-float Sensors_Read_Voltage(Adafruit_INA260& sensor) {
+float Sensors_Current_ReadVoltage(Adafruit_INA260& sensor) {
   #ifdef OVERRIDE_INA
     if(&sensor == &OVERRIDE_INA) {
       return(0);

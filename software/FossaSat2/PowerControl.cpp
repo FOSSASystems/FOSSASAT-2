@@ -111,7 +111,7 @@ void PowerControl_Deploy() {
 }
 
 float PowerControl_Get_Battery_Voltage() {
-  return(Sensors_Read_Voltage(currSensorMPPT));
+  return(Sensors_Current_ReadVoltage(currSensorMPPT));
 }
 
 void PowerControl_Manage_Battery() {
@@ -137,7 +137,7 @@ void PowerControl_Manage_Battery() {
   if(mpptKeepAlive == 1) {
     // MPPT keep alive is enabled, force charging regardless of everything else
     digitalWrite(MPPT_OFF, LOW);
-  } else if((mpptTempSwitch == 1) && ((Sensors_Read_Temperature(tempSensorBattery) <= mpptTempLimit) || (Sensors_Read_Temperature(tempSensorSecBattery) <= mpptTempLimit))) {
+  } else if((mpptTempSwitch == 1) && ((Sensors_Temperature_Read(tempSensorBattery) <= mpptTempLimit) || (Sensors_Temperature_Read(tempSensorSecBattery) <= mpptTempLimit))) {
     // at least one battery has temperature below limit, disable charging
     digitalWrite(MPPT_OFF, HIGH);
   } else {
@@ -147,8 +147,8 @@ void PowerControl_Manage_Battery() {
 
   // check temperature and voltage limit to enable heater
   float heaterTempLimit = PersistentStorage_Get<float>(FLASH_BATTERY_HEATER_TEMP_LIMIT);
-  if((Sensors_Read_Temperature(tempSensorBattery) <= heaterTempLimit) && 
-     (Sensors_Read_Temperature(tempSensorSecBattery) <= heaterTempLimit) && 
+  if((Sensors_Temperature_Read(tempSensorBattery) <= heaterTempLimit) && 
+     (Sensors_Temperature_Read(tempSensorSecBattery) <= heaterTempLimit) && 
      (PowerControl_Get_Battery_Voltage() >= PersistentStorage_Get<int16_t>(FLASH_HEATER_BATTERY_VOLTAGE_LIMIT))) {
     // both temperatures are below limit and battery is above limit, enable heater
     analogWrite(BATTERY_HEATER_FET, PersistentStorage_Get<uint8_t>(BATTERY_HEATER_DUTY_CYCLE));

@@ -156,10 +156,10 @@ void Communication_Send_Basic_System_Info() {
 
   FOSSASAT_DEBUG_PRINTLN(F("--- System info: ---"));
 
-  uint8_t mpptOutputVoltage = Sensors_Read_Voltage(currSensorMPPT) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t mpptOutputVoltage = Sensors_Current_ReadVoltage(currSensorMPPT) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mpptOutputVoltage, "batteryVoltage", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t mpptOutputCurrent = Sensors_Read_Current(currSensorMPPT) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
+  int16_t mpptOutputCurrent = Sensors_Current_Read(currSensorMPPT) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mpptOutputCurrent, "mpptOutputCurrent", CURRENT_MULTIPLIER, "uA");
 
   uint32_t onboardTime = rtc.getEpoch();
@@ -176,25 +176,25 @@ void Communication_Send_Basic_System_Info() {
   uint16_t resetCounter = PersistentStorage_Get<uint16_t>(FLASH_RESTART_COUNTER);
   Communication_Frame_Add(&optDataPtr, resetCounter, "resetCounter", 1, "");
 
-  uint8_t voltageXA = Sensors_Read_Voltage(currSensorXA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageXA = Sensors_Current_ReadVoltage(currSensorXA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageXA, "voltageXA", VOLTAGE_MULTIPLIER, "mV");
 
-  uint8_t voltageXB = Sensors_Read_Voltage(currSensorXB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageXB = Sensors_Current_ReadVoltage(currSensorXB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageXB, "voltageXB", VOLTAGE_MULTIPLIER, "mV");
 
-  uint8_t voltageZA = Sensors_Read_Voltage(currSensorZA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageZA = Sensors_Current_ReadVoltage(currSensorZA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageZA, "voltageZA", VOLTAGE_MULTIPLIER, "mV");
 
-  uint8_t voltageZB = Sensors_Read_Voltage(currSensorZB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageZB = Sensors_Current_ReadVoltage(currSensorZB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageZB, "voltageZB", VOLTAGE_MULTIPLIER, "mV");
 
-  uint8_t voltageY = Sensors_Read_Voltage(currSensorY) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageY = Sensors_Current_ReadVoltage(currSensorY) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageY, "voltageY", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t batteryTemperature = Sensors_Read_Temperature(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  int16_t batteryTemperature = Sensors_Temperature_Read(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, batteryTemperature, "batteryTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
 
-  int16_t boardTemperature = Sensors_Read_Temperature(tempSensorTop) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  int16_t boardTemperature = Sensors_Temperature_Read(tempSensorTop) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, boardTemperature, "boardTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
 
   uint32_t errCounter = PersistentStorage_Get<uint32_t>(FLASH_MEMORY_ERROR_COUNTER);
@@ -214,10 +214,10 @@ void Communication_Send_Full_System_Info() {
 
   FOSSASAT_DEBUG_PRINTLN(F("--- System info: ---"));
 
-  uint8_t mpptOutputVoltage = Sensors_Read_Voltage(currSensorMPPT) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t mpptOutputVoltage = Sensors_Current_ReadVoltage(currSensorMPPT) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mpptOutputVoltage, "batteryVoltage", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t mpptOutputCurrent = Sensors_Read_Current(currSensorMPPT) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
+  int16_t mpptOutputCurrent = Sensors_Current_Read(currSensorMPPT) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mpptOutputCurrent, "mpptOutputCurrent", CURRENT_MULTIPLIER, "uA");
 
   uint32_t onboardTime = rtc.getEpoch();
@@ -234,52 +234,52 @@ void Communication_Send_Full_System_Info() {
   uint16_t resetCounter = PersistentStorage_Get<uint16_t>(FLASH_RESTART_COUNTER);
   Communication_Frame_Add(&optDataPtr, resetCounter, "resetCounter", 1, "");
 
-  uint8_t voltageXA = Sensors_Read_Voltage(currSensorXA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageXA = Sensors_Current_ReadVoltage(currSensorXA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageXA, "voltageXA", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentXA = Sensors_Read_Current(currSensorXA) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
+  int16_t currentXA = Sensors_Current_Read(currSensorXA) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentXA, "currentXA", CURRENT_MULTIPLIER, "uA");
 
-  uint8_t voltageXB = Sensors_Read_Voltage(currSensorXB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageXB = Sensors_Current_ReadVoltage(currSensorXB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageXB, "voltageXB", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentXB = Sensors_Read_Current(currSensorXB) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
+  int16_t currentXB = Sensors_Current_Read(currSensorXB) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentXB, "currentXB", CURRENT_MULTIPLIER, "uA");
 
-  uint8_t voltageZA = Sensors_Read_Voltage(currSensorZA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageZA = Sensors_Current_ReadVoltage(currSensorZA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageZA, "voltageZA", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentZA = Sensors_Read_Current(currSensorZA) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
+  int16_t currentZA = Sensors_Current_Read(currSensorZA) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentZA, "currentZA", CURRENT_MULTIPLIER, "uA");
 
-  uint8_t voltageZB = Sensors_Read_Voltage(currSensorZB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageZB = Sensors_Current_ReadVoltage(currSensorZB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageZB, "voltageZB", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentZB = Sensors_Read_Current(currSensorZB) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
+  int16_t currentZB = Sensors_Current_Read(currSensorZB) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentZB, "currentZB", CURRENT_MULTIPLIER, "uA");
 
-  uint8_t voltageY = Sensors_Read_Voltage(currSensorY) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageY = Sensors_Current_ReadVoltage(currSensorY) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, voltageY, "voltageY", VOLTAGE_MULTIPLIER, "mV");
 
-  int16_t currentY = Sensors_Read_Current(currSensorY) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
+  int16_t currentY = Sensors_Current_Read(currSensorY) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentY, "currentY", CURRENT_MULTIPLIER, "uA");
 
-  int16_t tempPanelY = Sensors_Read_Temperature(tempSensorPanelY) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  int16_t tempPanelY = Sensors_Temperature_Read(tempSensorPanelY) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, tempPanelY, "tempPanelY", TEMPERATURE_MULTIPLIER, "mdeg C");
 
-  int16_t boardTemperature = Sensors_Read_Temperature(tempSensorTop) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  int16_t boardTemperature = Sensors_Temperature_Read(tempSensorTop) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, boardTemperature, "boardTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
 
-  int16_t tempBottom = Sensors_Read_Temperature(tempSensorBottom) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  int16_t tempBottom = Sensors_Temperature_Read(tempSensorBottom) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, tempBottom, "tempBottom", TEMPERATURE_MULTIPLIER, "mdeg C");
 
-  int16_t batteryTemperature = Sensors_Read_Temperature(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  int16_t batteryTemperature = Sensors_Temperature_Read(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, batteryTemperature, "batteryTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
 
-  int16_t secBatteryTemperature = Sensors_Read_Temperature(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  int16_t secBatteryTemperature = Sensors_Temperature_Read(tempSensorSecBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, secBatteryTemperature, "secBatteryTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
 
-  int16_t mcuTemperature = Sensors_Read_Temperature(tempSensorMCU) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
+  int16_t mcuTemperature = Sensors_Temperature_Read(tempSensorMCU) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, mcuTemperature, "mcuTemperature", TEMPERATURE_MULTIPLIER, "mdeg C");
 
   float lightPanelY = Sensors_Read_Light(lightSensorPanelY);
@@ -1055,7 +1055,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           // wait for for the next measurement
           while(millis() - start < period) {
             // update IMU
-            Sensors_Update_IMU();
+            Sensors_IMU_Update();
 
             // pet watchdog
             PowerControl_Watchdog_Heartbeat();

@@ -3,15 +3,15 @@
 
 #include "FossaSat2.h"
 
-void Sensors_Setup_Temp(wireSensor_t& sensor, uint8_t res);
-float Sensors_Read_Temperature(wireSensor_t& sensor);
+void Sensors_Temperature_Setup(wireSensor_t& sensor, uint8_t res);
+float Sensors_Temperature_Read(wireSensor_t& sensor);
 
-uint16_t Sensors_Setup_IMU();
-void Sensors_Update_IMU();
+uint16_t Sensors_IMU_Setup();
+void Sensors_IMU_Update();
 
-bool Sensors_Setup_Current(Adafruit_INA260& sensor, TwoWire& wire, uint8_t addr);
-float Sensors_Read_Current(Adafruit_INA260& sensor);
-float Sensors_Read_Voltage(Adafruit_INA260& sensor);
+bool Sensors_Current_Setup(Adafruit_INA260& sensor, TwoWire& wire, uint8_t addr);
+float Sensors_Current_Read(Adafruit_INA260& sensor);
+float Sensors_Current_ReadVoltage(Adafruit_INA260& sensor);
 
 bool Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire);
 float Sensors_Read_Light(Adafruit_VEML7700& sensor);
