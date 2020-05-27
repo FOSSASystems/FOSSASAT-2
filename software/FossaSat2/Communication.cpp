@@ -1671,11 +1671,20 @@ int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData, size_t opt
   int16_t state = FCP_Encode(frame, callsign, respId, optDataLen, optData);
   FOSSASAT_DEBUG_PRINT(F("Encoding state: "));
   FOSSASAT_DEBUG_PRINTLN(state);
+  FOSSASAT_DEBUG_DELAY(10);
   
   // delay before responding
-  // TODO: skip (or shorter) waiting for certain frames (e.g. picture downlink)?
-  FOSSASAT_DEBUG_DELAY(100);
-  PowerControl_Wait(RESPONSE_DELAY, LOW_POWER_NONE);
+  if((respId == RESP_GPS_LOG) ||
+     (respId == RESP_FLASH_CONTENTS) ||
+     (respId == RESP_CAMERA_PICTURE)) {
+    
+    // use short length in case of "burst" transfers
+    PowerControl_Wait(RESPONSE_DELAY_SHORT, LOW_POWER_NONE);    
+      
+  } else {
+    // use standard length in all other cases
+    PowerControl_Wait(RESPONSE_DELAY, LOW_POWER_NONE);    
+  }
   
   // send response
   return (Communication_Transmit(frame, len, overrideModem));

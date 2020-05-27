@@ -18,7 +18,6 @@
 void setup() {
   // initialize debug port
   FOSSASAT_DEBUG_PORT.begin(FOSSASAT_DEBUG_SPEED);
-  FOSSASAT_DEBUG_PORT.println();
 
   // setup hardware interfaces
   Configuration_Setup();
@@ -56,7 +55,11 @@ void loop() {
   FOSSASAT_DEBUG_PRINT(F("Starting at address: 0x"));
   uint32_t imgAddress = FLASH_IMAGES_START + slot*FLASH_IMAGE_SLOT_SIZE;
   FOSSASAT_DEBUG_PRINTLN(imgAddress, HEX);
-  for(uint32_t i = 0; i <= len / FLASH_EXT_PAGE_SIZE; i++) {
-    FOSSASAT_DEBUG_PRINT_FLASH(imgAddress + i*FLASH_EXT_PAGE_SIZE, FLASH_EXT_PAGE_SIZE);
+  uint32_t stepSize = FLASH_EXT_PAGE_SIZE / 2;
+  for(uint32_t i = 0; i <= len / stepSize; i++) {
+    FOSSASAT_DEBUG_PRINT_FLASH(imgAddress + i*stepSize, stepSize);
+
+    // wait for a bit to emulate how long it takes to downlink picture of this size
+    delay(2*RESPONSE_DELAY_SHORT);
   }
 }
