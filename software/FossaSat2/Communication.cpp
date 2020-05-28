@@ -1284,17 +1284,17 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY, FLASH_NMEA_LOG_START);
         PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, 0);
 
+        // power up GPS
+        digitalWrite(GPS_POWER_FET, HIGH);
+
         // wait for offset to elapse
         FOSSASAT_DEBUG_PRINTLN(F("Waiting for offset to elapse"));
         PowerControl_Wait(offset, LOW_POWER_SLEEP, true);
-        
-        FOSSASAT_DEBUG_PRINTLN(F("GPS logging start"));
 
         // initialize UART interface
         GpsSerial.begin(9600);
-
-        // power up GPS
-        digitalWrite(GPS_POWER_FET, HIGH);
+        
+        FOSSASAT_DEBUG_PRINTLN(F("GPS logging start"));
 
         // log entries are saved in 128-byte chunks (to fit two chunks in one flash page)
         uint8_t buff[FLASH_NMEA_LOG_SLOT_SIZE];
