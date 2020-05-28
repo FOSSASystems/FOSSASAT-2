@@ -20,13 +20,13 @@ The purpose of this document is to provide overview of the communication system 
 ### CMD_RETRANSMIT_CUSTOM
 - Optional data length: 11 - 43
 - Optional data:
-  - 0 - 3: sender ID, unsigned 32-bit integer, LSB first
-  - 4: bandwidth (0x00 for 7.8 kHz, 0x07 for 125 kHz)
-  - 5: spreading factor (0x00 for SF5, 0x07 for SF12)
-  - 6: coding rate (0x05 for 4/5, 0x08 for 4/8)
-  - 7 - 8: preamble length in symbols, LSB first
-  - 9: CRC enabled (0x01) or disabled (0x00)
-  - 10: output power in dBm (signed 8-bit integer, -17 to 22)
+  - 0: bandwidth (0x00 for 7.8 kHz, 0x07 for 125 kHz)
+  - 1: spreading factor (0x00 for SF5, 0x07 for SF12)
+  - 2: coding rate (0x05 for 4/5, 0x08 for 4/8)
+  - 3 - 4: preamble length in symbols, LSB first
+  - 5: CRC enabled (0x01) or disabled (0x00)
+  - 6: output power in dBm (signed 8-bit integer, -17 to 22)
+  - 7 - 10: sender ID, unsigned 32-bit integer, LSB first
   - 11 - N: message to be repeated
 - Response: [RESP_REPEATED_MESSAGE_CUSTOM](#RESP_REPEATED_MESSAGE_CUSTOM)
 - Description: Satellite will retransmit the optional data provided in this command using the provided radio configuration.
@@ -105,7 +105,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Description: Wipes persistent storages.
 
 ### CMD_SET_TRANSMIT_ENABLE
-- Optional data length: 1
+- Optional data length: 2
 - Optional data:
   - 0: transmit enable (0x01) or disable (0x00)
   - 1: automated statistics transmission enable (0x01) or disable (0x00)
@@ -195,7 +195,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
     - 0x02: accelerometer
     - 0x04: magnetometer
 - Response: [RESP_RECORDED_IMU](#RESP_RECORDED_IMU)
-- Description: Records selected IMU device. Logging will be stopped if battery voltage drops below low power mode level.
+- Description: Records selected IMU device. Logging will be stopped if battery voltage drops below low power mode level. Only available in FSK mode.
 
 ### CMD_RUN_ADCS
 - Optional data length: 7
@@ -313,14 +313,16 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Optional data: none
 
 ### RESP_REPEATED_MESSAGE
-- Optional data length: 0 - 32
+- Optional data length: 4 - 32
 - Optional data:
-  - 0 - N: repeated message
+  - 0 - 3: sender ID, unsigned 32-bit integer
+  - 4 - N: repeated message
 
 ### RESP_REPEATED_MESSAGE_CUSTOM
-- Optional data length: 0 - 32
+- Optional data length: 4 - 32
 - Optional data:
-  - 0 - N: repeated message
+  - 0 - 3: sender ID, unsigned 32-bit integer
+  - 4 - N: repeated message
 
 ### RESP_SYSTEM_INFO
 - Optional data length: 20
@@ -456,10 +458,10 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 0 - N: flash data
 
 ### RESP_CAMERA_PICTURE
-- Optional data length: 6 - 130
+- Optional data length: 6 - 162
 - Optional data:
   - 0 - 1: picture packet ID, unsigned 16-bit integer
-  - 2 - N: picture data (4 null bytes sent if the requested slot has no image)
+  - 2 - N: picture data (4 null bytes sent if the requested slot has no image), last 32 bytes are RS(255, 223) FEC code.
 
 ### RESP_CAMERA_PICTURE_LENGTH
 - Optional data length: 4
