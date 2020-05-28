@@ -427,12 +427,12 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
         }
         
         if (flags & 0x10) {
-          printStatFloat("Acceleration X\t\tm/s^2\t", respOptData, pos);
-          printStatFloat("Acceleration y\t\tm/s^2\t", respOptData, pos);
-          printStatFloat("Acceleration Z\t\tm/s^2\t", respOptData, pos);
           printStatFloat("Angle velocity X\tdeg/s\t", respOptData, pos);
           printStatFloat("Angle velocity Y\tdeg/s\t", respOptData, pos);
           printStatFloat("Angle velocity Z\tdeg/s\t", respOptData, pos);
+          printStatFloat("Acceleration X\t\tm/s^2\t", respOptData, pos);
+          printStatFloat("Acceleration Y\t\tm/s^2\t", respOptData, pos);
+          printStatFloat("Acceleration Z\t\tm/s^2\t", respOptData, pos);
           printStatFloat("Magn. induction X\tgauss\t", respOptData, pos);
           printStatFloat("Magn. induction Y\tgauss\t", respOptData, pos);
           printStatFloat("Magn. induction Z\tgauss\t", respOptData, pos);
