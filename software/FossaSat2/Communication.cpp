@@ -972,6 +972,12 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_RECORD_IMU: {
+      // check FSK is active
+      if(currentModem != MODEM_FSK) {
+        FOSSASAT_DEBUG_PRINTLN(F("FSK is required to record IMU"));
+        return;
+      }
+      
       // check optional data
       if(Communication_Check_OptDataLen(4, optDataLen)) {
         uint8_t numSamples = optData[0];
