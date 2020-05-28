@@ -339,10 +339,16 @@ void loop() {
   
   #ifdef ENABLE_TRANSMISSION_CONTROL
     } else {
-      // battery is low, transmit CW beeps
+      // set delay between beeps according to battery voltage
+      uint32_t delayLen = battVoltage * 1000.0 - MORSE_BATTERY_MIN;
+      if(battVoltage < MORSE_BATTERY_MIN + MORSE_BATTERY_STEP) {
+        delayLen = MORSE_BATTERY_STEP;
+      }
+
+      // transmit the beeps
       for(uint8_t i = 0; i < NUM_CW_BEEPS; i++) {
         Communication_CW_Beep(500);
-        PowerControl_Wait(1000, LOW_POWER_SLEEP);
+        PowerControl_Wait(delayLen, LOW_POWER_NONE);
       }
     }
   }
