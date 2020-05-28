@@ -40,8 +40,14 @@
 // string length limit
 #define MAX_STRING_LENGTH                               32
 
-// maximum number of image bytes in packet
-#define MAX_IMAGE_PACKET_LENGTH                         128
+// maximum number of image data bytes in packet
+#define MAX_IMAGE_PAYLOAD_LENGTH                        128
+
+// number of FEC bytes in picture downlink packet
+#define IMAGE_PACKET_FEC_LENGTH                         32
+
+// RS code full packet length
+#define RS8_FULL_PACKET_LENGTH                          256
 
 // optional data length limit
 #define MAX_OPT_DATA_LENGTH                             220
@@ -247,7 +253,7 @@
 // 64kB blocks 2 - 31 - NMEA sentences: null-terminated C-strings, each starts with 4-byte timestamp (offset since recording start)
 #define FLASH_NMEA_LOG_START                            0x00020000  //  0x00030000    0x001FFFFF
 #define FLASH_NMEA_LOG_END                              (FLASH_IMAGES_START)
-#define FLASH_NMEA_LOG_SLOT_SIZE                        (MAX_IMAGE_PACKET_LENGTH)
+#define FLASH_NMEA_LOG_SLOT_SIZE                        (128)
 
 // 64kB blocks 32 - 1023 - image slots: 8 blocks per slot
 #define FLASH_IMAGES_START                              0x00200000  //  0x00200000    0x03FFFFFF
@@ -296,7 +302,7 @@
 #define NUM_CW_BEEPS                                    3           /*!< number of CW sync beeps in low power mode */
 #define MORSE_PREAMBLE_LENGTH                           0           /*!< number of start signal repetitions */
 #define MORSE_SPEED                                     20          /*!< words per minute */
-#define MORSE_BATTERY_MIN                               3200.0      /*!< minimum voltage value that can be send via Morse (corresponds to 'A'), mV */
+#define MORSE_BATTERY_MIN                               3200.0      /*!< minimum voltage value that can be send via Morse (corresponds to 'A'), mV*/
 #define MORSE_BATTERY_STEP                              50.0        /*!< voltage step in Morse, mV */
 #define MORSE_BEACON_LOOP_FREQ                          2           /*!< how often to transmit full Morse code beacon (e.g. transmit every second main loop when set to 2) */
 

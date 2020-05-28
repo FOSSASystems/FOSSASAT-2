@@ -32,3 +32,4 @@
 #include "PowerControl.h"
 #include "Sensors.h"
 #include "Types.h"
+#include "src/FEC/rs8.h"
