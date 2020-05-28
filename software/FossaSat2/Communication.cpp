@@ -1067,7 +1067,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_RUN_ADCS: {
-      if(Communication_Check_OptDataLen(7, optDataLen)) {
+      if(Communication_Check_OptDataLen(8, optDataLen)) {
         int8_t x = optData[0];
         FOSSASAT_DEBUG_PRINT(F("x = "));
         FOSSASAT_DEBUG_PRINTLN(x);
@@ -1084,6 +1084,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         memcpy(&duration, optData + 3, sizeof(uint32_t));
         FOSSASAT_DEBUG_PRINT(F("duration = "));
         FOSSASAT_DEBUG_PRINTLN(duration);
+
+        uint8_t ignoreFlags = optData[7];
+        FOSSASAT_DEBUG_PRINT(F("ignoreFlags = 0x"));
+        FOSSASAT_DEBUG_PRINTLN(ignoreFlags, HEX);
 
         uint8_t respOptData[7];
 
@@ -1112,15 +1116,15 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // check faults
           respOptData[0] = bridgeX.getFault();
-          if((x != 0) && (respOptData[0] & FAULT) && (respOptData[0] != 0)) {
+          if((x != 0) && (respOptData[0] & FAULT) && (respOptData[0] != 0) && (ignoreFlags & 0x01 == 0x00)) {
             break;
           }
           respOptData[1] = bridgeY.getFault();
-          if((y != 0) && (respOptData[1] & FAULT) && (respOptData[1] != 0)) {
+          if((y != 0) && (respOptData[1] & FAULT) && (respOptData[1] != 0) && (ignoreFlags & 0x02 == 0x00)) {
             break;
           }
           respOptData[2] = bridgeZ.getFault();
-          if((z != 0) && (respOptData[2] & FAULT) && (respOptData[2] != 0)) {
+          if((z != 0) && (respOptData[2] & FAULT) && (respOptData[2] != 0) && (ignoreFlags & 0x04 == 0x00)) {
             break;
           }
 

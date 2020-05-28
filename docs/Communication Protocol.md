@@ -198,12 +198,16 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Description: Records selected IMU device. Logging will be stopped if battery voltage drops below low power mode level. Only available in FSK mode.
 
 ### CMD_RUN_ADCS
-- Optional data length: 7
+- Optional data length: 8
 - Optional data:
   - 0: X axis H-bridge magnitude, signed 8-bit integer, -63 to 63
   - 1: Y axis H-bridge magnitude, signed 8-bit integer, -63 to 63
   - 2: Z axis H-bridge magnitude, signed 8-bit integer, -63 to 63
   - 3 - 6: maneuver duration in ms, unsigned 32-bit integer, LSB first
+  - 7: flags which specify whether to ignore H-bridge fault:
+    - 0x01: X axis
+    - 0x02: Y axis
+    - 0x04: Z axis
 - Response: [RESP_ADCS_RESULT](#RESP_ADCS_RESULT)
 - Description: Performs ADCS maneuver. May be terminated prematurely if one or more H-bridges return some error, or if battery voltage drops below low power mode level.
 
