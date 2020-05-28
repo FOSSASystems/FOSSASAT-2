@@ -1066,7 +1066,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       }
     } break;
 
-    case CMD_RUN_ADCS: {
+    case CMD_RUN_MANUAL_ACS: {
       if(Communication_Check_OptDataLen(8, optDataLen)) {
         int8_t x = optData[0];
         FOSSASAT_DEBUG_PRINT(F("x = "));
@@ -1140,7 +1140,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // send response
         elapsed = millis() - start;
         memcpy(respOptData + 3, &elapsed, sizeof(uint32_t));
-        Communication_Send_Response(RESP_ADCS_RESULT, respOptData, 7);
+        Communication_Send_Response(RESP_MANUAL_ACS_RESULT, respOptData, 7);
       }
     } break;
 

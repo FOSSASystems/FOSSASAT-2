@@ -197,7 +197,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Response: [RESP_RECORDED_IMU](#RESP_RECORDED_IMU)
 - Description: Records selected IMU device. Logging will be stopped if battery voltage drops below low power mode level. Only available in FSK mode.
 
-### CMD_RUN_ADCS
+### CMD_RUN_MANUAL_ACS
 - Optional data length: 8
 - Optional data:
   - 0: X axis H-bridge magnitude, signed 8-bit integer, -63 to 63
@@ -208,7 +208,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
     - 0x01: X axis
     - 0x02: Y axis
     - 0x04: Z axis
-- Response: [RESP_ADCS_RESULT](#RESP_ADCS_RESULT)
+- Response: [RESP_MANUAL_ACS_RESULT](#RESP_MANUAL_ACS_RESULT)
 - Description: Performs ADCS maneuver. May be terminated prematurely if one or more H-bridges return some error, or if battery voltage drops below low power mode level.
 
 ### CMD_LOG_GPS
