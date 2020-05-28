@@ -77,6 +77,8 @@ static inline int mod255(int x)
 void encode_rs_8(uint8_t *data, uint8_t *parity, int pad)
 {
 	int i, j;
+
+  // cppcheck-suppress variableScope
 	uint8_t feedback;
 
 	memset(parity, 0, NROOTS * sizeof(uint8_t));
@@ -99,6 +101,7 @@ void encode_rs_8(uint8_t *data, uint8_t *parity, int pad)
 	}
 }
 
+// cppcheck-suppress unusedFunction
 int decode_rs_8(uint8_t *data, int *eras_pos, int no_eras, int pad)
 {
 	int deg_lambda, el, deg_omega;
