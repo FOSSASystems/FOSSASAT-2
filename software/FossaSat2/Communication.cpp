@@ -1151,21 +1151,23 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_GET_PICTURE_BURST: {
+      // check FSK is active
+      if(currentModem != MODEM_FSK) {
+        FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer picture"));
+        return;
+      }
+        
       if(Communication_Check_OptDataLen(3, optDataLen)) {
-        // check FSK is active
-        if(currentModem != MODEM_FSK) {
-          FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer picture"));
-          return;
-        }
+        // TODO send only scan data (ff c0 ... ff d9), should save about 1 kB
 
         // get the basic info
         FOSSASAT_DEBUG_PRINT(F("Reading slot: "));
         uint8_t slot = optData[0];
         FOSSASAT_DEBUG_PRINTLN(slot);
         FOSSASAT_DEBUG_PRINT(F("Starting at ID: "));
-        uint16_t i = 0;
-        memcpy(&i, optData + 1, sizeof(uint16_t));
-        FOSSASAT_DEBUG_PRINTLN(i);
+        uint16_t packetId = 0;
+        memcpy(&packetId, optData + 1, sizeof(uint16_t));
+        FOSSASAT_DEBUG_PRINTLN(packetId);
         FOSSASAT_DEBUG_PRINT(F("Starting at address: 0x"));
         uint32_t imgAddress = FLASH_IMAGES_START + slot*FLASH_IMAGE_SLOT_SIZE;
         FOSSASAT_DEBUG_PRINTLN(imgAddress, HEX);
@@ -1179,14 +1181,19 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           return;
         }
 
-        static const uint8_t respOptDataLen = 2 + MAX_IMAGE_PACKET_LENGTH;
+        static const uint8_t respOptDataLen = 2 + MAX_IMAGE_PAYLOAD_LENGTH + IMAGE_PACKET_FEC_LENGTH;
         uint8_t respOptData[respOptDataLen];
-        for(; i < imgLen / MAX_IMAGE_PACKET_LENGTH; i++) {
+        for(; packetId < imgLen / MAX_IMAGE_PAYLOAD_LENGTH; packetId++) {
           // write packet ID
-          memcpy(respOptData, &i, sizeof(uint16_t));
+          memcpy(respOptData, &packetId, sizeof(uint16_t));
 
-          // send full packet
-          PersistentStorage_Read(imgAddress + i*MAX_IMAGE_PACKET_LENGTH, respOptData + 2, MAX_IMAGE_PACKET_LENGTH);
+          // read data
+          PersistentStorage_Read(imgAddress + packetId*MAX_IMAGE_PAYLOAD_LENGTH, respOptData + 2, MAX_IMAGE_PAYLOAD_LENGTH);
+
+          // add FEC
+          encode_rs_8(respOptData + 2, respOptData + 2 + MAX_IMAGE_PAYLOAD_LENGTH, RS8_FULL_PACKET_LENGTH - IMAGE_PACKET_FEC_LENGTH - MAX_IMAGE_PAYLOAD_LENGTH);
+
+          // send response
           Communication_Send_Response(RESP_CAMERA_PICTURE, respOptData, respOptDataLen);
           PowerControl_Watchdog_Heartbeat();
 
@@ -1201,10 +1208,17 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         }
 
         // send the final packet (might not be full)
-        uint16_t remLen = imgLen - i*MAX_IMAGE_PACKET_LENGTH;
-        memcpy(respOptData, &i, sizeof(uint16_t));
-        PersistentStorage_Read(imgAddress + i*MAX_IMAGE_PACKET_LENGTH, respOptData + 2, remLen);
-        Communication_Send_Response(RESP_CAMERA_PICTURE, respOptData, 2 + remLen);
+        uint16_t remLen = imgLen - packetId*MAX_IMAGE_PAYLOAD_LENGTH;
+        memcpy(respOptData, &packetId, sizeof(uint16_t));
+        
+        // read data
+        PersistentStorage_Read(imgAddress + packetId*MAX_IMAGE_PAYLOAD_LENGTH, respOptData + 2, remLen);
+
+        // add FEC
+        encode_rs_8(respOptData + 2, respOptData + 2 + remLen, RS8_FULL_PACKET_LENGTH - IMAGE_PACKET_FEC_LENGTH - remLen);
+
+        // send response
+        Communication_Send_Response(RESP_CAMERA_PICTURE, respOptData, 2 + remLen + IMAGE_PACKET_FEC_LENGTH);
 
       }
     } break;
@@ -1412,13 +1426,13 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_GET_GPS_LOG: {
+      // check FSK is active
+      if(currentModem != MODEM_FSK) {
+        FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer GPS log"));
+        return;
+      }
+      
       if(Communication_Check_OptDataLen(5, optDataLen)) {
-        // check FSK is active
-        if(currentModem != MODEM_FSK) {
-          FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer GPS log"));
-          return;
-        }
-
         // get parameters
         uint8_t dir = optData[0];
         uint16_t offset = 0;
@@ -1496,7 +1510,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINTLN(len);
 
         // read data from flash
-        uint8_t respOptData[MAX_IMAGE_PACKET_LENGTH];
+        uint8_t respOptData[FLASH_NMEA_LOG_SLOT_SIZE];
         for(uint16_t packetNum = 0; packetNum < len; packetNum++) {
           // read data into buffer
           FOSSASAT_DEBUG_PRINTLN(addr, HEX);
