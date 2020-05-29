@@ -186,16 +186,16 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Description: Changes current RTC time.
 
 ### CMD_RECORD_IMU
-- Optional data length: 4
+- Optional data length: 5
 - Optional data:
-  - 0: number of samples (10 is maximum)
-  - 1 - 2: sampling period in ms, unsigned 16-bit integer, LSB first
-  - 3: flags which specify the device to use, only one may be active at a time:
+  - 0 - 1: number of samples, unsigned 16-bit integer, LSB first
+  - 2 - 3: sampling period in ms, unsigned 16-bit integer, LSB first
+  - 4: flags which specify the device to use, any combination:
     - 0x01: gyroscope
     - 0x02: accelerometer
     - 0x04: magnetometer
 - Response: [RESP_RECORDED_IMU](#RESP_RECORDED_IMU)
-- Description: Records selected IMU device. Logging will be stopped if battery voltage drops below low power mode level. Only available in FSK mode.
+- Description: Records selected IMU device(s). Logging will be stopped if battery voltage drops below low power mode level. Only available in FSK mode, each sample is sent in separate response
 
 ### CMD_RUN_MANUAL_ACS
 - Optional data length: 8
@@ -294,6 +294,11 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 8 - 11: third sleep interval voltage level and length etc.
 - Response: none
 - Description: Sets new sleep interval voltage levels and sleep durations. Maximum of 8 intervals can be set, MUST be ordered by voltage threshold (highest to lowest).
+
+### CMD_ABORT
+- Optional data length: 0
+- Response: none
+- Description: Aborts the currently running operation (e.g. GPS logging or ADCS control).
 
 ---
 # Responses
@@ -429,11 +434,15 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 0 - 3: captured image length or camera error state, unsigned 32-bit integer
 
 ### RESP_RECORDED_IMU
-- Optional data length: 12 * number of samples
+- Optional data length: 13 - 37
 - Optional data:
-  - first 4 bytes: X axis measurements, float
-  - second 4 bytes: Y axis measurements, float
-  - third 4 bytes: Z axis measurements, float
+  - 0: flags which specify the device to use, any combination may be active:
+    - 0x01: gyroscope
+    - 0x02: accelerometer
+    - 0x04: magnetometer
+  - 1 - 12: gyroscope sample (X/Y/Z, only present if gyroscope flag is set), float
+  - 13 - 24: accelerometer sample (X/Y/Z, only present if accelerometer flag is set), float
+  - 25 - 36: magnetometer sample (X/Y/Z, only present if magnetometer flag is set), float
 
 ### RESP_ADCS_RESULT
 - Optional data length: 7

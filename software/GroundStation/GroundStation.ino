@@ -617,6 +617,65 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       Serial.println(ul, HEX);
     } break;
 
+    case RESP_RECORDED_IMU: {
+      Serial.println(F("IMU data:"));
+      uint8_t flags = respOptData[0];
+      uint8_t* respOptDataPtr = respOptData + 1;
+      float f = 0;
+      
+      if(flags & 0x01) {
+        memcpy(&f, respOptDataPtr, sizeof(float));
+        respOptDataPtr += sizeof(float);
+        Serial.print(F("G X "));
+        Serial.println(f, 2);
+        
+        memcpy(&f, respOptDataPtr, sizeof(float));
+        respOptDataPtr += sizeof(float);
+        Serial.print(F("G Y "));
+        Serial.println(f, 2);
+        
+        memcpy(&f, respOptDataPtr, sizeof(float));
+        respOptDataPtr += sizeof(float);
+        Serial.print(F("G Z "));
+        Serial.println(f, 2);
+      }
+      
+      if(flags & 0x02) {
+        memcpy(&f, respOptDataPtr, sizeof(float));
+        respOptDataPtr += sizeof(float);
+        Serial.print(F("A X "));
+        Serial.println(f, 2);
+        
+        memcpy(&f, respOptDataPtr, sizeof(float));
+        respOptDataPtr += sizeof(float);
+        Serial.print(F("A Y "));
+        Serial.println(f, 2);
+        
+        memcpy(&f, respOptDataPtr, sizeof(float));
+        respOptDataPtr += sizeof(float);
+        Serial.print(F("A Z "));
+        Serial.println(f, 2);
+      }
+      
+      if(flags & 0x04) {
+        memcpy(&f, respOptDataPtr, sizeof(float));
+        respOptDataPtr += sizeof(float);
+        Serial.print(F("M X "));
+        Serial.println(f, 2);
+        
+        memcpy(&f, respOptDataPtr, sizeof(float));
+        respOptDataPtr += sizeof(float);
+        Serial.print(F("M Y "));
+        Serial.println(f, 2);
+        
+        memcpy(&f, respOptDataPtr, sizeof(float));
+        respOptDataPtr += sizeof(float);
+        Serial.print(F("M Z "));
+        Serial.println(f, 2);
+      }
+      
+    } break;
+
     case RESP_ACKNOWLEDGE: {
       Serial.print(F("Frame ACK, functionId = 0x"));
       Serial.print(respOptData[0], HEX);
@@ -861,13 +920,13 @@ void getStats(uint8_t mask) {
   sendFrame(CMD_GET_STATISTICS, 1, &mask);
 }
 
-void recordIMU(uint8_t samples, uint16_t period, uint8_t flags) {
+void recordIMU(uint16_t samples, uint16_t period, uint8_t flags) {
   Serial.print(F("Sending record IMU request ... "));
-  uint8_t optData[4];
-  optData[0] = samples;
-  memcpy(optData + 1, &period, 2);
-  optData[3] = flags;
-  sendFrameEncrypted(CMD_RECORD_IMU, 4, optData);
+  uint8_t optData[5];
+  memcpy(optData, &samples, sizeof(uint16_t));
+  memcpy(optData + sizeof(uint16_t), &period, sizeof(uint16_t));
+  optData[4] = flags;
+  sendFrameEncrypted(CMD_RECORD_IMU, 5, optData);
 }
 
 void cameraCapture(uint8_t slot, uint8_t pictureSize, uint8_t lightMode, uint8_t saturation, uint8_t brightness, uint8_t contrast, uint8_t special) {
@@ -1096,7 +1155,7 @@ void loop() {
         requestRetransmitCustom();
         break;
       case 'o':
-        recordIMU(1, 1000, 0b00000001);
+        recordIMU(200, 100, 0b00000111);
         break;
       case 'u':
         Serial.print(F("Sending unknown frame ... "));

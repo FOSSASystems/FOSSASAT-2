@@ -979,84 +979,101 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       }
       
       // check optional data
-      if(Communication_Check_OptDataLen(4, optDataLen)) {
-        uint8_t numSamples = optData[0];
+      if(Communication_Check_OptDataLen(5, optDataLen)) {
+        // get number of samples
+        uint16_t numSamples = 0;
+        memcpy(&numSamples, optData, sizeof(uint16_t));
         FOSSASAT_DEBUG_PRINT(F("numSamples="));
         FOSSASAT_DEBUG_PRINTLN(numSamples);
 
-        // check number of samples is less than limit
-        if(numSamples > 10) {
-          FOSSASAT_DEBUG_PRINT(F("too much!"));
-          break;
-        }
-
-        // check flags
-        char device;
-        if(optData[3] & 0b00000001) {
-          // gyroscope
-          device = 'G';
-        } else if(optData[3] & 0b00000010) {
-          // accelerometer
-          device = 'A';
-        } else if(optData[3] & 0b00000100) {
-          // magnetometer
-          device = 'M';
-        } else {
-          FOSSASAT_DEBUG_PRINTLN(F("Unknown device!"));
-          break;
-        }
-
         // get sample period
         uint16_t period = 0;
-        memcpy(&period, optData + 1, 2);
+        memcpy(&period, optData + sizeof(uint16_t), sizeof(uint16_t));
         FOSSASAT_DEBUG_PRINT(F("period="));
         FOSSASAT_DEBUG_PRINTLN(period);
 
-        uint8_t respOptDataLen = 3*sizeof(float) * numSamples;
-        uint8_t respOptData[MAX_OPT_DATA_LENGTH];
+        // get flags
+        uint8_t flags = optData[4];
+        FOSSASAT_DEBUG_PRINT(F("flags="));
+        FOSSASAT_DEBUG_PRINTLN(flags, HEX);
 
-        for(uint16_t i = 0; i < respOptDataLen; i += 3*sizeof(float)) {
+        // calculate response optional data length
+        uint8_t respOptDataLen = 1;
+        while(flags) {
+          respOptDataLen += 3*sizeof(float);
+          flags >>= 1;
+        }
+
+        // restore flags
+        flags = optData[4];
+
+        // prepare response buffer
+        uint8_t respOptData[MAX_OPT_DATA_LENGTH];
+        uint8_t* respOptDataPtr = respOptData;
+
+        // set flags
+        *respOptDataPtr++ = flags;
+
+        // wait for a bit before measurement
+        PowerControl_Wait(RESPONSE_DELAY, LOW_POWER_NONE);
+        
+        // get initial IMU update
+        Sensors_IMU_Update();
+
+        // measure all samples
+        for(uint16_t i = 0; i < numSamples; i++) {
           // check if the battery is good enough to continue
           uint32_t start = millis();
           #ifdef ENABLE_TRANSMISSION_CONTROL
           if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
-             // battery check failed, stop measurement and send what we have
-             respOptDataLen = i;
+             // battery check failed, stop measurement
              break;
           }
           #endif
 
-          // read the requested values
+          // read the values
           float valX = 0;
           float valY = 0;
           float valZ = 0;
-          switch(device) {
-            case 'G': {
-              valX = imu.calcGyro(imu.gx);
-              valY = imu.calcGyro(imu.gy);
-              valZ = imu.calcGyro(imu.gz);
-            } break;
-            case 'A': {
-              valX = imu.calcAccel(imu.ax);
-              valY = imu.calcAccel(imu.ay);
-              valZ = imu.calcAccel(imu.az);
-            } break;
-            case 'M': {
-              valX = imu.calcMag(imu.mx);
-              valY = imu.calcMag(imu.my);
-              valZ = imu.calcMag(imu.mz);
-            } break;
+
+          // gyroscope
+          if(flags & 0x01) {
+            valX = imu.calcGyro(imu.gx);
+            valY = imu.calcGyro(imu.gy);
+            valZ = imu.calcGyro(imu.gz);
+            
+            Communication_Frame_Add(&respOptDataPtr, valX, "G X", 1, "deg/s");
+            Communication_Frame_Add(&respOptDataPtr, valY, "G Y", 1, "deg/s");
+            Communication_Frame_Add(&respOptDataPtr, valZ, "G Z", 1, "deg/s");
           }
 
-          FOSSASAT_DEBUG_PRINT(valX);
-          FOSSASAT_DEBUG_PRINT('\t');
-          FOSSASAT_DEBUG_PRINT(valY);
-          FOSSASAT_DEBUG_PRINT('\t');
-          FOSSASAT_DEBUG_PRINTLN(valZ);
+          // accelerometer
+          if(flags & 0x02) {
+            valX = imu.calcAccel(imu.ax);
+            valY = imu.calcAccel(imu.ay);
+            valZ = imu.calcAccel(imu.az);
+            
+            Communication_Frame_Add(&respOptDataPtr, valX, "A X", 1, "m/s^2");
+            Communication_Frame_Add(&respOptDataPtr, valY, "A Y", 1, "m/s^2");
+            Communication_Frame_Add(&respOptDataPtr, valZ, "A Z", 1, "m/s^2");
+          }
 
-          memcpy(respOptData + i, &valX, sizeof(float));
-          memcpy(respOptData + i + sizeof(float), &valY, sizeof(float));
-          memcpy(respOptData + i + 2*sizeof(float), &valZ, sizeof(float));
+          // magnetometer
+          if(flags & 0x04) {
+            valX = imu.calcMag(imu.mx);
+            valY = imu.calcMag(imu.my);
+            valZ = imu.calcMag(imu.mz);
+            
+            Communication_Frame_Add(&respOptDataPtr, valX, "M X", 1, "gauss");
+            Communication_Frame_Add(&respOptDataPtr, valY, "M Y", 1, "gauss");
+            Communication_Frame_Add(&respOptDataPtr, valZ, "M Z", 1, "gauss");
+          }
+
+          // send the sample
+          Communication_Send_Response(RESP_RECORDED_IMU, respOptData, respOptDataLen);
+
+          // reset pointer
+          respOptDataPtr = respOptData + 1;
 
           // wait for for the next measurement
           while(millis() - start < period) {
@@ -1067,8 +1084,6 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             PowerControl_Watchdog_Heartbeat();
           }
         }
-
-        Communication_Send_Response(RESP_RECORDED_IMU, respOptData, respOptDataLen);
       }
     } break;
 
@@ -1705,7 +1720,8 @@ int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData, size_t opt
   
   // delay before responding
   if((respId == RESP_GPS_LOG) ||
-     (respId == RESP_CAMERA_PICTURE)) {
+     (respId == RESP_CAMERA_PICTURE) || 
+     (respId == RESP_RECORDED_IMU)) {
     
     // use short length in case of "burst" transfers
     PowerControl_Wait(RESPONSE_DELAY_SHORT, LOW_POWER_NONE);    
