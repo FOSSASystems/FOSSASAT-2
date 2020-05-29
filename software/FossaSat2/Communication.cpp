@@ -1388,10 +1388,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             }
           }
 
-          // TODO: sleep for a short period of time?
+          // sleep for one second - data on GPS UART will wake us up anyway
+          PowerControl_Wait(1000, LOW_POWER_SLEEP);
 
           // check battery
-          PowerControl_Watchdog_Heartbeat();
           #ifdef ENABLE_TRANSMISSION_CONTROL
           if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
             FOSSASAT_DEBUG_PRINTLN(F("Battery too low."));
