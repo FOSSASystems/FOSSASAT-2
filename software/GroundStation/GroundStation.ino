@@ -904,7 +904,7 @@ void runADCS(int8_t x, int8_t y, int8_t z, uint32_t duration) {
   optData[1] = y;
   optData[2] = z;
   memcpy(optData + 3, &duration, sizeof(uint32_t));
-  sendFrameEncrypted(CMD_RUN_ADCS, 7, optData);
+  sendFrameEncrypted(CMD_RUN_MANUAL_ACS, 7, optData);
 }
 
 void getFullSystemInfo() {

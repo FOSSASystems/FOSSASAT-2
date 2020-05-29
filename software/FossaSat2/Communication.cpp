@@ -1181,6 +1181,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           return;
         }
 
+        // wait a bit before sending the first packet
+        PowerControl_Wait(RESPONSE_DELAY, LOW_POWER_NONE);
+
         static const uint8_t respOptDataLen = 2 + MAX_IMAGE_PAYLOAD_LENGTH + IMAGE_PACKET_FEC_LENGTH;
         uint8_t respOptData[respOptDataLen];
         for(; packetId < imgLen / MAX_IMAGE_PAYLOAD_LENGTH; packetId++) {
@@ -1509,6 +1512,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINT(F("Number of packets: "));
         FOSSASAT_DEBUG_PRINTLN(len);
 
+        // wait a bit before sending the first packet
+        PowerControl_Wait(RESPONSE_DELAY, LOW_POWER_NONE);
+
         // read data from flash
         uint8_t respOptData[FLASH_NMEA_LOG_SLOT_SIZE];
         for(uint16_t packetNum = 0; packetNum < len; packetNum++) {
@@ -1699,7 +1705,6 @@ int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData, size_t opt
   
   // delay before responding
   if((respId == RESP_GPS_LOG) ||
-     (respId == RESP_FLASH_CONTENTS) ||
      (respId == RESP_CAMERA_PICTURE)) {
     
     // use short length in case of "burst" transfers
