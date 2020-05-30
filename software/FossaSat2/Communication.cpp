@@ -899,7 +899,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // take a picture
         uint32_t imgLen = Camera_Capture(optData[0]);
         digitalWrite(CAMERA_POWER_FET, LOW);
-        FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGE_PROPERTIES + (optData[0]/FLASH_IMAGE_PROPERTIES_SLOT_SIZE) * FLASH_SECTOR_SIZE, 3*sizeof(uint32_t));
+        FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGE_PROPERTIES + (optData[0]/FLASH_IMAGE_PROPERTIES_SLOT_SIZE) * FLASH_SECTOR_SIZE, FLASH_EXT_PAGE_SIZE);
 
         // send response
         uint8_t respOptData[4];
