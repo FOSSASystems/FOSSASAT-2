@@ -29,14 +29,14 @@ extern HardwareSerial debugSerial;
     uint8_t readBuff[FLASH_EXT_PAGE_SIZE]; \
     PersistentStorage_Read(ADDR, readBuff, LEN); \
     char buff[16]; \
-      for(size_t i = 0; i < LEN/16; i++) { \
+      for(size_t i = 0; i < (LEN)/16; i++) { \
         for(uint8_t j = 0; j < 16; j++) { \
           sprintf(buff, "%02x ", readBuff[i*16 + j]); \
           FOSSASAT_DEBUG_PORT.print(buff); \
         } \
         FOSSASAT_DEBUG_PORT.println(); \
       } \
-      for(size_t i = ((LEN/16) * 16); i < LEN; i++) { \
+      for(size_t i = (((LEN)/16) * 16); i < (LEN); i++) { \
         sprintf(buff, "%02x ", readBuff[i]); \
         FOSSASAT_DEBUG_PORT.print(buff); \
       } \
