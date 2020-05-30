@@ -881,13 +881,13 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         uint8_t special = (uint8_t)(optData[3] & 0x0F);
 
         // power up camera
-        digitalWrite(CAMERA_POWER_FET, HIGH);
+        digitalWrite(CAMERA_POWER_FET, POWER_FET_POLARITY_ON);
 
         // initialize
         uint32_t cameraState = (uint32_t)Camera_Init((JPEG_Size)pictureSize, (Light_Mode)lightMode, (Color_Saturation)saturation, (Brightness)brightness, (Contrast)contrast, (Special_Effects)special);
         if(cameraState != 0) {
           // initialization failed, send the error
-          digitalWrite(CAMERA_POWER_FET, LOW);
+          digitalWrite(CAMERA_POWER_FET, POWER_FET_POLARITY_OFF);
           FOSSASAT_DEBUG_PRINT(F("Camera init failed, code "));
           FOSSASAT_DEBUG_PRINTLN(cameraState);
           uint8_t respOptData[4];
@@ -898,7 +898,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // take a picture
         uint32_t imgLen = Camera_Capture(optData[0]);
-        digitalWrite(CAMERA_POWER_FET, LOW);
+        digitalWrite(CAMERA_POWER_FET, POWER_FET_POLARITY_OFF);
         FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGE_PROPERTIES + (optData[0]/FLASH_IMAGE_PROPERTIES_SLOT_SIZE) * FLASH_SECTOR_SIZE, FLASH_EXT_PAGE_SIZE);
 
         // send response
@@ -1330,7 +1330,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, 0);
 
         // power up GPS
-        digitalWrite(GPS_POWER_FET, HIGH);
+        digitalWrite(GPS_POWER_FET, POWER_FET_POLARITY_ON);
 
         // wait for offset to elapse
         FOSSASAT_DEBUG_PRINTLN(F("Waiting for offset to elapse"));
@@ -1432,7 +1432,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, lastFixAddr);
 
         // turn GPS off
-        digitalWrite(GPS_POWER_FET, LOW);
+        digitalWrite(GPS_POWER_FET, POWER_FET_POLARITY_OFF);
 
         // stop UART interface (to prevent it from waking up the MCU)
         GpsSerial.end();

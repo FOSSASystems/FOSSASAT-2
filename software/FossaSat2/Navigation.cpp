@@ -110,7 +110,7 @@ uint16_t Navigation_GNSS_Run_Cmd(uint8_t* payload, uint16_t payloadLen, uint8_t*
   GpsSerial.begin(9600);
 
   // power up GPS
-  digitalWrite(GPS_POWER_FET, HIGH);
+  digitalWrite(GPS_POWER_FET, POWER_FET_POLARITY_ON);
 
   // wait for GPS to boot up
   PowerControl_Wait(50);
@@ -123,7 +123,7 @@ uint16_t Navigation_GNSS_Run_Cmd(uint8_t* payload, uint16_t payloadLen, uint8_t*
   // send the command
   if(!Navigation_GNSS_Send_Cmd(payload, payloadLen)) {
     // command returned NACK or timed out
-    digitalWrite(GPS_POWER_FET, LOW);
+    digitalWrite(GPS_POWER_FET, POWER_FET_POLARITY_OFF);
     GpsSerial.end();
     return(0);
   }
@@ -132,7 +132,7 @@ uint16_t Navigation_GNSS_Run_Cmd(uint8_t* payload, uint16_t payloadLen, uint8_t*
   uint16_t responseLen = Navigation_GNSS_Get_Resp(resp, timeout);
 
   // turn GPS off
-  digitalWrite(GPS_POWER_FET, LOW);
+  digitalWrite(GPS_POWER_FET, POWER_FET_POLARITY_OFF);
 
   // stop UART interface (to prevent it from waking up the MCU)
   GpsSerial.end();

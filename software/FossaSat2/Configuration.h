@@ -103,6 +103,9 @@
 #define MPPT_OFF                                        PA11
 #define ANALOG_IN_RANDOM_SEED                           PC2    // used as source for randomSeed(), should be left floating
 
+#define POWER_FET_POLARITY_ON                           HIGH
+#define POWER_FET_POLARITY_OFF                          LOW
+
 
 /*
    Timing Definitions

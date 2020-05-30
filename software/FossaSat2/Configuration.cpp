@@ -78,7 +78,7 @@ void Configuration_Setup() {
   pinMode(CAMERA_CS, OUTPUT);
   digitalWrite(CAMERA_CS, HIGH);
   pinMode(CAMERA_POWER_FET, OUTPUT);
-  digitalWrite(CAMERA_POWER_FET, LOW);
+  digitalWrite(CAMERA_POWER_FET, POWER_FET_POLARITY_OFF);
 
   pinMode(DEPLOYMENT_FET_1, OUTPUT);
   pinMode(DEPLOYMENT_FET_2, OUTPUT);
@@ -92,7 +92,7 @@ void Configuration_Setup() {
   randomSeed(analogRead(ANALOG_IN_RANDOM_SEED));
 
   pinMode(GPS_POWER_FET, OUTPUT);
-  digitalWrite(GPS_POWER_FET, LOW);
+  digitalWrite(GPS_POWER_FET, POWER_FET_POLARITY_OFF);
 
   // initialize default I2C interface
   Wire.setSDA(I2C1_SDA);

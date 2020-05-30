@@ -58,10 +58,10 @@ void setup() {
   FOSSASAT_DEBUG_PORT.println(Communication_Set_Modem(MODEM_FSK));
 
   // initialize camera
-  digitalWrite(CAMERA_POWER_FET, HIGH);
+  digitalWrite(CAMERA_POWER_FET, POWER_FET_POLARITY_ON);
   FOSSASAT_DEBUG_PORT.print(F("Camera init:\t"));
   FOSSASAT_DEBUG_PORT.println(Camera_Init(p320x240, Auto, Saturation0, Brightness0, Contrast0, Normal));
-  digitalWrite(CAMERA_POWER_FET, LOW);
+  digitalWrite(CAMERA_POWER_FET, POWER_FET_POLARITY_OFF);
 
   // initialize IMU
   FOSSASAT_DEBUG_PORT.print(F("IMU init (expected 0x683D):\t0x"));
