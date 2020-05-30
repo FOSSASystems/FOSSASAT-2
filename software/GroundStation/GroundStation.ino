@@ -575,21 +575,19 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       Serial.println(packetId);
 
       char buff[16];
-      if(respOptDataLen < 16) {
-        for(uint8_t i = 0; i < respOptDataLen; i++) {
-          sprintf(buff, "%02x ", respOptData[2 + i]);
+      for(uint8_t i = 0; i < (respOptDataLen - 2)/16; i++) {
+        for(uint8_t j = 0; j < 16; j++) {
+          sprintf(buff, "%02x ", respOptData[2 + i*16 + j]);
           Serial.print(buff);
         }
         Serial.println();
-      } else {
-        for(uint8_t i = 0; i < respOptDataLen/16; i++) {
-          for(uint8_t j = 0; j < 16; j++) {
-            sprintf(buff, "%02x ", respOptData[2 + i*16 + j]);
-            Serial.print(buff);
-          }
-          Serial.println();
-        }
       }
+      for(uint8_t i = ((respOptDataLen - 2)/16) * 16; i < (respOptDataLen - 2); i++) {
+        sprintf(buff, "%02x ", respOptData[2 + i]);
+        Serial.print(buff);
+      }
+      Serial.println();
+      
     } break;
 
     case RESP_GPS_LOG: {
@@ -958,7 +956,7 @@ void setRTC(uint8_t year, uint8_t month, uint8_t day, uint8_t weekDay, uint8_t h
 
 void runADCS(int8_t x, int8_t y, int8_t z, uint32_t duration) {
   Serial.print(F("Sending ADCS request ... "));
-  uint8_t optData[6];
+  uint8_t optData[7];
   optData[0] = x;
   optData[1] = y;
   optData[2] = z;
