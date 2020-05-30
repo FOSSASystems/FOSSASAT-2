@@ -154,7 +154,11 @@ void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, size_t len);
 void PersistentStorage_Reset_System_Info();
 
 uint32_t PersistentStorage_Get_Image_Len(uint8_t slot);
-void PersistentStorage_Set_Image_Len(uint8_t slot, uint32_t len);
+uint32_t PersistentStorage_Get_Image_ScanStart(uint8_t slot);
+uint32_t PersistentStorage_Get_Image_ScanEnd(uint8_t slot);
+uint32_t PersistentStorage_Get_Image_Property(uint8_t slot, uint8_t offset);
+void PersistentStorage_Set_Image_Properties(uint8_t slot, uint32_t len, uint32_t scanStart, uint32_t scanEnd);
+
 uint8_t PersistentStorage_Get_Message(uint16_t slotNum, uint8_t* buff);
 void PersistentStorage_Set_Message(uint16_t slotNum, uint8_t* buff, uint8_t len);
 

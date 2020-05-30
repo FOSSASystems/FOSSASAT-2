@@ -242,9 +242,9 @@
 #define FLASH_STATS_MAG_Y                               0x000010C6  //  0x000010C6    0x000010D1    3x float
 #define FLASH_STATS_MAG_Z                               0x000010D2  //  0x000010D2    0x000010DD    3x float
 
-// sectors 2 + 3 - image lengths: 4 bytes per length
-#define FLASH_IMAGE_LENGTHS_1                           0x00002000  //  0x00002000    0x00002FFF
-#define FLASH_IMAGE_LENGTHS_2                           0x00003000  //  0x00003000    0x00003FFF
+// sectors 2 - 7 - image properites: 12 bytes per picture, 4 bytes total length, 4 bytes scan start address, 4 bytes scan end address
+#define FLASH_IMAGE_PROPERTIES                          0x00002000  //  0x00002000    0x00007FFF
+#define FLASH_IMAGE_PROPERTIES_SLOT_SIZE                (21)        //  properties of 21 pictures in each sector
 
 // 64kB block 1 - store & forward slots
 #define FLASH_STORE_AND_FORWARD_START                   0x00010000  //  0x00010000    0x0001FFFF
@@ -258,6 +258,14 @@
 // 64kB blocks 32 - 1023 - image slots: 8 blocks per slot
 #define FLASH_IMAGES_START                              0x00200000  //  0x00200000    0x03FFFFFF
 #define FLASH_IMAGE_SLOT_SIZE                           (FLASH_IMAGE_NUM_64K_BLOCKS * FLASH_64K_BLOCK_SIZE)
+
+/*
+    JPEG markers
+*/
+
+#define JPEG_MARKER_ESCAPE                              0xFF
+#define JPEG_MARKER_SOF0                                0xC0
+#define JPEG_MARKER_EOI                                 0xD9
 
 /*
     Radio Configuration

@@ -244,10 +244,11 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Description: Reads length of picture in provided slot.
 
 ### CMD_GET_PICTURE_BURST
-- Optional data length: 3
+- Optional data length: 4
 - Optional data:
   - 0: picture slot to read
-  - 1 - 2: picture packet ID at which should the reading start, unsigned 16-bit integer, LSB first
+  - 1: whether to send the full picture (0x00) or only the scan data (0x01)
+  - 2 - 3: picture packet ID at which should the reading start, unsigned 16-bit integer, LSB first
 - Response: [RESP_CAMERA_PICTURE](#RESP_CAMERA_PICTURE)
 - Description: Requests burst downlink of picture from provided slot.
 

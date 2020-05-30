@@ -299,30 +299,41 @@ void PersistentStorage_Set_Callsign(char* newCallsign) {
 }
 
 uint32_t PersistentStorage_Get_Image_Len(uint8_t slot) {
-  uint8_t buff[4];
-  uint32_t addr = FLASH_IMAGE_LENGTHS_1;
-  if(slot >= 64) {
-    addr = FLASH_IMAGE_LENGTHS_2;
-    slot -= 64;
-  }
-  PersistentStorage_Read(addr + slot*sizeof(uint32_t), buff, sizeof(uint32_t));
-  uint32_t len;
-  memcpy(&len, buff, sizeof(uint32_t));
-  return(len);
+  return(PersistentStorage_Get_Image_Property(slot, 0));
 }
 
-void PersistentStorage_Set_Image_Len(uint8_t slot, uint32_t len) {
-  // read the correct page
+uint32_t PersistentStorage_Get_Image_ScanStart(uint8_t slot) {
+  return(PersistentStorage_Get_Image_Property(slot, 1));
+}
+
+uint32_t PersistentStorage_Get_Image_ScanEnd(uint8_t slot) {
+  return(PersistentStorage_Get_Image_Property(slot, 2));
+}
+
+uint32_t PersistentStorage_Get_Image_Property(uint8_t slot, uint8_t offset) {
+  // find which sector are the properties in
   uint8_t buff[FLASH_EXT_PAGE_SIZE];
-  uint32_t addr = FLASH_IMAGE_LENGTHS_1;
-  if(slot >= 64) {
-    addr = FLASH_IMAGE_LENGTHS_2;
-    slot -= 64;
-  }
+  uint32_t addr = FLASH_IMAGE_PROPERTIES + (slot/FLASH_IMAGE_PROPERTIES_SLOT_SIZE) * FLASH_SECTOR_SIZE;
+  PersistentStorage_Read(addr, buff, FLASH_EXT_PAGE_SIZE);
+
+  // get the value
+  uint8_t* slotAddr = buff + (slot % FLASH_IMAGE_PROPERTIES_SLOT_SIZE) * 3*sizeof(uint32_t) + offset*sizeof(uint32_t);
+  uint32_t prop;
+  memcpy(&prop, slotAddr, sizeof(uint32_t));
+  return(prop);
+}
+
+void PersistentStorage_Set_Image_Properties(uint8_t slot, uint32_t len, uint32_t scanStart, uint32_t scanEnd) {
+  // find which sector are the properties in
+  uint8_t buff[FLASH_EXT_PAGE_SIZE];
+  uint32_t addr = FLASH_IMAGE_PROPERTIES + (slot/FLASH_IMAGE_PROPERTIES_SLOT_SIZE) * FLASH_SECTOR_SIZE;
   PersistentStorage_Read(addr, buff, FLASH_EXT_PAGE_SIZE);
   
-  // update value
-  memcpy(buff + slot*sizeof(uint32_t), &len, sizeof(uint32_t));
+  // update values
+  uint8_t* slotAddr = buff + (slot % FLASH_IMAGE_PROPERTIES_SLOT_SIZE) * 3*sizeof(uint32_t);
+  memcpy(slotAddr, &len, sizeof(uint32_t));
+  memcpy(slotAddr + sizeof(uint32_t), &scanStart, sizeof(uint32_t));
+  memcpy(slotAddr + 2*sizeof(uint32_t), &scanEnd, sizeof(uint32_t));
 
   // write it back in (will automatically erase the sector)
   PersistentStorage_Write(addr, buff, FLASH_EXT_PAGE_SIZE);

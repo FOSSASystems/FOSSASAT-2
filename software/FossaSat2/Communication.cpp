@@ -773,9 +773,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           if(optData[0] & 0b00010000) {
             // wipe image lengths
             FOSSASAT_DEBUG_PRINTLN(F("Wiping image lengths"));
-            PersistentStorage_SectorErase(FLASH_IMAGE_LENGTHS_1);
-            PersistentStorage_SectorErase(FLASH_IMAGE_LENGTHS_2);
-            PowerControl_Watchdog_Heartbeat();
+            for(uint8_t i = 0; i < 6; i++) {
+              PersistentStorage_SectorErase(FLASH_IMAGE_PROPERTIES + i*FLASH_SECTOR_SIZE);
+              PowerControl_Watchdog_Heartbeat();
+            }
 
             // wipe all 64k image blocks
             FOSSASAT_DEBUG_PRINTLN(F("Wiping images (will take about 3 minutes)"));
@@ -898,7 +899,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // take a picture
         uint32_t imgLen = Camera_Capture(optData[0]);
         digitalWrite(CAMERA_POWER_FET, LOW);
-        FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, 0x50)
+        FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGE_PROPERTIES + (optData[0]/FLASH_IMAGE_PROPERTIES_SLOT_SIZE) * FLASH_SECTOR_SIZE, 3*sizeof(uint32_t));
 
         // send response
         uint8_t respOptData[4];
@@ -1172,7 +1173,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         return;
       }
         
-      if(Communication_Check_OptDataLen(3, optDataLen)) {
+      if(Communication_Check_OptDataLen(4, optDataLen)) {
         // TODO send only scan data (ff c0 ... ff d9), should save about 1 kB
 
         // get the basic info
@@ -1194,6 +1195,18 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           uint8_t respOptData[] = {0, 0, 0, 0, 0, 0};
           Communication_Send_Response(RESP_CAMERA_PICTURE, respOptData, 6);
           return;
+        }
+
+        // check scan only flag
+        uint8_t scanOnly = optData[3];
+        if(scanOnly == 0x01) {
+          FOSSASAT_DEBUG_PRINTLN(F("Scan only"));
+
+          // set start address to scan start
+          imgAddress = PersistentStorage_Get_Image_ScanStart(slot);
+
+          // set scan length
+          imgLen = PersistentStorage_Get_Image_ScanEnd(slot) - imgAddress;
         }
 
         // wait a bit before sending the first packet
