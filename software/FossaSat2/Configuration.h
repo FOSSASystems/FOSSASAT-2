@@ -521,12 +521,12 @@ extern Adafruit_VEML7700 lightSensorPanelY;
 extern Adafruit_VEML7700 lightSensorTop;
 
 // GPS logging variables (global since GPS logging is event-driven)
-extern uint8_t buff[];
-extern uint16_t buffPos;
-extern uint32_t flashPos;
-extern uint32_t lastFixAddr;
-extern bool overwrite;
-extern uint32_t gpsLoggingStart;
+extern uint8_t gpsLogBuff[];
+extern uint16_t gpsLogBuffPos;
+extern uint32_t gpsLogFlashPos;
+extern uint32_t gpsLogLastFixAddr;
+extern bool gpsLogOverwrite;
+extern uint32_t gpsLogStart;
 
 void Configuration_Setup();
 

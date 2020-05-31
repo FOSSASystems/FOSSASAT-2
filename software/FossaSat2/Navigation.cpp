@@ -283,21 +283,20 @@ void Navigation_GNSS_Setup_Logging() {
   FOSSASAT_DEBUG_PRINTLN(F("GPS logging start"));
 
   // log entries are saved in 128-byte chunks (to fit two chunks in one flash page)
-  buff[FLASH_NMEA_LOG_SLOT_SIZE];
-  memset(buff, 0x00, FLASH_NMEA_LOG_SLOT_SIZE);
-  buffPos = sizeof(uint32_t);
+  memset(gpsLogBuff, 0x00, FLASH_NMEA_LOG_SLOT_SIZE);
+  gpsLogBuffPos = sizeof(uint32_t);
 
   // log starts from the first address
-  flashPos = FLASH_NMEA_LOG_START;
+  gpsLogFlashPos = FLASH_NMEA_LOG_START;
 
   // address of the last fix
-  lastFixAddr = 0;
+  gpsLogLastFixAddr = 0;
 
   // whether we need to overwrite the current page
-  overwrite = false;
+  gpsLogOverwrite = false;
   
   // run for the requested duration
-  gpsLoggingStart = millis();
+  gpsLogStart = millis();
 }
 
 void Navigation_GNSS_SerialEvent() {
@@ -305,67 +304,67 @@ void Navigation_GNSS_SerialEvent() {
     char c = GpsSerial.read();
   
     // check if we got line ending or the buffer is full
-    if((c == '\n') || (buffPos == FLASH_NMEA_LOG_SLOT_SIZE)) {
+    if((c == '\n') || (gpsLogBuffPos == FLASH_NMEA_LOG_SLOT_SIZE)) {
       // add timestamp
-      uint32_t stamp = millis() - gpsLoggingStart;
-      memcpy(buff, &stamp, sizeof(uint32_t));
+      uint32_t stamp = millis() - gpsLogStart;
+      memcpy(gpsLogBuff, &stamp, sizeof(uint32_t));
       FOSSASAT_DEBUG_PRINTLN(stamp, HEX);
-      FOSSASAT_DEBUG_PRINTLN(buffPos);
+      FOSSASAT_DEBUG_PRINTLN(gpsLogBuffPos);
   
       // add null terminator instead of CR
-      buff[buffPos - 1] = '\0';
-      FOSSASAT_DEBUG_PRINTLN((char*)buff + 4);
-      FOSSASAT_DEBUG_PRINTLN(flashPos, HEX);
+      gpsLogBuff[gpsLogBuffPos - 1] = '\0';
+      FOSSASAT_DEBUG_PRINTLN((char*)gpsLogBuff + 4);
+      FOSSASAT_DEBUG_PRINTLN(gpsLogFlashPos, HEX);
       FOSSASAT_DEBUG_DELAY(10);
   
       // check if we got GPS fix
-      if(memcmp(buff + 7, "GSA", 3) == 0) {
+      if(memcmp(gpsLogBuff + 7, "GSA", 3) == 0) {
         // GSA message, check fix value
-        if((buff[13] == '2') || (buff[13] == '3')) {
+        if((gpsLogBuff[13] == '2') || (gpsLogBuff[13] == '3')) {
           // got fix, save last fix address
-          lastFixAddr = flashPos;
+          gpsLogLastFixAddr = gpsLogFlashPos;
           FOSSASAT_DEBUG_PRINTLN(F("Got fix"));
         }
       }
   
       // check if we are overwriting old data
-      if(overwrite && (flashPos % FLASH_SECTOR_SIZE == 0)) {
+      if(gpsLogOverwrite && (gpsLogFlashPos % FLASH_SECTOR_SIZE == 0)) {
         // reading sector to RAM, erasing and then writing back to flash would be too slow
-        PersistentStorage_SectorErase(flashPos);
+        PersistentStorage_SectorErase(gpsLogFlashPos);
         PowerControl_Watchdog_Heartbeat();
         FOSSASAT_DEBUG_PRINTLN(F("Erased sector "));
-        FOSSASAT_DEBUG_PRINTLN(flashPos, HEX);
+        FOSSASAT_DEBUG_PRINTLN(gpsLogFlashPos, HEX);
       }
   
       // write the buffer
-      PersistentStorage_Write(flashPos, buff, buffPos, false);
+      PersistentStorage_Write(gpsLogFlashPos, gpsLogBuff, gpsLogBuffPos, false);
       FOSSASAT_DEBUG_PRINTLN(F("-----"));
       FOSSASAT_DEBUG_DELAY(10);
       
       // update address of the latest log entry
-      PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY, flashPos);
+      PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY, gpsLogFlashPos);
   
       // reset buffer position
-      buffPos = sizeof(uint32_t);
+      gpsLogBuffPos = sizeof(uint32_t);
   
       // check there's still space left
-      flashPos += FLASH_NMEA_LOG_SLOT_SIZE;
-      if(flashPos >= FLASH_NMEA_LOG_END) {
+      gpsLogFlashPos += FLASH_NMEA_LOG_SLOT_SIZE;
+      if(gpsLogFlashPos >= FLASH_NMEA_LOG_END) {
         // reached end of flash reserved for GPS log, set overwrite flag and start over
-        flashPos = FLASH_NMEA_LOG_START;
-        overwrite = true;
+        gpsLogFlashPos = FLASH_NMEA_LOG_START;
+        gpsLogOverwrite = true;
       }
       
     } else {
       // add to buffer
-      buff[buffPos] = c;
-      buffPos++;
+      gpsLogBuff[gpsLogBuffPos] = c;
+      gpsLogBuffPos++;
     }
   }
 }
 uint32_t Navigation_GNSS_Finish_Logging() {
   // update last fix addres
-  PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, lastFixAddr);
+  PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, gpsLogLastFixAddr);
 
   // turn GPS off
   digitalWrite(GPS_POWER_FET, POWER_FET_POLARITY_OFF);
@@ -374,8 +373,8 @@ uint32_t Navigation_GNSS_Finish_Logging() {
   GpsSerial.end();
 
   // save the number of logged bytes and send it
-  uint32_t logged = flashPos - FLASH_NMEA_LOG_START;
-  if(overwrite) {
+  uint32_t logged = gpsLogFlashPos - FLASH_NMEA_LOG_START;
+  if(gpsLogOverwrite) {
     // log is full when the overwrite flag is set
     logged = FLASH_NMEA_LOG_END - FLASH_NMEA_LOG_START;
   }

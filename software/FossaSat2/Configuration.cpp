@@ -75,12 +75,12 @@ Adafruit_VEML7700 lightSensorPanelY = Adafruit_VEML7700();
 Adafruit_VEML7700 lightSensorTop = Adafruit_VEML7700();
 
 // GPS logging variables (global since GPS logging is done from serialEvent)
-uint8_t buff[FLASH_NMEA_LOG_SLOT_SIZE];
-uint16_t buffPos;
-uint32_t flashPos;
-uint32_t lastFixAddr;
-bool overwrite;
-uint32_t gpsLoggingStart;
+uint8_t gpsLogBuff[FLASH_NMEA_LOG_SLOT_SIZE];
+uint16_t gpsLogBuffPos;
+uint32_t gpsLogFlashPos;
+uint32_t gpsLogLastFixAddr;
+bool gpsLogOverwrite;
+uint32_t gpsLogStart;
 
 void Configuration_Setup() {
   // initialize pins
