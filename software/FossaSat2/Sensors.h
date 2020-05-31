@@ -14,7 +14,7 @@ bool Sensors_Current_Setup(Adafruit_INA260& sensor, TwoWire& wire, uint8_t addr)
 float Sensors_Current_Read(Adafruit_INA260& sensor);
 float Sensors_Current_ReadVoltage(Adafruit_INA260& sensor);
 
-bool Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire);
-float Sensors_Read_Light(Adafruit_VEML7700& sensor);
+bool Sensors_Setup_Light(lightSensor_t& sensor);
+float Sensors_Read_Light(lightSensor_t& sensor);
 
 #endif

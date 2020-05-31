@@ -131,9 +131,10 @@ float Sensors_Current_ReadVoltage(Adafruit_INA260& sensor) {
   return(voltage);
 }
 
-bool Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire) {
+// TODO timeout on disconnected sensors
+bool Sensors_Setup_Light(lightSensor_t& sensor) {
   FOSSASAT_DEBUG_PRINT(F("Light sensor I2C"));
-  if (&wire == &Wire) {
+  if (&(sensor.bus) == &Wire) {
     FOSSASAT_DEBUG_PRINT('1');
   } else {
     FOSSASAT_DEBUG_PRINT('2');
@@ -141,29 +142,35 @@ bool Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire) {
   FOSSASAT_DEBUG_PRINT(F(" init ... "));
 
   // initialize the current sensor
-  if (!sensor.begin(&wire)) {
+  if (!sensor.driver->begin(&(sensor.bus))) {
     FOSSASAT_DEBUG_PRINTLN(F("failed!"));
+    sensor.available = false;
     return(false);
   } else {
     FOSSASAT_DEBUG_PRINTLN(F("success!"));
+    sensor.available = true;
   }
 
   // set default properties
-  sensor.setGain(LIGHT_SENSOR_GAIN);
-  sensor.setIntegrationTime(LIGHT_SENSOR_INTEGRATION_TIME);
-  sensor.enable(false);
+  sensor.driver->setGain(LIGHT_SENSOR_GAIN);
+  sensor.driver->setIntegrationTime(LIGHT_SENSOR_INTEGRATION_TIME);
+  sensor.driver->enable(false);
   return(true);
 }
 
-float Sensors_Read_Light(Adafruit_VEML7700& sensor) {
+float Sensors_Read_Light(lightSensor_t& sensor) {
+  if(!sensor.available) {
+    return(0);
+  }
+  
   // wake up sensor
-  sensor.enable(true);
+  sensor.driver->enable(true);
 
   // wait for new data
   delay(30);
-  float lux = sensor.readLux();
+  float lux = sensor.driver->readLux();
   
   // shut down again
-  sensor.enable(false);
+  sensor.driver->enable(false);
   return(lux);
 }

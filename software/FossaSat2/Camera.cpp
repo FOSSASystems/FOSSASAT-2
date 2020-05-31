@@ -62,6 +62,7 @@ uint8_t Camera_Init(JPEG_Size pictureSize, Light_Mode lightMode, Color_Saturatio
       FOSSASAT_DEBUG_PRINT(F("Camera SPI test failed, got 0x"));
       FOSSASAT_DEBUG_PRINTLN(testValue, HEX);
       state = 7;
+      
     } else {
       FOSSASAT_DEBUG_PRINTLN(F("Camera SPI test OK"));
       state = 0;

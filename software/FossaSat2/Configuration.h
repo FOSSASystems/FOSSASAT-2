@@ -517,8 +517,8 @@ extern Adafruit_INA260 currSensorY;
 extern Adafruit_INA260 currSensorMPPT;
 
 // light sensors
-extern Adafruit_VEML7700 lightSensorPanelY;
-extern Adafruit_VEML7700 lightSensorTop;
+extern lightSensor_t lightSensorPanelY;
+extern lightSensor_t lightSensorTop;
 
 // GPS logging variables (global since GPS logging is event-driven)
 extern uint8_t gpsLogBuff[];

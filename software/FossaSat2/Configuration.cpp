@@ -71,8 +71,8 @@ Adafruit_INA260 currSensorY = Adafruit_INA260();
 Adafruit_INA260 currSensorMPPT = Adafruit_INA260();
 
 // light sensors
-Adafruit_VEML7700 lightSensorPanelY = Adafruit_VEML7700();
-Adafruit_VEML7700 lightSensorTop = Adafruit_VEML7700();
+lightSensor_t lightSensorPanelY = { .driver = new Adafruit_VEML7700(), .bus = LIGHT_SENSOR_Y_PANEL_BUS,   .available = false };
+lightSensor_t lightSensorTop =    { .driver = new Adafruit_VEML7700(), .bus = LIGHT_SENSOR_TOP_PANEL_BUS, .available = false };
 
 // GPS logging variables (global since GPS logging is done from serialEvent)
 uint8_t gpsLogBuff[FLASH_NMEA_LOG_SLOT_SIZE];

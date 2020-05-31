@@ -11,4 +11,10 @@ struct wireSensor_t {
   uint8_t mode;
 };
 
+struct lightSensor_t {
+  Adafruit_VEML7700* driver;
+  TwoWire& bus;
+  bool available;
+};
+
 #endif

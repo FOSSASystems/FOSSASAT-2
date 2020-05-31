@@ -97,9 +97,9 @@ void setup() {
   // initialize light sensors
   FOSSASAT_DEBUG_PORT.println(F("Light sensors init:"));
   FOSSASAT_DEBUG_PORT.print(F("Y: "));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Light(lightSensorPanelY, LIGHT_SENSOR_Y_PANEL_BUS));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Light(lightSensorPanelY));
   FOSSASAT_DEBUG_PORT.print(F("Top: "));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Light(lightSensorTop, LIGHT_SENSOR_TOP_PANEL_BUS));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Setup_Light(lightSensorTop));
 
   // initialize H-bridges
   FOSSASAT_DEBUG_PORT.println(F("H-bridges init:"));
