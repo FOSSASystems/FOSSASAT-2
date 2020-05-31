@@ -567,6 +567,11 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
         Serial.print(F("loraRxLen = "));
         Serial.println(rxLen);
 
+        uint8_t sensors = 0;
+        memcpy(&sensors, respOptData + 54, sizeof(uint8_t));
+        Serial.print(F("sensors = 0x"));
+        Serial.println(sensors, HEX);
+
       } break;
 
     case RESP_CAMERA_PICTURE: {

@@ -208,7 +208,7 @@ void Communication_Send_Basic_System_Info() {
 
 void Communication_Send_Full_System_Info() {
   // build response frame
-  static const uint8_t optDataLen = 12*sizeof(uint8_t) + 12*sizeof(int16_t) + sizeof(uint16_t) + 2*sizeof(uint32_t) + 2*sizeof(float);
+  static const uint8_t optDataLen = 13*sizeof(uint8_t) + 12*sizeof(int16_t) + sizeof(uint16_t) + 2*sizeof(uint32_t) + 2*sizeof(float);
   uint8_t optData[optDataLen];
   uint8_t* optDataPtr = optData;
 
@@ -305,6 +305,12 @@ void Communication_Send_Full_System_Info() {
 
   uint8_t loraRxLen = PersistentStorage_Get<uint8_t>(FLASH_LORA_RECEIVE_LEN);
   Communication_Frame_Add(&optDataPtr, loraRxLen, "loraRxLen", 1, "");
+  
+  uint8_t sensorStates = (uint8_t)currSensorXA.available << 7 | (uint8_t)currSensorXB.available << 6 |
+                         (uint8_t)currSensorZA.available << 5 | (uint8_t)currSensorZB.available << 4 | 
+                         (uint8_t)currSensorY.available << 3 | (uint8_t)currSensorMPPT.available << 2 | 
+                         (uint8_t)lightSensorPanelY.available << 1 | (uint8_t)lightSensorTop.available << 0;
+  Communication_Frame_Add(&optDataPtr, sensorStates, "sensors", 1, "");
 
   FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
 
