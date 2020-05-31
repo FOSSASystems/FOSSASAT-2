@@ -89,10 +89,9 @@
 #define CAMERA_CS                                       PB6
 
 // GPS
-#define GPS_TX                                          PA0   // GPS UART pins are set in build_opt.h file
+#define GPS_TX                                          PA0
 #define GPS_RX                                          PA1
 #define GPS_POWER_FET                                   PC3
-#define GpsSerial                                       Serial4
 
 // control FETs
 #define DEPLOYMENT_FET_1                                PB1
@@ -474,6 +473,9 @@ extern TwoWire Wire2;
 extern SPIClass RadioSPI;
 extern SPIClass FlashSPI;
 
+// additional UART interface
+extern HardwareSerial GpsSerial;
+
 // RadioLib instances
 extern SX1268 radio;
 extern MorseClient morse;
@@ -517,6 +519,14 @@ extern Adafruit_INA260 currSensorMPPT;
 // light sensors
 extern Adafruit_VEML7700 lightSensorPanelY;
 extern Adafruit_VEML7700 lightSensorTop;
+
+// GPS logging variables (global since GPS logging is event-driven)
+extern uint8_t buff[];
+extern uint16_t buffPos;
+extern uint32_t flashPos;
+extern uint32_t lastFixAddr;
+extern bool overwrite;
+extern uint32_t gpsLoggingStart;
 
 void Configuration_Setup();
 

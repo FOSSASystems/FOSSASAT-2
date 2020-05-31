@@ -26,6 +26,9 @@ TwoWire Wire2;
 SPIClass RadioSPI(RADIO_MOSI, RADIO_MISO, RADIO_SCK);
 SPIClass FlashSPI(FLASH_MOSI, FLASH_MISO, FLASH_SCK);
 
+// additional UART interface
+HardwareSerial GpsSerial(GPS_RX, GPS_TX);
+
 // RadioLib instances
 SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_NRST, RADIO_BUSY, RadioSPI, SPISettings(2000000, MSBFIRST, SPI_MODE0));
 MorseClient morse(&radio);
@@ -70,6 +73,14 @@ Adafruit_INA260 currSensorMPPT = Adafruit_INA260();
 // light sensors
 Adafruit_VEML7700 lightSensorPanelY = Adafruit_VEML7700();
 Adafruit_VEML7700 lightSensorTop = Adafruit_VEML7700();
+
+// GPS logging variables (global since GPS logging is done from serialEvent)
+uint8_t buff[FLASH_NMEA_LOG_SLOT_SIZE];
+uint16_t buffPos;
+uint32_t flashPos;
+uint32_t lastFixAddr;
+bool overwrite;
+uint32_t gpsLoggingStart;
 
 void Configuration_Setup() {
   // initialize pins
