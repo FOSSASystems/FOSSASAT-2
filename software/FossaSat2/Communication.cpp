@@ -1168,6 +1168,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         uint8_t respOptData[7];
 
+        // command with long execution time - enable reception
+        radio.startReceive();
+
         // clear faults
         bridgeX.getFault();
         bridgeY.getFault();
@@ -1207,6 +1210,14 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // pet watchdog
           PowerControl_Watchdog_Heartbeat();
+
+          // check new packets
+          Communication_Check_New_Packet();
+          if(abortExecution) {
+            abortExecution = false;
+            radio.standby();
+            break;
+          }
         }
 
         // stop everything

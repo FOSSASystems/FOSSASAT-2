@@ -955,14 +955,15 @@ void setRTC(uint8_t year, uint8_t month, uint8_t day, uint8_t weekDay, uint8_t h
   sendFrameEncrypted(CMD_SET_RTC, 7, optData);
 }
 
-void runADCS(int8_t x, int8_t y, int8_t z, uint32_t duration) {
+void runADCS(int8_t x, int8_t y, int8_t z, uint32_t duration, uint8_t ignoreFlags) {
   Serial.print(F("Sending ADCS request ... "));
-  uint8_t optData[7];
+  uint8_t optData[8];
   optData[0] = x;
   optData[1] = y;
   optData[2] = z;
   memcpy(optData + 3, &duration, sizeof(uint32_t));
-  sendFrameEncrypted(CMD_RUN_MANUAL_ACS, 7, optData);
+  optData[7] = ignoreFlags;
+  sendFrameEncrypted(CMD_RUN_MANUAL_ACS, 8, optData);
 }
 
 void getFullSystemInfo() {
@@ -1174,7 +1175,7 @@ void loop() {
         setRTC(21, 4, 2, 5, 20, 10, 50);
         break;
       case 'a':
-        runADCS(-60, 0, 30, 10000);
+        runADCS(-60, 0, 30, 10000, 0b00000111);
         break;
       case 'I':
         getFullSystemInfo();
