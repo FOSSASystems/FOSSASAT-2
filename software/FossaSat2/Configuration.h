@@ -89,7 +89,7 @@
 #define CAMERA_CS                                       PB6
 
 // GPS
-#define GPS_TX                                          PA0
+#define GPS_TX                                          PA0   // GPS UART pins are set in build_opt.h file
 #define GPS_RX                                          PA1
 #define GPS_POWER_FET                                   PC3
 #define GpsSerial                                       Serial4
