@@ -1358,6 +1358,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         }
         #endif
 
+        // command with long execution time - enable reception
+        radio.startReceive();
+
         // wipe GPS log
         Navigation_GNSS_Wipe_Log();
 
@@ -1366,7 +1369,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // wait for offset to elapse
         FOSSASAT_DEBUG_PRINTLN(F("Waiting for offset to elapse"));
-        PowerControl_Wait(offset, LOW_POWER_SLEEP, true);
+        PowerControl_Wait(offset, LOW_POWER_SLEEP);
 
         // setup logging variables
         Navigation_GNSS_Setup_Logging();
@@ -1377,6 +1380,14 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           // check new data
           Navigation_GNSS_SerialEvent();
           PowerControl_Watchdog_Heartbeat();
+
+          // check new packets
+          Communication_Check_New_Packet();
+          if(abortExecution) {
+            abortExecution = false;
+            Navigation_GNSS_Finish_Logging();
+            return;
+          }
 
           // check battery
           #ifdef ENABLE_TRANSMISSION_CONTROL
@@ -1389,8 +1400,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // finish logging
         uint32_t logged = Navigation_GNSS_Finish_Logging();
+        radio.standby();
 
-        // sned response
+        // send response
         const uint8_t respOptDataLen = 3*sizeof(uint32_t);
         uint8_t respOptData[respOptDataLen];
         memcpy(respOptData, &logged, sizeof(uint32_t));
