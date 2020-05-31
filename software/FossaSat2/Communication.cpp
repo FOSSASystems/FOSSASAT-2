@@ -380,6 +380,14 @@ template void Communication_Frame_Add<int16_t>(uint8_t**, int16_t, const char*, 
 template void Communication_Frame_Add<uint16_t>(uint8_t**, uint16_t, const char*, uint32_t, const char*);
 template void Communication_Frame_Add<uint32_t>(uint8_t**, uint32_t, const char*, uint32_t, const char*);
 
+void Communication_Check_New_Packet() {
+  if(digitalRead(RADIO_DIO1)) {
+    radio.standby();
+    Communication_Process_Packet();
+    radio.startReceive();
+  }
+}
+
 void Communication_Acknowledge(uint8_t functionId, uint8_t result) {
   uint8_t optData[] = { functionId, result };
   Communication_Send_Response(RESP_ACKNOWLEDGE, optData, 2);
@@ -523,6 +531,23 @@ void Comunication_Parse_Frame(uint8_t* frame, uint8_t len) {
 void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t optDataLen) {
   // increment valid frame counter
   PersistentStorage_Increment_Frame_Counter(true);
+
+  // check science mode flag
+  if(scienceModeActive) {
+    // we're in science mode, allow only whitelisted commands
+    const uint8_t whitelist[] = SCIENCE_MODE_CMD_WHITELIST;
+    bool idAllowed = false;
+    for(uint8_t i = 0; i < sizeof(whitelist); i++) {
+      if(functionId == whitelist[i]) {
+        idAllowed = true;
+      }
+    }
+
+    // check if the command is on whitelist
+    if(!idAllowed) {
+      return;
+    }
+  }
 
   // acknowledge frame
   Communication_Acknowledge(functionId, 0x00);
@@ -771,10 +796,14 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           }
 
           if(optData[0] & 0b00010000) {
+            // command with long execution time - enable reception
+            radio.startReceive();
+            
             // wipe image lengths
             FOSSASAT_DEBUG_PRINTLN(F("Wiping image lengths"));
             for(uint8_t i = 0; i < 6; i++) {
               PersistentStorage_SectorErase(FLASH_IMAGE_PROPERTIES + i*FLASH_SECTOR_SIZE);
+              Communication_Check_New_Packet();
               PowerControl_Watchdog_Heartbeat();
             }
 
@@ -782,9 +811,11 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             FOSSASAT_DEBUG_PRINTLN(F("Wiping images (will take about 3 minutes)"));
             for(uint32_t addr = FLASH_IMAGES_START; addr < FLASH_CHIP_SIZE; addr += FLASH_64K_BLOCK_SIZE) {
               PersistentStorage_64kBlockErase(addr);
+              Communication_Check_New_Packet();
               PowerControl_Watchdog_Heartbeat();
             }
             FOSSASAT_DEBUG_PRINTLN(F("Image wipe done"));
+            radio.standby();
           }
         }
       } break;
@@ -1174,8 +1205,6 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       }
         
       if(Communication_Check_OptDataLen(4, optDataLen)) {
-        // TODO send only scan data (ff c0 ... ff d9), should save about 1 kB
-
         // get the basic info
         FOSSASAT_DEBUG_PRINT(F("Reading slot: "));
         uint8_t slot = optData[0];

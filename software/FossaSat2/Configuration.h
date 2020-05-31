@@ -286,8 +286,45 @@
 #define LORA_RECEIVE_WINDOW_LENGTH                      40          /*!< How long to listen out for LoRa transmissions for (s) */
 #define FSK_RECEIVE_WINDOW_LENGTH                       20          /*!< How long to listen out for FSK transmissions for (s) */
 #define RESPONSE_DELAY                                  500         /*!< How long to wait for before responding to a transmission (ms) */
-#define RESPONSE_DELAY_SHORT                            0         /*!< Shorter version of RESPONSE_DELAY to be used for certain frames (e.g. picture downlink) (ms) */
+#define RESPONSE_DELAY_SHORT                            0           /*!< Shorter version of RESPONSE_DELAY to be used for certain frames (e.g. picture downlink) (ms) */
 #define WHITENING_INITIAL                               0x1FF       /*!< Whitening LFSR initial value, to ensure SX127x compatibility */
+#define SCIENCE_MODE_CMD_WHITELIST                      { \
+                                                          /* CMD_PING,*/ \
+                                                          /* CMD_RETRANSMIT,*/ \
+                                                          /* CMD_RETRANSMIT_CUSTOM,*/ \
+                                                          CMD_TRANSMIT_SYSTEM_INFO, \
+                                                          CMD_GET_PACKET_INFO, \
+                                                          /* CMD_GET_STATISTICS,*/ \
+                                                          CMD_GET_FULL_SYSTEM_INFO, \
+                                                          /* CMD_STORE_AND_FORWARD_ADD,*/ \
+                                                          /* CMD_STORE_AND_FORWARD_REQUEST,*/ \
+                                                          CMD_DEPLOY, \
+                                                          CMD_RESTART, \
+                                                          /* CMD_WIPE_EEPROM,*/ \
+                                                          CMD_SET_CALLSIGN, \
+                                                          CMD_SET_SF_MODE, \
+                                                          CMD_SET_MPPT_MODE, \
+                                                          CMD_SET_LOW_POWER_ENABLE, \
+                                                          CMD_SET_RECEIVE_WINDOWS, \
+                                                          /* CMD_RECORD_SOLAR_CELLS,*/ \
+                                                          CMD_CAMERA_CAPTURE, \
+                                                          CMD_SET_POWER_LIMITS, \
+                                                          CMD_SET_RTC, \
+                                                          /* CMD_RECORD_IMU,*/ \
+                                                          /* CMD_RUN_MANUAL_ACS,*/ \
+                                                          /* CMD_LOG_GPS,*/ \
+                                                          /* CMD_GET_GPS_LOG,*/ \
+                                                          CMD_GET_FLASH_CONTENTS, \
+                                                          /* CMD_GET_PICTURE_LENGTH,*/ \
+                                                          /* CMD_GET_PICTURE_BURST,*/ \
+                                                          CMD_ROUTE, \
+                                                          CMD_SET_FLASH_CONTENTS, \
+                                                          CMD_SET_TLE, \
+                                                          /* CMD_GET_GPS_LOG_STATE,*/ \
+                                                          /* CMD_RUN_GPS_COMMAND,*/ \
+                                                          CMD_SET_SLEEP_INTERVALS, \
+                                                          CMD_ABORT \
+                                                         }          /*!< List of function IDs that remain available in "science mode" (e.g. logging GPS or ADCS closed-loop control) */
 
 // LoRa
 #define LORA_FREQUENCY                                  436.7       /*!< MHz */
@@ -419,9 +456,11 @@ extern volatile bool interruptsEnabled;
 // flag to signal data was received from ISR
 extern volatile bool dataReceived;
 
+// flag to incidacte whenther "science mode" is currently active or not
+extern volatile bool scienceModeActive;
+
 // current modem configuration
 extern uint8_t currentModem;
-
 extern uint8_t spreadingFactorMode;
 
 // second I2C interface

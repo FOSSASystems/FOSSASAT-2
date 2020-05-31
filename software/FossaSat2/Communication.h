@@ -23,6 +23,7 @@ template <typename T>
 void Communication_Frame_Add(uint8_t** buffPtr, T val, const char* name, uint32_t mult, const char* unit);
 
 // FOSSA Communication Protocol frame handling
+void Communication_Check_New_Packet();
 void Communication_Acknowledge(uint8_t functionId, uint8_t result);
 void Communication_Process_Packet();
 void Comunication_Parse_Frame(uint8_t* frame, uint8_t len);

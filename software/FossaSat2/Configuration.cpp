@@ -9,9 +9,11 @@ volatile bool interruptsEnabled = true;
 // flag to signal data was received from ISR
 volatile bool dataReceived = false;
 
+// flag to incidacte whenther "science mode" is currently active or not
+volatile bool scienceModeActive = false;
+
 // current modem configuration
 uint8_t currentModem = MODEM_FSK;
-
 uint8_t spreadingFactorMode = LORA_SPREADING_FACTOR;
 
 // second I2C instance

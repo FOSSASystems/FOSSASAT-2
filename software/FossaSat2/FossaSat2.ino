@@ -387,11 +387,7 @@ void loop() {
 
   for(uint8_t i = 0; i < windowLenLoRa; i++) {
     PowerControl_Wait(1000, LOW_POWER_SLEEP);
-    if(digitalRead(RADIO_DIO1)) {
-      radio.standby();
-      Communication_Process_Packet();
-      radio.startReceive();
-    }
+    Communication_Check_New_Packet();
   }
 
   // GFSK receive
@@ -409,11 +405,7 @@ void loop() {
 
   for(uint8_t i = 0; i < windowLenFsk; i++) {
     PowerControl_Wait(1000, LOW_POWER_SLEEP);
-    if(digitalRead(RADIO_DIO1)) {
-      radio.standby();
-      Communication_Process_Packet();
-      radio.startReceive();
-    }
+    Communication_Check_New_Packet();
   }
 
   radio.standby();
