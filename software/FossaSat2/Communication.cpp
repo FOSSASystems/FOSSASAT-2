@@ -1064,6 +1064,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // get initial IMU update
         Sensors_IMU_Update();
 
+        // command with long execution time - enable reception
+        radio.startReceive();
+
         // measure all samples
         for(uint16_t i = 0; i < numSamples; i++) {
           // check if the battery is good enough to continue
@@ -1114,7 +1117,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           }
 
           // send the sample
+          radio.standby();
           Communication_Send_Response(RESP_RECORDED_IMU, respOptData, respOptDataLen);
+          radio.startReceive();
 
           // reset pointer
           respOptDataPtr = respOptData + 1;
@@ -1126,6 +1131,13 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
             // pet watchdog
             PowerControl_Watchdog_Heartbeat();
+
+            // check new packets
+            Communication_Check_New_Packet();
+            if(abortExecution) {
+              abortExecution = false;
+              return;
+            }
           }
         }
       }

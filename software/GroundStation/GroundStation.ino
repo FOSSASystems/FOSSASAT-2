@@ -1155,7 +1155,7 @@ void loop() {
         requestRetransmitCustom();
         break;
       case 'o':
-        recordIMU(200, 100, 0b00000111);
+        recordIMU(200, 1000, 0b00000111);
         break;
       case 'u':
         Serial.print(F("Sending unknown frame ... "));
@@ -1165,7 +1165,7 @@ void loop() {
         getStats(0b00001111);
         break;
       case 'c':
-        cameraCapture(0, OV2640_320x240, Auto, Saturation0, Brightness0, Contrast0, Normal);
+        cameraCapture(0, OV2640_160x120, Auto, Saturation0, Brightness0, Contrast0, Normal);
         break;
       case 'e':
         setPowerLimits(3600, 3700, 3750, 3900, 4.2, -1.5, 126);
@@ -1186,7 +1186,7 @@ void loop() {
         readFlash(0x80, 128);
         break;
       case 'g':
-        logGps(120*60*1000UL, 0);
+        logGps(1*60*1000UL, 0);
         break;
       case 'G':
         getGpsLog(1, 0, 50);
