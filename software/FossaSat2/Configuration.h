@@ -509,12 +509,12 @@ extern MiniMoto bridgeZ;
 extern LSM9DS1 imu;
 
 // current sensors
-extern Adafruit_INA260 currSensorXA;
-extern Adafruit_INA260 currSensorXB;
-extern Adafruit_INA260 currSensorZA;
-extern Adafruit_INA260 currSensorZB;
-extern Adafruit_INA260 currSensorY;
-extern Adafruit_INA260 currSensorMPPT;
+extern currentSensor_t currSensorXA;
+extern currentSensor_t currSensorXB;
+extern currentSensor_t currSensorZA;
+extern currentSensor_t currSensorZB;
+extern currentSensor_t currSensorY;
+extern currentSensor_t currSensorMPPT;
 
 // light sensors
 extern lightSensor_t lightSensorPanelY;

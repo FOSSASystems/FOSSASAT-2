@@ -17,4 +17,11 @@ struct lightSensor_t {
   bool available;
 };
 
+struct currentSensor_t {
+  Adafruit_INA260* driver;
+  TwoWire& bus;
+  uint8_t addr;
+  bool available;
+};
+
 #endif

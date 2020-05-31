@@ -63,12 +63,12 @@ MiniMoto bridgeZ(ADCS_Z_BRIDGE_ADDRESS);
 LSM9DS1 imu;
 
 // current sensors
-Adafruit_INA260 currSensorXA = Adafruit_INA260();
-Adafruit_INA260 currSensorXB = Adafruit_INA260();
-Adafruit_INA260 currSensorZA = Adafruit_INA260();
-Adafruit_INA260 currSensorZB = Adafruit_INA260();
-Adafruit_INA260 currSensorY = Adafruit_INA260();
-Adafruit_INA260 currSensorMPPT = Adafruit_INA260();
+currentSensor_t currSensorXA =    { .driver = new Adafruit_INA260(), .bus = CURR_SENSOR_X_A_BUS,          .addr = CURR_SENSOR_X_A_ADDRESS,          .available = false };
+currentSensor_t currSensorXB =    { .driver = new Adafruit_INA260(), .bus = CURR_SENSOR_X_B_BUS,          .addr = CURR_SENSOR_X_B_ADDRESS,          .available = false };
+currentSensor_t currSensorZA =    { .driver = new Adafruit_INA260(), .bus = CURR_SENSOR_Z_A_BUS,          .addr = CURR_SENSOR_Z_A_ADDRESS,          .available = false };
+currentSensor_t currSensorZB =    { .driver = new Adafruit_INA260(), .bus = CURR_SENSOR_Z_B_BUS,          .addr = CURR_SENSOR_Z_B_ADDRESS,          .available = false };
+currentSensor_t currSensorY  =    { .driver = new Adafruit_INA260(), .bus = CURR_SENSOR_Y_BUS,            .addr = CURR_SENSOR_Y_ADDRESS,            .available = false };
+currentSensor_t currSensorMPPT =  { .driver = new Adafruit_INA260(), .bus = CURR_SENSOR_MPPT_OUTPUT_BUS,  .addr = CURR_SENSOR_MPPT_OUTPUT_ADDRESS,  .available = false };
 
 // light sensors
 lightSensor_t lightSensorPanelY = { .driver = new Adafruit_VEML7700(), .bus = LIGHT_SENSOR_Y_PANEL_BUS,   .available = false };

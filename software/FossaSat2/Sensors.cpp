@@ -69,64 +69,62 @@ void Sensors_IMU_Sleep(bool sleep) {
   imu.sleepGyro(sleep);
 }
 
-bool Sensors_Current_Setup(Adafruit_INA260& sensor, TwoWire& wire, uint8_t addr) {
+bool Sensors_Current_Setup(currentSensor_t& sensor) {
   FOSSASAT_DEBUG_PRINT(F("Current sensor 0b"));
-  FOSSASAT_DEBUG_PRINT(addr, BIN);
+  FOSSASAT_DEBUG_PRINT(sensor.addr, BIN);
   FOSSASAT_DEBUG_PRINT(F(" init ... "));
 
   // initialize the current sensor
-  if (!sensor.begin(addr, &wire)) {
+  if (!sensor.driver->begin(sensor.addr, &(sensor.bus))) {
     FOSSASAT_DEBUG_PRINTLN(F("failed!"));
+    sensor.available = false;
     return(false);
   }
   FOSSASAT_DEBUG_PRINTLN(F("success!"));
 
   // set sensor to sleep by default
-  sensor.setMode(INA260_MODE_SHUTDOWN);
+  sensor.driver->setMode(INA260_MODE_SHUTDOWN);
+  sensor.available = true;
   
   return(true);
 }
 
-float Sensors_Current_Read(Adafruit_INA260& sensor) {
-  #ifdef OVERRIDE_INA
-    if(&sensor == &OVERRIDE_INA) {
-      return(0);
-    }
-  #endif
+float Sensors_Current_Read(currentSensor_t& sensor) {
+  if(!(sensor.available)) {
+    return(0);
+  }
   
   // wake up the sensor
-  sensor.setMode(INA260_MODE_CONTINUOUS);
+  sensor.driver->setMode(INA260_MODE_CONTINUOUS);
 
   // wait for full recovery
   delayMicroseconds(60);
   
   // read the value
-  float current = sensor.readCurrent();
+  float current = sensor.driver->readCurrent();
   
   // set the sensor back to sleep
-  sensor.setMode(INA260_MODE_SHUTDOWN);
+  sensor.driver->setMode(INA260_MODE_SHUTDOWN);
 
   return(current);
 }
 
-float Sensors_Current_ReadVoltage(Adafruit_INA260& sensor) {
-  #ifdef OVERRIDE_INA
-    if(&sensor == &OVERRIDE_INA) {
-      return(0);
-    }
-  #endif
+float Sensors_Current_ReadVoltage(currentSensor_t& sensor) {
+  if(!(sensor.available)) {
+    return(0);
+  }
   
   // wake up the sensor
-  sensor.setMode(INA260_MODE_CONTINUOUS);
+  sensor.driver->setMode(INA260_MODE_CONTINUOUS);
 
   // wait for full recovery
   delayMicroseconds(60);
 
   // read the value
-  float voltage = sensor.readBusVoltage();
+  float voltage = sensor.driver->readBusVoltage();
   
   // set the sensor back to sleep
-  sensor.setMode(INA260_MODE_SHUTDOWN);
+  sensor.driver->setMode(INA260_MODE_SHUTDOWN);
 
   return(voltage);
 }

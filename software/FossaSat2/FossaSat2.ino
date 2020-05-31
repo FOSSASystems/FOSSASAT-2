@@ -39,17 +39,17 @@ void setup() {
   // initialize current sensors
   FOSSASAT_DEBUG_PORT.println(F("Current sensors init:"));
   FOSSASAT_DEBUG_PORT.print(F("XA: "));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorXA, CURR_SENSOR_X_A_BUS, CURR_SENSOR_X_A_ADDRESS));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorXA));
   FOSSASAT_DEBUG_PORT.print(F("XB: "));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorXB, CURR_SENSOR_X_B_BUS, CURR_SENSOR_X_B_ADDRESS));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorXB));
   FOSSASAT_DEBUG_PORT.print(F("ZA: "));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorZA, CURR_SENSOR_Z_A_BUS, CURR_SENSOR_Z_A_ADDRESS));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorZA));
   FOSSASAT_DEBUG_PORT.print(F("ZB: "));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorZB, CURR_SENSOR_Z_B_BUS, CURR_SENSOR_Z_B_ADDRESS));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorZB));
   FOSSASAT_DEBUG_PORT.print(F("Y: "));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorY, CURR_SENSOR_Y_BUS, CURR_SENSOR_Y_ADDRESS));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorY));
   FOSSASAT_DEBUG_PORT.print(F("MPPT: "));
-  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorMPPT, CURR_SENSOR_MPPT_OUTPUT_BUS, CURR_SENSOR_MPPT_OUTPUT_ADDRESS));
+  FOSSASAT_DEBUG_PORT.println(Sensors_Current_Setup(currSensorMPPT));
 
   // initialize radio
   FOSSASAT_DEBUG_PORT.print(F("LoRa modem init: "));
