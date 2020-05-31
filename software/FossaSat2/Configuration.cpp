@@ -23,9 +23,6 @@ TwoWire Wire2;
 SPIClass RadioSPI(RADIO_MOSI, RADIO_MISO, RADIO_SCK);
 SPIClass FlashSPI(FLASH_MOSI, FLASH_MISO, FLASH_SCK);
 
-// additional UART interface
-HardwareSerial GpsSerial(GPS_RX, GPS_TX);
-
 // RadioLib instances
 SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_NRST, RADIO_BUSY, RadioSPI, SPISettings(2000000, MSBFIRST, SPI_MODE0));
 MorseClient morse(&radio);

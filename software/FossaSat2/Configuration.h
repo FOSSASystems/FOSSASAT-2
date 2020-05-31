@@ -92,6 +92,7 @@
 #define GPS_TX                                          PA0
 #define GPS_RX                                          PA1
 #define GPS_POWER_FET                                   PC3
+#define GpsSerial                                       Serial4
 
 // control FETs
 #define DEPLOYMENT_FET_1                                PB1
@@ -469,9 +470,6 @@ extern TwoWire Wire2;
 // additional SPI interfaces
 extern SPIClass RadioSPI;
 extern SPIClass FlashSPI;
-
-// additional UART interface
-extern HardwareSerial GpsSerial;
 
 // RadioLib instances
 extern SX1268 radio;

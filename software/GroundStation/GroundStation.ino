@@ -969,12 +969,13 @@ void getFullSystemInfo() {
   sendFrame(CMD_GET_FULL_SYSTEM_INFO);
 }
 
-void getPictureBurst(uint8_t slot, uint16_t startingId) {
+void getPictureBurst(uint8_t slot, uint16_t startingId, uint8_t scanOnly) {
   Serial.print(F("Sending picture transfer request ... "));
-  uint8_t optData[3];
+  uint8_t optData[4];
   optData[0] = slot;
   memcpy(optData + 1, &startingId, sizeof(uint16_t));
-  sendFrameEncrypted(CMD_GET_PICTURE_BURST, 3, optData);
+  optData[3] = scanOnly;
+  sendFrameEncrypted(CMD_GET_PICTURE_BURST, 4, optData);
 }
 
 void readFlash(uint32_t addr, uint8_t len) {
@@ -1178,7 +1179,7 @@ void loop() {
         getFullSystemInfo();
         break;
       case 'P':
-        getPictureBurst(0, 0);
+        getPictureBurst(0, 0, 1);
         break;
       case 'F':
         readFlash(0x80, 128);
