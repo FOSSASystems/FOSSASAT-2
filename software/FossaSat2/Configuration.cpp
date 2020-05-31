@@ -10,7 +10,10 @@ volatile bool interruptsEnabled = true;
 volatile bool dataReceived = false;
 
 // flag to incidacte whenther "science mode" is currently active or not
-volatile bool scienceModeActive = false;
+bool scienceModeActive = false;
+
+// flag to abort currently running process
+bool abortExecution = false;
 
 // current modem configuration
 uint8_t currentModem = MODEM_FSK;

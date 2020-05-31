@@ -429,6 +429,7 @@ void loop() {
   PowerControl_Wait(interval, LOW_POWER_SLEEP, true);
 }
 
+// cppcheck-suppress unusedFunction
 void serialEvent4() {
   PowerControl_Watchdog_Heartbeat(false);
 }

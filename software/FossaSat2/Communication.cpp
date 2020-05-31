@@ -803,16 +803,28 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             FOSSASAT_DEBUG_PRINTLN(F("Wiping image lengths"));
             for(uint8_t i = 0; i < 6; i++) {
               PersistentStorage_SectorErase(FLASH_IMAGE_PROPERTIES + i*FLASH_SECTOR_SIZE);
-              Communication_Check_New_Packet();
               PowerControl_Watchdog_Heartbeat();
+
+              // check new packets
+              Communication_Check_New_Packet();
+              if(abortExecution) {
+                abortExecution = false;
+                return;
+              }
             }
 
             // wipe all 64k image blocks
             FOSSASAT_DEBUG_PRINTLN(F("Wiping images (will take about 3 minutes)"));
             for(uint32_t addr = FLASH_IMAGES_START; addr < FLASH_CHIP_SIZE; addr += FLASH_64K_BLOCK_SIZE) {
               PersistentStorage_64kBlockErase(addr);
-              Communication_Check_New_Packet();
               PowerControl_Watchdog_Heartbeat();
+
+              // check new packets
+              Communication_Check_New_Packet();
+              if(abortExecution) {
+                abortExecution = false;
+                return;
+              }
             }
             FOSSASAT_DEBUG_PRINTLN(F("Image wipe done"));
             radio.standby();
@@ -1738,6 +1750,11 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         }
       }
       
+    } break;
+
+    case CMD_ABORT: {
+      FOSSASAT_DEBUG_PRINTLN(F("Aborting current operation"));
+      abortExecution = true;
     } break;
 
     default:

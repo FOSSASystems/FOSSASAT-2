@@ -228,6 +228,7 @@ void printControls() {
   Serial.println(F("H - get GPS log state"));
   Serial.println(F("j - run GPS command"));
   Serial.println(F("J - set sleep intervals"));
+  Serial.println(F("A - abort current operation"));
   Serial.println(F("------------------------------------"));
 }
 
@@ -1218,6 +1219,9 @@ void loop() {
         uint16_t sleepIntervals[] = { 4050, 20, 4000, 35, 3900, 100, 3800, 160, 3700, 180, 3300, 200, 0, 20};
         setSleepIntervals(sleepIntervals, 7);
       } break;
+      case 'A':
+        sendFrameEncrypted(CMD_ABORT);
+        break;
       default:
         Serial.print(F("Unknown command: "));
         Serial.println(serialCmd);

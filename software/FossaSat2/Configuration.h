@@ -458,7 +458,10 @@ extern volatile bool interruptsEnabled;
 extern volatile bool dataReceived;
 
 // flag to incidacte whenther "science mode" is currently active or not
-extern volatile bool scienceModeActive;
+extern bool scienceModeActive;
+
+// flag to abort currently running process
+extern bool abortExecution;
 
 // current modem configuration
 extern uint8_t currentModem;
