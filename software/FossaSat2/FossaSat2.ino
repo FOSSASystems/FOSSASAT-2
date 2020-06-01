@@ -281,6 +281,9 @@ void setup() {
     PersistentStorage_Set(FLASH_DEPLOYMENT_COUNTER, attemptNumber);
   }
 #endif
+
+  // update system info flash page
+  PersistentStorage_Set_Buffer(FLASH_SYSTEM_INFO, systemInfoBuffer, FLASH_EXT_PAGE_SIZE);
 }
 
 // cppcheck-suppress unusedFunction
