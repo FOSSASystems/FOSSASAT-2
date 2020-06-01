@@ -21,13 +21,6 @@
 #define MX25L51245G_SR_WEL                              0b00000010
 #define MX25L51245G_SR_WIP                              0b00000001
 
-#define FLASH_EXT_PAGE_SIZE                             0x00000100
-#define FLASH_STATS                                     0x00001000
-#define FLASH_SYSTEM_INFO_START                         0x00000000
-#define FLASH_SYSTEM_INFO_LEN                          (FLASH_EXT_PAGE_SIZE)
-#define FLASH_SYSTEM_INFO_CRC                           0x000000F8  //  0x000000F8    0x000000FB
-#define FLASH_MEMORY_ERROR_COUNTER                      0x000000FC  //  0x000000FC    0x000000FF
-
 /*
     CRC32 Implementation based on GCC libiberty library, under the following license:
 
@@ -184,52 +177,20 @@ bool PersistentStorage_WaitForWriteInProgress(uint32_t timeout = 50);
 void PersistentStorage_SPItransaction(uint8_t cmd, bool write = true, uint8_t* data = NULL, size_t numBytes = 0);
 void PersistentStorage_SPItransaction(uint8_t* cmd, uint8_t cmdLen, bool write, uint8_t* data, size_t numBytes);
 
-// get/set only affect RAM buffer, changed values will be saved to flash only on main loop end!
-extern uint8_t systemInfoBuffer[];
+// system info get/set only affect RAM buffer, changed values will be saved to flash only on main loop end!
 template<typename T>
-T PersistentStorage_Get(uint8_t addr) {
-  T t;
-  memcpy(&t, systemInfoBuffer + addr, sizeof(T));
-  return(t);
-}
-
+T PersistentStorage_SystemInfo_Get(uint8_t addr);
 template<typename T>
-void PersistentStorage_Set(uint8_t addr, T t) {
-  // check address is in system info
-  if(addr > (FLASH_SYSTEM_INFO_LEN - 1)) {
-    return;
-  }
+void PersistentStorage_SystemInfo_Set(uint8_t addr, T t);
 
-  // set the new value to RAM buffer
-  memcpy(systemInfoBuffer + addr, &t, sizeof(T));
-}
+// generic get/set
+template<typename T>
+T PersistentStorage_Get(uint32_t addr);
+template<typename T>
+void PersistentStorage_Set(uint32_t addr, T t);
 
 template <typename T>
-void PersistentStorage_Update_Stat(uint8_t* statBuff, uint32_t addr, T val) {
-  uint32_t statAddr = addr - FLASH_STATS;
-  size_t typeSize = sizeof(T);
-
-  // get min/avg/max
-  T min = 0;
-  memcpy(&min, statBuff + statAddr, typeSize);
-  T avg = 0;
-  memcpy(&avg, statBuff + statAddr + typeSize, typeSize);
-  T max = 0;
-  memcpy(&max, statBuff + statAddr + 2*typeSize, typeSize);
-
-  // update stats
-  if(val < min) {
-    memcpy(statBuff + statAddr, &val, typeSize);
-  }
-  
-  avg = (avg + val)/((T)2);
-  memcpy(statBuff + statAddr + typeSize, &avg, typeSize);
-
-  if(val > max) {
-    memcpy(statBuff + statAddr + 2*typeSize, &val, typeSize);
-  }
-}
-
+void PersistentStorage_Update_Stat(uint8_t* statBuff, uint32_t addr, T val);
 void PersistentStorage_Update_Stats(uint8_t flags);
 void PersistentStorage_Reset_Stats();
 

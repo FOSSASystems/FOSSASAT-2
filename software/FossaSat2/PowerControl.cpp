@@ -116,12 +116,12 @@ float PowerControl_Get_Battery_Voltage() {
 
 void PowerControl_Manage_Battery() {
   // check battery voltage
-  if((PowerControl_Get_Battery_Voltage() <= PersistentStorage_Get<uint16_t>(FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT)) && (PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED) == 1)) {
+  if((PowerControl_Get_Battery_Voltage() <= PersistentStorage_SystemInfo_Get<uint16_t>(FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT)) && (PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED) == 1)) {
     // activate low power mode
     systemInfoBuffer[FLASH_LOW_POWER_MODE] = LOW_POWER_SLEEP;
 
     // write the change immediately if power mode changed
-    if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
+    if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
       PersistentStorage_Set_Buffer(FLASH_SYSTEM_INFO, systemInfoBuffer, FLASH_EXT_PAGE_SIZE);
     }
     
@@ -131,9 +131,9 @@ void PowerControl_Manage_Battery() {
   }
 
   // check temperature limit to enable/disable charging
-  float mpptTempLimit = PersistentStorage_Get<float>(FLASH_MPPT_TEMP_LIMIT);
-  uint8_t mpptKeepAlive = PersistentStorage_Get<uint8_t>(FLASH_MPPT_KEEP_ALIVE_ENABLED);
-  uint8_t mpptTempSwitch = PersistentStorage_Get<uint8_t>(FLASH_MPPT_TEMP_SWITCH_ENABLED);
+  float mpptTempLimit = PersistentStorage_SystemInfo_Get<float>(FLASH_MPPT_TEMP_LIMIT);
+  uint8_t mpptKeepAlive = PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_MPPT_KEEP_ALIVE_ENABLED);
+  uint8_t mpptTempSwitch = PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_MPPT_TEMP_SWITCH_ENABLED);
   if(mpptKeepAlive == 1) {
     // MPPT keep alive is enabled, force charging regardless of everything else
     digitalWrite(MPPT_OFF, LOW);
@@ -146,12 +146,12 @@ void PowerControl_Manage_Battery() {
   }
 
   // check temperature and voltage limit to enable heater
-  float heaterTempLimit = PersistentStorage_Get<float>(FLASH_BATTERY_HEATER_TEMP_LIMIT);
+  float heaterTempLimit = PersistentStorage_SystemInfo_Get<float>(FLASH_BATTERY_HEATER_TEMP_LIMIT);
   if((Sensors_Temperature_Read(tempSensorBattery) <= heaterTempLimit) && 
      (Sensors_Temperature_Read(tempSensorSecBattery) <= heaterTempLimit) && 
-     (PowerControl_Get_Battery_Voltage() >= PersistentStorage_Get<int16_t>(FLASH_HEATER_BATTERY_VOLTAGE_LIMIT))) {
+     (PowerControl_Get_Battery_Voltage() >= PersistentStorage_SystemInfo_Get<int16_t>(FLASH_HEATER_BATTERY_VOLTAGE_LIMIT))) {
     // both temperatures are below limit and battery is above limit, enable heater
-    analogWrite(BATTERY_HEATER_FET, PersistentStorage_Get<uint8_t>(BATTERY_HEATER_DUTY_CYCLE));
+    analogWrite(BATTERY_HEATER_FET, PersistentStorage_SystemInfo_Get<uint8_t>(BATTERY_HEATER_DUTY_CYCLE));
   } else {
     // temperature is too high or battery is too low, disable heater
     digitalWrite(BATTERY_HEATER_FET, LOW);

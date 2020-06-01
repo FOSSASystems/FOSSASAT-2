@@ -269,9 +269,9 @@ void Navigation_GNSS_Wipe_Log() {
   }
       
   // reset NMEA log length, latest entry and latest fix
-  PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, 0);
-  PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY, FLASH_NMEA_LOG_START);
-  PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, 0);
+  PersistentStorage_SystemInfo_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, 0);
+  PersistentStorage_SystemInfo_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY, FLASH_NMEA_LOG_START);
+  PersistentStorage_SystemInfo_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, 0);
 }
 
 void Navigation_GNSS_Setup_Logging() {
@@ -342,7 +342,7 @@ void Navigation_GNSS_SerialEvent() {
       FOSSASAT_DEBUG_DELAY(10);
       
       // update address of the latest log entry
-      PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY, gpsLogFlashPos);
+      PersistentStorage_SystemInfo_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY, gpsLogFlashPos);
   
       // reset buffer position
       gpsLogBuffPos = sizeof(uint32_t);
@@ -364,7 +364,7 @@ void Navigation_GNSS_SerialEvent() {
 }
 uint32_t Navigation_GNSS_Finish_Logging() {
   // update last fix addres
-  PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, gpsLogLastFixAddr);
+  PersistentStorage_SystemInfo_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, gpsLogLastFixAddr);
 
   // turn GPS off
   digitalWrite(GPS_POWER_FET, POWER_FET_POLARITY_OFF);
@@ -380,6 +380,6 @@ uint32_t Navigation_GNSS_Finish_Logging() {
   }
   FOSSASAT_DEBUG_PRINT(F("Logged total of (bytes): "));
   FOSSASAT_DEBUG_PRINTLN(logged);
-  PersistentStorage_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, logged);
+  PersistentStorage_SystemInfo_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, logged);
   return(logged);
 }

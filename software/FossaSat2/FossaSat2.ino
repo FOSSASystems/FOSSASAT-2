@@ -23,10 +23,10 @@ void setup() {
   PersistentStorage_Enter4ByteMode();
 
   // increment reset counter
-  uint16_t restartCounter = PersistentStorage_Get<uint16_t>(FLASH_RESTART_COUNTER);
+  uint16_t restartCounter = PersistentStorage_SystemInfo_Get<uint16_t>(FLASH_RESTART_COUNTER);
   FOSSASAT_DEBUG_PORT.print(F("Restart #"));
   FOSSASAT_DEBUG_PORT.println(restartCounter++);
-  PersistentStorage_Set(FLASH_RESTART_COUNTER, restartCounter);
+  PersistentStorage_SystemInfo_Set(FLASH_RESTART_COUNTER, restartCounter);
 
 #ifdef RESET_SYSTEM_INFO
   // reset system info (first sector in external flash)
@@ -34,7 +34,7 @@ void setup() {
 #endif
 
   // print system info page
-  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, FLASH_EXT_PAGE_SIZE);
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO, FLASH_EXT_PAGE_SIZE);
 
   // initialize current sensors
   FOSSASAT_DEBUG_PORT.println(F("Current sensors init:"));
@@ -123,7 +123,7 @@ void setup() {
 
   // check deployment
 #ifdef ENABLE_DEPLOYMENT_SEQUENCE
-  uint8_t attemptNumber = PersistentStorage_Get<uint8_t>(FLASH_DEPLOYMENT_COUNTER);
+  uint8_t attemptNumber = PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_DEPLOYMENT_COUNTER);
   FOSSASAT_DEBUG_PORT.print(F("Deployment attempt #"));
   FOSSASAT_DEBUG_PORT.println(attemptNumber);
 
@@ -244,7 +244,7 @@ void setup() {
 
     // increment deployment counter
     attemptNumber++;
-    PersistentStorage_Set(FLASH_DEPLOYMENT_COUNTER, attemptNumber);
+    PersistentStorage_SystemInfo_Set(FLASH_DEPLOYMENT_COUNTER, attemptNumber);
 
   } else if(attemptNumber <= 3) {
     // mid-flight reset, deploy
@@ -257,7 +257,7 @@ void setup() {
     // check voltage
 #ifdef ENABLE_DEPLOYMENT_CHARGING
     uint32_t chargingStart = millis();
-    int16_t voltageLimit = PersistentStorage_Get<int16_t>(FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT);
+    int16_t voltageLimit = PersistentStorage_SystemInfo_Get<int16_t>(FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT);
     while (PowerControl_Get_Battery_Voltage() < voltageLimit) {
       // voltage below 3.7V, wait until charged
       if (millis() - chargingStart >= (uint32_t)DEPLOYMENT_CHARGE_LIMIT * (uint32_t)3600 * (uint32_t)1000) {
@@ -278,7 +278,7 @@ void setup() {
 
     // increment deployment counter
     attemptNumber++;
-    PersistentStorage_Set(FLASH_DEPLOYMENT_COUNTER, attemptNumber);
+    PersistentStorage_SystemInfo_Set(FLASH_DEPLOYMENT_COUNTER, attemptNumber);
   }
 #endif
 
@@ -299,7 +299,7 @@ void loop() {
   // check RTC time
   if(!rtc.isTimeSet()) {
     FOSSASAT_DEBUG_PRINTLN(F("RTC time not set, restoring last saved epoch"));
-    rtc.setEpoch(PersistentStorage_Get<uint32_t>(FLASH_RTC_EPOCH));
+    rtc.setEpoch(PersistentStorage_SystemInfo_Get<uint32_t>(FLASH_RTC_EPOCH));
   } else {
     uint32_t rtcEpoch = rtc.getEpoch();
     memcpy(systemInfoBuffer + FLASH_RTC_EPOCH, &rtcEpoch, sizeof(rtcEpoch));
@@ -312,11 +312,11 @@ void loop() {
   float battVoltage = PowerControl_Get_Battery_Voltage();
   FOSSASAT_DEBUG_PRINTLN(battVoltage, 2);
   PowerControl_Manage_Battery();
-  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO_START, FLASH_EXT_PAGE_SIZE)
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO, FLASH_EXT_PAGE_SIZE)
 
   // update all stats when not in low power mode
   #ifdef ENABLE_TRANSMISSION_CONTROL
-  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
+  if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
     PersistentStorage_Update_Stats(0xFF);
   }
   #else
@@ -328,13 +328,13 @@ void loop() {
   FOSSASAT_DEBUG_DELAY(10);
   
   // get loop number
-  uint8_t numLoops = PersistentStorage_Get<uint8_t>(FLASH_LOOP_COUNTER);
+  uint8_t numLoops = PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOOP_COUNTER);
   
   #ifdef ENABLE_TRANSMISSION_CONTROL
-  if(PersistentStorage_Get<uint8_t>(FLASH_TRANSMISSIONS_ENABLED) == 0) {
+  if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_TRANSMISSIONS_ENABLED) == 0) {
     FOSSASAT_DEBUG_PRINTLN(F("Tx off by cmd"));
   } else {
-    if((battVoltage >= PersistentStorage_Get<int16_t>(FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT)) && (numLoops % MORSE_BEACON_LOOP_FREQ == 0)) {
+    if((battVoltage >= PersistentStorage_SystemInfo_Get<int16_t>(FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT)) && (numLoops % MORSE_BEACON_LOOP_FREQ == 0)) {
     // transmit full Morse beacon
   #endif
   
@@ -362,14 +362,14 @@ void loop() {
   Communication_Send_Full_System_Info(); 
   
   // send stats too (if it's enabled)
-  if(PersistentStorage_Get<uint8_t>(FLASH_AUTO_STATISTICS) == 1) {
+  if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_AUTO_STATISTICS) == 1) {
     Communication_Send_Statistics(0xFF);
   }
 
   // send LoRa system info if not in low power mode
   Communication_Set_Modem(MODEM_LORA);
   #ifdef ENABLE_TRANSMISSION_CONTROL
-  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
+  if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
     Communication_Send_Basic_System_Info();
   }
   #else
@@ -377,9 +377,9 @@ void loop() {
   #endif
 
   // LoRa receive
-  uint8_t windowLenLoRa = PersistentStorage_Get<uint8_t>(FLASH_LORA_RECEIVE_LEN);
+  uint8_t windowLenLoRa = PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LORA_RECEIVE_LEN);
   FOSSASAT_DEBUG_PRINT(F("LoRa Rx "));
-  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
+  if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
     // use only half of the interval in low power mode
     windowLenLoRa /= 2;
     FOSSASAT_DEBUG_PRINT(F("(halved due to LP mode) "));
@@ -394,10 +394,10 @@ void loop() {
   }
 
   // GFSK receive
-  uint8_t windowLenFsk = PersistentStorage_Get<uint8_t>(FLASH_FSK_RECEIVE_LEN);
+  uint8_t windowLenFsk = PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_FSK_RECEIVE_LEN);
   Communication_Set_Modem(MODEM_FSK);
   FOSSASAT_DEBUG_PRINT(F("FSK Rx "));
-  if(PersistentStorage_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
+  if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
     // use only half of the interval in low power mode
     windowLenFsk /= 2;
     FOSSASAT_DEBUG_PRINT(F("(halved due to LP mode) "));

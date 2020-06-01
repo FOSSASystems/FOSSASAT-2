@@ -158,109 +158,117 @@
 #define FLASH_CHIP_SIZE                                 0x04000000
 #define FLASH_IMAGE_NUM_64K_BLOCKS                      8
 
-// Flash address map                                                    LSB           MSB           type
+// Flash address map                                                              LSB           MSB           type
 // 64kB block 0 - system info, stats, image lengths
 // sector 0 page 0 - system info and configuration
-#define FLASH_SYSTEM_INFO                               0x00000000  //  0x00000000    0x000000FF
-#define FLASH_RESTART_COUNTER                           0x00000000  //  0x00000000    0x00000001    uint16_t
-#define FLASH_DEPLOYMENT_COUNTER                        0x00000002  //  0x00000002    0x00000002    uint8_t
-#define FLASH_TRANSMISSIONS_ENABLED                     0x00000003  //  0x00000003    0x00000003    uint8_t
-#define FLASH_CALLSIGN_LEN                              0x00000004  //  0x00000004    0x00000004    uint8_t
-#define FLASH_CALLSIGN                                  0x00000005  //  0x00000005    0x00000025    char[]
-#define FLASH_FSK_RECEIVE_LEN                           0x00000026  //  0x00000026    0x00000026    uint8_t
-#define FLASH_LORA_RECEIVE_LEN                          0x00000027  //  0x00000027    0x00000027    uint8_t
-#define FLASH_RTC_EPOCH                                 0x00000028  //  0x00000028    0x0000002B    uint32_t
-#define FLASH_LORA_VALID_COUNTER                        0x0000002C  //  0x0000002C    0x0000002D    uint16_t
-#define FLASH_LORA_INVALID_COUNTER                      0x0000002E  //  0x0000002E    0x0000002F    uint16_t
-#define FLASH_FSK_VALID_COUNTER                         0x00000030  //  0x00000030    0x00000031    uint16_t
-#define FLASH_FSK_INVALID_COUNTER                       0x00000032  //  0x00000032    0x00000033    uint16_t
-#define FLASH_LOW_POWER_MODE_ENABLED                    0x00000034  //  0x00000034    0x00000034    uint8_t
-#define FLASH_LOW_POWER_MODE                            0x00000035  //  0x00000035    0x00000035    uint8_t
-#define FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT          0x00000036  //  0x00000036    0x00000037    int16_t
-#define FLASH_HEATER_BATTERY_VOLTAGE_LIMIT              0x00000038  //  0x00000038    0x00000039    int16_t
-#define FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT             0x0000003A  //  0x0000003A    0x0000003B    int16_t
-#define FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT              0x0000003C  //  0x0000003C    0x0000003D    int16_t
-#define FLASH_BATTERY_HEATER_TEMP_LIMIT                 0x0000003E  //  0x0000003E    0x00000041    float
-#define FLASH_MPPT_TEMP_LIMIT                           0x00000042  //  0x00000042    0x00000045    float
-#define FLASH_BATTERY_HEATER_DUTY_CYCLE                 0x00000046  //  0x00000046    0x00000046    uint8_t
-#define FLASH_MPPT_TEMP_SWITCH_ENABLED                  0x00000047  //  0x00000047    0x00000047    uint8_t
-#define FLASH_MPPT_KEEP_ALIVE_ENABLED                   0x00000048  //  0x00000048    0x00000048    uint8_t
-#define FLASH_NMEA_LOG_LENGTH                           0x00000049  //  0x00000049    0x0000004C    uint32_t
-#define FLASH_STORE_AND_FORWARD_LENGTH                  0x0000004D  //  0x0000004D    0x0000004E    int16_t
-#define FLASH_AUTO_STATISTICS                           0x0000004F  //  0x0000004F    0x0000004F    uint8_t
-#define FLASH_TLE_EPOCH_DAY                             0x00000050  //  0x00000050    0x00000057    double
-#define FLASH_TLE_BALLISTIC_COEFF                       0x00000058  //  0x00000058    0x0000005F    double
-#define FLASH_TLE_MEAN_MOTION_2ND                       0x00000060  //  0x00000060    0x00000067    double
-#define FLASH_TLE_DRAG_TERM                             0x00000068  //  0x00000068    0x0000006F    double
-#define FLASH_TLE_INCLINATION                           0x00000070  //  0x00000070    0x00000077    double
-#define FLASH_TLE_RIGHT_ASCENTION                       0x00000078  //  0x00000078    0x0000007F    double
-#define FLASH_TLE_ECCENTRICITY                          0x00000080  //  0x00000080    0x00000087    double
-#define FLASH_TLE_PERIGEE_ARGUMENT                      0x00000088  //  0x00000088    0x0000008F    double
-#define FLASH_TLE_MEAN_ANOMALY                          0x00000090  //  0x00000090    0x00000097    double
-#define FLASH_TLE_MEAN_MOTION                           0x00000098  //  0x00000098    0x0000009F    double
-#define FLASH_TLE_REVOLUTION_NUMBER                     0x000000A0  //  0x000000A0    0x000000A3    uint32_t
-#define FLASH_TLE_EPOCH_YEAR                            0x000000A4  //  0x000000A4    0x000000A4    uint8_t
-#define FLASH_NMEA_LOG_LATEST_ENTRY                     0x000000A5  //  0x000000A5    0x000000A8    uint32_t
-#define FLASH_NMEA_LOG_LATEST_FIX                       0x000000A9  //  0x000000A9    0x000000AC    uint32_t
-#define FLASH_LOOP_COUNTER                              0x000000AD  //  0x000000AD    0x000000AD    uint8_t
-#define FLASH_NUM_SLEEP_INTERVALS                       0x000000AE  //  0x000000AE    0x000000AE    uint8_t
-#define FLASH_SLEEP_INTERVALS                           0x000000B0  //  0x000000B0    0x000000BF    FLASH_NUM_SLEEP_INTERVALS x (int16_t + uint16_t)
-#define FLASH_SYSTEM_INFO_CRC                           0x000000F8  //  0x000000F8    0x000000FB    uint32_t
-#define FLASH_MEMORY_ERROR_COUNTER                      0x000000FC  //  0x000000FC    0x000000FF    uint32_t
+#define FLASH_SYSTEM_INFO                                         0x00000000  //  0x00000000    0x000000FF
 
-// sector 1 page 0 - stats
-#define FLASH_STATS                                     0x00001000  //  0x00001000    0x000010FF
+#define FLASH_RESTART_COUNTER                     (FLASH_SYSTEM_INFO + 0x00)  //  0x00000000    0x00000001    uint16_t
+#define FLASH_DEPLOYMENT_COUNTER                  (FLASH_SYSTEM_INFO + 0x02)  //  0x00000002    0x00000002    uint8_t
+#define FLASH_TRANSMISSIONS_ENABLED               (FLASH_SYSTEM_INFO + 0x03)  //  0x00000003    0x00000003    uint8_t
+#define FLASH_CALLSIGN_LEN                        (FLASH_SYSTEM_INFO + 0x04)  //  0x00000004    0x00000004    uint8_t
+#define FLASH_CALLSIGN                            (FLASH_SYSTEM_INFO + 0x05)  //  0x00000005    0x00000025    char[]
+#define FLASH_FSK_RECEIVE_LEN                     (FLASH_SYSTEM_INFO + 0x26)  //  0x00000026    0x00000026    uint8_t
+#define FLASH_LORA_RECEIVE_LEN                    (FLASH_SYSTEM_INFO + 0x27)  //  0x00000027    0x00000027    uint8_t
+#define FLASH_RTC_EPOCH                           (FLASH_SYSTEM_INFO + 0x28)  //  0x00000028    0x0000002B    uint32_t
+#define FLASH_LORA_VALID_COUNTER                  (FLASH_SYSTEM_INFO + 0x2C)  //  0x0000002C    0x0000002D    uint16_t
+#define FLASH_LORA_INVALID_COUNTER                (FLASH_SYSTEM_INFO + 0x2E)  //  0x0000002E    0x0000002F    uint16_t
+#define FLASH_FSK_VALID_COUNTER                   (FLASH_SYSTEM_INFO + 0x30)  //  0x00000030    0x00000031    uint16_t
+#define FLASH_FSK_INVALID_COUNTER                 (FLASH_SYSTEM_INFO + 0x32)  //  0x00000032    0x00000033    uint16_t
+#define FLASH_LOW_POWER_MODE_ENABLED              (FLASH_SYSTEM_INFO + 0x34)  //  0x00000034    0x00000034    uint8_t
+#define FLASH_LOW_POWER_MODE                      (FLASH_SYSTEM_INFO + 0x35)  //  0x00000035    0x00000035    uint8_t
+#define FLASH_DEPLOYMENT_BATTERY_VOLTAGE_LIMIT    (FLASH_SYSTEM_INFO + 0x36)  //  0x00000036    0x00000037    int16_t
+#define FLASH_HEATER_BATTERY_VOLTAGE_LIMIT        (FLASH_SYSTEM_INFO + 0x38)  //  0x00000038    0x00000039    int16_t
+#define FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT       (FLASH_SYSTEM_INFO + 0x3A)  //  0x0000003A    0x0000003B    int16_t
+#define FLASH_LOW_POWER_MODE_VOLTAGE_LIMIT        (FLASH_SYSTEM_INFO + 0x3C)  //  0x0000003C    0x0000003D    int16_t
+#define FLASH_BATTERY_HEATER_TEMP_LIMIT           (FLASH_SYSTEM_INFO + 0x3E)  //  0x0000003E    0x00000041    float
+#define FLASH_MPPT_TEMP_LIMIT                     (FLASH_SYSTEM_INFO + 0x42)  //  0x00000042    0x00000045    float
+#define FLASH_BATTERY_HEATER_DUTY_CYCLE           (FLASH_SYSTEM_INFO + 0x46)  //  0x00000046    0x00000046    uint8_t
+#define FLASH_MPPT_TEMP_SWITCH_ENABLED            (FLASH_SYSTEM_INFO + 0x47)  //  0x00000047    0x00000047    uint8_t
+#define FLASH_MPPT_KEEP_ALIVE_ENABLED             (FLASH_SYSTEM_INFO + 0x48)  //  0x00000048    0x00000048    uint8_t
+#define FLASH_NMEA_LOG_LENGTH                     (FLASH_SYSTEM_INFO + 0x49)  //  0x00000049    0x0000004C    uint32_t
+#define FLASH_STORE_AND_FORWARD_LENGTH            (FLASH_SYSTEM_INFO + 0x4D)  //  0x0000004D    0x0000004E    int16_t
+#define FLASH_AUTO_STATISTICS                     (FLASH_SYSTEM_INFO + 0x4F)  //  0x0000004F    0x0000004F    uint8_t
+#define FLASH_TLE_EPOCH_DAY                       (FLASH_SYSTEM_INFO + 0x50)  //  0x00000050    0x00000057    double
+#define FLASH_TLE_BALLISTIC_COEFF                 (FLASH_SYSTEM_INFO + 0x58)  //  0x00000058    0x0000005F    double
+#define FLASH_TLE_MEAN_MOTION_2ND                 (FLASH_SYSTEM_INFO + 0x60)  //  0x00000060    0x00000067    double
+#define FLASH_TLE_DRAG_TERM                       (FLASH_SYSTEM_INFO + 0x68)  //  0x00000068    0x0000006F    double
+#define FLASH_TLE_INCLINATION                     (FLASH_SYSTEM_INFO + 0x70)  //  0x00000070    0x00000077    double
+#define FLASH_TLE_RIGHT_ASCENTION                 (FLASH_SYSTEM_INFO + 0x78)  //  0x00000078    0x0000007F    double
+#define FLASH_TLE_ECCENTRICITY                    (FLASH_SYSTEM_INFO + 0x80)  //  0x00000080    0x00000087    double
+#define FLASH_TLE_PERIGEE_ARGUMENT                (FLASH_SYSTEM_INFO + 0x88)  //  0x00000088    0x0000008F    double
+#define FLASH_TLE_MEAN_ANOMALY                    (FLASH_SYSTEM_INFO + 0x90)  //  0x00000090    0x00000097    double
+#define FLASH_TLE_MEAN_MOTION                     (FLASH_SYSTEM_INFO + 0x98)  //  0x00000098    0x0000009F    double
+#define FLASH_TLE_REVOLUTION_NUMBER               (FLASH_SYSTEM_INFO + 0xA0)  //  0x000000A0    0x000000A3    uint32_t
+#define FLASH_TLE_EPOCH_YEAR                      (FLASH_SYSTEM_INFO + 0xA4)  //  0x000000A4    0x000000A4    uint8_t
+#define FLASH_NMEA_LOG_LATEST_ENTRY               (FLASH_SYSTEM_INFO + 0xA5)  //  0x000000A5    0x000000A8    uint32_t
+#define FLASH_NMEA_LOG_LATEST_FIX                 (FLASH_SYSTEM_INFO + 0xA9)  //  0x000000A9    0x000000AC    uint32_t
+#define FLASH_LOOP_COUNTER                        (FLASH_SYSTEM_INFO + 0xAD)  //  0x000000AD    0x000000AD    uint8_t
+#define FLASH_NUM_SLEEP_INTERVALS                 (FLASH_SYSTEM_INFO + 0xAE)  //  0x000000AE    0x000000AE    uint8_t
+#define FLASH_SLEEP_INTERVALS                     (FLASH_SYSTEM_INFO + 0xB0)  //  0x000000B0    0x000000BF    FLASH_NUM_SLEEP_INTERVALS x (int16_t + uint16_t)
+#define FLASH_SYSTEM_INFO_CRC                     (FLASH_SYSTEM_INFO + 0xF8)  //  0x000000F8    0x000000FB    uint32_t
+#define FLASH_MEMORY_ERROR_COUNTER                (FLASH_SYSTEM_INFO + 0xFC)  //  0x000000FC    0x000000FF    uint32_t
 
-#define FLASH_STATS_TEMP_PANEL_Y                        0x00001000  //  0x00001000    0x00001005    3x int16_t
-#define FLASH_STATS_TEMP_TOP                            0x00001006  //  0x00001006    0x0000100B    3x int16_t
-#define FLASH_STATS_TEMP_BOTTOM                         0x0000100C  //  0x0000100C    0x00001011    3x int16_t
-#define FLASH_STATS_TEMP_BATTERY                        0x00001012  //  0x00001012    0x00001017    3x int16_t
-#define FLASH_STATS_TEMP_SEC_BATTERY                    0x00001018  //  0x00001018    0x0000101D    3x int16_t
-#define FLASH_STATS_TEMP_MCU                            0x0000101E  //  0x0000101E    0x00001023    3x int16_t
+// sector 1 - ADCS parameters
+#define FLASH_ADCS_PARAMETERS                                     0x00001000  //  0x00001000    0x000010FF
 
-#define FLASH_STATS_CURR_XA                             0x00001024  //  0x00001024    0x00001029    3x int16_t
-#define FLASH_STATS_CURR_XB                             0x0000102A  //  0x0000102A    0x0000102F    3x int16_t
-#define FLASH_STATS_CURR_ZA                             0x00001030  //  0x00001030    0x00001035    3x int16_t
-#define FLASH_STATS_CURR_ZB                             0x00001036  //  0x00001036    0x0000103B    3x int16_t
-#define FLASH_STATS_CURR_Y                              0x0000103C  //  0x0000103C    0x00001041    3x int16_t
-#define FLASH_STATS_CURR_MPPT                           0x00001042  //  0x00001042    0x00001047    3x int16_t
+#define FLASH_ADCS_PULSE_MAX_INTENSITY        (FLASH_ADCS_PARAMETERS + 0x00)  //  0x00008000    0x00008003    float
+#define FLASH_ADCS_PULSE_MAX_LENGTH           (FLASH_ADCS_PARAMETERS + 0x04)  //  0x00008004    0x00008007    float
+#define FLASH_ADCS_OMEGA_TOLERANCE            (FLASH_ADCS_PARAMETERS + 0x08)  //  0x00008008    0x0000800C    float
 
-#define FLASH_STATS_VOLT_XA                             0x00001048  //  0x00001048    0x0000104A    3x uint8_t
-#define FLASH_STATS_VOLT_XB                             0x0000104B  //  0x0000104B    0x0000104D    3x uint8_t
-#define FLASH_STATS_VOLT_ZA                             0x0000104E  //  0x0000104E    0x00001050    3x uint8_t
-#define FLASH_STATS_VOLT_ZB                             0x00001051  //  0x00001051    0x00001053    3x uint8_t
-#define FLASH_STATS_VOLT_Y                              0x00001054  //  0x00001054    0x00001056    3x uint8_t
-#define FLASH_STATS_VOLT_MPPT                           0x00001057  //  0x00001057    0x00001059    3x uint8_t
+// sector 2 - stats
+#define FLASH_STATS                                               0x00002000  //  0x00002000    0x000020FF
 
-#define FLASH_STATS_LIGHT_PANEL_Y                       0x0000105A  //  0x0000105A    0x0000105F    3x float
-#define FLASH_STATS_LIGHT_TOP                           0x00001066  //  0x00001066    0x00001071    3x float
+#define FLASH_STATS_TEMP_PANEL_Y                        (FLASH_STATS + 0x00)  //  0x00001000    0x00001005    3x int16_t
+#define FLASH_STATS_TEMP_TOP                            (FLASH_STATS + 0x06)  //  0x00001006    0x0000100B    3x int16_t
+#define FLASH_STATS_TEMP_BOTTOM                         (FLASH_STATS + 0x0C)  //  0x0000100C    0x00001011    3x int16_t
+#define FLASH_STATS_TEMP_BATTERY                        (FLASH_STATS + 0x12)  //  0x00001012    0x00001017    3x int16_t
+#define FLASH_STATS_TEMP_SEC_BATTERY                    (FLASH_STATS + 0x18)  //  0x00001018    0x0000101D    3x int16_t
+#define FLASH_STATS_TEMP_MCU                            (FLASH_STATS + 0x1E)  //  0x0000101E    0x00001023    3x int16_t
 
-#define FLASH_STATS_GYRO_X                              0x00001072  //  0x00001072    0x0000107D    3x float
-#define FLASH_STATS_GYRO_Y                              0x0000107E  //  0x0000107E    0x00001089    3x float
-#define FLASH_STATS_GYRO_Z                              0x0000108A  //  0x0000108A    0x00001095    3x float
-#define FLASH_STATS_ACCEL_X                             0x00001096  //  0x00001096    0x000010A1    3x float
-#define FLASH_STATS_ACCEL_Y                             0x000010A2  //  0x000010A2    0x000010AD    3x float
-#define FLASH_STATS_ACCEL_Z                             0x000010AE  //  0x000010AE    0x000010B9    3x float
-#define FLASH_STATS_MAG_X                               0x000010BA  //  0x000010BA    0x000010C5    3x float
-#define FLASH_STATS_MAG_Y                               0x000010C6  //  0x000010C6    0x000010D1    3x float
-#define FLASH_STATS_MAG_Z                               0x000010D2  //  0x000010D2    0x000010DD    3x float
+#define FLASH_STATS_CURR_XA                             (FLASH_STATS + 0x24)  //  0x00001024    0x00001029    3x int16_t
+#define FLASH_STATS_CURR_XB                             (FLASH_STATS + 0x2A)  //  0x0000102A    0x0000102F    3x int16_t
+#define FLASH_STATS_CURR_ZA                             (FLASH_STATS + 0x30)  //  0x00001030    0x00001035    3x int16_t
+#define FLASH_STATS_CURR_ZB                             (FLASH_STATS + 0x36)  //  0x00001036    0x0000103B    3x int16_t
+#define FLASH_STATS_CURR_Y                              (FLASH_STATS + 0x3C)  //  0x0000103C    0x00001041    3x int16_t
+#define FLASH_STATS_CURR_MPPT                           (FLASH_STATS + 0x42)  //  0x00001042    0x00001047    3x int16_t
 
-// sectors 2 - 7 - image properites: 12 bytes per picture, 4 bytes total length, 4 bytes scan start address, 4 bytes scan end address
-#define FLASH_IMAGE_PROPERTIES                          0x00002000  //  0x00002000    0x00007FFF
-#define FLASH_IMAGE_PROPERTIES_SLOT_SIZE                (21)        //  properties of 21 pictures in each sector
+#define FLASH_STATS_VOLT_XA                             (FLASH_STATS + 0x48)  //  0x00001048    0x0000104A    3x uint8_t
+#define FLASH_STATS_VOLT_XB                             (FLASH_STATS + 0x4B)  //  0x0000104B    0x0000104D    3x uint8_t
+#define FLASH_STATS_VOLT_ZA                             (FLASH_STATS + 0x4E)  //  0x0000104E    0x00001050    3x uint8_t
+#define FLASH_STATS_VOLT_ZB                             (FLASH_STATS + 0x51)  //  0x00001051    0x00001053    3x uint8_t
+#define FLASH_STATS_VOLT_Y                              (FLASH_STATS + 0x54)  //  0x00001054    0x00001056    3x uint8_t
+#define FLASH_STATS_VOLT_MPPT                           (FLASH_STATS + 0x57)  //  0x00001057    0x00001059    3x uint8_t
+
+#define FLASH_STATS_LIGHT_PANEL_Y                       (FLASH_STATS + 0x5A)  //  0x0000105A    0x0000105F    3x float
+#define FLASH_STATS_LIGHT_TOP                           (FLASH_STATS + 0x66)  //  0x00001066    0x00001071    3x float
+
+#define FLASH_STATS_GYRO_X                              (FLASH_STATS + 0x72)  //  0x00001072    0x0000107D    3x float
+#define FLASH_STATS_GYRO_Y                              (FLASH_STATS + 0x7E)  //  0x0000107E    0x00001089    3x float
+#define FLASH_STATS_GYRO_Z                              (FLASH_STATS + 0x8A)  //  0x0000108A    0x00001095    3x float
+#define FLASH_STATS_ACCEL_X                             (FLASH_STATS + 0x96)  //  0x00001096    0x000010A1    3x float
+#define FLASH_STATS_ACCEL_Y                             (FLASH_STATS + 0xA2)  //  0x000010A2    0x000010AD    3x float
+#define FLASH_STATS_ACCEL_Z                             (FLASH_STATS + 0xAE)  //  0x000010AE    0x000010B9    3x float
+#define FLASH_STATS_MAG_X                               (FLASH_STATS + 0xBA)  //  0x000010BA    0x000010C5    3x float
+#define FLASH_STATS_MAG_Y                               (FLASH_STATS + 0xC6)  //  0x000010C6    0x000010D1    3x float
+#define FLASH_STATS_MAG_Z                               (FLASH_STATS + 0xD2)  //  0x000010D2    0x000010DD    3x float
+
+// sectors 3 - 8 - image properites: 12 bytes per picture, 4 bytes total length, 4 bytes scan start address, 4 bytes scan end address
+#define FLASH_IMAGE_PROPERTIES                                    0x00003000  //  0x00003000    0x00008FFF
+#define FLASH_IMAGE_PROPERTIES_SLOT_SIZE                          (21)        //  properties of 21 pictures in each sector
 
 // 64kB block 1 - store & forward slots
-#define FLASH_STORE_AND_FORWARD_START                   0x00010000  //  0x00010000    0x0001FFFF
-#define FLASH_STORE_AND_FORWARD_NUM_SLOTS               (FLASH_64K_BLOCK_SIZE / MAX_STRING_LENGTH)
+#define FLASH_STORE_AND_FORWARD_START                             0x00010000  //  0x00010000    0x0001FFFF
+#define FLASH_STORE_AND_FORWARD_NUM_SLOTS                         (FLASH_64K_BLOCK_SIZE / MAX_STRING_LENGTH)
 
 // 64kB blocks 2 - 31 - NMEA sentences: null-terminated C-strings, each starts with 4-byte timestamp (offset since recording start)
-#define FLASH_NMEA_LOG_START                            0x00020000  //  0x00030000    0x001FFFFF
-#define FLASH_NMEA_LOG_END                              (FLASH_IMAGES_START)
-#define FLASH_NMEA_LOG_SLOT_SIZE                        (128)
+#define FLASH_NMEA_LOG_START                                      0x00020000  //  0x00030000    0x001FFFFF
+#define FLASH_NMEA_LOG_END                                        (FLASH_IMAGES_START)
+#define FLASH_NMEA_LOG_SLOT_SIZE                                  (128)
 
 // 64kB blocks 32 - 1023 - image slots: 8 blocks per slot
-#define FLASH_IMAGES_START                              0x00200000  //  0x00200000    0x03FFFFFF
-#define FLASH_IMAGE_SLOT_SIZE                           (FLASH_IMAGE_NUM_64K_BLOCKS * FLASH_64K_BLOCK_SIZE)
+#define FLASH_IMAGES_START                                        0x00200000  //  0x00200000    0x03FFFFFF
+#define FLASH_IMAGE_SLOT_SIZE                                     (FLASH_IMAGE_NUM_64K_BLOCKS * FLASH_64K_BLOCK_SIZE)
 
 /*
     JPEG markers

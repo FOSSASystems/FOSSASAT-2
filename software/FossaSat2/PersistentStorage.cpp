@@ -29,6 +29,114 @@ bool PersistentStorage_Check_CRC(uint8_t* buff, uint32_t crcPos) {
   return(true);
 }
 
+template<typename T>
+// cppcheck-suppress unusedFunction
+T PersistentStorage_SystemInfo_Get(uint8_t addr) {
+  T t;
+  memcpy(&t, systemInfoBuffer + addr, sizeof(T));
+  return(t);
+}
+
+template int8_t PersistentStorage_SystemInfo_Get<int8_t>(uint8_t);
+template uint8_t PersistentStorage_SystemInfo_Get<uint8_t>(uint8_t);
+template int16_t PersistentStorage_SystemInfo_Get<int16_t>(uint8_t);
+template uint16_t PersistentStorage_SystemInfo_Get<uint16_t>(uint8_t);
+template int32_t PersistentStorage_SystemInfo_Get<int32_t>(uint8_t);
+template uint32_t PersistentStorage_SystemInfo_Get<uint32_t>(uint8_t);
+template float PersistentStorage_SystemInfo_Get<float>(uint8_t);
+template double PersistentStorage_SystemInfo_Get<double>(uint8_t);
+
+template<typename T>
+// cppcheck-suppress unusedFunction
+void PersistentStorage_SystemInfo_Set(uint8_t addr, T t) {
+  // check address is in system info
+  if(addr > (FLASH_EXT_PAGE_SIZE - 1)) {
+    return;
+  }
+
+  // set the new value to RAM buffer
+  memcpy(systemInfoBuffer + addr, &t, sizeof(T));
+}
+
+template void PersistentStorage_SystemInfo_Set<int8_t>(uint8_t, int8_t);
+template void PersistentStorage_SystemInfo_Set<uint8_t>(uint8_t, uint8_t);
+template void PersistentStorage_SystemInfo_Set<int16_t>(uint8_t, int16_t);
+template void PersistentStorage_SystemInfo_Set<uint16_t>(uint8_t, uint16_t);
+template void PersistentStorage_SystemInfo_Set<int32_t>(uint8_t, int32_t);
+template void PersistentStorage_SystemInfo_Set<uint32_t>(uint8_t, uint32_t);
+
+template<typename T>
+// cppcheck-suppress unusedFunction
+T PersistentStorage_Get(uint32_t addr) {
+  // create buffer large enough to fit any data type saved in external flash
+  uint8_t varBuff[32];
+  
+  // read the flash
+  PersistentStorage_Read(addr, varBuff, sizeof(T));
+
+  // read the value
+  T t;
+  memcpy(&t, varBuff, sizeof(T));
+  return(t);
+}
+
+template float PersistentStorage_Get<float>(uint32_t);
+
+template<typename T>
+// cppcheck-suppress unusedFunction
+void PersistentStorage_Set(uint32_t addr, T t) {
+  // create single page buffer
+  uint8_t pageBuff[FLASH_EXT_PAGE_SIZE];
+  
+  // read the page
+  uint32_t addrInPage = addr & 0x000000FF;
+  uint32_t pageStartAddr = addr & 0xFFFFFF00;
+  PersistentStorage_Read(pageStartAddr, pageBuff, FLASH_EXT_PAGE_SIZE);
+
+  // check if we need to update
+  uint8_t newPageBuff[FLASH_EXT_PAGE_SIZE];
+  memcpy(newPageBuff, pageBuff, FLASH_EXT_PAGE_SIZE);
+  memcpy(newPageBuff + addrInPage, &t, sizeof(T));
+  if(memcmp(pageBuff, newPageBuff, FLASH_EXT_PAGE_SIZE) == 0) {
+    // the value is already there, no need to write
+    return;
+  }
+
+  // we need to update
+  PersistentStorage_Write(pageStartAddr, newPageBuff, FLASH_EXT_PAGE_SIZE);
+}
+
+template <typename T>
+// cppcheck-suppress unusedFunction
+void PersistentStorage_Update_Stat(uint8_t* statBuff, uint32_t addr, T val) {
+  uint32_t statAddr = addr - FLASH_STATS;
+  size_t typeSize = sizeof(T);
+
+  // get min/avg/max
+  T min = 0;
+  memcpy(&min, statBuff + statAddr, typeSize);
+  T avg = 0;
+  memcpy(&avg, statBuff + statAddr + typeSize, typeSize);
+  T max = 0;
+  memcpy(&max, statBuff + statAddr + 2*typeSize, typeSize);
+
+  // update stats
+  if(val < min) {
+    memcpy(statBuff + statAddr, &val, typeSize);
+  }
+  
+  avg = (avg + val)/((T)2);
+  memcpy(statBuff + statAddr + typeSize, &avg, typeSize);
+
+  if(val > max) {
+    memcpy(statBuff + statAddr + 2*typeSize, &val, typeSize);
+  }
+}
+
+template void PersistentStorage_Update_Stat<uint8_t>(uint8_t*, uint32_t, uint8_t);
+template void PersistentStorage_Update_Stat<int16_t>(uint8_t*, uint32_t, int16_t);
+template void PersistentStorage_Update_Stat<float>(uint8_t*, uint32_t, float);
+
 void PersistentStorage_Update_Stats(uint8_t flags) {
   // read stats page
   uint8_t statsBuffer[FLASH_EXT_PAGE_SIZE];
@@ -258,7 +366,7 @@ void PersistentStorage_Increment_Counter(uint16_t addr) {
   uint16_t counter = 0;
   memcpy(&counter, systemInfoBuffer + addr, sizeof(uint16_t));
   counter++;
-  PersistentStorage_Set(addr, counter);
+  PersistentStorage_SystemInfo_Set(addr, counter);
 }
 
 void PersistentStorage_Increment_Frame_Counter(bool valid) {
@@ -341,13 +449,13 @@ void PersistentStorage_Set_Image_Properties(uint8_t slot, uint32_t len, uint32_t
 
 void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, size_t len) {
   // check address is in system info
-  if(addr > (FLASH_SYSTEM_INFO_LEN - 1)) {
+  if(addr > (FLASH_EXT_PAGE_SIZE - 1)) {
     return;
   }
   
   // read the current system info page
-  uint8_t currSysInfoPage[FLASH_SYSTEM_INFO_LEN];
-  PersistentStorage_Read(FLASH_SYSTEM_INFO_START, currSysInfoPage, FLASH_SYSTEM_INFO_LEN);
+  uint8_t currSysInfoPage[FLASH_EXT_PAGE_SIZE];
+  PersistentStorage_Read(FLASH_SYSTEM_INFO, currSysInfoPage, FLASH_EXT_PAGE_SIZE);
 
   // get current memory error counter
   uint32_t errCounter = 0;
@@ -363,10 +471,10 @@ void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, size_t len) {
   }
 
   // check if we need to update
-  uint8_t newSysInfoPage[FLASH_SYSTEM_INFO_LEN];
-  memcpy(newSysInfoPage, currSysInfoPage, FLASH_SYSTEM_INFO_LEN);
+  uint8_t newSysInfoPage[FLASH_EXT_PAGE_SIZE];
+  memcpy(newSysInfoPage, currSysInfoPage, FLASH_EXT_PAGE_SIZE);
   memcpy(newSysInfoPage + addr, buff, len);
-  if(memcmp(currSysInfoPage, newSysInfoPage, FLASH_SYSTEM_INFO_LEN) == 0) {
+  if(memcmp(currSysInfoPage, newSysInfoPage, FLASH_EXT_PAGE_SIZE) == 0) {
     // the value is already there, no need to write
     return;
   }
@@ -379,12 +487,12 @@ void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, size_t len) {
   memcpy(newSysInfoPage + FLASH_MEMORY_ERROR_COUNTER, &errCounter, sizeof(uint32_t));
 
   // we need to update
-  PersistentStorage_Write(FLASH_SYSTEM_INFO_START, newSysInfoPage, FLASH_SYSTEM_INFO_LEN);
+  PersistentStorage_Write(FLASH_SYSTEM_INFO, newSysInfoPage, FLASH_EXT_PAGE_SIZE);
 }
 
 void PersistentStorage_Reset_System_Info() {
   // set everything to 0 by default
-  memset(systemInfoBuffer, 0, FLASH_SYSTEM_INFO_LEN);
+  memset(systemInfoBuffer, 0, FLASH_EXT_PAGE_SIZE);
 
   // set non-zero defaults
 
@@ -487,7 +595,7 @@ void PersistentStorage_Reset_System_Info() {
   memcpy(systemInfoBuffer + FLASH_SYSTEM_INFO_CRC, &crc, sizeof(uint32_t));
 
   // write the default system info
-  PersistentStorage_Write(FLASH_SYSTEM_INFO_START, systemInfoBuffer, FLASH_SYSTEM_INFO_LEN);
+  PersistentStorage_Write(FLASH_SYSTEM_INFO, systemInfoBuffer, FLASH_EXT_PAGE_SIZE);
 }
 
 uint8_t PersistentStorage_Get_Message(uint16_t slotNum, uint8_t* buff) {
