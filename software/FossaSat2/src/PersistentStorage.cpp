@@ -1,15 +1,5 @@
 #include "PersistentStorage.h"
 
-uint32_t CRC32_Get(uint8_t* buff, size_t len, uint32_t initial) {
-  uint32_t crc = initial;
-  while (len--) {
-    crc = (crc << 8) ^ crc32_table[((crc >> 24) ^ *buff) & 255];
-    buff++;
-  }
-
-  return crc;
-}
-
 bool PersistentStorage_Check_CRC(uint8_t* buff, uint32_t crcPos) {
   // check CRC of the current page
   uint32_t currCrc = 0;
