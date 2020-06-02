@@ -19,7 +19,7 @@ float Sensors_Temperature_Read(wireSensor_t& sensor) {
   sensor.bus.beginTransmission(sensor.addr);
   sensor.bus.write(TMP_100_REG_TEMPERATURE);
   sensor.bus.endTransmission();
-  
+
   // read data from I2C sensor
   sensor.bus.requestFrom(sensor.addr, (uint8_t)2);
   uint8_t msb = sensor.bus.read();
@@ -28,7 +28,7 @@ float Sensors_Temperature_Read(wireSensor_t& sensor) {
   // convert raw data to temperature
   int16_t tempRaw = ((msb << 8) | lsb) >> 4;
   float temp = tempRaw * TMP_100_LSB_RESOLUTION;
-  
+
   return (temp);
 }
 
@@ -38,17 +38,19 @@ uint16_t Sensors_IMU_Setup() {
 
   // set to sleep by default
   Sensors_IMU_Sleep(true);
-  
+
   return(state);
 }
 
-void Sensors_IMU_Update() {
+void Sensors_IMU_Update(bool autoSleep) {
   // wake up IMU
-  Sensors_IMU_Sleep(false);
+  if(autoSleep) {
+    Sensors_IMU_Sleep(false);
 
-  // wait for everything to wake up
-  delay(10);
-  
+    // wait for everything to wake up
+    delay(10);
+  }
+
   if (imu.gyroAvailable()) {
     imu.readGyro();
   }
@@ -60,9 +62,11 @@ void Sensors_IMU_Update() {
   if (imu.magAvailable()) {
     imu.readMag();
   }
-  
+
   // put IMU back to sleep
-  Sensors_IMU_Sleep(false);
+  if(autoSleep) {
+    Sensors_IMU_Sleep(false);
+  }
 }
 
 void Sensors_IMU_Sleep(bool sleep) {
@@ -85,7 +89,7 @@ bool Sensors_Current_Setup(currentSensor_t& sensor) {
   // set sensor to sleep by default
   sensor.driver->setMode(INA260_MODE_SHUTDOWN);
   sensor.available = true;
-  
+
   return(true);
 }
 
@@ -93,16 +97,16 @@ float Sensors_Current_Read(currentSensor_t& sensor) {
   if(!(sensor.available)) {
     return(0);
   }
-  
+
   // wake up the sensor
   sensor.driver->setMode(INA260_MODE_CONTINUOUS);
 
   // wait for full recovery
   delayMicroseconds(60);
-  
+
   // read the value
   float current = sensor.driver->readCurrent();
-  
+
   // set the sensor back to sleep
   sensor.driver->setMode(INA260_MODE_SHUTDOWN);
 
@@ -113,7 +117,7 @@ float Sensors_Current_ReadVoltage(currentSensor_t& sensor) {
   if(!(sensor.available)) {
     return(0);
   }
-  
+
   // wake up the sensor
   sensor.driver->setMode(INA260_MODE_CONTINUOUS);
 
@@ -122,7 +126,7 @@ float Sensors_Current_ReadVoltage(currentSensor_t& sensor) {
 
   // read the value
   float voltage = sensor.driver->readBusVoltage();
-  
+
   // set the sensor back to sleep
   sensor.driver->setMode(INA260_MODE_SHUTDOWN);
 
@@ -160,14 +164,14 @@ float Sensors_Read_Light(lightSensor_t& sensor) {
   if(!sensor.available) {
     return(0);
   }
-  
+
   // wake up sensor
   sensor.driver->enable(true);
 
   // wait for new data
   delay(30);
   float lux = sensor.driver->readLux();
-  
+
   // shut down again
   sensor.driver->enable(false);
   return(lux);
