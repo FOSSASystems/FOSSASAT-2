@@ -6,7 +6,7 @@ uint32_t CRC32_Get(uint8_t* buff, size_t len, uint32_t initial) {
     crc = (crc << 8) ^ crc32_table[((crc >> 24) ^ *buff) & 255];
     buff++;
   }
-  
+
   return crc;
 }
 
@@ -70,7 +70,7 @@ template<typename T>
 T PersistentStorage_Get(uint32_t addr) {
   // create buffer large enough to fit any data type saved in external flash
   uint8_t varBuff[32];
-  
+
   // read the flash
   PersistentStorage_Read(addr, varBuff, sizeof(T));
 
@@ -87,7 +87,7 @@ template<typename T>
 void PersistentStorage_Set(uint32_t addr, T t) {
   // create single page buffer
   uint8_t pageBuff[FLASH_EXT_PAGE_SIZE];
-  
+
   // read the page
   uint32_t addrInPage = addr & 0x000000FF;
   uint32_t pageStartAddr = addr & 0xFFFFFF00;
@@ -105,6 +105,8 @@ void PersistentStorage_Set(uint32_t addr, T t) {
   // we need to update
   PersistentStorage_Write(pageStartAddr, newPageBuff, FLASH_EXT_PAGE_SIZE);
 }
+
+template void PersistentStorage_Set<float>(uint32_t, float);
 
 template <typename T>
 // cppcheck-suppress unusedFunction
@@ -124,7 +126,7 @@ void PersistentStorage_Update_Stat(uint8_t* statBuff, uint32_t addr, T val) {
   if(val < min) {
     memcpy(statBuff + statAddr, &val, typeSize);
   }
-  
+
   avg = (avg + val)/((T)2);
   memcpy(statBuff + statAddr + typeSize, &avg, typeSize);
 
@@ -141,7 +143,7 @@ void PersistentStorage_Update_Stats(uint8_t flags) {
   // read stats page
   uint8_t statsBuffer[FLASH_EXT_PAGE_SIZE];
   PersistentStorage_Read(FLASH_STATS, statsBuffer, FLASH_EXT_PAGE_SIZE);
-  
+
   if(flags & STATS_FLAGS_TEMPERATURES) {
     // temperatures
     PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_TEMP_PANEL_Y, (int16_t)(Sensors_Temperature_Read(tempSensorPanelY) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER)));
@@ -241,7 +243,7 @@ void PersistentStorage_Reset_Stats() {
   memcpy(statsPage + (FLASH_STATS_TEMP_SEC_BATTERY - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
   intVal = Sensors_Temperature_Read(tempSensorMCU) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
   memcpy(statsPage + (FLASH_STATS_TEMP_MCU - FLASH_STATS) + sizeof(intVal), &intMax, sizeof(intMax));
-  
+
   memcpy(statsPage + (FLASH_STATS_TEMP_PANEL_Y - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
   memcpy(statsPage + (FLASH_STATS_TEMP_TOP - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
   memcpy(statsPage + (FLASH_STATS_TEMP_BOTTOM - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
@@ -269,7 +271,7 @@ void PersistentStorage_Reset_Stats() {
   memcpy(statsPage + (FLASH_STATS_CURR_Y - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
   intVal = Sensors_Current_Read(currSensorMPPT) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   memcpy(statsPage + (FLASH_STATS_CURR_MPPT - FLASH_STATS) + sizeof(intVal), &intVal, sizeof(intVal));
-  
+
   memcpy(statsPage + (FLASH_STATS_CURR_XA - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
   memcpy(statsPage + (FLASH_STATS_CURR_XB - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
   memcpy(statsPage + (FLASH_STATS_CURR_ZA - FLASH_STATS) + 2*sizeof(intMin), &intMin, sizeof(intMin));
@@ -297,7 +299,7 @@ void PersistentStorage_Reset_Stats() {
   memcpy(statsPage + (FLASH_STATS_VOLT_Y - FLASH_STATS) + sizeof(byteVal), &byteVal, sizeof(byteVal));
   byteVal = Sensors_Current_ReadVoltage(currSensorMPPT) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
   memcpy(statsPage + (FLASH_STATS_VOLT_Y - FLASH_STATS) + sizeof(byteVal), &byteVal, sizeof(byteVal));
-  
+
   memcpy(statsPage + (FLASH_STATS_VOLT_XA - FLASH_STATS) + 2*sizeof(byteMin), &byteMin, sizeof(byteMin));
   memcpy(statsPage + (FLASH_STATS_VOLT_XB - FLASH_STATS) + 2*sizeof(byteMin), &byteMin, sizeof(byteMin));
   memcpy(statsPage + (FLASH_STATS_VOLT_ZA - FLASH_STATS) + 2*sizeof(byteMin), &byteMin, sizeof(byteMin));
@@ -313,7 +315,7 @@ void PersistentStorage_Reset_Stats() {
   memcpy(statsPage + (FLASH_STATS_LIGHT_PANEL_Y - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
   floatVal = Sensors_Read_Light(lightSensorTop);
   memcpy(statsPage + (FLASH_STATS_LIGHT_TOP - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  
+
   memcpy(statsPage + (FLASH_STATS_LIGHT_PANEL_Y - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
   memcpy(statsPage + (FLASH_STATS_LIGHT_TOP - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
 
@@ -327,7 +329,7 @@ void PersistentStorage_Reset_Stats() {
   memcpy(statsPage + (FLASH_STATS_MAG_X - FLASH_STATS), &floatMax, sizeof(floatMax));
   memcpy(statsPage + (FLASH_STATS_MAG_Y - FLASH_STATS), &floatMax, sizeof(floatMax));
   memcpy(statsPage + (FLASH_STATS_MAG_Z - FLASH_STATS), &floatMax, sizeof(floatMax));
-  
+
   Sensors_IMU_Update();
   floatVal = imu.calcGyro(imu.gx);
   memcpy(statsPage + (FLASH_STATS_GYRO_X - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
@@ -347,7 +349,7 @@ void PersistentStorage_Reset_Stats() {
   memcpy(statsPage + (FLASH_STATS_MAG_Y - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
   floatVal = imu.calcMag(imu.mz);
   memcpy(statsPage + (FLASH_STATS_MAG_Z - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  
+
   memcpy(statsPage + (FLASH_STATS_GYRO_X - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
   memcpy(statsPage + (FLASH_STATS_GYRO_Y - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
   memcpy(statsPage + (FLASH_STATS_GYRO_Z - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
@@ -436,7 +438,7 @@ void PersistentStorage_Set_Image_Properties(uint8_t slot, uint32_t len, uint32_t
   uint8_t buff[FLASH_EXT_PAGE_SIZE];
   uint32_t addr = FLASH_IMAGE_PROPERTIES + (slot/FLASH_IMAGE_PROPERTIES_SLOT_SIZE) * FLASH_SECTOR_SIZE;
   PersistentStorage_Read(addr, buff, FLASH_EXT_PAGE_SIZE);
-  
+
   // update values
   uint8_t* slotAddr = buff + (slot % FLASH_IMAGE_PROPERTIES_SLOT_SIZE) * 3*sizeof(uint32_t);
   memcpy(slotAddr, &len, sizeof(uint32_t));
@@ -452,7 +454,7 @@ void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, size_t len) {
   if(addr > (FLASH_EXT_PAGE_SIZE - 1)) {
     return;
   }
-  
+
   // read the current system info page
   uint8_t currSysInfoPage[FLASH_EXT_PAGE_SIZE];
   PersistentStorage_Read(FLASH_SYSTEM_INFO, currSysInfoPage, FLASH_EXT_PAGE_SIZE);
@@ -643,7 +645,7 @@ void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool auto
   FOSSASAT_DEBUG_PRINT(writeCtr++);
   FOSSASAT_DEBUG_PRINT(F(", address 0x"));
   FOSSASAT_DEBUG_PRINT(addr, HEX);
-  
+
   // erase requested sector
   if(autoErase) {
     FOSSASAT_DEBUG_PRINT(F(", with sector erase"));
@@ -685,7 +687,7 @@ void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool auto
     cmdBuff[4] = (uint8_t)(newAddr & 0xFF);
     PersistentStorage_SPItransaction(cmdBuff, 5, true, buff + firstPageLen, len - firstPageLen);
   }
-  
+
   // wait until page is written
   PersistentStorage_WaitForWriteInProgress();
 }
