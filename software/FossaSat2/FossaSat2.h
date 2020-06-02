@@ -23,13 +23,13 @@
 #include <RadioLib.h>
 
 // files
-#include "Camera.h"
-#include "Communication.h"
-#include "Configuration.h"
-#include "Debug.h"
-#include "Navigation.h"
-#include "PersistentStorage.h"
-#include "PowerControl.h"
-#include "Sensors.h"
-#include "Types.h"
+#include "src/Camera.h"
+#include "src/Communication.h"
+#include "src/Configuration.h"
+#include "src/Debug.h"
+#include "src/Navigation.h"
+#include "src/PersistentStorage.h"
+#include "src/PowerControl.h"
+#include "src/Sensors.h"
+#include "src/Types.h"
 #include "src/FEC/rs8.h"
