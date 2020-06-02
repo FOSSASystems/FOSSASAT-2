@@ -33,3 +33,10 @@
 #include "src/Sensors.h"
 #include "src/Types.h"
 #include "src/FEC/rs8.h"
+
+// Reed-Solomon FEC
+#include "src/FEC/rs8.h"
+
+// CRC32
+#include "src/FEC/crc32.h"
+
