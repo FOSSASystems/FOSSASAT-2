@@ -599,17 +599,17 @@ void PersistentStorage_Reset_ADCS_Params() {
   memset(adcsPage, 0, FLASH_EXT_PAGE_SIZE);
 
   float f = ADCS_PULSE_MAX_INTENSITY;
-  memcpy(adcsPage + FLASH_ADCS_PULSE_MAX_INTENSITY - FLASH_ADCS_PARAMETERS, &f, sizeof(f));
+  memcpy(adcsPage + (FLASH_ADCS_PULSE_MAX_INTENSITY - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   f = ADCS_PULSE_MAX_LENGTH;
-  memcpy(adcsPage + FLASH_ADCS_PULSE_MAX_LENGTH - FLASH_ADCS_PARAMETERS, &f, sizeof(f));
+  memcpy(adcsPage + (FLASH_ADCS_PULSE_MAX_LENGTH - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   f = ADCS_OMEGA_TOLERANCE;
-  memcpy(adcsPage + FLASH_ADCS_OMEGA_TOLERANCE - FLASH_ADCS_PARAMETERS, &f, sizeof(f));
+  memcpy(adcsPage + (FLASH_ADCS_OMEGA_TOLERANCE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   uint32_t ul = ADCS_TIME_STEP;
-  memcpy(adcsPage + FLASH_ADCS_TIME_STEP - FLASH_ADCS_PARAMETERS, &ul, sizeof(ul));
+  memcpy(adcsPage + (FLASH_ADCS_TIME_STEP - FLASH_ADCS_PARAMETERS), &ul, sizeof(ul));
   f = ADCS_MIN_INERTIAL_MOMENT;
-  memcpy(adcsPage + FLASH_ADCS_MIN_INERTIAL_MOMENT - FLASH_ADCS_PARAMETERS, &f, sizeof(f));
+  memcpy(adcsPage + (FLASH_ADCS_MIN_INERTIAL_MOMENT - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   f = ADCS_PULSE_AMPLITUDE;
-  memcpy(adcsPage + FLASH_ADCS_PULSE_AMPLITUDE - FLASH_ADCS_PARAMETERS, &f, sizeof(f));
+  memcpy(adcsPage + (FLASH_ADCS_PULSE_AMPLITUDE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
 
   // write the default ADCS info
   PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);
