@@ -65,7 +65,7 @@ void Sensors_IMU_Update() {
 
   // put IMU back to sleep
   if(!adcsState.active) {
-    Sensors_IMU_Sleep(false);
+    Sensors_IMU_Sleep(true);
   }
 }
 

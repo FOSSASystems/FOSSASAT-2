@@ -80,7 +80,7 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const float orbitalIncl
     // wake up IMU
     adcsState.active = true;
     Sensors_IMU_Sleep(false);
-    delay(10);
+    delay(50);
 
     // set initial state
     for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
