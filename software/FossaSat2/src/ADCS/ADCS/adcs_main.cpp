@@ -17,15 +17,10 @@
 void ADCS_Main(const bool detumbleOnly, const uint32_t detumbleDuration, const uint32_t activeDuration,
                const uint8_t position[], const float orbitalInclination, const float orbitalPeriod) {
 
-  // Selection of the controller mode: detumbling or not
-  if(detumbleOnly) {
-    // just detumble
-    ADCS_Detumble_Init(detumbleDuration, orbitalInclination, orbitalPeriod);
+  // always detumble first
+  ADCS_Detumble_Init(detumbleDuration, orbitalInclination, orbitalPeriod);
 
-  } else {
-    // Prepare the satellite for the active controlling
-    ADCS_Detumble_Init(detumbleDuration, orbitalInclination, orbitalPeriod);
-
+  if(!detumbleOnly) {
     // Active controlling loop
     //active_controlling(active_time-detumbleTime, position, pulse_times);
   }
