@@ -334,6 +334,8 @@
                                                           /* CMD_GET_GPS_LOG_STATE,*/ \
                                                           /* CMD_RUN_GPS_COMMAND,*/ \
                                                           CMD_SET_SLEEP_INTERVALS, \
+                                                          /* CMD_MANEUVER,*/ \
+                                                          /* CMD_SET_ADCS_PARAMETERS*/ \
                                                           CMD_ABORT \
                                                          }          /*!< List of function IDs that remain available in "science mode" (e.g. logging GPS or ADCS closed-loop control) */
 
@@ -460,10 +462,10 @@
 
 #define ADCS_NUM_AXES                                   3       // number of axes to control
 #define ADCS_TIME_STEP                                  100000  // time setup between successive ADCS updates, in us
-#define ADCS_PULSE_MAX_INTENSITY                        0.05    //
-#define ADCS_PULSE_MAX_LENGTH                           23.5    //
+#define ADCS_PULSE_MAX_INTENSITY                        1.0    //
+#define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)    //
 #define ADCS_OMEGA_TOLERANCE                            0.0001//0.1     // detumbling will be stopped once change in normalized angular velocity drops below this value
-#define ADCS_MIN_INERTIAL_MOMENT                        1.0     //
+#define ADCS_MIN_INERTIAL_MOMENT                        1000     //
 #define ADCS_PULSE_AMPLITUDE                            1.0     //
 
 /*

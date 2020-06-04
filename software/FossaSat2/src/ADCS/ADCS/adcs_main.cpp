@@ -175,12 +175,6 @@ void ADCS_Detumble_Update() {
       }
 
       // update Hbridges
-      int8_t xVal = ADCS_GetDriveStrength(pulseLength[0]);
-      int8_t yVal = ADCS_GetDriveStrength(pulseLength[1]);
-      int8_t zVal = ADCS_GetDriveStrength(pulseLength[2]);
-      bridgeX.drive(xVal);
-      bridgeY.drive(yVal);
-      bridgeZ.drive(zVal);
       FOSSASAT_DEBUG_PRINT(F("intensity=\t"));
       FOSSASAT_DEBUG_PRINT(intensity[0], 4); FOSSASAT_DEBUG_PRINT('\t');
       FOSSASAT_DEBUG_PRINT(intensity[1], 4); FOSSASAT_DEBUG_PRINT('\t');
@@ -189,10 +183,6 @@ void ADCS_Detumble_Update() {
       FOSSASAT_DEBUG_PRINT(pulseLength[0], 4); FOSSASAT_DEBUG_PRINT('\t');
       FOSSASAT_DEBUG_PRINT(pulseLength[1], 4); FOSSASAT_DEBUG_PRINT('\t');
       FOSSASAT_DEBUG_PRINTLN(pulseLength[2], 4);
-      FOSSASAT_DEBUG_PRINT(F("drive=\t"));
-      FOSSASAT_DEBUG_PRINT(xVal); FOSSASAT_DEBUG_PRINT('\t');
-      FOSSASAT_DEBUG_PRINT(yVal); FOSSASAT_DEBUG_PRINT('\t');
-      FOSSASAT_DEBUG_PRINTLN(zVal);
       FOSSASAT_DEBUG_PRINTLN();
 
   } else {

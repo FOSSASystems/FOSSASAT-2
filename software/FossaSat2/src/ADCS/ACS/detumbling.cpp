@@ -15,19 +15,25 @@
 void ACS_BdotFunction(const float omega[], const float mag[], const float orbitalInclination,  const float orbitalPeriod, float intensity[]) {
     // Constants definition
     // Module of the magnetic field intensity
-    const double B_module = pow((pow(mag[0], 2) + pow(mag[1], 2) + mag[2]), 0.5);
+    const double B_module = sqrt((pow(mag[0], 2) + pow(mag[1], 2) + mag[2]));
+    FOSSASAT_DEBUG_PRINT(F("B_module = "));
+    FOSSASAT_DEBUG_PRINTLN(B_module);
 
     // Controller gain constant
     const float gainConstant = 4.0*M_PI * (1.0 + sin(orbitalInclination)) * adcsParams.minInertialMoment/orbitalPeriod;
+    FOSSASAT_DEBUG_PRINT(F("gainConstant = "));
+    FOSSASAT_DEBUG_PRINTLN(gainConstant);
 
     // General gain
-    const int gainGeneral = gainConstant/B_module;
+    const float gainGeneral = gainConstant/B_module;
+    FOSSASAT_DEBUG_PRINT(F("gainGeneral = "));
+    FOSSASAT_DEBUG_PRINTLN(gainGeneral);
 
     // Coil magnetic characteristics
     // TODO configurable?
-    const double coilChar[3][3] = { {1.88 * pow(10, 5), 0,               0},
-                                    {0,                 6.1*pow(10, 5),  0},
-                                    {0,                 0,               5.96*pow(10, 5)} };
+    const double coilChar[3][3] = { {1.88 * pow(10, 5), 0,                 0},
+                                    {0,                 6.1 * pow(10, 5),  0},
+                                    {0,                 0,                 5.96 * pow(10, 5)} };
 
     // Generate the control law by means of a vector product: m = a*(B x omega) = (K/B_module)*(B x omega)
     float m[3];
