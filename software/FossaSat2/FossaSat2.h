@@ -40,3 +40,5 @@
 // CRC32
 #include "src/FEC/crc32.h"
 
+// ADCS
+#include "src/ADCS/ADCS/adcs.h"

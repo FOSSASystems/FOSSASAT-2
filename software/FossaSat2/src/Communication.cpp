@@ -305,10 +305,10 @@ void Communication_Send_Full_System_Info() {
 
   uint8_t loraRxLen = PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LORA_RECEIVE_LEN);
   Communication_Frame_Add(&optDataPtr, loraRxLen, "loraRxLen", 1, "");
-  
+
   uint8_t sensorStates = (uint8_t)currSensorXA.available << 7 | (uint8_t)currSensorXB.available << 6 |
-                         (uint8_t)currSensorZA.available << 5 | (uint8_t)currSensorZB.available << 4 | 
-                         (uint8_t)currSensorY.available << 3 | (uint8_t)currSensorMPPT.available << 2 | 
+                         (uint8_t)currSensorZA.available << 5 | (uint8_t)currSensorZB.available << 4 |
+                         (uint8_t)currSensorY.available << 3 | (uint8_t)currSensorMPPT.available << 2 |
                          (uint8_t)lightSensorPanelY.available << 1 | (uint8_t)lightSensorTop.available << 0;
   Communication_Frame_Add(&optDataPtr, sensorStates, "sensors", 1, "");
 
@@ -362,7 +362,7 @@ void Communication_Send_Statistics(uint8_t flags) {
     respOptDataPtr += 27*sizeof(float);
     respOptDataLen += 27*sizeof(float);
   }
-  
+
   Communication_Send_Response(RESP_STATISTICS, respOptData, respOptDataLen);
 }
 
@@ -646,7 +646,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           FOSSASAT_DEBUG_PRINTLN(F("FSK is required to get stats"));
           return;
         }
-        
+
         Communication_Send_Statistics(optData[0]);
       }
     } break;
@@ -782,7 +782,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             FOSSASAT_DEBUG_PRINTLN(F("Wiping store & forward"));
             PersistentStorage_64kBlockErase(FLASH_STORE_AND_FORWARD_START);
             PowerControl_Watchdog_Heartbeat();
-            
+
             // reset store & forward length
             PersistentStorage_SystemInfo_Set<uint32_t>(FLASH_STORE_AND_FORWARD_LENGTH, 0);
           }
@@ -794,7 +794,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
               PersistentStorage_64kBlockErase(addr);
               PowerControl_Watchdog_Heartbeat();
             }
-            
+
             // reset NMEA log length, latest entry and latest fix
             PersistentStorage_SystemInfo_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, 0);
             PersistentStorage_SystemInfo_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_ENTRY, FLASH_NMEA_LOG_START);
@@ -804,7 +804,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           if(optData[0] & 0b00010000) {
             // command with long execution time - enable reception
             radio.startReceive();
-            
+
             // wipe image lengths
             FOSSASAT_DEBUG_PRINTLN(F("Wiping image lengths"));
             for(uint8_t i = 0; i < 6; i++) {
@@ -834,6 +834,13 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             }
             FOSSASAT_DEBUG_PRINTLN(F("Image wipe done"));
             radio.standby();
+          }
+
+          if(optData[0] & 0b00100000) {
+            // reset ADCS parameters
+            FOSSASAT_DEBUG_PRINTLN(F("Resetting ADCS parameters"));
+            PersistentStorage_Reset_ADCS_Params();
+            PowerControl_Watchdog_Heartbeat();
           }
         }
       } break;
@@ -1029,7 +1036,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINTLN(F("FSK is required to record IMU"));
         return;
       }
-      
+
       // check optional data
       if(Communication_Check_OptDataLen(5, optDataLen)) {
         // get number of samples
@@ -1068,7 +1075,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // wait for a bit before measurement
         PowerControl_Wait(RESPONSE_DELAY, LOW_POWER_NONE);
-        
+
         // get initial IMU update
         Sensors_IMU_Update();
 
@@ -1096,7 +1103,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             valX = imu.calcGyro(imu.gx);
             valY = imu.calcGyro(imu.gy);
             valZ = imu.calcGyro(imu.gz);
-            
+
             Communication_Frame_Add(&respOptDataPtr, valX, "G X", 1, "deg/s");
             Communication_Frame_Add(&respOptDataPtr, valY, "G Y", 1, "deg/s");
             Communication_Frame_Add(&respOptDataPtr, valZ, "G Z", 1, "deg/s");
@@ -1107,7 +1114,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             valX = imu.calcAccel(imu.ax);
             valY = imu.calcAccel(imu.ay);
             valZ = imu.calcAccel(imu.az);
-            
+
             Communication_Frame_Add(&respOptDataPtr, valX, "A X", 1, "m/s^2");
             Communication_Frame_Add(&respOptDataPtr, valY, "A Y", 1, "m/s^2");
             Communication_Frame_Add(&respOptDataPtr, valZ, "A Z", 1, "m/s^2");
@@ -1118,7 +1125,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             valX = imu.calcMag(imu.mx);
             valY = imu.calcMag(imu.my);
             valZ = imu.calcMag(imu.mz);
-            
+
             Communication_Frame_Add(&respOptDataPtr, valX, "M X", 1, "gauss");
             Communication_Frame_Add(&respOptDataPtr, valY, "M Y", 1, "gauss");
             Communication_Frame_Add(&respOptDataPtr, valZ, "M Z", 1, "gauss");
@@ -1246,7 +1253,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer picture"));
         return;
       }
-        
+
       if(Communication_Check_OptDataLen(4, optDataLen)) {
         // get the basic info
         FOSSASAT_DEBUG_PRINT(F("Reading slot: "));
@@ -1313,7 +1320,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // send the final packet (might not be full)
         uint16_t remLen = imgLen - packetId*MAX_IMAGE_PAYLOAD_LENGTH;
         memcpy(respOptData, &packetId, sizeof(uint16_t));
-        
+
         // read data
         PersistentStorage_Read(imgAddress + packetId*MAX_IMAGE_PAYLOAD_LENGTH, respOptData + 2, remLen);
 
@@ -1449,7 +1456,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer GPS log"));
         return;
       }
-      
+
       if(Communication_Check_OptDataLen(5, optDataLen)) {
         // get parameters
         uint8_t dir = optData[0];
@@ -1493,7 +1500,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             // log is not full AND downlink from newest - start at last logged address
             startAddr = latestAddr;
           }
-          
+
         } else {
           // log is full, so it might have wrapped around
           if(dir == 0) {
@@ -1503,7 +1510,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             // log is full AND downlink from newest - start at last logged address
             startAddr = latestAddr;
           }
-          
+
         }
 
         // move by the reqested offset
@@ -1663,7 +1670,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       } else {
         Communication_Send_Response(RESP_GPS_COMMAND_RESPONSE, respOptData, respOptDataLen);
       }
-      
+
     } break;
 
     case CMD_SET_SLEEP_INTERVALS: {
@@ -1676,31 +1683,61 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINT(F("numIntervals = "));
         FOSSASAT_DEBUG_PRINTLN(numIntervals);
         systemInfoBuffer[FLASH_NUM_SLEEP_INTERVALS] = numIntervals;
-        
+
         // parse voltage thresholds and interval lengths
         for(uint8_t i = 0; i < numIntervals; i++) {
           FOSSASAT_DEBUG_PRINT(i);
           FOSSASAT_DEBUG_PRINT('\t');
-          
+
           int16_t voltage = 0;
           memcpy(&voltage, optData + i*intervalSize, sizeof(int16_t));
           FOSSASAT_DEBUG_PRINT(voltage);
           FOSSASAT_DEBUG_PRINT('\t');
           memcpy(systemInfoBuffer + FLASH_SLEEP_INTERVALS + i*intervalSize, &voltage, sizeof(int16_t));
-          
+
           uint16_t intervalLen = 0;
           memcpy(&intervalLen, optData + sizeof(int16_t) + i*intervalSize, sizeof(uint16_t));
           FOSSASAT_DEBUG_PRINTLN(intervalLen);
           memcpy(systemInfoBuffer + FLASH_SLEEP_INTERVALS + sizeof(int16_t) + i*intervalSize, &intervalLen, sizeof(uint16_t));
-          
+
         }
       }
-      
+
     } break;
 
     case CMD_ABORT: {
       FOSSASAT_DEBUG_PRINTLN(F("Aborting current operation"));
       abortExecution = true;
+    } break;
+
+    case CMD_MANEUVER: {
+      if(Communication_Check_OptDataLen(15, optDataLen)) {
+        // extract parameters
+        uint32_t detumbleLen = 0;
+        memcpy(&detumbleLen, optData + 1, sizeof(detumbleLen));
+        FOSSASAT_DEBUG_PRINT(F("detumbleLen = "));
+        FOSSASAT_DEBUG_PRINTLN(detumbleLen);
+
+        uint32_t maneuverLen = 0;
+        memcpy(&maneuverLen, optData + 5, sizeof(maneuverLen));
+        FOSSASAT_DEBUG_PRINT(F("maneuverLen = "));
+        FOSSASAT_DEBUG_PRINTLN(maneuverLen);
+
+        bool detumbleOnly = true;
+        if(optData[0] == 0x00) {
+          detumbleOnly = false;
+        }
+        FOSSASAT_DEBUG_PRINT(F("detumbleOnly = "));
+        FOSSASAT_DEBUG_PRINTLN(detumbleOnly);
+
+        // read orbital period and inclination from TLE
+        // TODO check this
+        double orbitalInclination = PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_INCLINATION);
+        double orbitalPeriod = (PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_MEAN_MOTION) * 2*M_PI) / (24.0 * 36000.0);
+
+        // initialize ADCS
+        ADCS_Main(detumbleOnly, detumbleLen, maneuverLen, optData + 9, orbitalInclination, orbitalPeriod);
+      }
     } break;
 
     default:
@@ -1722,20 +1759,20 @@ int16_t Communication_Send_Response(uint8_t respId, uint8_t* optData, size_t opt
   FOSSASAT_DEBUG_PRINT(F("Encoding state: "));
   FOSSASAT_DEBUG_PRINTLN(state);
   FOSSASAT_DEBUG_DELAY(10);
-  
+
   // delay before responding
   if((respId == RESP_GPS_LOG) ||
-     (respId == RESP_CAMERA_PICTURE) || 
+     (respId == RESP_CAMERA_PICTURE) ||
      (respId == RESP_RECORDED_IMU)) {
-    
+
     // use short length in case of "burst" transfers
-    PowerControl_Wait(RESPONSE_DELAY_SHORT, LOW_POWER_NONE);    
-      
+    PowerControl_Wait(RESPONSE_DELAY_SHORT, LOW_POWER_NONE);
+
   } else {
     // use standard length in all other cases
-    PowerControl_Wait(RESPONSE_DELAY, LOW_POWER_NONE);    
+    PowerControl_Wait(RESPONSE_DELAY, LOW_POWER_NONE);
   }
-  
+
   // send response
   return (Communication_Transmit(frame, len, overrideModem));
 }

@@ -30,6 +30,7 @@ void PersistentStorage_Get_Callsign(char* buff, uint8_t len);
 void PersistentStorage_Set_Callsign(char* newCallsign);
 void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, size_t len);
 void PersistentStorage_Reset_System_Info();
+void PersistentStorage_Reset_ADCS_Params();
 
 uint32_t PersistentStorage_Get_Image_Len(uint8_t slot);
 uint32_t PersistentStorage_Get_Image_ScanStart(uint8_t slot);

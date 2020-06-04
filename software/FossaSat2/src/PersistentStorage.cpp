@@ -71,6 +71,7 @@ T PersistentStorage_Get(uint32_t addr) {
 }
 
 template float PersistentStorage_Get<float>(uint32_t);
+template uint32_t PersistentStorage_Get<uint32_t>(uint32_t);
 
 template<typename T>
 // cppcheck-suppress unusedFunction
@@ -192,7 +193,7 @@ void PersistentStorage_Update_Stats(uint8_t flags) {
 }
 
 void PersistentStorage_Reset_Stats() {
-  // build a completely stats page
+  // build a completely new stats page
   uint8_t statsPage[FLASH_EXT_PAGE_SIZE];
 
   // set everything to 0 by default
@@ -588,6 +589,30 @@ void PersistentStorage_Reset_System_Info() {
 
   // write the default system info
   PersistentStorage_Write(FLASH_SYSTEM_INFO, systemInfoBuffer, FLASH_EXT_PAGE_SIZE);
+}
+
+void PersistentStorage_Reset_ADCS_Params() {
+  // build a completely new page
+  uint8_t adcsPage[FLASH_EXT_PAGE_SIZE];
+
+  // set everything to 0 by default
+  memset(adcsPage, 0, FLASH_EXT_PAGE_SIZE);
+
+  float f = ADCS_PULSE_MAX_INTENSITY;
+  memcpy(adcsPage + FLASH_ADCS_PULSE_MAX_INTENSITY - FLASH_ADCS_PARAMETERS, &f, sizeof(f));
+  f = ADCS_PULSE_MAX_LENGTH;
+  memcpy(adcsPage + FLASH_ADCS_PULSE_MAX_LENGTH - FLASH_ADCS_PARAMETERS, &f, sizeof(f));
+  f = ADCS_OMEGA_TOLERANCE;
+  memcpy(adcsPage + FLASH_ADCS_OMEGA_TOLERANCE - FLASH_ADCS_PARAMETERS, &f, sizeof(f));
+  uint32_t ul = ADCS_TIME_STEP;
+  memcpy(adcsPage + FLASH_ADCS_TIME_STEP - FLASH_ADCS_PARAMETERS, &ul, sizeof(ul));
+  f = ADCS_MIN_INERTIAL_MOMENT;
+  memcpy(adcsPage + FLASH_ADCS_MIN_INERTIAL_MOMENT - FLASH_ADCS_PARAMETERS, &f, sizeof(f));
+  f = ADCS_PULSE_AMPLITUDE;
+  memcpy(adcsPage + FLASH_ADCS_PULSE_AMPLITUDE - FLASH_ADCS_PARAMETERS, &f, sizeof(f));
+
+  // write the default ADCS info
+  PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);
 }
 
 uint8_t PersistentStorage_Get_Message(uint16_t slotNum, uint8_t* buff) {

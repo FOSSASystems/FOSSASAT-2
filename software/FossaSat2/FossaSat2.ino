@@ -29,8 +29,8 @@ void setup() {
   PersistentStorage_SystemInfo_Set(FLASH_RESTART_COUNTER, restartCounter);
 
 #ifdef RESET_SYSTEM_INFO
-  // reset system info (first sector in external flash)
   PersistentStorage_Reset_System_Info();
+  PersistentStorage_Reset_ADCS_Params();
 #endif
 
   // print system info page
@@ -131,6 +131,7 @@ void setup() {
   if (attemptNumber == 0) {
     // integration, reset system info
     PersistentStorage_Reset_System_Info();
+    PersistentStorage_Reset_ADCS_Params();
     
     // print data for integration purposes (independently of FOSSASAT_DEBUG macro!)
     start = millis();

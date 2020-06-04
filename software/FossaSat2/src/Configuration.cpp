@@ -29,6 +29,9 @@ SPIClass FlashSPI(FLASH_MOSI, FLASH_MISO, FLASH_SCK);
 // additional UART interface
 HardwareSerial GpsSerial(GPS_RX, GPS_TX);
 
+// ADCS update timer instance
+HardwareTimer* AdcsTimer = new HardwareTimer(TIM2);
+
 // RadioLib instances
 SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_NRST, RADIO_BUSY, RadioSPI, SPISettings(2000000, MSBFIRST, SPI_MODE0));
 MorseClient morse(&radio);
@@ -82,12 +85,18 @@ uint32_t gpsLogLastFixAddr;
 bool gpsLogOverwrite;
 uint32_t gpsLogStart;
 
+// ADCS state variables (global since ADCS updates are interrupt-driven)
+volatile adcsState_t adcsState;
+
+// cached ADCS parameters
+adcsParams_t adcsParams;
+
 void Configuration_Setup() {
   // initialize pins
   pinMode(FLASH_CS, OUTPUT);
   digitalWrite(FLASH_CS, HIGH);
   pinMode(FLASH_RESET, INPUT);
-  
+
   pinMode(CAMERA_CS, OUTPUT);
   digitalWrite(CAMERA_CS, HIGH);
   pinMode(CAMERA_POWER_FET, OUTPUT);
@@ -96,7 +105,7 @@ void Configuration_Setup() {
   pinMode(DEPLOYMENT_FET_1, OUTPUT);
   pinMode(DEPLOYMENT_FET_2, OUTPUT);
   pinMode(BATTERY_HEATER_FET, OUTPUT);
-  
+
   pinMode(WATCHDOG_IN, OUTPUT);
   pinMode(MPPT_OFF, OUTPUT);
   pinMode(ANALOG_IN_RANDOM_SEED, INPUT_ANALOG);

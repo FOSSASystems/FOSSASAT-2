@@ -212,9 +212,12 @@
 // sector 1 - ADCS parameters
 #define FLASH_ADCS_PARAMETERS                                     0x00001000  //  0x00001000    0x000010FF
 
-#define FLASH_ADCS_PULSE_MAX_INTENSITY        (FLASH_ADCS_PARAMETERS + 0x00)  //  0x00008000    0x00008003    float
-#define FLASH_ADCS_PULSE_MAX_LENGTH           (FLASH_ADCS_PARAMETERS + 0x04)  //  0x00008004    0x00008007    float
-#define FLASH_ADCS_OMEGA_TOLERANCE            (FLASH_ADCS_PARAMETERS + 0x08)  //  0x00008008    0x0000800C    float
+#define FLASH_ADCS_PULSE_MAX_INTENSITY        (FLASH_ADCS_PARAMETERS + 0x00)  //  0x00001000    0x00001003    float
+#define FLASH_ADCS_PULSE_MAX_LENGTH           (FLASH_ADCS_PARAMETERS + 0x04)  //  0x00001004    0x00001007    float
+#define FLASH_ADCS_OMEGA_TOLERANCE            (FLASH_ADCS_PARAMETERS + 0x08)  //  0x00001008    0x0000100B    float
+#define FLASH_ADCS_TIME_STEP                  (FLASH_ADCS_PARAMETERS + 0x0C)  //  0x0000100C    0x0000100F    uint32_t
+#define FLASH_ADCS_MIN_INERTIAL_MOMENT        (FLASH_ADCS_PARAMETERS + 0x10)  //  0x0000100C    0x0000100F    float
+#define FLASH_ADCS_PULSE_AMPLITUDE            (FLASH_ADCS_PARAMETERS + 0x14)  //  0x0000100C    0x0000100F    float
 
 // sector 2 - stats
 #define FLASH_STATS                                               0x00002000  //  0x00002000    0x000020FF
@@ -452,6 +455,18 @@
 #define LIGHT_SENSOR_TOP_PANEL_BUS                      Wire2
 
 /*
+    ADCS TODO - placeholder values only!!!!
+*/
+
+#define ADCS_NUM_AXES                                   3       // number of axes to control
+#define ADCS_TIME_STEP                                  100000  // time setup between successive ADCS updates, in us
+#define ADCS_PULSE_MAX_INTENSITY                        0.05    //
+#define ADCS_PULSE_MAX_LENGTH                           23.5    //
+#define ADCS_OMEGA_TOLERANCE                            0.0001//0.1     // detumbling will be stopped once change in normalized angular velocity drops below this value
+#define ADCS_MIN_INERTIAL_MOMENT                        1.0     //
+#define ADCS_PULSE_AMPLITUDE                            1.0     //
+
+/*
     Global Variables
 */
 
@@ -483,6 +498,9 @@ extern SPIClass FlashSPI;
 
 // additional UART interface
 extern HardwareSerial GpsSerial;
+
+// ADCS update timer instance
+extern HardwareTimer* AdcsTimer;
 
 // RadioLib instances
 extern SX1268 radio;
@@ -535,6 +553,12 @@ extern uint32_t gpsLogFlashPos;
 extern uint32_t gpsLogLastFixAddr;
 extern bool gpsLogOverwrite;
 extern uint32_t gpsLogStart;
+
+// ADCS state variables (global since ADCS updates are interrupt-driven)
+extern volatile adcsState_t adcsState;
+
+// cached ADCS parameters
+extern adcsParams_t adcsParams;
 
 void Configuration_Setup();
 

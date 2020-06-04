@@ -215,7 +215,7 @@ void printControls() {
   Serial.println(F("c - capture photo"));
   Serial.println(F("e - set power limits"));
   Serial.println(F("T - set RTC"));
-  Serial.println(F("a - run ADCS"));
+  Serial.println(F("a - run manual ADCS"));
   Serial.println(F("I - get full system info (GFSK only)"));
   Serial.println(F("P - get picture (all blocks)"));
   Serial.println(F("F - read flash"));
@@ -229,6 +229,7 @@ void printControls() {
   Serial.println(F("j - run GPS command"));
   Serial.println(F("J - set sleep intervals"));
   Serial.println(F("A - abort current operation"));
+  Serial.println(F("z - perform ADCS manuever"));
   Serial.println(F("------------------------------------"));
 }
 
@@ -1063,6 +1064,20 @@ void setSleepIntervals(uint16_t* sleepIntervals, uint8_t numIntervals) {
   delete[] optData;
 }
 
+void maneuver(bool detumbleOnly, uint32_t detumbleLen, uint32_t activeLen, uint8_t* pos) {
+  const uint8_t optDataLen = sizeof(uint8_t) + 2*sizeof(uint32_t) + 6*sizeof(uint8_t);
+  uint8_t* optData = new uint8_t[optDataLen];
+  optData[0] = 0x00;
+  if(detumbleOnly) {
+    optData[0] = 0x01;
+  }
+  memcpy(optData + sizeof(uint8_t), &detumbleLen, sizeof(detumbleLen));
+  memcpy(optData + sizeof(uint8_t) + sizeof(uint32_t), &activeLen, sizeof(activeLen));
+  memcpy(optData + sizeof(uint8_t) + 2*sizeof(uint32_t), &detumbleLen, 6*sizeof(uint8_t));
+  sendFrameEncrypted(CMD_MANEUVER, optDataLen, optData);
+  delete[] optData;
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println(F("FOSSASAT-2 Ground Station Demo Code"));
@@ -1227,6 +1242,10 @@ void loop() {
       } break;
       case 'A':
         sendFrameEncrypted(CMD_ABORT);
+        break;
+      case 'z':
+        uint8_t pos[] = { 1, 2, 3, 4, 5, 6 };
+        maneuver(true, 5000, 6000, pos);
         break;
       default:
         Serial.print(F("Unknown command: "));

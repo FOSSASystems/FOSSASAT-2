@@ -39,6 +39,11 @@ void PowerControl_Wait(uint32_t ms, uint8_t type, bool radioSleep) {
     return;
   }
 
+  // override sleep mode while ADCS is active
+  if(adcsState.active) {
+    type = LOW_POWER_NONE;
+  }
+
   // calculate number of required loops (rounded up)
   float stepSize = 1000.0;
   if (type == LOW_POWER_NONE) {
@@ -104,7 +109,7 @@ void PowerControl_Deploy() {
   digitalWrite(DEPLOYMENT_FET_1, HIGH);
   PowerControl_Wait(1000, LOW_POWER_SLEEP);
   digitalWrite(DEPLOYMENT_FET_1, LOW);
-  
+
   digitalWrite(DEPLOYMENT_FET_2, HIGH);
   PowerControl_Wait(1000, LOW_POWER_SLEEP);
   digitalWrite(DEPLOYMENT_FET_2, LOW);
@@ -124,7 +129,7 @@ void PowerControl_Manage_Battery() {
     if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) == LOW_POWER_NONE) {
       PersistentStorage_Set_Buffer(FLASH_SYSTEM_INFO, systemInfoBuffer, FLASH_EXT_PAGE_SIZE);
     }
-    
+
   } else {
     // deactivate low power mode
     systemInfoBuffer[FLASH_LOW_POWER_MODE] = LOW_POWER_NONE;
@@ -147,8 +152,8 @@ void PowerControl_Manage_Battery() {
 
   // check temperature and voltage limit to enable heater
   float heaterTempLimit = PersistentStorage_SystemInfo_Get<float>(FLASH_BATTERY_HEATER_TEMP_LIMIT);
-  if((Sensors_Temperature_Read(tempSensorBattery) <= heaterTempLimit) && 
-     (Sensors_Temperature_Read(tempSensorSecBattery) <= heaterTempLimit) && 
+  if((Sensors_Temperature_Read(tempSensorBattery) <= heaterTempLimit) &&
+     (Sensors_Temperature_Read(tempSensorSecBattery) <= heaterTempLimit) &&
      (PowerControl_Get_Battery_Voltage() >= PersistentStorage_SystemInfo_Get<int16_t>(FLASH_HEATER_BATTERY_VOLTAGE_LIMIT))) {
     // both temperatures are below limit and battery is above limit, enable heater
     analogWrite(BATTERY_HEATER_FET, PersistentStorage_SystemInfo_Get<uint8_t>(BATTERY_HEATER_DUTY_CYCLE));

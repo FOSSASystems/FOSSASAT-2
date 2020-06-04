@@ -42,9 +42,9 @@ uint16_t Sensors_IMU_Setup() {
   return(state);
 }
 
-void Sensors_IMU_Update(bool autoSleep) {
+void Sensors_IMU_Update() {
   // wake up IMU
-  if(autoSleep) {
+  if(!adcsState.active) {
     Sensors_IMU_Sleep(false);
 
     // wait for everything to wake up
@@ -64,7 +64,7 @@ void Sensors_IMU_Update(bool autoSleep) {
   }
 
   // put IMU back to sleep
-  if(autoSleep) {
+  if(!adcsState.active) {
     Sensors_IMU_Sleep(false);
   }
 }

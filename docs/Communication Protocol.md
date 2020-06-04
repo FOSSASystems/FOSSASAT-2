@@ -101,6 +101,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
     - 0x04: store and forward frames
     - 0x08: NMEA log
     - 0x10: image storage (execution of this command will take several minutes)
+    - 0x20: ADCS parameters (all settings in persistent storage will be reset to the default values)
 - Response: none
 - Description: Wipes persistent storages.
 
@@ -300,6 +301,16 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Optional data length: 0
 - Response: none
 - Description: Aborts the currently running operation (e.g. GPS logging or ADCS control).
+
+### CMD_MANEUVER
+- Optional data length: 15
+- Optional data:
+  - 0: flag to indicate whether to only perform detumbling (0x01) or both detumbling and maneuver (0x00).
+  - 1 - 4: detumbling length in ms, unsigned 32-bit integer, LSB first
+  - 5 - 8: maneuver length in ms (ignored if detumble-only flag is set), unsigned 32-bit integer, LSB first
+  - 9 - 14: target position, uint8_t array
+- Response: none
+- Description: Performs maneuver with closed-loop ADCS control.
 
 ---
 # Responses

@@ -24,4 +24,28 @@ struct currentSensor_t {
   bool available;
 };
 
+// TODO GPS struct
+/*struct gpsLogState_t {
+
+};*/
+
+struct adcsState_t {
+  float prevIntensity[3];
+  float prevOmegaNorm;
+  uint32_t start;
+  bool active;
+};
+
+struct adcsParams_t {
+  float maxPulseInt;
+  float maxPulseLen;
+  float omegaTol;
+  uint32_t timeStep;
+  float minInertialMoment;
+  float orbInclination;
+  float orbPeriod;
+  float pulseAmplitude;
+  uint32_t detumbleLen;
+};
+
 #endif
