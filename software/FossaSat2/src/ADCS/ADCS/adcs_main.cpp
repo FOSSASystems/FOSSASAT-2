@@ -30,7 +30,7 @@ float ADCS_VectorNorm(const float dim[]) {
   return(sqrt(pow(dim[0], 2) + pow(dim[1], 2) + pow(dim[2], 2)));
 }
 
-int8_t ADCS_GetDriveStrength(float pulseLen) {
+/*int8_t ADCS_GetDriveStrength(float pulseLen) {
   float strength = (pulseLen - 24.191) / (-0.6828);
   if(strength > 35.0) {
     // clamp high
@@ -44,7 +44,7 @@ int8_t ADCS_GetDriveStrength(float pulseLen) {
   }
 
   return((int8_t)strength);
-}
+}*/
 
 /************ Auxiliary functions implementation ***********/
 void ADCS_Detumble_Init(const uint32_t detumbleDuration, const float orbitalInclination, const float orbitalPeriod) {

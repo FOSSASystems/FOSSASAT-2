@@ -24,7 +24,7 @@ void ADCS_Main(const bool detumbleOnly, const uint32_t detumbleDuration, const u
                const uint8_t position[], const float orbitalInclination, const float orbitalPeriod);
 
 float ADCS_VectorNorm(const float dim[]);
-int8_t ADCS_GetDriveStrength(float pulseLen);
+//int8_t ADCS_GetDriveStrength(float pulseLen);
 
 void ADCS_Detumble_Init(const uint32_t detumbleDuration, const float orbitalInclination, const float orbitalPeriod);
 void ADCS_Detumble_Update();
