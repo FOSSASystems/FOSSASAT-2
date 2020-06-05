@@ -25,9 +25,14 @@ struct currentSensor_t {
 };
 
 // TODO GPS struct
-/*struct gpsLogState_t {
-
-};*/
+struct gpsLogState_t {
+  uint8_t buff[128];
+  uint16_t buffPos;
+  uint32_t flashPos;
+  uint32_t lastFixAddr;
+  bool overwrite;
+  uint32_t start;
+};
 
 struct adcsState_t {
   float prevIntensity[3];

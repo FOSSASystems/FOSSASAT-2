@@ -554,12 +554,7 @@ extern lightSensor_t lightSensorPanelY;
 extern lightSensor_t lightSensorTop;
 
 // GPS logging variables (global since GPS logging is event-driven)
-extern uint8_t gpsLogBuff[];
-extern uint16_t gpsLogBuffPos;
-extern uint32_t gpsLogFlashPos;
-extern uint32_t gpsLogLastFixAddr;
-extern bool gpsLogOverwrite;
-extern uint32_t gpsLogStart;
+extern gpsLogState_t gpsLogState;
 
 // ADCS state variables (global since ADCS updates are interrupt-driven)
 extern volatile adcsState_t adcsState;

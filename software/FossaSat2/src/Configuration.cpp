@@ -78,12 +78,7 @@ lightSensor_t lightSensorPanelY = { .driver = new Adafruit_VEML7700(), .bus = LI
 lightSensor_t lightSensorTop =    { .driver = new Adafruit_VEML7700(), .bus = LIGHT_SENSOR_TOP_PANEL_BUS, .available = false };
 
 // GPS logging variables (global since GPS logging is done from serialEvent)
-uint8_t gpsLogBuff[FLASH_NMEA_LOG_SLOT_SIZE];
-uint16_t gpsLogBuffPos;
-uint32_t gpsLogFlashPos;
-uint32_t gpsLogLastFixAddr;
-bool gpsLogOverwrite;
-uint32_t gpsLogStart;
+gpsLogState_t gpsLogState;
 
 // ADCS state variables (global since ADCS updates are interrupt-driven)
 volatile adcsState_t adcsState;

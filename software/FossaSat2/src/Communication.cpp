@@ -1414,7 +1414,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // run for the requested duration
         // TODO change millis() for RTC - millis() timer is not updated in sleep mode
-        while(millis() - gpsLogStart < duration) {
+        while(millis() - gpsLogState.start < duration) {
           // check new data
           Navigation_GNSS_SerialEvent();
           PowerControl_Watchdog_Heartbeat();
@@ -1444,8 +1444,8 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         const uint8_t respOptDataLen = 3*sizeof(uint32_t);
         uint8_t respOptData[respOptDataLen];
         memcpy(respOptData, &logged, sizeof(uint32_t));
-        memcpy(respOptData + sizeof(uint32_t), &gpsLogFlashPos, sizeof(uint32_t));
-        memcpy(respOptData + 2*sizeof(uint32_t), &gpsLogLastFixAddr, sizeof(uint32_t));
+        memcpy(respOptData + sizeof(uint32_t), &(gpsLogState.flashPos), sizeof(uint32_t));
+        memcpy(respOptData + 2*sizeof(uint32_t), &(gpsLogState.lastFixAddr), sizeof(uint32_t));
         Communication_Send_Response(RESP_GPS_LOG_STATE, respOptData, respOptDataLen);
       }
     } break;
