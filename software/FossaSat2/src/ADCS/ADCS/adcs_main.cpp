@@ -26,7 +26,7 @@ void ADCS_Main(const bool detumbleOnly, const uint32_t detumbleDuration, const u
   }
 }
 
-float ADCS_VectorNorm(float dim[]) {
+float ADCS_VectorNorm(const float dim[]) {
   return(sqrt(pow(dim[0], 2) + pow(dim[1], 2) + pow(dim[2], 2)));
 }
 
@@ -55,6 +55,7 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const float orbitalIncl
     adcsParams.timeStep = PersistentStorage_Get<uint32_t>(FLASH_ADCS_TIME_STEP);           // Time step between to calculation instants
     adcsParams.minInertialMoment = PersistentStorage_Get<float>(FLASH_ADCS_MIN_INERTIAL_MOMENT); // Minimum inertial moment
     adcsParams.pulseAmplitude = PersistentStorage_Get<float>(FLASH_ADCS_PULSE_AMPLITUDE);  // Amplitude of pulse for ACS_IntensitiesRectifier
+    adcsParams.BmodTol = PersistentStorage_Get<float>(FLASH_ADCS_B_MODULE_TOLERANCE);
     adcsParams.orbInclination = orbitalInclination;
     adcsParams.orbPeriod = orbitalPeriod;
     adcsParams.detumbleLen = detumbleDuration;

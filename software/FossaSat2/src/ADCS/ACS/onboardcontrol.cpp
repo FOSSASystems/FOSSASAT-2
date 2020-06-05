@@ -19,10 +19,11 @@
     const int number_variables = 6;     // Number of state variables: 3 angles and 3 angular velocities
 
     //Module of the magnetic field intensity
-    const double B_module = pow((pow(magnetic_vector[0],2)+pow(magnetic_vector[1],2)+magnetic_vector[2]),(1/2));
+    const float tol = 0.01;
+    const double B_module = sqrt(magnetic_vector[0]*magnetic_vector[0]+magnetic_vector[1]*magnetic_vector[1]
+                                +magnetic_vector[2]*magnetic_vector[2])+tol;
     //Coil magnetic characteristics
     const double A[3][3] = {{1.88*pow(10,5),0,0}, {0,6.1*pow(10,5),0}, {0,0,5.96*pow(10,5)}};
-
 
     // Variables initialization
     float Lc[3], Lc_aux = 0;
@@ -37,11 +38,11 @@
         }
     }
 
-    //Calculation of magnetic dipole applied on the coils
+    // Calculation of magnetic dipole applied on the coils
     float m[3];
-    m[0] = (Lc[1]*B[2]-Lc[2]*B[1])/ B_module;
-    m[1] = (Lc[2]*B[0]-Lc[0]*B[2])/ B_module;
-    m[2] = (Lc[0]*B[1]-Lc[1]*B[0])/ B_module;
+    m[0] = (L[2]*B[1]-B[2]*L[1])/B_module;
+    m[1] = (L[0]*B[2]-B[0]*L[2])/B_module;
+    m[2] = (L[1]*B[0]-B[1]*L[0])/B_module;
 
     //Definition of intensity output -solving the equation: A*I = m-
     I[0] = m[0]/A[0][0];

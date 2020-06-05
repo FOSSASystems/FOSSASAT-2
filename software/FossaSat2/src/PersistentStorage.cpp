@@ -610,6 +610,8 @@ void PersistentStorage_Reset_ADCS_Params() {
   memcpy(adcsPage + (FLASH_ADCS_MIN_INERTIAL_MOMENT - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   f = ADCS_PULSE_AMPLITUDE;
   memcpy(adcsPage + (FLASH_ADCS_PULSE_AMPLITUDE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
+  f = ADCS_B_MODULE_TOLERANCE;
+  memcpy(adcsPage + (FLASH_ADCS_B_MODULE_TOLERANCE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
 
   // write the default ADCS info
   PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);

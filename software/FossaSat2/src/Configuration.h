@@ -216,8 +216,9 @@
 #define FLASH_ADCS_PULSE_MAX_LENGTH           (FLASH_ADCS_PARAMETERS + 0x04)  //  0x00001004    0x00001007    float
 #define FLASH_ADCS_OMEGA_TOLERANCE            (FLASH_ADCS_PARAMETERS + 0x08)  //  0x00001008    0x0000100B    float
 #define FLASH_ADCS_TIME_STEP                  (FLASH_ADCS_PARAMETERS + 0x0C)  //  0x0000100C    0x0000100F    uint32_t
-#define FLASH_ADCS_MIN_INERTIAL_MOMENT        (FLASH_ADCS_PARAMETERS + 0x10)  //  0x0000100C    0x0000100F    float
-#define FLASH_ADCS_PULSE_AMPLITUDE            (FLASH_ADCS_PARAMETERS + 0x14)  //  0x0000100C    0x0000100F    float
+#define FLASH_ADCS_MIN_INERTIAL_MOMENT        (FLASH_ADCS_PARAMETERS + 0x10)  //  0x00001010    0x00001013    float
+#define FLASH_ADCS_PULSE_AMPLITUDE            (FLASH_ADCS_PARAMETERS + 0x14)  //  0x00001014    0x00001017    float
+#define FLASH_ADCS_B_MODULE_TOLERANCE         (FLASH_ADCS_PARAMETERS + 0x18)  //  0x00001018    0x0000101B    float
 
 // sector 2 - stats
 #define FLASH_STATS                                               0x00002000  //  0x00002000    0x000020FF
@@ -467,9 +468,10 @@
 #define ADCS_TIME_STEP                                  100000  // time setup between successive ADCS updates, in us
 #define ADCS_PULSE_MAX_INTENSITY                        1.0    //
 #define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)    //
-#define ADCS_OMEGA_TOLERANCE                            0.0001//0.1     // detumbling will be stopped once change in normalized angular velocity drops below this value
+#define ADCS_OMEGA_TOLERANCE                            0.1     // detumbling will be stopped once change in normalized angular velocity drops below this value
 #define ADCS_MIN_INERTIAL_MOMENT                        1000     //
 #define ADCS_PULSE_AMPLITUDE                            0.1     //
+#define ADCS_B_MODULE_TOLERANCE                         0.01
 
 /*
     Global Variables

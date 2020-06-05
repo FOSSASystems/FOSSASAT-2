@@ -15,7 +15,7 @@
 float ACS_IntensitiesRectifier(const float intensity1, const float intensity2, const int delta_t) {
   // Energy approximation of the signal by the trapezoidal rule
   float intensityDiff = intensity2 - intensity1;
-  float energy = (pow(intensity1, 2) + (1.0/3.0)*pow(intensityDiff, 2) + intensity1*(intensityDiff)) * delta_t;
+  float energy = (pow(intensity1, 2) + (1.0/3.0)*pow(intensityDiff, 2) + intensity1*(intensityDiff)) * (float)delta_t;
 
   //Pulse time calculation
   float duration = energy/adcsParams.pulseAmplitude;

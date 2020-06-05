@@ -46,6 +46,7 @@ struct adcsParams_t {
   float orbPeriod;
   float pulseAmplitude;
   uint32_t detumbleLen;
+  float BmodTol;
 };
 
 #endif
