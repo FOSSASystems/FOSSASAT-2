@@ -305,7 +305,9 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 ### CMD_MANEUVER
 - Optional data length: 15
 - Optional data:
-  - 0: flag to indicate whether to only perform detumbling (0x01) or both detumbling and maneuver (0x00).
+  - 0: control flags
+    - bit 0: only perform detumbling (0x01) or both detumbling and maneuver (0x00)
+    - bit 1: override detumbling angular velocity tolerance check
   - 1 - 4: detumbling length in ms, unsigned 32-bit integer, LSB first
   - 5 - 8: maneuver length in ms (ignored if detumble-only flag is set), unsigned 32-bit integer, LSB first
   - 9 - 14: target position, uint8_t array

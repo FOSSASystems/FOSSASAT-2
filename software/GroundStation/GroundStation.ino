@@ -1064,13 +1064,10 @@ void setSleepIntervals(uint16_t* sleepIntervals, uint8_t numIntervals) {
   delete[] optData;
 }
 
-void maneuver(bool detumbleOnly, uint32_t detumbleLen, uint32_t activeLen, uint8_t* pos) {
+void maneuver(uint8_t controlFlags, uint32_t detumbleLen, uint32_t activeLen, uint8_t* pos) {
   const uint8_t optDataLen = sizeof(uint8_t) + 2*sizeof(uint32_t) + 6*sizeof(uint8_t);
   uint8_t* optData = new uint8_t[optDataLen];
-  optData[0] = 0x00;
-  if(detumbleOnly) {
-    optData[0] = 0x01;
-  }
+  optData[0] = controlFlags;
   memcpy(optData + sizeof(uint8_t), &detumbleLen, sizeof(detumbleLen));
   memcpy(optData + sizeof(uint8_t) + sizeof(uint32_t), &activeLen, sizeof(activeLen));
   memcpy(optData + sizeof(uint8_t) + 2*sizeof(uint32_t), &detumbleLen, 6*sizeof(uint8_t));
@@ -1245,7 +1242,7 @@ void loop() {
         break;
       case 'z':
         uint8_t pos[] = { 1, 2, 3, 4, 5, 6 };
-        maneuver(true, 5000, 6000, pos);
+        maneuver(0b00000011, 5000, 6000, pos);
         break;
       default:
         Serial.print(F("Unknown command: "));

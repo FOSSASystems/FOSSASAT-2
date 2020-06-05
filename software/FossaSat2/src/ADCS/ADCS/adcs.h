@@ -20,7 +20,7 @@
 
 /*********** Functions declaration ************/
 // Main structure
-void ADCS_Main(const bool detumbleOnly, const uint32_t detumbleDuration, const uint32_t activeDuration,
+void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, const uint32_t activeDuration,
                const uint8_t position[], const float orbitalInclination, const float orbitalPeriod);
 
 float ADCS_VectorNorm(const float dim[]);

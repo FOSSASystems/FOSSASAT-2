@@ -466,10 +466,10 @@
 
 #define ADCS_NUM_AXES                                   3       // number of axes to control
 #define ADCS_TIME_STEP                                  100000  // time setup between successive ADCS updates, in us
-#define ADCS_PULSE_MAX_INTENSITY                        1.0    //
+#define ADCS_PULSE_MAX_INTENSITY                        1.0     //
 #define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)    //
 #define ADCS_OMEGA_TOLERANCE                            0.1     // detumbling will be stopped once change in normalized angular velocity drops below this value
-#define ADCS_MIN_INERTIAL_MOMENT                        1000     //
+#define ADCS_MIN_INERTIAL_MOMENT                        1000    //
 #define ADCS_PULSE_AMPLITUDE                            0.1     //
 #define ADCS_B_MODULE_TOLERANCE                         0.01
 

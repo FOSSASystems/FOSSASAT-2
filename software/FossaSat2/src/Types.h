@@ -36,6 +36,11 @@ struct adcsState_t {
   bool active;
 };
 
+struct adcsControlBits_t {
+  uint8_t detumbleOnly : 1;       // LSB
+  uint8_t overrideDetumbleTol : 1;
+};
+
 struct adcsParams_t {
   float maxPulseInt;
   float maxPulseLen;
@@ -47,6 +52,10 @@ struct adcsParams_t {
   float pulseAmplitude;
   uint32_t detumbleLen;
   float BmodTol;
+  union {
+    adcsControlBits_t bits;
+    uint8_t val;
+  } control;
 };
 
 #endif

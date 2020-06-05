@@ -1723,20 +1723,16 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINT(F("maneuverLen = "));
         FOSSASAT_DEBUG_PRINTLN(maneuverLen);
 
-        bool detumbleOnly = true;
-        if(optData[0] == 0x00) {
-          detumbleOnly = false;
-        }
-        FOSSASAT_DEBUG_PRINT(F("detumbleOnly = "));
-        FOSSASAT_DEBUG_PRINTLN(detumbleOnly);
+        uint8_t controlFlags = optData[0];
+        FOSSASAT_DEBUG_PRINT(F("controlFlags = "));
+        FOSSASAT_DEBUG_PRINTLN(controlFlags, HEX);
 
         // read orbital period and inclination from TLE
-        // TODO check this
         double orbitalInclination = PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_INCLINATION) * (M_PI/180.0);
         double orbitalPeriod = (24.0 * 3600.0) / PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_MEAN_MOTION);
 
         // initialize ADCS
-        ADCS_Main(detumbleOnly, detumbleLen, maneuverLen, optData + 9, orbitalInclination, orbitalPeriod);
+        ADCS_Main(controlFlags, detumbleLen, maneuverLen, optData + 9, orbitalInclination, orbitalPeriod);
       }
     } break;
 

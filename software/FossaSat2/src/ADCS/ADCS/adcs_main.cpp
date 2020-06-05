@@ -14,13 +14,16 @@
 //void active_controlling(const int active_time, const int position, float pulse_times[][3]);
 
 /*********** Main function ***************/
-void ADCS_Main(const bool detumbleOnly, const uint32_t detumbleDuration, const uint32_t activeDuration,
+void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, const uint32_t activeDuration,
                const uint8_t position[], const float orbitalInclination, const float orbitalPeriod) {
+
+  // save control flags
+  adcsParams.control.val = controlFlags;
 
   // always detumble first
   ADCS_Detumble_Init(detumbleDuration, orbitalInclination, orbitalPeriod);
 
-  if(!detumbleOnly) {
+  if(!adcsParams.control.bits.detumbleOnly) {
     // Active controlling loop
     //active_controlling(active_time-detumbleTime, position, pulse_times);
   }
@@ -154,8 +157,8 @@ void ADCS_Detumble_Update() {
   FOSSASAT_DEBUG_PRINT(F("omegaNorm=\t"));
   FOSSASAT_DEBUG_PRINTLN(omegaNorm, 4);
 
-  // TODO add option to override tolerance check
-  if (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.omegaTol) {
+  // check tolerance
+  if ((adcsParams.control.bits.overrideDetumbleTol) || (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.omegaTol)) {
       // Control law generation
       ACS_BdotFunction(omega, mag, adcsParams.orbInclination, adcsParams.orbPeriod, intensity);
       float intensityNorm = ADCS_VectorNorm(intensity);
