@@ -163,26 +163,26 @@ void setup() {
         FOSSASAT_DEBUG_PORT.println();
 
         // IMU
-        FOSSASAT_DEBUG_PORT.println(F("Device\t\tomega [deg./s]\ta [m/s^2]\tB [gauss]"));
+        FOSSASAT_DEBUG_PORT.println(F("Device\t\tomega [rad./s]\ta [m/s^2]\tB [tesla]"));
         FOSSASAT_DEBUG_PORT.println(F("-------------------------------------------------------------"));
         FOSSASAT_DEBUG_PORT.print(F("X axis\t\t"));
-        FOSSASAT_DEBUG_PORT.print(imu.calcGyro(imu.gx));
+        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcGyro(imu.gx));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.print(imu.calcAccel(imu.ax));
+        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcAccel(imu.ax));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.println(imu.calcMag(imu.mx));
+        FOSSASAT_DEBUG_PORT.println(Sensors_IMU_CalcMag(imu.mx));
         FOSSASAT_DEBUG_PORT.print(F("Y axis\t\t"));
-        FOSSASAT_DEBUG_PORT.print(imu.calcGyro(imu.gy));
+        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcGyro(imu.gy));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.print(imu.calcAccel(imu.ay));
+        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcAccel(imu.ay));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.println(imu.calcMag(imu.my));
+        FOSSASAT_DEBUG_PORT.println(Sensors_IMU_CalcMag(imu.my));
         FOSSASAT_DEBUG_PORT.print(F("Z axis\t\t"));
-        FOSSASAT_DEBUG_PORT.print(imu.calcGyro(imu.gz));
+        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcGyro(imu.gz));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.print(imu.calcAccel(imu.az));
+        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcAccel(imu.az));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.println(imu.calcMag(imu.mz));
+        FOSSASAT_DEBUG_PORT.println(Sensors_IMU_CalcMag(imu.mz));
         FOSSASAT_DEBUG_PORT.println();
 
         // current sensors

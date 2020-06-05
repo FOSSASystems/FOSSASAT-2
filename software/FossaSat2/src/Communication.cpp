@@ -1100,9 +1100,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // gyroscope
           if(flags & 0x01) {
-            valX = imu.calcGyro(imu.gx);
-            valY = imu.calcGyro(imu.gy);
-            valZ = imu.calcGyro(imu.gz);
+            valX = Sensors_IMU_CalcGyro(imu.gx);
+            valY = Sensors_IMU_CalcGyro(imu.gy);
+            valZ = Sensors_IMU_CalcGyro(imu.gz);
 
             Communication_Frame_Add(&respOptDataPtr, valX, "G X", 1, "deg/s");
             Communication_Frame_Add(&respOptDataPtr, valY, "G Y", 1, "deg/s");
@@ -1111,9 +1111,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // accelerometer
           if(flags & 0x02) {
-            valX = imu.calcAccel(imu.ax);
-            valY = imu.calcAccel(imu.ay);
-            valZ = imu.calcAccel(imu.az);
+            valX = Sensors_IMU_CalcAccel(imu.ax);
+            valY = Sensors_IMU_CalcAccel(imu.ay);
+            valZ = Sensors_IMU_CalcAccel(imu.az);
 
             Communication_Frame_Add(&respOptDataPtr, valX, "A X", 1, "m/s^2");
             Communication_Frame_Add(&respOptDataPtr, valY, "A Y", 1, "m/s^2");
@@ -1122,9 +1122,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // magnetometer
           if(flags & 0x04) {
-            valX = imu.calcMag(imu.mx);
-            valY = imu.calcMag(imu.my);
-            valZ = imu.calcMag(imu.mz);
+            valX = Sensors_IMU_CalcMag(imu.mx);
+            valY = Sensors_IMU_CalcMag(imu.my);
+            valZ = Sensors_IMU_CalcMag(imu.mz);
 
             Communication_Frame_Add(&respOptDataPtr, valX, "M X", 1, "gauss");
             Communication_Frame_Add(&respOptDataPtr, valY, "M Y", 1, "gauss");

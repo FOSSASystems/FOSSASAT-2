@@ -422,6 +422,9 @@
 #define IMU_BUS                                         Wire2
 #define IMU_ACCEL_GYRO_ADDRESS                          0b1101011 // SDO_A/G pulled high internally
 #define IMU_MAG_ADDRESS                                 0b0011110 // SDO_M pulled high internally
+#define IMU_DEG_S_TO_RAD_S                              (M_PI / 180.0)  // gyroscope conversion constant from deg/s to rad/s
+#define IMU_G_TO_MS2                                    (9.80665) // accelerometer conversion constant from g units to m/s^2
+#define IMU_GAUSS_TO_TESLA                              (0.0001)  // magnetometer conversion constant from gauss to tesla
 
 /*
    Current Sensors

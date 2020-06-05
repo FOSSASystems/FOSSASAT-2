@@ -90,12 +90,12 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const float orbitalIncl
     // get initial IMU data
     Sensors_IMU_Update();
     float omega[ADCS_NUM_AXES];
-    omega[0] = imu.calcGyro(imu.gx);
-    omega[1] = imu.calcGyro(imu.gy);
-    omega[2] = imu.calcGyro(imu.gz);
+    omega[0] = Sensors_IMU_CalcGyro(imu.gx);
+    omega[1] = Sensors_IMU_CalcGyro(imu.gy);
+    omega[2] = Sensors_IMU_CalcGyro(imu.gz);
     adcsState.prevOmegaNorm = ADCS_VectorNorm(omega);
 
-    FOSSASAT_DEBUG_PRINT(F("omega=\t"));
+    FOSSASAT_DEBUG_PRINT(F("omega= \t"));
     FOSSASAT_DEBUG_PRINT(omega[0], 4); FOSSASAT_DEBUG_PRINT('\t');
     FOSSASAT_DEBUG_PRINT(omega[1], 4); FOSSASAT_DEBUG_PRINT('\t');
     FOSSASAT_DEBUG_PRINTLN(omega[2], 4);
@@ -129,15 +129,15 @@ void ADCS_Detumble_Update() {
 
   // Call for the magnetometer raw data
   float mag[ADCS_NUM_AXES];
-  mag[0] = imu.calcMag(imu.mx);
-  mag[1] = imu.calcMag(imu.my);
-  mag[2] = imu.calcMag(imu.mz);
+  mag[0] = Sensors_IMU_CalcMag(imu.mx);
+  mag[1] = Sensors_IMU_CalcMag(imu.my);
+  mag[2] = Sensors_IMU_CalcMag(imu.mz);
 
   // Call the IMU angular velocity data
   float omega[ADCS_NUM_AXES];
-  omega[0] = imu.calcGyro(imu.gx);
-  omega[1] = imu.calcGyro(imu.gy);
-  omega[2] = imu.calcGyro(imu.gz);
+  omega[0] = Sensors_IMU_CalcGyro(imu.gx);
+  omega[1] = Sensors_IMU_CalcGyro(imu.gy);
+  omega[2] = Sensors_IMU_CalcGyro(imu.gz);
 
   float omegaNorm = ADCS_VectorNorm(omega);
   float intensity[ADCS_NUM_AXES];
@@ -146,13 +146,14 @@ void ADCS_Detumble_Update() {
   FOSSASAT_DEBUG_PRINT(mag[0], 4); FOSSASAT_DEBUG_PRINT('\t');
   FOSSASAT_DEBUG_PRINT(mag[1], 4); FOSSASAT_DEBUG_PRINT('\t');
   FOSSASAT_DEBUG_PRINTLN(mag[2], 4);
-  FOSSASAT_DEBUG_PRINT(F("omega=\t"));
+  FOSSASAT_DEBUG_PRINT(F("omega= \t"));
   FOSSASAT_DEBUG_PRINT(omega[0], 4); FOSSASAT_DEBUG_PRINT('\t');
   FOSSASAT_DEBUG_PRINT(omega[1], 4); FOSSASAT_DEBUG_PRINT('\t');
   FOSSASAT_DEBUG_PRINTLN(omega[2], 4);
   FOSSASAT_DEBUG_PRINT(F("omegaNorm=\t"));
   FOSSASAT_DEBUG_PRINTLN(omegaNorm, 4);
 
+  // TODO add option to override tolerance check
   if (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.omegaTol) {
       // Control law generation
       ACS_BdotFunction(omega, mag, adcsParams.orbInclination, adcsParams.orbPeriod, intensity);

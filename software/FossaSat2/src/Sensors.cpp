@@ -73,6 +73,18 @@ void Sensors_IMU_Sleep(bool sleep) {
   imu.sleepGyro(sleep);
 }
 
+float Sensors_IMU_CalcGyro(int16_t raw) {
+  return(imu.calcGyro(raw) * IMU_DEG_S_TO_RAD_S);
+}
+
+float Sensors_IMU_CalcAccel(int16_t raw) {
+  return(imu.calcAccel(raw) * IMU_G_TO_MS2);
+}
+
+float Sensors_IMU_CalcMag(int16_t raw) {
+  return(imu.calcMag(raw) * IMU_GAUSS_TO_TESLA);
+}
+
 bool Sensors_Current_Setup(currentSensor_t& sensor) {
   FOSSASAT_DEBUG_PRINT(F("Current sensor 0b"));
   FOSSASAT_DEBUG_PRINT(sensor.addr, BIN);
