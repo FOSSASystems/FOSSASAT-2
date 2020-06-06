@@ -216,7 +216,8 @@
 #define FLASH_ADCS_MIN_INERTIAL_MOMENT        (FLASH_ADCS_PARAMETERS + 0x18)  //  0x00001018    0x0000101F    float or double
 #define FLASH_ADCS_PULSE_AMPLITUDE            (FLASH_ADCS_PARAMETERS + 0x20)  //  0x00001020    0x00001027    float or double
 #define FLASH_ADCS_B_MODULE_TOLERANCE         (FLASH_ADCS_PARAMETERS + 0x28)  //  0x00001028    0x0000102F    float or double
-#define FLASH_ADCS_TIME_STEP                  (FLASH_ADCS_PARAMETERS + 0xA0)  //  0x000010A0    0x000010A4    uint32_t
+#define FLASH_ADCS_TIME_STEP                  (FLASH_ADCS_PARAMETERS + 0x70)  //  0x00001070    0x00001073    uint32_t
+#define FLASH_ADCS_COIL_CHAR_MATRIX           (FLASH_ADCS_PARAMETERS + 0x80)  //  0x00001080    0x000010C8    9x float or double
 
 // sector 2 - stats
 #define FLASH_STATS                                               0x00002000  //  0x00002000    0x000020FF
@@ -471,6 +472,9 @@
 #define ADCS_MIN_INERTIAL_MOMENT                        1000    //
 #define ADCS_PULSE_AMPLITUDE                            0.1     //
 #define ADCS_B_MODULE_TOLERANCE                         0.01
+#define ADCS_COIL_CHARACTERISTICS                       { {1.88 * pow(10, 5), 0,                 0}, \
+                                                          {0,                 6.1 * pow(10, 5),  0}, \
+                                                          {0,                 0,                 5.96 * pow(10, 5)} }
 
 /*
     Global Variables

@@ -314,6 +314,19 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Response: none
 - Description: Performs maneuver with closed-loop ADCS control.
 
+### CMD_SET_ADCS_PARAMETERS
+- Optional data length: 28
+- Optional data:
+  - 0 - 3: maximum pulse intensity, float
+  - 4 - 7: maximum pulse length, float
+  - 8 - 11: detumbling angular velocity tolerance, float
+  - 12 - 15: minimum inertial moment, float
+  - 16 - 19: pulse amplitude, float
+  - 20 - 23: magnetic intensity vector module tolerance, float
+  - 24 - 27: time step between ADCS updates in us, unsigned 32-bit integer, LSB first
+- Response: none
+- Description: Sets configurable ADCS parameters. Floating point numbers should are sent first due to internal automated conversion.
+
 ---
 # Responses
 

@@ -21,6 +21,7 @@ void Communication_Send_Full_System_Info();
 void Communication_Send_Statistics(uint8_t flags);
 template <typename T>
 void Communication_Frame_Add(uint8_t** buffPtr, T val, const char* name, uint32_t mult, const char* unit);
+void Communication_Set_ADCS_Param(uint8_t** optDataPtr, uint8_t* adcsPage, uint32_t addr);
 
 // FOSSA Communication Protocol frame handling
 void Communication_Check_New_Packet();

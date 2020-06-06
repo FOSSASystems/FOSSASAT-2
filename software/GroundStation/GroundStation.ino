@@ -230,6 +230,7 @@ void printControls() {
   Serial.println(F("J - set sleep intervals"));
   Serial.println(F("A - abort current operation"));
   Serial.println(F("z - perform ADCS manuever"));
+  Serial.println(F("Z - set ADCS parameters"));
   Serial.println(F("------------------------------------"));
 }
 
@@ -1066,13 +1067,35 @@ void setSleepIntervals(uint16_t* sleepIntervals, uint8_t numIntervals) {
 
 void maneuver(uint8_t controlFlags, uint32_t detumbleLen, uint32_t activeLen, uint8_t* pos) {
   const uint8_t optDataLen = sizeof(uint8_t) + 2*sizeof(uint32_t) + 6*sizeof(uint8_t);
-  uint8_t* optData = new uint8_t[optDataLen];
+  uint8_t optData[optDataLen];
   optData[0] = controlFlags;
   memcpy(optData + sizeof(uint8_t), &detumbleLen, sizeof(detumbleLen));
   memcpy(optData + sizeof(uint8_t) + sizeof(uint32_t), &activeLen, sizeof(activeLen));
   memcpy(optData + sizeof(uint8_t) + 2*sizeof(uint32_t), &detumbleLen, 6*sizeof(uint8_t));
   sendFrameEncrypted(CMD_MANEUVER, optDataLen, optData);
-  delete[] optData;
+}
+
+void setAdcsParams(uint32_t timeStep, float pulseMaxIntensity, float maxPulseLength, 
+                   float omegaTol, float minInertialMoment, float pulseAmplitude, float bModTol) {
+  Serial.print(F("Sending ADCS parameters ... "));
+  const uint8_t optDataLen = sizeof(uint32_t) + 6*sizeof(float);
+  uint8_t optData[optDataLen];
+  uint8_t* optDataPtr = optData;
+  memcpy(optDataPtr, &pulseMaxIntensity, sizeof(pulseMaxIntensity));
+  optDataPtr += sizeof(pulseMaxIntensity);
+  memcpy(optDataPtr, &maxPulseLength, sizeof(maxPulseLength));
+  optDataPtr += sizeof(maxPulseLength);
+  memcpy(optDataPtr, &omegaTol, sizeof(omegaTol));
+  optDataPtr += sizeof(omegaTol);
+  memcpy(optDataPtr, &minInertialMoment, sizeof(minInertialMoment));
+  optDataPtr += sizeof(minInertialMoment);
+  memcpy(optDataPtr, &pulseAmplitude, sizeof(pulseAmplitude));
+  optDataPtr += sizeof(pulseAmplitude);
+  memcpy(optDataPtr, &bModTol, sizeof(bModTol));
+  optDataPtr += sizeof(bModTol);
+  memcpy(optDataPtr, &timeStep, sizeof(timeStep));
+  optDataPtr += sizeof(timeStep);
+  sendFrameEncrypted(CMD_SET_ADCS_PARAMETERS, optDataLen, optData);
 }
 
 void setup() {
@@ -1240,9 +1263,12 @@ void loop() {
       case 'A':
         sendFrameEncrypted(CMD_ABORT);
         break;
-      case 'z':
+      case 'z': {
         uint8_t pos[] = { 1, 2, 3, 4, 5, 6 };
         maneuver(0b00000011, 5000, 6000, pos);
+      } break;
+      case 'Z':
+        setAdcsParams(80000, 2.0, 40000.0, 0.2, 800, 0.3, 0.02);
         break;
       default:
         Serial.print(F("Unknown command: "));

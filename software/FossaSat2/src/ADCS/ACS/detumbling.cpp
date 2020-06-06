@@ -30,10 +30,11 @@ void ACS_BdotFunction(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE mag[], 
     FOSSASAT_DEBUG_PRINTLN(gainGeneral, 4);
 
     // Coil magnetic characteristics
-    // TODO configurable?
-    const ADCS_CALC_TYPE coilChar[3][3] = { {1.88 * pow(10, 5), 0,                 0},
-                                    {0,                 6.1 * pow(10, 5),  0},
-                                    {0,                 0,                 5.96 * pow(10, 5)} };
+    ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES];
+    const uint8_t coilCharLen = ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(ADCS_CALC_TYPE);
+    uint8_t coilCharBuff[coilCharLen];
+    PersistentStorage_Read(FLASH_ADCS_COIL_CHAR_MATRIX, coilCharBuff, coilCharLen);
+    memcpy(coilChar, coilCharBuff, coilCharLen);
 
     // Generate the control law by means of a vector product: m = a*(B x omega) = (K/B_module)*(B x omega)
     ADCS_CALC_TYPE controlLaw[3];

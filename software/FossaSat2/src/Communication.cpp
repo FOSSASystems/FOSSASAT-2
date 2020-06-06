@@ -386,6 +386,14 @@ template void Communication_Frame_Add<int16_t>(uint8_t**, int16_t, const char*, 
 template void Communication_Frame_Add<uint16_t>(uint8_t**, uint16_t, const char*, uint32_t, const char*);
 template void Communication_Frame_Add<uint32_t>(uint8_t**, uint32_t, const char*, uint32_t, const char*);
 
+void Communication_Set_ADCS_Param(uint8_t** optDataPtr, uint8_t* adcsPage, uint32_t addr) {
+  float f;
+  memcpy(&f, *optDataPtr, sizeof(float));
+  (*optDataPtr) += sizeof(float);
+  ADCS_CALC_TYPE val = (ADCS_CALC_TYPE)f;
+  memcpy(adcsPage + (addr - FLASH_ADCS_PARAMETERS), &val, sizeof(ADCS_CALC_TYPE));
+}
+
 void Communication_Check_New_Packet() {
   if(digitalRead(RADIO_DIO1)) {
     radio.standby();
@@ -1736,9 +1744,27 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       }
     } break;
 
-
     case CMD_SET_ADCS_PARAMETERS: {
+      if(Communication_Check_OptDataLen(28, optDataLen)) {
+        // read the current ADCS parameters
+        uint8_t adcsPage[FLASH_EXT_PAGE_SIZE];
+        PersistentStorage_Read(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);
+        uint8_t* optDataPtr = optData;
 
+        // set the parameters that require conversion
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_MAX_INTENSITY);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_MAX_LENGTH);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_OMEGA_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_AMPLITUDE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_B_MODULE_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_MIN_INERTIAL_MOMENT);
+
+        // set the rest
+        memcpy(adcsPage + (FLASH_ADCS_TIME_STEP - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint32_t));
+
+        // write all at once
+        PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);
+      }
     } break;
 
     default:
