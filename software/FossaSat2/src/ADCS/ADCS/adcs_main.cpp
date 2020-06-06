@@ -122,11 +122,24 @@ void ADCS_Detumble_Update() {
     return;
   }
 
-  // TODO check battery voltage or LP mode
+  // check battery voltage or LP mode
+  #ifdef ENABLE_TRANSMISSION_CONTROL
+  if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
+    ADCS_Finish();
+    FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (battery too low)"));
+    return;
+  }
+  #endif
 
   // TODO check Hbridge faults
 
-  // TODO check abort command
+  // check abort command
+  if(abortExecution) {
+    abortExecution = false;
+    ADCS_Finish();
+    FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (aborted)"));
+    return;
+  }
 
   // Call sensors data
   Sensors_IMU_Update();
