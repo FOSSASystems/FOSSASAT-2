@@ -15,7 +15,7 @@
 
 /*********** Main function ***************/
 void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, const uint32_t activeDuration,
-               const uint8_t position[], const float orbitalInclination, const float orbitalPeriod) {
+               const uint8_t position[], const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE orbitalPeriod) {
 
   // save control flags
   adcsParams.control.val = controlFlags;
@@ -29,7 +29,7 @@ void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, cons
   }
 }
 
-float ADCS_VectorNorm(const float dim[]) {
+ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[]) {
   return(sqrt(pow(dim[0], 2) + pow(dim[1], 2) + pow(dim[2], 2)));
 }
 
@@ -50,15 +50,15 @@ float ADCS_VectorNorm(const float dim[]) {
 }*/
 
 /************ Auxiliary functions implementation ***********/
-void ADCS_Detumble_Init(const uint32_t detumbleDuration, const float orbitalInclination, const float orbitalPeriod) {
+void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE orbitalPeriod) {
     // cache parameters
-    adcsParams.maxPulseInt = PersistentStorage_Get<float>(FLASH_ADCS_PULSE_MAX_INTENSITY);     // Maximum applicable intensity
-    adcsParams.maxPulseLen = PersistentStorage_Get<float>(FLASH_ADCS_PULSE_MAX_LENGTH);    // Maximum pulse time available by energy reasons
-    adcsParams.omegaTol = PersistentStorage_Get<float>(FLASH_ADCS_OMEGA_TOLERANCE);   // Angular velocity tolerance to interrupt the detumbling for safety reasons
+    adcsParams.maxPulseInt = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_INTENSITY);     // Maximum applicable intensity
+    adcsParams.maxPulseLen = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_LENGTH);    // Maximum pulse time available by energy reasons
+    adcsParams.omegaTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_OMEGA_TOLERANCE);   // Angular velocity tolerance to interrupt the detumbling for safety reasons
     adcsParams.timeStep = PersistentStorage_Get<uint32_t>(FLASH_ADCS_TIME_STEP);           // Time step between to calculation instants
-    adcsParams.minInertialMoment = PersistentStorage_Get<float>(FLASH_ADCS_MIN_INERTIAL_MOMENT); // Minimum inertial moment
-    adcsParams.pulseAmplitude = PersistentStorage_Get<float>(FLASH_ADCS_PULSE_AMPLITUDE);  // Amplitude of pulse for ACS_IntensitiesRectifier
-    adcsParams.BmodTol = PersistentStorage_Get<float>(FLASH_ADCS_B_MODULE_TOLERANCE);
+    adcsParams.minInertialMoment = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_MIN_INERTIAL_MOMENT); // Minimum inertial moment
+    adcsParams.pulseAmplitude = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_AMPLITUDE);  // Amplitude of pulse for ACS_IntensitiesRectifier
+    adcsParams.BmodTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_B_MODULE_TOLERANCE);
     adcsParams.orbInclination = orbitalInclination;
     adcsParams.orbPeriod = orbitalPeriod;
     adcsParams.detumbleLen = detumbleDuration;
@@ -93,7 +93,7 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const float orbitalIncl
 
     // get initial IMU data
     Sensors_IMU_Update();
-    float omega[ADCS_NUM_AXES];
+    ADCS_CALC_TYPE omega[ADCS_NUM_AXES];
     omega[0] = Sensors_IMU_CalcGyro(imu.gx);
     omega[1] = Sensors_IMU_CalcGyro(imu.gy);
     omega[2] = Sensors_IMU_CalcGyro(imu.gz);
@@ -132,19 +132,19 @@ void ADCS_Detumble_Update() {
   Sensors_IMU_Update();
 
   // Call for the magnetometer raw data
-  float mag[ADCS_NUM_AXES];
+  ADCS_CALC_TYPE mag[ADCS_NUM_AXES];
   mag[0] = Sensors_IMU_CalcMag(imu.mx);
   mag[1] = Sensors_IMU_CalcMag(imu.my);
   mag[2] = Sensors_IMU_CalcMag(imu.mz);
 
   // Call the IMU angular velocity data
-  float omega[ADCS_NUM_AXES];
+  ADCS_CALC_TYPE omega[ADCS_NUM_AXES];
   omega[0] = Sensors_IMU_CalcGyro(imu.gx);
   omega[1] = Sensors_IMU_CalcGyro(imu.gy);
   omega[2] = Sensors_IMU_CalcGyro(imu.gz);
 
-  float omegaNorm = ADCS_VectorNorm(omega);
-  float intensity[ADCS_NUM_AXES];
+  ADCS_CALC_TYPE omegaNorm = ADCS_VectorNorm(omega);
+  ADCS_CALC_TYPE intensity[ADCS_NUM_AXES];
 
   FOSSASAT_DEBUG_PRINT(F("mag=\t\t"));
   FOSSASAT_DEBUG_PRINT(mag[0], 4); FOSSASAT_DEBUG_PRINT('\t');
@@ -161,8 +161,8 @@ void ADCS_Detumble_Update() {
   if ((adcsParams.control.bits.overrideDetumbleTol) || (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.omegaTol)) {
       // Control law generation
       ACS_BdotFunction(omega, mag, adcsParams.orbInclination, adcsParams.orbPeriod, intensity);
-      float intensityNorm = ADCS_VectorNorm(intensity);
-      float pulseLength[ADCS_NUM_AXES];
+      ADCS_CALC_TYPE intensityNorm = ADCS_VectorNorm(intensity);
+      ADCS_CALC_TYPE pulseLength[ADCS_NUM_AXES];
       FOSSASAT_DEBUG_PRINT(F("intensityNorm=\t"));
       FOSSASAT_DEBUG_PRINTLN(intensityNorm, 4);
 
@@ -181,13 +181,13 @@ void ADCS_Detumble_Update() {
 
       // update Hbridges
       FOSSASAT_DEBUG_PRINT(F("intensity=\t"));
-      FOSSASAT_DEBUG_PRINT(intensity[0], 4); FOSSASAT_DEBUG_PRINT('\t');
-      FOSSASAT_DEBUG_PRINT(intensity[1], 4); FOSSASAT_DEBUG_PRINT('\t');
-      FOSSASAT_DEBUG_PRINTLN(intensity[2], 4);
+      FOSSASAT_DEBUG_PRINT(intensity[0], 8); FOSSASAT_DEBUG_PRINT('\t');
+      FOSSASAT_DEBUG_PRINT(intensity[1], 8); FOSSASAT_DEBUG_PRINT('\t');
+      FOSSASAT_DEBUG_PRINTLN(intensity[2], 8);
       FOSSASAT_DEBUG_PRINT(F("pulseLength=\t"));
-      FOSSASAT_DEBUG_PRINT(pulseLength[0], 4); FOSSASAT_DEBUG_PRINT('\t');
-      FOSSASAT_DEBUG_PRINT(pulseLength[1], 4); FOSSASAT_DEBUG_PRINT('\t');
-      FOSSASAT_DEBUG_PRINTLN(pulseLength[2], 4);
+      FOSSASAT_DEBUG_PRINT(pulseLength[0], 8); FOSSASAT_DEBUG_PRINT('\t');
+      FOSSASAT_DEBUG_PRINT(pulseLength[1], 8); FOSSASAT_DEBUG_PRINT('\t');
+      FOSSASAT_DEBUG_PRINTLN(pulseLength[2], 8);
       FOSSASAT_DEBUG_PRINTLN();
 
   } else {

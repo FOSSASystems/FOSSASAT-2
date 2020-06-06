@@ -6,10 +6,11 @@
 
 /*********** Functions declaration ************/
 //Detumbling procedure
-void ACS_BdotFunction(const float omega[], const float mag[], const float orbitalInclination, const float orbitalPeriod, float intensity[]);
+void ACS_BdotFunction(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE mag[], const ADCS_CALC_TYPE orbitalInclination,
+                      const ADCS_CALC_TYPE orbitalPeriod, ADCS_CALC_TYPE intensity[]);
 
 // Intensities rectifier function
-float ACS_IntensitiesRectifier(const float intensity1, const float intensity2, const int delta_t);
+float ACS_IntensitiesRectifier(const ADCS_CALC_TYPE intensity1, const ADCS_CALC_TYPE intensity2, const int delta_t);
 
 //void onboardcontrol(double* M, double* B, double** K, double* I, double* t);        // Controller function
 

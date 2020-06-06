@@ -31,8 +31,6 @@
 // comment out to disable transmission control (transmission disable and no transmissions in low power mode)
 //#define ENABLE_TRANSMISSION_CONTROL
 
-#define OVERRIDE_INA                                    currSensorZB
-
 /*
     Array Length Limits
 */
@@ -212,50 +210,50 @@
 // sector 1 - ADCS parameters
 #define FLASH_ADCS_PARAMETERS                                     0x00001000  //  0x00001000    0x000010FF
 
-#define FLASH_ADCS_PULSE_MAX_INTENSITY        (FLASH_ADCS_PARAMETERS + 0x00)  //  0x00001000    0x00001003    float
-#define FLASH_ADCS_PULSE_MAX_LENGTH           (FLASH_ADCS_PARAMETERS + 0x04)  //  0x00001004    0x00001007    float
-#define FLASH_ADCS_OMEGA_TOLERANCE            (FLASH_ADCS_PARAMETERS + 0x08)  //  0x00001008    0x0000100B    float
-#define FLASH_ADCS_TIME_STEP                  (FLASH_ADCS_PARAMETERS + 0x0C)  //  0x0000100C    0x0000100F    uint32_t
-#define FLASH_ADCS_MIN_INERTIAL_MOMENT        (FLASH_ADCS_PARAMETERS + 0x10)  //  0x00001010    0x00001013    float
-#define FLASH_ADCS_PULSE_AMPLITUDE            (FLASH_ADCS_PARAMETERS + 0x14)  //  0x00001014    0x00001017    float
-#define FLASH_ADCS_B_MODULE_TOLERANCE         (FLASH_ADCS_PARAMETERS + 0x18)  //  0x00001018    0x0000101B    float
+#define FLASH_ADCS_PULSE_MAX_INTENSITY        (FLASH_ADCS_PARAMETERS + 0x00)  //  0x00001000    0x00001007    float or double
+#define FLASH_ADCS_PULSE_MAX_LENGTH           (FLASH_ADCS_PARAMETERS + 0x08)  //  0x00001008    0x0000100F    float or double
+#define FLASH_ADCS_OMEGA_TOLERANCE            (FLASH_ADCS_PARAMETERS + 0x10)  //  0x00001010    0x00001017    float or double
+#define FLASH_ADCS_MIN_INERTIAL_MOMENT        (FLASH_ADCS_PARAMETERS + 0x18)  //  0x00001018    0x0000101F    float or double
+#define FLASH_ADCS_PULSE_AMPLITUDE            (FLASH_ADCS_PARAMETERS + 0x20)  //  0x00001020    0x00001027    float or double
+#define FLASH_ADCS_B_MODULE_TOLERANCE         (FLASH_ADCS_PARAMETERS + 0x28)  //  0x00001028    0x0000102F    float or double
+#define FLASH_ADCS_TIME_STEP                  (FLASH_ADCS_PARAMETERS + 0xA0)  //  0x000010A0    0x000010A4    uint32_t
 
 // sector 2 - stats
 #define FLASH_STATS                                               0x00002000  //  0x00002000    0x000020FF
 
-#define FLASH_STATS_TEMP_PANEL_Y                        (FLASH_STATS + 0x00)  //  0x00001000    0x00001005    3x int16_t
-#define FLASH_STATS_TEMP_TOP                            (FLASH_STATS + 0x06)  //  0x00001006    0x0000100B    3x int16_t
-#define FLASH_STATS_TEMP_BOTTOM                         (FLASH_STATS + 0x0C)  //  0x0000100C    0x00001011    3x int16_t
-#define FLASH_STATS_TEMP_BATTERY                        (FLASH_STATS + 0x12)  //  0x00001012    0x00001017    3x int16_t
-#define FLASH_STATS_TEMP_SEC_BATTERY                    (FLASH_STATS + 0x18)  //  0x00001018    0x0000101D    3x int16_t
-#define FLASH_STATS_TEMP_MCU                            (FLASH_STATS + 0x1E)  //  0x0000101E    0x00001023    3x int16_t
+#define FLASH_STATS_TEMP_PANEL_Y                        (FLASH_STATS + 0x00)  //  0x00002000    0x00002005    3x int16_t
+#define FLASH_STATS_TEMP_TOP                            (FLASH_STATS + 0x06)  //  0x00002006    0x0000200B    3x int16_t
+#define FLASH_STATS_TEMP_BOTTOM                         (FLASH_STATS + 0x0C)  //  0x0000200C    0x00002011    3x int16_t
+#define FLASH_STATS_TEMP_BATTERY                        (FLASH_STATS + 0x12)  //  0x00002012    0x00002017    3x int16_t
+#define FLASH_STATS_TEMP_SEC_BATTERY                    (FLASH_STATS + 0x18)  //  0x00002018    0x0000201D    3x int16_t
+#define FLASH_STATS_TEMP_MCU                            (FLASH_STATS + 0x1E)  //  0x0000201E    0x00002023    3x int16_t
 
-#define FLASH_STATS_CURR_XA                             (FLASH_STATS + 0x24)  //  0x00001024    0x00001029    3x int16_t
-#define FLASH_STATS_CURR_XB                             (FLASH_STATS + 0x2A)  //  0x0000102A    0x0000102F    3x int16_t
-#define FLASH_STATS_CURR_ZA                             (FLASH_STATS + 0x30)  //  0x00001030    0x00001035    3x int16_t
-#define FLASH_STATS_CURR_ZB                             (FLASH_STATS + 0x36)  //  0x00001036    0x0000103B    3x int16_t
-#define FLASH_STATS_CURR_Y                              (FLASH_STATS + 0x3C)  //  0x0000103C    0x00001041    3x int16_t
-#define FLASH_STATS_CURR_MPPT                           (FLASH_STATS + 0x42)  //  0x00001042    0x00001047    3x int16_t
+#define FLASH_STATS_CURR_XA                             (FLASH_STATS + 0x24)  //  0x00002024    0x00002029    3x int16_t
+#define FLASH_STATS_CURR_XB                             (FLASH_STATS + 0x2A)  //  0x0000202A    0x0000202F    3x int16_t
+#define FLASH_STATS_CURR_ZA                             (FLASH_STATS + 0x30)  //  0x00002030    0x00002035    3x int16_t
+#define FLASH_STATS_CURR_ZB                             (FLASH_STATS + 0x36)  //  0x00002036    0x0000203B    3x int16_t
+#define FLASH_STATS_CURR_Y                              (FLASH_STATS + 0x3C)  //  0x0000203C    0x00002041    3x int16_t
+#define FLASH_STATS_CURR_MPPT                           (FLASH_STATS + 0x42)  //  0x00002042    0x00002047    3x int16_t
 
-#define FLASH_STATS_VOLT_XA                             (FLASH_STATS + 0x48)  //  0x00001048    0x0000104A    3x uint8_t
-#define FLASH_STATS_VOLT_XB                             (FLASH_STATS + 0x4B)  //  0x0000104B    0x0000104D    3x uint8_t
-#define FLASH_STATS_VOLT_ZA                             (FLASH_STATS + 0x4E)  //  0x0000104E    0x00001050    3x uint8_t
-#define FLASH_STATS_VOLT_ZB                             (FLASH_STATS + 0x51)  //  0x00001051    0x00001053    3x uint8_t
-#define FLASH_STATS_VOLT_Y                              (FLASH_STATS + 0x54)  //  0x00001054    0x00001056    3x uint8_t
-#define FLASH_STATS_VOLT_MPPT                           (FLASH_STATS + 0x57)  //  0x00001057    0x00001059    3x uint8_t
+#define FLASH_STATS_VOLT_XA                             (FLASH_STATS + 0x48)  //  0x00002048    0x0000204A    3x uint8_t
+#define FLASH_STATS_VOLT_XB                             (FLASH_STATS + 0x4B)  //  0x0000204B    0x0000204D    3x uint8_t
+#define FLASH_STATS_VOLT_ZA                             (FLASH_STATS + 0x4E)  //  0x0000204E    0x00002050    3x uint8_t
+#define FLASH_STATS_VOLT_ZB                             (FLASH_STATS + 0x51)  //  0x00002051    0x00002053    3x uint8_t
+#define FLASH_STATS_VOLT_Y                              (FLASH_STATS + 0x54)  //  0x00002054    0x00002056    3x uint8_t
+#define FLASH_STATS_VOLT_MPPT                           (FLASH_STATS + 0x57)  //  0x00002057    0x00002059    3x uint8_t
 
-#define FLASH_STATS_LIGHT_PANEL_Y                       (FLASH_STATS + 0x5A)  //  0x0000105A    0x0000105F    3x float
-#define FLASH_STATS_LIGHT_TOP                           (FLASH_STATS + 0x66)  //  0x00001066    0x00001071    3x float
+#define FLASH_STATS_LIGHT_PANEL_Y                       (FLASH_STATS + 0x5A)  //  0x0000205A    0x0000205F    3x float
+#define FLASH_STATS_LIGHT_TOP                           (FLASH_STATS + 0x66)  //  0x00002066    0x00002071    3x float
 
-#define FLASH_STATS_GYRO_X                              (FLASH_STATS + 0x72)  //  0x00001072    0x0000107D    3x float
-#define FLASH_STATS_GYRO_Y                              (FLASH_STATS + 0x7E)  //  0x0000107E    0x00001089    3x float
-#define FLASH_STATS_GYRO_Z                              (FLASH_STATS + 0x8A)  //  0x0000108A    0x00001095    3x float
-#define FLASH_STATS_ACCEL_X                             (FLASH_STATS + 0x96)  //  0x00001096    0x000010A1    3x float
-#define FLASH_STATS_ACCEL_Y                             (FLASH_STATS + 0xA2)  //  0x000010A2    0x000010AD    3x float
-#define FLASH_STATS_ACCEL_Z                             (FLASH_STATS + 0xAE)  //  0x000010AE    0x000010B9    3x float
-#define FLASH_STATS_MAG_X                               (FLASH_STATS + 0xBA)  //  0x000010BA    0x000010C5    3x float
-#define FLASH_STATS_MAG_Y                               (FLASH_STATS + 0xC6)  //  0x000010C6    0x000010D1    3x float
-#define FLASH_STATS_MAG_Z                               (FLASH_STATS + 0xD2)  //  0x000010D2    0x000010DD    3x float
+#define FLASH_STATS_GYRO_X                              (FLASH_STATS + 0x72)  //  0x00002072    0x0000207D    3x float
+#define FLASH_STATS_GYRO_Y                              (FLASH_STATS + 0x7E)  //  0x0000207E    0x00002089    3x float
+#define FLASH_STATS_GYRO_Z                              (FLASH_STATS + 0x8A)  //  0x0000208A    0x00002095    3x float
+#define FLASH_STATS_ACCEL_X                             (FLASH_STATS + 0x96)  //  0x00002096    0x000020A1    3x float
+#define FLASH_STATS_ACCEL_Y                             (FLASH_STATS + 0xA2)  //  0x000020A2    0x000020AD    3x float
+#define FLASH_STATS_ACCEL_Z                             (FLASH_STATS + 0xAE)  //  0x000020AE    0x000020B9    3x float
+#define FLASH_STATS_MAG_X                               (FLASH_STATS + 0xBA)  //  0x000020BA    0x000020C5    3x float
+#define FLASH_STATS_MAG_Y                               (FLASH_STATS + 0xC6)  //  0x000020C6    0x000020D1    3x float
+#define FLASH_STATS_MAG_Z                               (FLASH_STATS + 0xD2)  //  0x000020D2    0x000020DD    3x float
 
 // sectors 3 - 8 - image properites: 12 bytes per picture, 4 bytes total length, 4 bytes scan start address, 4 bytes scan end address
 #define FLASH_IMAGE_PROPERTIES                                    0x00003000  //  0x00003000    0x00008FFF
@@ -465,6 +463,7 @@
 */
 
 #define ADCS_NUM_AXES                                   3       // number of axes to control
+#define ADCS_CALC_TYPE                                  double  // numeric type to use in ADCS calculation, float for single precision, double for double precision
 #define ADCS_TIME_STEP                                  100000  // time setup between successive ADCS updates, in us
 #define ADCS_PULSE_MAX_INTENSITY                        1.0     //
 #define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)    //

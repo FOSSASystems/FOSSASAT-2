@@ -71,6 +71,7 @@ T PersistentStorage_Get(uint32_t addr) {
 }
 
 template float PersistentStorage_Get<float>(uint32_t);
+template double PersistentStorage_Get<double>(uint32_t);
 template uint32_t PersistentStorage_Get<uint32_t>(uint32_t);
 
 template<typename T>
@@ -98,6 +99,7 @@ void PersistentStorage_Set(uint32_t addr, T t) {
 }
 
 template void PersistentStorage_Set<float>(uint32_t, float);
+template void PersistentStorage_Set<double>(uint32_t, double);
 
 template <typename T>
 // cppcheck-suppress unusedFunction
@@ -598,7 +600,7 @@ void PersistentStorage_Reset_ADCS_Params() {
   // set everything to 0 by default
   memset(adcsPage, 0, FLASH_EXT_PAGE_SIZE);
 
-  float f = ADCS_PULSE_MAX_INTENSITY;
+  ADCS_CALC_TYPE f = ADCS_PULSE_MAX_INTENSITY;
   memcpy(adcsPage + (FLASH_ADCS_PULSE_MAX_INTENSITY - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   f = ADCS_PULSE_MAX_LENGTH;
   memcpy(adcsPage + (FLASH_ADCS_PULSE_MAX_LENGTH - FLASH_ADCS_PARAMETERS), &f, sizeof(f));

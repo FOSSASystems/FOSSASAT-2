@@ -15,18 +15,20 @@
 
 #include "../../../FossaSat2.h"
 
+#define ADCS_CALC_TYPE                                  double
+
 #include "../ACS/acs.h"
 //#include "../ADS/ads.h"
 
 /*********** Functions declaration ************/
 // Main structure
 void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, const uint32_t activeDuration,
-               const uint8_t position[], const float orbitalInclination, const float orbitalPeriod);
+               const uint8_t position[], const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE orbitalPeriod);
 
-float ADCS_VectorNorm(const float dim[]);
+ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[]);
 //int8_t ADCS_GetDriveStrength(float pulseLen);
 
-void ADCS_Detumble_Init(const uint32_t detumbleDuration, const float orbitalInclination, const float orbitalPeriod);
+void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE orbitalPeriod);
 void ADCS_Detumble_Update();
 
 void ADCS_Finish();

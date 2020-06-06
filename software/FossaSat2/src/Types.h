@@ -3,6 +3,10 @@
 
 #include "FossaSat2.h"
 
+#define FLASH_NMEA_LOG_SLOT_SIZE                        (128)
+#define ADCS_NUM_AXES                                   3
+#define ADCS_CALC_TYPE                                  double
+
 // structure to save data about I2C sensors
 struct wireSensor_t {
   TwoWire& bus;
@@ -24,9 +28,8 @@ struct currentSensor_t {
   bool available;
 };
 
-// TODO GPS struct
 struct gpsLogState_t {
-  uint8_t buff[128];
+  uint8_t buff[FLASH_NMEA_LOG_SLOT_SIZE];
   uint16_t buffPos;
   uint32_t flashPos;
   uint32_t lastFixAddr;
@@ -35,7 +38,7 @@ struct gpsLogState_t {
 };
 
 struct adcsState_t {
-  float prevIntensity[3];
+  float prevIntensity[ADCS_NUM_AXES];
   float prevOmegaNorm;
   uint32_t start;
   bool active;
@@ -47,16 +50,16 @@ struct adcsControlBits_t {
 };
 
 struct adcsParams_t {
-  float maxPulseInt;
-  float maxPulseLen;
-  float omegaTol;
+  ADCS_CALC_TYPE maxPulseInt;
+  ADCS_CALC_TYPE maxPulseLen;
+  ADCS_CALC_TYPE omegaTol;
   uint32_t timeStep;
-  float minInertialMoment;
-  float orbInclination;
-  float orbPeriod;
-  float pulseAmplitude;
+  ADCS_CALC_TYPE minInertialMoment;
+  ADCS_CALC_TYPE orbInclination;
+  ADCS_CALC_TYPE orbPeriod;
+  ADCS_CALC_TYPE pulseAmplitude;
   uint32_t detumbleLen;
-  float BmodTol;
+  ADCS_CALC_TYPE BmodTol;
   union {
     adcsControlBits_t bits;
     uint8_t val;
