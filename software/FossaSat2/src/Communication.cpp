@@ -1599,7 +1599,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         uint8_t flashBuff[FLASH_EXT_PAGE_SIZE];
         PersistentStorage_Read(address / FLASH_EXT_PAGE_SIZE, flashBuff, FLASH_EXT_PAGE_SIZE);
         memcpy(flashBuff + (address % FLASH_EXT_PAGE_SIZE), optData + sizeof(uint32_t), dataLen);
-        PersistentStorage_Write(address / FLASH_EXT_PAGE_SIZE, flashBuff, FLASH_EXT_PAGE_SIZE);
+        PersistentStorage_Write(address / FLASH_EXT_PAGE_SIZE, flashBuff, FLASH_EXT_PAGE_SIZE, false);
       }
     } break;
 
@@ -1765,6 +1765,17 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // write all at once
         PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);
       }
+    } break;
+
+    case CMD_ERASE_FLASH: {
+      if(Communication_Check_OptDataLen(4, optDataLen)) {
+        uint32_t addr = 0;
+        memcpy(&addr, optData, sizeof(uint32_t));
+        FOSSASAT_DEBUG_PRINT(F("Erasing flash sector at address 0x"));
+        FOSSASAT_DEBUG_PRINTLN(addr, HEX);
+        PersistentStorage_SectorErase(addr);
+      }
+
     } break;
 
     default:

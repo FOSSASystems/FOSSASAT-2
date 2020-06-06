@@ -327,6 +327,13 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Response: none
 - Description: Sets configurable ADCS parameters. Floating point numbers should are sent first due to internal automated conversion.
 
+### CMD_ERASE_FLASH
+- Optional data length: 4
+- Optional data:
+  - 0 - 3: address of sector to erase, unsigned 32-bit integer, LSB first
+- Response: none
+- Description: Erases one external flash sector.
+
 ---
 # Responses
 
