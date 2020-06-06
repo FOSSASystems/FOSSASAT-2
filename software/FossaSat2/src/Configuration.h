@@ -272,6 +272,8 @@
 // 64kB blocks 32 - 1023 - image slots: 8 blocks per slot
 #define FLASH_IMAGES_START                                        0x00200000  //  0x00200000    0x03FFFFFF
 #define FLASH_IMAGE_SLOT_SIZE                                     (FLASH_IMAGE_NUM_64K_BLOCKS * FLASH_64K_BLOCK_SIZE)
+#define FLASH_PUBLIC_PICTURES_START                               (80)
+#define FLASH_PUBLIC_PICTURES_END                                 (100)
 
 /*
     JPEG markers

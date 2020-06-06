@@ -394,6 +394,50 @@ void Communication_Set_ADCS_Param(uint8_t** optDataPtr, uint8_t* adcsPage, uint3
   memcpy(adcsPage + (addr - FLASH_ADCS_PARAMETERS), &val, sizeof(ADCS_CALC_TYPE));
 }
 
+void Communication_Transfer_Picture(uint32_t imgAddress, uint32_t imgLen, uint16_t packetId, uint8_t respId) {
+  // wait a bit before sending the first packet
+  PowerControl_Wait(RESPONSE_DELAY, LOW_POWER_NONE);
+
+  static const uint8_t respOptDataLen = 2 + MAX_IMAGE_PAYLOAD_LENGTH + IMAGE_PACKET_FEC_LENGTH;
+  uint8_t respOptData[respOptDataLen];
+  for(; packetId < imgLen / MAX_IMAGE_PAYLOAD_LENGTH; packetId++) {
+    // write packet ID
+    memcpy(respOptData, &packetId, sizeof(uint16_t));
+
+    // read data
+    PersistentStorage_Read(imgAddress + packetId*MAX_IMAGE_PAYLOAD_LENGTH, respOptData + 2, MAX_IMAGE_PAYLOAD_LENGTH);
+
+    // add FEC
+    encode_rs_8(respOptData + 2, respOptData + 2 + MAX_IMAGE_PAYLOAD_LENGTH, RS8_FULL_PACKET_LENGTH - IMAGE_PACKET_FEC_LENGTH - MAX_IMAGE_PAYLOAD_LENGTH);
+
+    // send response
+    Communication_Send_Response(respId, respOptData, respOptDataLen);
+    PowerControl_Watchdog_Heartbeat();
+
+    // check battery
+    #ifdef ENABLE_TRANSMISSION_CONTROL
+    if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
+      // battery check failed, stop sending data
+      FOSSASAT_DEBUG_PRINTLN(F("Battery too low, stopped."));
+      return;
+    }
+    #endif
+  }
+
+  // send the final packet (might not be full)
+  uint16_t remLen = imgLen - packetId*MAX_IMAGE_PAYLOAD_LENGTH;
+  memcpy(respOptData, &packetId, sizeof(uint16_t));
+
+  // read data
+  PersistentStorage_Read(imgAddress + packetId*MAX_IMAGE_PAYLOAD_LENGTH, respOptData + 2, remLen);
+
+  // add FEC
+  encode_rs_8(respOptData + 2, respOptData + 2 + remLen, RS8_FULL_PACKET_LENGTH - IMAGE_PACKET_FEC_LENGTH - remLen);
+
+  // send response
+  Communication_Send_Response(respId, respOptData, 2 + remLen + IMAGE_PACKET_FEC_LENGTH);
+}
+
 void Communication_Check_New_Packet() {
   if(digitalRead(RADIO_DIO1)) {
     radio.standby();
@@ -748,6 +792,48 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // requested message does not exist
         uint8_t respOptData[] = {0xFF, 0xFF};
         Communication_Send_Response(RESP_FORWARDED_MESSAGE, respOptData, 2);
+      }
+    } break;
+
+    case CMD_REQUEST_PUBLIC_PICTURE: {
+      // check FSK is active
+      if(currentModem != MODEM_FSK) {
+        FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer picture"));
+        return;
+      }
+
+      if(Communication_Check_OptDataLen(3, optDataLen)) {
+        // get the basic info
+        FOSSASAT_DEBUG_PRINT(F("Reading slot: "));
+        uint8_t slot = optData[0];
+        FOSSASAT_DEBUG_PRINTLN(slot);
+
+        if((slot < FLASH_PUBLIC_PICTURES_START) || (slot > FLASH_PUBLIC_PICTURES_END)) {
+          FOSSASAT_DEBUG_PRINT(F("Private slot!"));
+          uint8_t respOptData[] = {0, 0, 0, 0, 0, 0};
+          Communication_Send_Response(RESP_PUBLIC_PICTURE, respOptData, 6);
+          return;
+        }
+
+        FOSSASAT_DEBUG_PRINT(F("Starting at ID: "));
+        uint16_t packetId = 0;
+        memcpy(&packetId, optData + 1, sizeof(uint16_t));
+        FOSSASAT_DEBUG_PRINTLN(packetId);
+        FOSSASAT_DEBUG_PRINT(F("Starting at address: 0x"));
+        uint32_t imgAddress = FLASH_IMAGES_START + slot*FLASH_IMAGE_SLOT_SIZE;
+        FOSSASAT_DEBUG_PRINTLN(imgAddress, HEX);
+        FOSSASAT_DEBUG_PRINT(F("Image length (bytes): "));
+        uint32_t imgLen = PersistentStorage_Get_Image_Len(slot);
+        FOSSASAT_DEBUG_PRINTLN(imgLen, HEX);
+        if(imgLen == 0xFFFFFFFF) {
+          FOSSASAT_DEBUG_PRINTLN(F("No image in that slot."));
+          uint8_t respOptData[] = {0, 0, 0, 0, 0, 0};
+          Communication_Send_Response(RESP_PUBLIC_PICTURE, respOptData, 6);
+          return;
+        }
+
+        // send the data
+        Communication_Transfer_Picture(imgAddress, imgLen, packetId, RESP_PUBLIC_PICTURE);
       }
     } break;
 
@@ -1296,48 +1382,8 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           imgLen = PersistentStorage_Get_Image_ScanEnd(slot) - imgAddress;
         }
 
-        // wait a bit before sending the first packet
-        PowerControl_Wait(RESPONSE_DELAY, LOW_POWER_NONE);
-
-        static const uint8_t respOptDataLen = 2 + MAX_IMAGE_PAYLOAD_LENGTH + IMAGE_PACKET_FEC_LENGTH;
-        uint8_t respOptData[respOptDataLen];
-        for(; packetId < imgLen / MAX_IMAGE_PAYLOAD_LENGTH; packetId++) {
-          // write packet ID
-          memcpy(respOptData, &packetId, sizeof(uint16_t));
-
-          // read data
-          PersistentStorage_Read(imgAddress + packetId*MAX_IMAGE_PAYLOAD_LENGTH, respOptData + 2, MAX_IMAGE_PAYLOAD_LENGTH);
-
-          // add FEC
-          encode_rs_8(respOptData + 2, respOptData + 2 + MAX_IMAGE_PAYLOAD_LENGTH, RS8_FULL_PACKET_LENGTH - IMAGE_PACKET_FEC_LENGTH - MAX_IMAGE_PAYLOAD_LENGTH);
-
-          // send response
-          Communication_Send_Response(RESP_CAMERA_PICTURE, respOptData, respOptDataLen);
-          PowerControl_Watchdog_Heartbeat();
-
-          // check battery
-          #ifdef ENABLE_TRANSMISSION_CONTROL
-          if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
-            // battery check failed, stop sending data
-            FOSSASAT_DEBUG_PRINTLN(F("Battery too low, stopped."));
-            return;
-          }
-          #endif
-        }
-
-        // send the final packet (might not be full)
-        uint16_t remLen = imgLen - packetId*MAX_IMAGE_PAYLOAD_LENGTH;
-        memcpy(respOptData, &packetId, sizeof(uint16_t));
-
-        // read data
-        PersistentStorage_Read(imgAddress + packetId*MAX_IMAGE_PAYLOAD_LENGTH, respOptData + 2, remLen);
-
-        // add FEC
-        encode_rs_8(respOptData + 2, respOptData + 2 + remLen, RS8_FULL_PACKET_LENGTH - IMAGE_PACKET_FEC_LENGTH - remLen);
-
-        // send response
-        Communication_Send_Response(RESP_CAMERA_PICTURE, respOptData, 2 + remLen + IMAGE_PACKET_FEC_LENGTH);
-
+        // send the data
+        Communication_Transfer_Picture(imgAddress, imgLen, packetId, RESP_CAMERA_PICTURE);
       }
     } break;
 

@@ -76,6 +76,14 @@ The purpose of this document is to provide overview of the communication system 
 - Response: [RESP_FORWARDED_MESSAGE](#RESP_FORWARDED_MESSAGE)
 - Description:  Satellite will retransmit the message stored previously with supplied ID.
 
+### CMD_REQUEST_PUBLIC_PICTURE
+- Optional data length: 3
+- Optional data:
+  - 0: picture slot to read
+  - 1 - 2: picture packet ID at which should the reading start, unsigned 16-bit integer, LSB first
+- Response: [RESP_PUBLIC_PICTURE](#RESP_PUBLIC_PICTURE)
+- Description: Requests burst downlink of picture from provided slot. Only public slot numbers (80 - 100) can be requested.
+
 ---
 # Private Commands
 The following commands are encrypted using AES-128 and must be correctly decrypted and verified in order to be executed.
@@ -248,8 +256,8 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Optional data length: 4
 - Optional data:
   - 0: picture slot to read
-  - 1: whether to send the full picture (0x00) or only the scan data (0x01)
-  - 2 - 3: picture packet ID at which should the reading start, unsigned 16-bit integer, LSB first
+  - 1 - 2: picture packet ID at which should the reading start, unsigned 16-bit integer, LSB first
+  - 3: whether to send the full picture (0x00) or only the scan data (0x01)
 - Response: [RESP_CAMERA_PICTURE](#RESP_CAMERA_PICTURE)
 - Description: Requests burst downlink of picture from provided slot.
 
@@ -465,6 +473,12 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Optional data length: 0 - 27
 - Optional data:
   - 0 - N: Requested message
+
+### RESP_PUBLIC_PICTURE
+- Optional data length: 6 - 162
+- Optional data:
+  - 0 - 1: picture packet ID, unsigned 16-bit integer
+  - 2 - N: picture data (4 null bytes sent if the requested slot has no image), last 32 bytes are RS(255, 223) FEC code.
 
 ### RESP_DEPLOYMENT_STATE
 - Optional data length: 1
