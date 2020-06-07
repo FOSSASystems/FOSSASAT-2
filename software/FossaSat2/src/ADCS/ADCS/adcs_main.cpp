@@ -63,7 +63,7 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     FOSSASAT_DEBUG_PRINT(F("orbInclination="));
     FOSSASAT_DEBUG_PRINTLN(adcsParams.orbInclination, 4);
     FOSSASAT_DEBUG_PRINT(F("orbPeriod="));
-    FOSSASAT_DEBUG_PRINTLN(adcsParams.orbPeriod, 4);
+    FOSSASAT_DEBUG_PRINTLN(adcsParams.meanOrbitalMotion, 4);
 
     // wake up IMU
     adcsState.active = true;
@@ -179,7 +179,7 @@ void ADCS_Detumble_Update() {
   // check tolerance
   if ((adcsParams.control.bits.overrideDetumbleTol) || (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.omegaTol)) {
       // Control law generation
-      ACS_BdotFunction(omega, mag, adcsParams.orbInclination, adcsParams.orbPeriod, intensity);
+      ACS_BdotFunction(omega, mag, adcsParams.orbInclination, adcsParams.meanOrbitalMotion, intensity);
       ADCS_CALC_TYPE intensityNorm = ADCS_VectorNorm(intensity);
       ADCS_CALC_TYPE pulseLength[ADCS_NUM_AXES];
       FOSSASAT_DEBUG_PRINT(F("intensityNorm=\t"));
