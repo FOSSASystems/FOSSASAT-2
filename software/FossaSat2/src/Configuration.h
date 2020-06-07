@@ -474,9 +474,9 @@
 #define ADCS_MIN_INERTIAL_MOMENT                        1000    //
 #define ADCS_PULSE_AMPLITUDE                            0.1     //
 #define ADCS_B_MODULE_TOLERANCE                         0.01
-#define ADCS_COIL_CHARACTERISTICS                       { {1.88 * pow(10, 5), 0,                 0}, \
-                                                          {0,                 6.1 * pow(10, 5),  0}, \
-                                                          {0,                 0,                 5.96 * pow(10, 5)} }
+#define ADCS_COIL_CHARACTERISTICS                       { {0.06316, 0,         0}, \
+                                                          {0,       0.001119,  0}, \
+                                                          {0,       0,         0.00921222} }
 
 /*
     Global Variables
