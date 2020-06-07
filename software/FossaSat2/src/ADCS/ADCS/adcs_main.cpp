@@ -33,22 +33,6 @@ ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[]) {
   return(sqrt(pow(dim[0], 2) + pow(dim[1], 2) + pow(dim[2], 2)));
 }
 
-/*int8_t ADCS_GetDriveStrength(float pulseLen) {
-  float strength = (pulseLen - 24.191) / (-0.6828);
-  if(strength > 35.0) {
-    // clamp high
-    strength = 35.0;
-  } else if(strength < 0.0) {
-    // clamp low
-    strength = 0.0;
-  } else {
-    // round
-    strength += 0.5;
-  }
-
-  return((int8_t)strength);
-}*/
-
 /************ Auxiliary functions implementation ***********/
 void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion) {
     // cache parameters
@@ -114,6 +98,8 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
 }
 
 void ADCS_Detumble_Update() {
+  // TODO add ADCS result reporting
+
   // check detumbling length
   if(millis() - adcsState.start > adcsParams.detumbleLen) {
     // time limit reached
@@ -131,7 +117,27 @@ void ADCS_Detumble_Update() {
   }
   #endif
 
-  // TODO check Hbridge faults
+  // check Hbridge faults
+  uint8_t fault = bridgeX.getFault();
+  if((!adcsParams.control.bits.overrideFaultX) && (fault != 0) && (fault & FAULT)) {
+    ADCS_Finish();
+    FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (X axis fault)"));
+    return;
+  }
+
+  fault = bridgeY.getFault();
+  if((!adcsParams.control.bits.overrideFaultY) && (fault != 0) && (fault & FAULT)) {
+    ADCS_Finish();
+    FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (Y axis fault)"));
+    return;
+  }
+
+  fault = bridgeZ.getFault();
+  if((!adcsParams.control.bits.overrideFaultZ) && (fault != 0) && (fault & FAULT)) {
+    ADCS_Finish();
+    FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (Z axis fault)"));
+    return;
+  }
 
   // check abort command
   if(abortExecution) {
@@ -192,7 +198,7 @@ void ADCS_Detumble_Update() {
           pulseLength[2] = adcsParams.maxPulseLen;
       }
 
-      // update Hbridges
+      // TODO update Hbridges
       FOSSASAT_DEBUG_PRINT(F("intensity=\t"));
       FOSSASAT_DEBUG_PRINT(intensity[0], 8); FOSSASAT_DEBUG_PRINT('\t');
       FOSSASAT_DEBUG_PRINT(intensity[1], 8); FOSSASAT_DEBUG_PRINT('\t');
