@@ -40,14 +40,14 @@
 
     // Calculation of magnetic dipole applied on the coils
     float m[3];
-    m[0] = (L[2]*B[1]-B[2]*L[1])/B_module;
-    m[1] = (L[0]*B[2]-B[0]*L[2])/B_module;
-    m[2] = (L[1]*B[0]-B[1]*L[0])/B_module;
+    m[0] = (L[2]*B[1]-B[2]*L[1])/pow(B_module,2);
+    m[1] = (L[0]*B[2]-B[0]*L[2])/pow(B_module,2);
+    m[2] = (L[1]*B[0]-B[1]*L[0])/pow(B_module,2);
 
-    //Definition of intensity output -solving the equation: A*I = m-
-    I[0] = m[0]/A[0][0];
-    I[1] = m[1]/A[1][1];
-    I[2] = m[2]/A[2][2];
+    // Definition of intensity output -solving the equation: A*I = m-
+    I[0] = m[0]*A[0][0]+m[1]*A[0][1]+m[2]*A[0][2];
+    I[1] = m[0]*A[1][0]+m[1]*A[1][1]+m[2]*A[1][2];
+    I[2] = m[0]*A[2][0]+m[1]*A[2][1]+m[2]*A[2][2];
 
     return;
 
