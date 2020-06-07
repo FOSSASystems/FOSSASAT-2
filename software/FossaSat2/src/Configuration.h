@@ -491,11 +491,11 @@ extern volatile bool interruptsEnabled;
 // flag to signal data was received from ISR
 extern volatile bool dataReceived;
 
-// flag to incidacte whenther "science mode" is currently active or not
+// flag to indicate whether "science mode" is currently active or not
 extern bool scienceModeActive;
 
 // flag to abort currently running process
-extern bool abortExecution;
+extern volatile bool abortExecution;
 
 // current modem configuration
 extern uint8_t currentModem;

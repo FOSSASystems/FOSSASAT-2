@@ -9,11 +9,11 @@ volatile bool interruptsEnabled = true;
 // flag to signal data was received from ISR
 volatile bool dataReceived = false;
 
-// flag to incidacte whenther "science mode" is currently active or not
+// flag to indicate whether "science mode" is currently active or not
 bool scienceModeActive = false;
 
 // flag to abort currently running process
-bool abortExecution = false;
+volatile bool abortExecution = false;
 
 // current modem configuration
 uint8_t currentModem = MODEM_FSK;
