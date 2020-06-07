@@ -272,6 +272,8 @@
 // 64kB blocks 32 - 1023 - image slots: 8 blocks per slot
 #define FLASH_IMAGES_START                                        0x00200000  //  0x00200000    0x03FFFFFF
 #define FLASH_IMAGE_SLOT_SIZE                                     (FLASH_IMAGE_NUM_64K_BLOCKS * FLASH_64K_BLOCK_SIZE)
+#define FLASH_PUBLIC_PICTURES_START                               (80)
+#define FLASH_PUBLIC_PICTURES_END                                 (100)
 
 /*
     JPEG markers
@@ -472,9 +474,9 @@
 #define ADCS_MIN_INERTIAL_MOMENT                        1000    //
 #define ADCS_PULSE_AMPLITUDE                            0.1     //
 #define ADCS_B_MODULE_TOLERANCE                         0.01
-#define ADCS_COIL_CHARACTERISTICS                       { {1.88 * pow(10, 5), 0,                 0}, \
-                                                          {0,                 6.1 * pow(10, 5),  0}, \
-                                                          {0,                 0,                 5.96 * pow(10, 5)} }
+#define ADCS_COIL_CHARACTERISTICS                       { {0.06316, 0,         0}, \
+                                                          {0,       0.001119,  0}, \
+                                                          {0,       0,         0.00921222} }
 
 /*
     Global Variables
