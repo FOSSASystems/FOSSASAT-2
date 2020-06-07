@@ -8,16 +8,16 @@
    control law by means of a modified trapezoidal rule integration scheme
 */
 
-/***************** Headers ****************/
+/************** Headers ****************/
 #include "../ADCS/adcs.h"
 
-/**************** Main function ***********/
+/*********** Main function ***********/
 float ACS_IntensitiesRectifier(const ADCS_CALC_TYPE intensity1, const ADCS_CALC_TYPE intensity2, const int delta_t) {
   // Energy approximation of the signal by the trapezoidal rule
   ADCS_CALC_TYPE intensityDiff = intensity2 - intensity1;
   ADCS_CALC_TYPE energy = (pow(intensity1, 2) + (1.0/3.0)*pow(intensityDiff, 2) + intensity1*(intensityDiff)) * (float)delta_t;
 
-  //Pulse time calculation
-  ADCS_CALC_TYPE duration = energy/adcsParams.pulseAmplitude;
+  // Pulse time calculation
+  ADCS_CALC_TYPE duration = energy/pow(adcsParams.pulseAmplitude,2);
   return(duration);
 }
