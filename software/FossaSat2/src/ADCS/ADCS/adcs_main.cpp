@@ -62,8 +62,8 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     FOSSASAT_DEBUG_PRINTLN(adcsParams.pulseAmplitude, 4);
     FOSSASAT_DEBUG_PRINT(F("orbInclination="));
     FOSSASAT_DEBUG_PRINTLN(adcsParams.orbInclination, 4);
-    FOSSASAT_DEBUG_PRINT(F("orbPeriod="));
-    FOSSASAT_DEBUG_PRINTLN(adcsParams.meanOrbitalMotion, 4);
+    FOSSASAT_DEBUG_PRINT(F("meanOrbitalMotion="));
+    FOSSASAT_DEBUG_PRINTLN(adcsParams.meanOrbitalMotion, 8);
 
     // wake up IMU
     adcsState.active = true;
