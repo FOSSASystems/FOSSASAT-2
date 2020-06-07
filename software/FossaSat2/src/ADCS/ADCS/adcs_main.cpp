@@ -15,13 +15,13 @@
 
 /*********** Main function ***************/
 void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, const uint32_t activeDuration,
-               const uint8_t position[], const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE orbitalPeriod) {
+               const uint8_t position[], const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion) {
 
   // save control flags
   adcsParams.control.val = controlFlags;
 
   // always detumble first
-  ADCS_Detumble_Init(detumbleDuration, orbitalInclination, orbitalPeriod);
+  ADCS_Detumble_Init(detumbleDuration, orbitalInclination, meanOrbitalMotion);
 
   if(!adcsParams.control.bits.detumbleOnly) {
     // Active controlling loop
@@ -50,7 +50,7 @@ ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[]) {
 }*/
 
 /************ Auxiliary functions implementation ***********/
-void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE orbitalPeriod) {
+void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion) {
     // cache parameters
     adcsParams.maxPulseInt = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_INTENSITY);     // Maximum applicable intensity
     adcsParams.maxPulseLen = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_LENGTH);    // Maximum pulse time available by energy reasons
@@ -60,7 +60,7 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     adcsParams.pulseAmplitude = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_AMPLITUDE);  // Amplitude of pulse for ACS_IntensitiesRectifier
     adcsParams.BmodTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_B_MODULE_TOLERANCE);
     adcsParams.orbInclination = orbitalInclination;
-    adcsParams.orbPeriod = orbitalPeriod;
+    adcsParams.meanOrbitalMotion = meanOrbitalMotion;
     adcsParams.detumbleLen = detumbleDuration;
 
     // print parameters for debugging

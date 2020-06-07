@@ -47,6 +47,9 @@ struct adcsState_t {
 struct adcsControlBits_t {
   uint8_t detumbleOnly : 1;       // LSB
   uint8_t overrideDetumbleTol : 1;
+  uint8_t overrideFaultX : 1;
+  uint8_t overrideFaultY : 1;
+  uint8_t overrideFaultZ : 1;
 };
 
 struct adcsParams_t {
@@ -56,7 +59,7 @@ struct adcsParams_t {
   uint32_t timeStep;
   ADCS_CALC_TYPE minInertialMoment;
   ADCS_CALC_TYPE orbInclination;
-  ADCS_CALC_TYPE orbPeriod;
+  ADCS_CALC_TYPE meanOrbitalMotion;
   ADCS_CALC_TYPE pulseAmplitude;
   uint32_t detumbleLen;
   ADCS_CALC_TYPE BmodTol;

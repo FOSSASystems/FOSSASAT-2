@@ -12,7 +12,7 @@
 #include "../ADCS/adcs.h"
 
 /*********************** Main function ***********************/
-void ACS_BdotFunction(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE mag[], const ADCS_CALC_TYPE orbitalInclination,  const ADCS_CALC_TYPE orbitalPeriod, ADCS_CALC_TYPE intensity[]) {
+void ACS_BdotFunction(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE mag[], const ADCS_CALC_TYPE orbitalInclination,  const ADCS_CALC_TYPE meanOrbitalMotion, ADCS_CALC_TYPE intensity[]) {
     // Constants definition
     // Module of the magnetic field intensity
     const ADCS_CALC_TYPE B_module = ADCS_VectorNorm(mag) + adcsParams.BmodTol;
@@ -20,7 +20,7 @@ void ACS_BdotFunction(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE mag[], 
     FOSSASAT_DEBUG_PRINTLN(B_module, 4);
 
     // Controller gain constant
-    const ADCS_CALC_TYPE gainConstant = 2*adcsParams.meanOrbitalMotion*(1.0 + sin(orbitalInclination)) * adcsParams.minInertialMoment;
+    const ADCS_CALC_TYPE gainConstant = 2.0*meanOrbitalMotion*(1.0 + sin(orbitalInclination)) * adcsParams.minInertialMoment;
     FOSSASAT_DEBUG_PRINT(F("gainConstant = "));
     FOSSASAT_DEBUG_PRINTLN(gainConstant, 4);
 

@@ -1783,10 +1783,10 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // read orbital period and inclination from TLE
         double orbitalInclination = PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_INCLINATION) * (M_PI/180.0);
-        double orbitalPeriod = (24.0 * 3600.0) / PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_MEAN_MOTION);
+        double meanOrbitalMotion = (2.0 * M_PI * PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_MEAN_MOTION)) / (24.0 * 3600.0);
 
         // initialize ADCS
-        ADCS_Main(controlFlags, detumbleLen, maneuverLen, optData + 9, orbitalInclination, orbitalPeriod);
+        ADCS_Main(controlFlags, detumbleLen, maneuverLen, optData + 9, orbitalInclination, meanOrbitalMotion);
       }
     } break;
 
