@@ -12,7 +12,7 @@
 #include "../ADCS/adcs.h"
 
 /*********************** Main function ***********************/
-void ACS_BdotFunction(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE mag[], const ADCS_CALC_TYPE orbitalInclination,  const ADCS_CALC_TYPE meanOrbitalMotion, ADCS_CALC_TYPE intensity[]) {
+void ACS_BdotFunction(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE mag[], ADCS_CALC_TYPE intensity[]) {
     // Constants definition
     // Module of the magnetic field intensity
     const ADCS_CALC_TYPE B_module = ADCS_VectorNorm(mag) + adcsParams.BmodTol;
@@ -20,7 +20,7 @@ void ACS_BdotFunction(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE mag[], 
     FOSSASAT_DEBUG_PRINTLN(B_module, 4);
 
     // Controller gain constant
-    const ADCS_CALC_TYPE gainConstant = 2.0*meanOrbitalMotion*(1.0 + sin(orbitalInclination)) * adcsParams.minInertialMoment;
+    const ADCS_CALC_TYPE gainConstant = 2.0*adcsParams.meanOrbitalMotion*(1.0 + sin(adcsParams.orbInclination)) * adcsParams.minInertialMoment;
     FOSSASAT_DEBUG_PRINT(F("gainConstant = "));
     FOSSASAT_DEBUG_PRINTLN(gainConstant, 4);
 
@@ -28,14 +28,6 @@ void ACS_BdotFunction(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE mag[], 
     const ADCS_CALC_TYPE gainGeneral = gainConstant/pow(B_module, 2);
     FOSSASAT_DEBUG_PRINT(F("gainGeneral = \t"));
     FOSSASAT_DEBUG_PRINTLN(gainGeneral, 4);
-
-    // Coil magnetic characteristics -shall be introduced already inversed-.
-    // TODO move external flash read outside ISR
-    ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES];
-    const uint8_t coilCharLen = ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(ADCS_CALC_TYPE);
-    uint8_t coilCharBuff[coilCharLen];
-    PersistentStorage_Read(FLASH_ADCS_COIL_CHAR_MATRIX, coilCharBuff, coilCharLen);
-    memcpy(coilChar, coilCharBuff, coilCharLen);
 
     // Generate the control law by means of a vector product: m = a*(B x omega) = (K/B_module)*(B x omega)
     ADCS_CALC_TYPE controlLaw[3];
@@ -58,7 +50,7 @@ void ACS_BdotFunction(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE mag[], 
     FOSSASAT_DEBUG_PRINTLN(magMoment[2], 4);
 
     // Definition of intensity output -solving the equation: A*I = m-
-    intensity[0] = magMoment[0]*coilChar[0][0]+magMoment[1]*coilChar[0][1]+magMoment[2]*coilChar[0][2];
-    intensity[1] = magMoment[0]*coilChar[1][0]+magMoment[1]*coilChar[1][1]+magMoment[2]*coilChar[1][2];
-    intensity[2] = magMoment[0]*coilChar[2][0]+magMoment[1]*coilChar[2][1]+magMoment[2]*coilChar[2][2];
+    intensity[0] = magMoment[0]*adcsParams.coilChar[0][0] + magMoment[1]*adcsParams.coilChar[0][1] + magMoment[2]*adcsParams.coilChar[0][2];
+    intensity[1] = magMoment[0]*adcsParams.coilChar[1][0] + magMoment[1]*adcsParams.coilChar[1][1] + magMoment[2]*adcsParams.coilChar[1][2];
+    intensity[2] = magMoment[0]*adcsParams.coilChar[2][0] + magMoment[1]*adcsParams.coilChar[2][1] + magMoment[2]*adcsParams.coilChar[2][2];
 }

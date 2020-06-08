@@ -47,6 +47,12 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     adcsParams.meanOrbitalMotion = meanOrbitalMotion;
     adcsParams.detumbleLen = detumbleDuration;
 
+    // Coil magnetic characteristics -shall be introduced already inversed-.
+    const uint8_t coilCharLen = ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(ADCS_CALC_TYPE);
+    uint8_t coilCharBuff[coilCharLen];
+    PersistentStorage_Read(FLASH_ADCS_COIL_CHAR_MATRIX, coilCharBuff, coilCharLen);
+    memcpy(adcsParams.coilChar, coilCharBuff, coilCharLen);
+
     // print parameters for debugging
     FOSSASAT_DEBUG_PRINT(F("timeStep="));
     FOSSASAT_DEBUG_PRINTLN(adcsParams.timeStep);
@@ -64,6 +70,15 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     FOSSASAT_DEBUG_PRINTLN(adcsParams.orbInclination, 4);
     FOSSASAT_DEBUG_PRINT(F("meanOrbitalMotion="));
     FOSSASAT_DEBUG_PRINTLN(adcsParams.meanOrbitalMotion, 8);
+    FOSSASAT_DEBUG_PRINT(F("coilChar="));
+    for(uint8_t row = 0; row < ADCS_NUM_AXES; row++) {
+      for(uint8_t col = 0; col < ADCS_NUM_AXES; col++) {
+        FOSSASAT_DEBUG_PRINT(adcsParams.coilChar[row][col], 4);
+        FOSSASAT_DEBUG_PRINT('\t');
+      }
+      FOSSASAT_DEBUG_PRINTLN();
+    }
+    FOSSASAT_DEBUG_PRINTLN();
 
     // wake up IMU
     adcsState.active = true;
@@ -192,7 +207,7 @@ void ADCS_Detumble_Update() {
   // check tolerance
   if ((adcsParams.control.bits.overrideDetumbleTol) || (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.omegaTol)) {
       // Control law generation
-      ACS_BdotFunction(omega, mag, adcsParams.orbInclination, adcsParams.meanOrbitalMotion, intensity);
+      ACS_BdotFunction(omega, mag, intensity);
       ADCS_CALC_TYPE intensityNorm = ADCS_VectorNorm(intensity);
       ADCS_CALC_TYPE pulseLength[ADCS_NUM_AXES];
       FOSSASAT_DEBUG_PRINT(F("intensityNorm=\t"));
