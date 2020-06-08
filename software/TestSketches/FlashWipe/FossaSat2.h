@@ -32,7 +32,6 @@
 #include "src/PowerControl.h"
 #include "src/Sensors.h"
 #include "src/Types.h"
-#include "src/FEC/rs8.h"
 
 // Reed-Solomon FEC
 #include "src/FEC/rs8.h"

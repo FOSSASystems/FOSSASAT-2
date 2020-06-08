@@ -1,45 +1,15 @@
-#ifndef _FOSSASAT_PERSISTENT_STORAGE_H
-#define _FOSSASAT_PERSISTENT_STORAGE_H
-
-#include "FossaSat2.h"
-
-#define MX25L51245G_CMD_NOP                             0x00
-#define MX25L51245G_CMD_WRSR                            0x01
-#define MX25L51245G_CMD_PP                              0x02
-#define MX25L51245G_CMD_READ                            0x03
-#define MX25L51245G_CMD_WRDI                            0x04
-#define MX25L51245G_CMD_RDSR                            0x05
-#define MX25L51245G_CMD_WREN                            0x06
-#define MX25L51245G_CMD_RDCR                            0x15
-#define MX25L51245G_CMD_RDSCUR                          0x2B
-#define MX25L51245G_CMD_SE                              0x20
-#define MX25L51245G_CMD_EN4B                            0xB7
-#define MX25L51245G_CMD_BE                              0xD8
-#define MX25L51245G_CMD_EX4B                            0xE9
-#define MX25L51245G_CMD_REMS                            0x90
-
-#define MX25L51245G_SR_WEL                              0b00000010
-#define MX25L51245G_SR_WIP                              0b00000001
-
-#define FLASH_EXT_PAGE_SIZE                             0x00000100
-#define FLASH_STATS                                     0x00001000
-#define FLASH_SYSTEM_INFO_START                         0x00000000
-#define FLASH_SYSTEM_INFO_LEN                          (FLASH_EXT_PAGE_SIZE)
-#define FLASH_SYSTEM_INFO_CRC                           0x000000F8  //  0x000000F8    0x000000FB
-#define FLASH_MEMORY_ERROR_COUNTER                      0x000000FC  //  0x000000FC    0x000000FF
-
 /*
     CRC32 Implementation based on GCC libiberty library, under the following license:
 
     Copyright (C) 2009-2020 Free Software Foundation, Inc.
-    
+
     This file is part of the libiberty library.
-    
+
     This file is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
-    
+
     In addition to the permissions in the GNU General Public License, the
     Free Software Foundation gives you unlimited permission to link the
     compiled version of this file into combinations with other programs,
@@ -48,16 +18,21 @@
     do apply in other respects; for example, they cover modification of
     the file, and distribution when not linked into a combined
     executable.)
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 */
+
+#ifndef _CRC32_H
+#define _CRC32_H
+
+#include "../../FossaSat2.h"
 
 static const uint32_t crc32_table[] PROGMEM =
 {
@@ -143,90 +118,5 @@ static const uint32_t crc32_table[] PROGMEM =
  */
 
 uint32_t CRC32_Get(uint8_t* buff, size_t len, uint32_t initial = 0xFFFFFFFF);
-bool PersistentStorage_Check_CRC(uint8_t* buff, uint32_t crcPos);
-
-// system info functions - these only change the RAM buffer
-void PersistentStorage_Increment_Counter(uint16_t addr);
-void PersistentStorage_Increment_Frame_Counter(bool valid);
-void PersistentStorage_Get_Callsign(char* buff, uint8_t len);
-void PersistentStorage_Set_Callsign(char* newCallsign);
-void PersistentStorage_Set_Buffer(uint8_t addr, uint8_t* buff, size_t len);
-void PersistentStorage_Reset_System_Info();
-
-uint32_t PersistentStorage_Get_Image_Len(uint8_t slot);
-void PersistentStorage_Set_Image_Len(uint8_t slot, uint32_t len);
-uint8_t PersistentStorage_Get_Message(uint16_t slotNum, uint8_t* buff);
-void PersistentStorage_Set_Message(uint16_t slotNum, uint8_t* buff, uint8_t len);
-
-void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len);
-void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool autoErase = true);
-
-void PersistentStorage_SectorErase(uint32_t addr);
-void PersistentStorage_64kBlockErase(uint32_t addr);
-
-void PersistentStorage_WriteEnable();
-void PersistentStorage_WriteDisable();
-uint8_t PersistentStorage_ReadManufacturerID();
-uint8_t PersistentStorage_ReadStatusRegister();
-uint8_t PersistentStorage_ReadConfigRegister();
-uint8_t PersistentStorage_ReadSecurityRegister();
-void PersistentStorage_Enter4ByteMode();
-void PersistentStorage_Exit4ByteMode();
-void PersistentStorage_Reset();
-void PersistentStorage_WriteStatusRegister(uint8_t sr, uint8_t cr);
-bool PersistentStorage_WaitForWriteEnable(uint32_t timeout = 50);
-bool PersistentStorage_WaitForWriteInProgress(uint32_t timeout = 50);
-
-void PersistentStorage_SPItransaction(uint8_t cmd, bool write = true, uint8_t* data = NULL, size_t numBytes = 0);
-void PersistentStorage_SPItransaction(uint8_t* cmd, uint8_t cmdLen, bool write, uint8_t* data, size_t numBytes);
-
-// get/set only affect RAM buffer, changed values will be saved to flash only on main loop end!
-extern uint8_t systemInfoBuffer[];
-template<typename T>
-T PersistentStorage_Get(uint8_t addr) {
-  T t;
-  memcpy(&t, systemInfoBuffer + addr, sizeof(T));
-  return(t);
-}
-
-template<typename T>
-void PersistentStorage_Set(uint8_t addr, T t) {
-  // check address is in system info
-  if(addr > (FLASH_SYSTEM_INFO_LEN - 1)) {
-    return;
-  }
-
-  // set the new value to RAM buffer
-  memcpy(systemInfoBuffer + addr, &t, sizeof(T));
-}
-
-template <typename T>
-void PersistentStorage_Update_Stat(uint8_t* statBuff, uint32_t addr, T val) {
-  uint32_t statAddr = addr - FLASH_STATS;
-  size_t typeSize = sizeof(T);
-
-  // get min/avg/max
-  T min = 0;
-  memcpy(&min, statBuff + statAddr, typeSize);
-  T avg = 0;
-  memcpy(&avg, statBuff + statAddr + typeSize, typeSize);
-  T max = 0;
-  memcpy(&max, statBuff + statAddr + 2*typeSize, typeSize);
-
-  // update stats
-  if(val < min) {
-    memcpy(statBuff + statAddr, &val, typeSize);
-  }
-  
-  avg = (avg + val)/((T)2);
-  memcpy(statBuff + statAddr + typeSize, &avg, typeSize);
-
-  if(val > max) {
-    memcpy(statBuff + statAddr + 2*typeSize, &val, typeSize);
-  }
-}
-
-void PersistentStorage_Update_Stats(uint8_t flags);
-void PersistentStorage_Reset_Stats();
 
 #endif

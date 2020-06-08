@@ -62,6 +62,7 @@ uint8_t Camera_Init(JPEG_Size pictureSize, Light_Mode lightMode, Color_Saturatio
       FOSSASAT_DEBUG_PRINT(F("Camera SPI test failed, got 0x"));
       FOSSASAT_DEBUG_PRINTLN(testValue, HEX);
       state = 7;
+      
     } else {
       FOSSASAT_DEBUG_PRINTLN(F("Camera SPI test OK"));
       state = 0;
@@ -147,6 +148,8 @@ uint32_t Camera_Capture(uint8_t slot) {
   // read image length
   FOSSASAT_DEBUG_PRINTLN(F("Capture done, reading data."));
   uint32_t len = camera->read_fifo_length();
+  uint32_t scanStart = 0x00000000;
+  uint32_t scanEnd = 0x00000000;
   if(len >= MAX_FIFO_SIZE) {
     FOSSASAT_DEBUG_PRINT(F("Image size is too large ("));
     FOSSASAT_DEBUG_PRINT(len)
@@ -156,9 +159,6 @@ uint32_t Camera_Capture(uint8_t slot) {
     FOSSASAT_DEBUG_PRINTLN(F("Image size is 0 B!"));
     return(0x00000000);
   }
-
-  // write image length
-  PersistentStorage_Set_Image_Len(slot, len);
 
   // print some basic info
   FOSSASAT_DEBUG_PRINT(F("Image size (bytes): "));
@@ -182,9 +182,27 @@ uint32_t Camera_Capture(uint8_t slot) {
   // write the complete pages first
   uint8_t dataBuffer[FLASH_EXT_PAGE_SIZE];
   uint32_t i;
+  uint8_t prevByte = 0x00;
   for(i = 0; i < len / FLASH_EXT_PAGE_SIZE; i++) {
     for(uint32_t j = 0; j < FLASH_EXT_PAGE_SIZE; j++) {
-      dataBuffer[j] = SPI.transfer(0x00);
+      // get the new byte
+      uint8_t newByte = SPI.transfer(0x00);
+
+      // save addresses of JPEG markers
+      if(prevByte == JPEG_MARKER_ESCAPE) {
+        switch(newByte) {
+          case JPEG_MARKER_SOF0:
+            scanStart = imgAddress + i*FLASH_EXT_PAGE_SIZE + j + 1;
+            break;
+          case JPEG_MARKER_EOI:
+            scanEnd = imgAddress + i*FLASH_EXT_PAGE_SIZE + j - 1;
+            break;
+        }
+      }
+
+      // update buffer and cache
+      dataBuffer[j] = newByte;
+      prevByte = newByte;
     }
 
     // write a single sector
@@ -194,9 +212,34 @@ uint32_t Camera_Capture(uint8_t slot) {
   // write the remaining page
   uint32_t remLen = len - i*FLASH_EXT_PAGE_SIZE;
   for(uint32_t j = 0; j < remLen; j++) {
-    dataBuffer[j] = SPI.transfer(0x00);
+      // get the new byte
+      uint8_t newByte = SPI.transfer(0x00);
+
+      // save addresses of JPEG markers
+      if(prevByte == JPEG_MARKER_ESCAPE) {
+        switch(newByte) {
+          case JPEG_MARKER_SOF0:
+            scanStart = imgAddress + i*FLASH_EXT_PAGE_SIZE + j + 1;
+            break;
+          case JPEG_MARKER_EOI:
+            scanEnd = imgAddress + i*FLASH_EXT_PAGE_SIZE + j - 1;
+            break;
+        }
+      }
+
+      // update buffer and cache
+      dataBuffer[j] = newByte;
+      prevByte = newByte;
   }
   PersistentStorage_Write(imgAddress + i*FLASH_EXT_PAGE_SIZE, dataBuffer, remLen, false);
+
+  // write image properties
+  FOSSASAT_DEBUG_PRINT(F("Scan start: 0x"));
+  FOSSASAT_DEBUG_PRINTLN(scanStart, HEX);
+  FOSSASAT_DEBUG_PRINT(F("Scan end: 0x"));
+  FOSSASAT_DEBUG_PRINTLN(scanEnd, HEX);
+  PersistentStorage_Set_Image_Properties(slot, len, scanStart, scanEnd);
+  
   FOSSASAT_DEBUG_PRINTLN(F("Writing done"));
   
   digitalWrite(CAMERA_CS, HIGH);
