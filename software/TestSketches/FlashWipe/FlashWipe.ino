@@ -70,17 +70,26 @@ void setup() {
   FOSSASAT_DEBUG_PRINT_FLASH(FLASH_NMEA_LOG_START, FLASH_EXT_PAGE_SIZE);
 
   FOSSASAT_DEBUG_PORT.println(F("-------"));
-  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGE_LENGTHS_1, FLASH_EXT_PAGE_SIZE);
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGE_PROPERTIES, FLASH_EXT_PAGE_SIZE);
   FOSSASAT_DEBUG_PORT.println(F("Image wipe start (will take about 3 minutes)"));
-  PersistentStorage_SectorErase(FLASH_IMAGE_LENGTHS_1);
-  PersistentStorage_SectorErase(FLASH_IMAGE_LENGTHS_2);
-  PowerControl_Watchdog_Heartbeat();
+  for(uint8_t i = 0; i < 6; i++) {
+    PersistentStorage_SectorErase(FLASH_IMAGE_PROPERTIES + i*FLASH_SECTOR_SIZE);
+    PowerControl_Watchdog_Heartbeat();
+  }
   for(uint32_t addr = FLASH_IMAGES_START; addr < FLASH_CHIP_SIZE; addr += FLASH_64K_BLOCK_SIZE) {
     PersistentStorage_64kBlockErase(addr);
     PowerControl_Watchdog_Heartbeat();
   }
   FOSSASAT_DEBUG_PORT.println(F("Image wipe done"));
-  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGE_LENGTHS_1, FLASH_EXT_PAGE_SIZE);
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGE_PROPERTIES, FLASH_EXT_PAGE_SIZE);
+
+  FOSSASAT_DEBUG_PORT.println(F("-------"));
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_ADCS_PARAMETERS, FLASH_EXT_PAGE_SIZE);
+  FOSSASAT_DEBUG_PORT.println(F("ADCS config wipe start"));
+  PersistentStorage_Reset_ADCS_Params();
+  PowerControl_Watchdog_Heartbeat();
+  FOSSASAT_DEBUG_PORT.println(F("ADCS config wipe done"));
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_ADCS_PARAMETERS, FLASH_EXT_PAGE_SIZE);
 }
 
 void loop() {
