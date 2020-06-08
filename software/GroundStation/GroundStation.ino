@@ -1076,9 +1076,10 @@ void maneuver(uint8_t controlFlags, uint32_t detumbleLen, uint32_t activeLen, ui
 }
 
 void setAdcsParams(uint32_t timeStep, float pulseMaxIntensity, float maxPulseLength, 
-                   float omegaTol, float minInertialMoment, float pulseAmplitude, float bModTol) {
+                   float omegaTol, float minInertialMoment, float pulseAmplitude, float bModTol,
+                   uint32_t bridgeTimerPeriod, int8_t bridgeValHigh, int8_t bridgeValLow) {
   Serial.print(F("Sending ADCS parameters ... "));
-  const uint8_t optDataLen = sizeof(uint32_t) + 6*sizeof(float);
+  const uint8_t optDataLen = 2*sizeof(uint32_t) + 6*sizeof(float) + 2*sizeof(int8_t);
   uint8_t optData[optDataLen];
   uint8_t* optDataPtr = optData;
   memcpy(optDataPtr, &pulseMaxIntensity, sizeof(pulseMaxIntensity));
@@ -1095,6 +1096,12 @@ void setAdcsParams(uint32_t timeStep, float pulseMaxIntensity, float maxPulseLen
   optDataPtr += sizeof(bModTol);
   memcpy(optDataPtr, &timeStep, sizeof(timeStep));
   optDataPtr += sizeof(timeStep);
+  memcpy(optDataPtr, &bridgeTimerPeriod, sizeof(bridgeTimerPeriod));
+  optDataPtr += sizeof(bridgeTimerPeriod);
+  memcpy(optDataPtr, &bridgeValHigh, sizeof(bridgeValHigh));
+  optDataPtr += sizeof(bridgeValHigh);
+  memcpy(optDataPtr, &bridgeValLow, sizeof(bridgeValLow));
+  optDataPtr += sizeof(bridgeValLow);
   sendFrameEncrypted(CMD_SET_ADCS_PARAMETERS, optDataLen, optData);
 }
 
@@ -1265,10 +1272,10 @@ void loop() {
         break;
       case 'z': {
         uint8_t pos[] = { 1, 2, 3, 4, 5, 6 };
-        maneuver(0b00000011, 5000, 6000, pos);
+        maneuver(0b00011111, 5000, 6000, pos);
       } break;
       case 'Z':
-        setAdcsParams(80000, 2.0, 40000.0, 0.2, 800, 0.3, 0.02);
+        setAdcsParams(80000, 2.0, 40000.0, 0.2, 800, 0.3, 0.02, 800, 40, -40);
         break;
       default:
         Serial.print(F("Unknown command: "));

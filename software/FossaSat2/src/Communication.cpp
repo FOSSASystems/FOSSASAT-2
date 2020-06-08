@@ -1791,7 +1791,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_SET_ADCS_PARAMETERS: {
-      if(Communication_Check_OptDataLen(28, optDataLen)) {
+      if(Communication_Check_OptDataLen(34, optDataLen)) {
         // read the current ADCS parameters
         uint8_t adcsPage[FLASH_EXT_PAGE_SIZE];
         PersistentStorage_Read(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);
@@ -1807,6 +1807,13 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // set the rest
         memcpy(adcsPage + (FLASH_ADCS_TIME_STEP - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint32_t));
+        optDataPtr += sizeof(uint32_t);
+        memcpy(adcsPage + (FLASH_ADCS_BRIDGE_TIMER_UPDATE_PERIOD - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint32_t));
+        optDataPtr += sizeof(uint32_t);
+        memcpy(adcsPage + (FLASH_ADCS_BRIDGE_OUTPUT_HIGH - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(int8_t));
+        optDataPtr += sizeof(int8_t);
+        memcpy(adcsPage + (FLASH_ADCS_BRIDGE_OUTPUT_LOW - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(int8_t));
+        optDataPtr += sizeof(int8_t);
 
         // write all at once
         PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);

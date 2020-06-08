@@ -326,7 +326,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Description: Performs maneuver with closed-loop ADCS control.
 
 ### CMD_SET_ADCS_PARAMETERS
-- Optional data length: 28
+- Optional data length: 34
 - Optional data:
   - 0 - 3: maximum pulse intensity, float
   - 4 - 7: maximum pulse length, float
@@ -335,6 +335,9 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 16 - 19: pulse amplitude, float
   - 20 - 23: magnetic intensity vector module tolerance, float
   - 24 - 27: time step between ADCS updates in us, unsigned 32-bit integer, LSB first
+  - 28 - 31: H-bridge timer update period in us, unsigned 32-bit integer, LSB first
+  - 32: H-bridge value for "high" output, signed 8-bit integer, -63 to 63
+  - 33: H-bridge value for "low" output, signed 8-bit integer, -63 to 63
 - Response: none
 - Description: Sets configurable ADCS parameters. Floating point numbers should are sent first due to internal automated conversion.
 

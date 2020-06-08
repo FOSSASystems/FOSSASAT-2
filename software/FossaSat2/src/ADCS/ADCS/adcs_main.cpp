@@ -46,6 +46,9 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     adcsParams.orbInclination = orbitalInclination;
     adcsParams.meanOrbitalMotion = meanOrbitalMotion;
     adcsParams.detumbleLen = detumbleDuration;
+    adcsParams.bridgeTimerUpdatePeriod = PersistentStorage_Get<uint32_t>(FLASH_ADCS_BRIDGE_TIMER_UPDATE_PERIOD);
+    adcsParams.bridgeOutputHigh = PersistentStorage_Get<int8_t>(FLASH_ADCS_BRIDGE_OUTPUT_HIGH);
+    adcsParams.bridgeOutputLow = PersistentStorage_Get<int8_t>(FLASH_ADCS_BRIDGE_OUTPUT_LOW);
 
     // Coil magnetic characteristics -shall be introduced already inversed-.
     const uint8_t coilCharLen = ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(ADCS_CALC_TYPE);
@@ -70,7 +73,7 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     FOSSASAT_DEBUG_PRINTLN(adcsParams.orbInclination, 4);
     FOSSASAT_DEBUG_PRINT(F("meanOrbitalMotion="));
     FOSSASAT_DEBUG_PRINTLN(adcsParams.meanOrbitalMotion, 8);
-    FOSSASAT_DEBUG_PRINT(F("coilChar="));
+    FOSSASAT_DEBUG_PRINTLN(F("coilChar="));
     for(uint8_t row = 0; row < ADCS_NUM_AXES; row++) {
       for(uint8_t col = 0; col < ADCS_NUM_AXES; col++) {
         FOSSASAT_DEBUG_PRINT(adcsParams.coilChar[row][col], 4);
@@ -79,6 +82,12 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
       FOSSASAT_DEBUG_PRINTLN();
     }
     FOSSASAT_DEBUG_PRINTLN();
+    FOSSASAT_DEBUG_PRINT(F("bridgeTimerUpdatePeriod="));
+    FOSSASAT_DEBUG_PRINTLN(adcsParams.bridgeTimerUpdatePeriod);
+    FOSSASAT_DEBUG_PRINT(F("bridgeOutputHigh="));
+    FOSSASAT_DEBUG_PRINTLN(adcsParams.bridgeOutputHigh);
+    FOSSASAT_DEBUG_PRINT(F("bridgeOutputLow="));
+    FOSSASAT_DEBUG_PRINTLN(adcsParams.bridgeOutputLow);
 
     // wake up IMU
     adcsState.active = true;
@@ -108,9 +117,9 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     // configure H bridge timer
     HbridgeTimer->setOverflow(ADCS_BRIDGE_TIMER_UPDATE_PERIOD, MICROSEC_FORMAT);
     HbridgeTimer->attachInterrupt(ADCS_Update_Bridges);
-    adcsState.bridgeValX = false;
-    adcsState.bridgeValY = false;
-    adcsState.bridgeValZ = false;
+    adcsState.bridgeStateX.outputHigh = false;
+    adcsState.bridgeStateY.outputHigh = false;
+    adcsState.bridgeStateZ.outputHigh = false;
 
     // configure ADCS timer
     AdcsTimer->setOverflow(adcsParams.timeStep, MICROSEC_FORMAT);
@@ -118,9 +127,9 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
 
     // start timers
     adcsState.start = millis();
-    adcsState.bridgeLastUpdateX = adcsState.start;
-    adcsState.bridgeLastUpdateY = adcsState.start;
-    adcsState.bridgeLastUpdateZ = adcsState.start;
+    adcsState.bridgeStateX.lastUpdate = adcsState.start;
+    adcsState.bridgeStateY.lastUpdate  = adcsState.start;
+    adcsState.bridgeStateZ.lastUpdate  = adcsState.start;
     HbridgeTimer->resume();
     AdcsTimer->resume();
 }
@@ -228,9 +237,9 @@ void ADCS_Detumble_Update() {
 
       // update H-bridges
       // TODO us -> ms
-      adcsState.bridgePeriodX = (uint32_t)(pulseLength[0] / 1000.0);
-      adcsState.bridgePeriodY = (uint32_t)(pulseLength[1] / 1000.0);
-      adcsState.bridgePeriodZ = (uint32_t)(pulseLength[2] / 1000.0);
+      adcsState.bridgeStateX.pulseLen = (uint32_t)(pulseLength[0] / 1000.0);
+      adcsState.bridgeStateY.pulseLen = (uint32_t)(pulseLength[1] / 1000.0);
+      adcsState.bridgeStateZ.pulseLen = (uint32_t)(pulseLength[2] / 1000.0);
 
       FOSSASAT_DEBUG_PRINT(F("intensity=\t"));
       FOSSASAT_DEBUG_PRINT(intensity[0], 8); FOSSASAT_DEBUG_PRINT('\t');
@@ -269,34 +278,34 @@ void ADCS_Finish() {
 void ADCS_Update_Bridges() {
   uint32_t currTime = millis();
 
-  if(currTime - adcsState.bridgeLastUpdateX >= adcsState.bridgePeriodX) {
-    adcsState.bridgeLastUpdateX = currTime;
-    if(adcsState.bridgeValX) {
-      bridgeX.drive(ADCS_BRIDGE_VAL_MAX);
+  if(currTime - adcsState.bridgeStateX.lastUpdate >= adcsState.bridgeStateX.pulseLen) {
+    adcsState.bridgeStateX.lastUpdate = currTime;
+    if(adcsState.bridgeStateX.outputHigh) {
+      bridgeX.drive(adcsParams.bridgeOutputHigh);
     } else {
-      bridgeX.drive(ADCS_BRIDGE_VAL_MIN);
+      bridgeX.drive(adcsParams.bridgeOutputLow);
     }
-    adcsState.bridgeValX = !adcsState.bridgeValX;
+    adcsState.bridgeStateX.outputHigh = !adcsState.bridgeStateX.outputHigh;
   }
 
-  if(currTime - adcsState.bridgeLastUpdateY >= adcsState.bridgePeriodY) {
-    adcsState.bridgeLastUpdateY = currTime;
-    if(adcsState.bridgeValY) {
-      bridgeY.drive(ADCS_BRIDGE_VAL_MAX);
+  if(currTime - adcsState.bridgeStateY.lastUpdate >= adcsState.bridgeStateY.pulseLen) {
+    adcsState.bridgeStateY.lastUpdate = currTime;
+    if(adcsState.bridgeStateY.outputHigh) {
+      bridgeY.drive(adcsParams.bridgeOutputHigh);
     } else {
-      bridgeY.drive(ADCS_BRIDGE_VAL_MIN);
+      bridgeY.drive(adcsParams.bridgeOutputLow);
     }
-    adcsState.bridgeValY = !adcsState.bridgeValY;
+    adcsState.bridgeStateY.outputHigh = !adcsState.bridgeStateY.outputHigh;
   }
 
-  if(currTime - adcsState.bridgeLastUpdateZ >= adcsState.bridgePeriodZ) {
-    adcsState.bridgeLastUpdateZ = currTime;
-    if(adcsState.bridgeValZ) {
-      bridgeZ.drive(ADCS_BRIDGE_VAL_MAX);
+  if(currTime - adcsState.bridgeStateZ.lastUpdate >= adcsState.bridgeStateZ.pulseLen) {
+    adcsState.bridgeStateZ.lastUpdate = currTime;
+    if(adcsState.bridgeStateZ.outputHigh) {
+      bridgeZ.drive(adcsParams.bridgeOutputHigh);
     } else {
-      bridgeZ.drive(ADCS_BRIDGE_VAL_MIN);
+      bridgeZ.drive(adcsParams.bridgeOutputLow);
     }
-    adcsState.bridgeValZ = !adcsState.bridgeValZ;
+    adcsState.bridgeStateZ.outputHigh = !adcsState.bridgeStateZ.outputHigh;
   }
 }
 

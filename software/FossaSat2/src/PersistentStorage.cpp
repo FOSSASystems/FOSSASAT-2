@@ -73,6 +73,7 @@ T PersistentStorage_Get(uint32_t addr) {
 template float PersistentStorage_Get<float>(uint32_t);
 template double PersistentStorage_Get<double>(uint32_t);
 template uint32_t PersistentStorage_Get<uint32_t>(uint32_t);
+template int8_t PersistentStorage_Get<int8_t>(uint32_t);
 
 template<typename T>
 // cppcheck-suppress unusedFunction
@@ -100,6 +101,8 @@ void PersistentStorage_Set(uint32_t addr, T t) {
 
 template void PersistentStorage_Set<float>(uint32_t, float);
 template void PersistentStorage_Set<double>(uint32_t, double);
+template void PersistentStorage_Set<uint32_t>(uint32_t, uint32_t);
+template void PersistentStorage_Set<int8_t>(uint32_t, int8_t);
 
 template <typename T>
 // cppcheck-suppress unusedFunction
@@ -614,6 +617,12 @@ void PersistentStorage_Reset_ADCS_Params() {
   memcpy(adcsPage + (FLASH_ADCS_B_MODULE_TOLERANCE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   uint32_t ul = ADCS_TIME_STEP;
   memcpy(adcsPage + (FLASH_ADCS_TIME_STEP - FLASH_ADCS_PARAMETERS), &ul, sizeof(ul));
+  ul = ADCS_BRIDGE_TIMER_UPDATE_PERIOD;
+  memcpy(adcsPage + (FLASH_ADCS_BRIDGE_TIMER_UPDATE_PERIOD - FLASH_ADCS_PARAMETERS), &ul, sizeof(ul));
+  int8_t ss = ADCS_BRIDGE_OUTPUT_HIGH;
+  memcpy(adcsPage + (FLASH_ADCS_BRIDGE_OUTPUT_HIGH - FLASH_ADCS_PARAMETERS), &ss, sizeof(ss));
+  ss = ADCS_BRIDGE_OUTPUT_LOW;
+  memcpy(adcsPage + (FLASH_ADCS_BRIDGE_OUTPUT_LOW - FLASH_ADCS_PARAMETERS), &ss, sizeof(ss));
 
   ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES] = ADCS_COIL_CHARACTERISTICS;
   memcpy(adcsPage + (FLASH_ADCS_COIL_CHAR_MATRIX - FLASH_ADCS_PARAMETERS), coilChar, ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(ADCS_CALC_TYPE));

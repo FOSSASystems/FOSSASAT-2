@@ -37,20 +37,20 @@ struct gpsLogState_t {
   uint32_t start;
 };
 
+struct adcsBridgeState_t {
+  bool outputHigh;
+  uint32_t lastUpdate;
+  uint32_t pulseLen;
+};
+
 struct adcsState_t {
   float prevIntensity[ADCS_NUM_AXES];
   float prevOmegaNorm;
   uint32_t start;
   bool active;
-  bool bridgeValX;
-  uint32_t bridgeLastUpdateX;
-  uint32_t bridgePeriodX;
-  bool bridgeValY;
-  uint32_t bridgeLastUpdateY;
-  uint32_t bridgePeriodY;
-  bool bridgeValZ;
-  uint32_t bridgeLastUpdateZ;
-  uint32_t bridgePeriodZ;
+  adcsBridgeState_t bridgeStateX;
+  adcsBridgeState_t bridgeStateY;
+  adcsBridgeState_t bridgeStateZ;
 };
 
 struct adcsControlBits_t {
@@ -73,6 +73,9 @@ struct adcsParams_t {
   uint32_t detumbleLen;
   ADCS_CALC_TYPE BmodTol;
   ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES];
+  uint32_t bridgeTimerUpdatePeriod;
+  int8_t bridgeOutputHigh;
+  int8_t bridgeOutputLow;
   union {
     adcsControlBits_t bits;
     uint8_t val;
