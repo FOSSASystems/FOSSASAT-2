@@ -72,6 +72,7 @@ struct adcsParams_t {
   ADCS_CALC_TYPE pulseAmplitude;
   uint32_t detumbleLen;
   ADCS_CALC_TYPE BmodTol;
+  ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES];
   union {
     adcsControlBits_t bits;
     uint8_t val;
