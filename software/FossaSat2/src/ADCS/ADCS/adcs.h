@@ -31,6 +31,7 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
 void ADCS_Detumble_Update();
 
 void ADCS_Finish();
+void ADCS_Update_Bridges();
 
 // Auxiliary functions
 /*void bdot_function(const double* omega, const double* B,

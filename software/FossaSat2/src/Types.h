@@ -42,6 +42,15 @@ struct adcsState_t {
   float prevOmegaNorm;
   uint32_t start;
   bool active;
+  bool bridgeValX;
+  uint32_t bridgeLastUpdateX;
+  uint32_t bridgePeriodX;
+  bool bridgeValY;
+  uint32_t bridgeLastUpdateY;
+  uint32_t bridgePeriodY;
+  bool bridgeValZ;
+  uint32_t bridgeLastUpdateZ;
+  uint32_t bridgePeriodZ;
 };
 
 struct adcsControlBits_t {

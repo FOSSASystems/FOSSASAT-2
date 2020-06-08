@@ -30,6 +30,7 @@ void ACS_BdotFunction(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE mag[], 
     FOSSASAT_DEBUG_PRINTLN(gainGeneral, 4);
 
     // Coil magnetic characteristics -shall be introduced already inversed-.
+    // TODO move external flash read outside ISR
     ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES];
     const uint8_t coilCharLen = ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(ADCS_CALC_TYPE);
     uint8_t coilCharBuff[coilCharLen];

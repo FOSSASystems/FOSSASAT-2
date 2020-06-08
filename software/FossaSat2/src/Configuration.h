@@ -467,7 +467,7 @@
 
 #define ADCS_NUM_AXES                                   3       // number of axes to control
 #define ADCS_CALC_TYPE                                  double  // numeric type to use in ADCS calculation, float for single precision, double for double precision
-#define ADCS_TIME_STEP                                  100000  // time setup between successive ADCS updates, in us
+#define ADCS_TIME_STEP                                  100000  // time step between successive ADCS updates, in us
 #define ADCS_PULSE_MAX_INTENSITY                        1.0     //
 #define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)    //
 #define ADCS_OMEGA_TOLERANCE                            0.1     // detumbling will be stopped once change in normalized angular velocity drops below this value
@@ -477,6 +477,9 @@
 #define ADCS_COIL_CHARACTERISTICS                       { {15.83,   0,        0}, \
                                                           {0,       893.65,   0}, \
                                                           {0,       0,        108.551} }
+#define ADCS_BRIDGE_TIMER_UPDATE_PERIOD                 (ADCS_TIME_STEP/100) // TODO cfg
+#define ADCS_BRIDGE_VAL_MIN                             -63 // TODO cfg
+#define ADCS_BRIDGE_VAL_MAX                             63 // TODO cfg
 
 /*
     Global Variables
@@ -511,8 +514,9 @@ extern SPIClass FlashSPI;
 // additional UART interface
 extern HardwareSerial GpsSerial;
 
-// ADCS update timer instance
+// ADCS timer instances
 extern HardwareTimer* AdcsTimer;
+extern HardwareTimer* HbridgeTimer;
 
 // RadioLib instances
 extern SX1268 radio;

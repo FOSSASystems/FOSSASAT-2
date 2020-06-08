@@ -90,10 +90,23 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     FOSSASAT_DEBUG_PRINT(F("omegaNorm=\t"));
     FOSSASAT_DEBUG_PRINTLN(adcsState.prevOmegaNorm, 4);
 
-    // start ADCS timer
-    adcsState.start = millis();
+    // configure H bridge timer
+    HbridgeTimer->setOverflow(ADCS_BRIDGE_TIMER_UPDATE_PERIOD, MICROSEC_FORMAT);
+    HbridgeTimer->attachInterrupt(ADCS_Update_Bridges);
+    adcsState.bridgeValX = false;
+    adcsState.bridgeValY = false;
+    adcsState.bridgeValZ = false;
+
+    // configure ADCS timer
     AdcsTimer->setOverflow(adcsParams.timeStep, MICROSEC_FORMAT);
     AdcsTimer->attachInterrupt(ADCS_Detumble_Update);
+
+    // start timers
+    adcsState.start = millis();
+    adcsState.bridgeLastUpdateX = adcsState.start;
+    adcsState.bridgeLastUpdateY = adcsState.start;
+    adcsState.bridgeLastUpdateZ = adcsState.start;
+    HbridgeTimer->resume();
     AdcsTimer->resume();
 }
 
@@ -198,7 +211,12 @@ void ADCS_Detumble_Update() {
           pulseLength[2] = adcsParams.maxPulseLen;
       }
 
-      // TODO update Hbridges
+      // update H-bridges
+      // TODO us -> ms
+      adcsState.bridgePeriodX = (uint32_t)(pulseLength[0] / 1000.0);
+      adcsState.bridgePeriodY = (uint32_t)(pulseLength[1] / 1000.0);
+      adcsState.bridgePeriodZ = (uint32_t)(pulseLength[2] / 1000.0);
+
       FOSSASAT_DEBUG_PRINT(F("intensity=\t"));
       FOSSASAT_DEBUG_PRINT(intensity[0], 8); FOSSASAT_DEBUG_PRINT('\t');
       FOSSASAT_DEBUG_PRINT(intensity[1], 8); FOSSASAT_DEBUG_PRINT('\t');
@@ -230,6 +248,41 @@ void ADCS_Finish() {
   bridgeZ.stop();
   AdcsTimer->pause();
   AdcsTimer->detachInterrupt();
+  HbridgeTimer->pause();
+}
+
+void ADCS_Update_Bridges() {
+  uint32_t currTime = millis();
+
+  if(currTime - adcsState.bridgeLastUpdateX >= adcsState.bridgePeriodX) {
+    adcsState.bridgeLastUpdateX = currTime;
+    if(adcsState.bridgeValX) {
+      bridgeX.drive(ADCS_BRIDGE_VAL_MAX);
+    } else {
+      bridgeX.drive(ADCS_BRIDGE_VAL_MIN);
+    }
+    adcsState.bridgeValX = !adcsState.bridgeValX;
+  }
+
+  if(currTime - adcsState.bridgeLastUpdateY >= adcsState.bridgePeriodY) {
+    adcsState.bridgeLastUpdateY = currTime;
+    if(adcsState.bridgeValY) {
+      bridgeY.drive(ADCS_BRIDGE_VAL_MAX);
+    } else {
+      bridgeY.drive(ADCS_BRIDGE_VAL_MIN);
+    }
+    adcsState.bridgeValY = !adcsState.bridgeValY;
+  }
+
+  if(currTime - adcsState.bridgeLastUpdateZ >= adcsState.bridgePeriodZ) {
+    adcsState.bridgeLastUpdateZ = currTime;
+    if(adcsState.bridgeValZ) {
+      bridgeZ.drive(ADCS_BRIDGE_VAL_MAX);
+    } else {
+      bridgeZ.drive(ADCS_BRIDGE_VAL_MIN);
+    }
+    adcsState.bridgeValZ = !adcsState.bridgeValZ;
+  }
 }
 
 /*
