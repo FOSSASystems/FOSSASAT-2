@@ -470,19 +470,19 @@
 
 #define ADCS_NUM_AXES                                   3       // number of axes to control
 #define ADCS_CALC_TYPE                                  double  // numeric type to use in ADCS calculation, float for single precision, double for double precision
-#define ADCS_TIME_STEP                                  100000  // time step between successive ADCS updates, in us
+#define ADCS_TIME_STEP                                  100     // time step between successive ADCS updates, in ms
 #define ADCS_PULSE_MAX_INTENSITY                        1.0     //
-#define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)    //
+#define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)  // maximum length of H-bridge pulse
 #define ADCS_OMEGA_TOLERANCE                            0.1     // detumbling will be stopped once change in normalized angular velocity drops below this value
 #define ADCS_MIN_INERTIAL_MOMENT                        1000    //
 #define ADCS_PULSE_AMPLITUDE                            0.1     //
-#define ADCS_B_MODULE_TOLERANCE                         0.01
+#define ADCS_B_MODULE_TOLERANCE                         0.01    //
 #define ADCS_COIL_CHARACTERISTICS                       { {15.83,   0,        0}, \
                                                           {0,       893.65,   0}, \
                                                           {0,       0,        108.551} }
-#define ADCS_BRIDGE_TIMER_UPDATE_PERIOD                 (ADCS_TIME_STEP/100)
-#define ADCS_BRIDGE_OUTPUT_HIGH                         63
-#define ADCS_BRIDGE_OUTPUT_LOW                         -63
+#define ADCS_BRIDGE_TIMER_UPDATE_PERIOD                 (ADCS_TIME_STEP/100)  // time step between successive H bridge output updates, in ms
+#define ADCS_BRIDGE_OUTPUT_HIGH                         63      // H bridge drive strength to be used as "high"
+#define ADCS_BRIDGE_OUTPUT_LOW                         -63      // H bridge drive strength to be used as "low"
 
 /*
     Global Variables

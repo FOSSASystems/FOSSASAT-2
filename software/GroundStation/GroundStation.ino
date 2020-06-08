@@ -1275,7 +1275,7 @@ void loop() {
         maneuver(0b00011111, 5000, 6000, pos);
       } break;
       case 'Z':
-        setAdcsParams(80000, 2.0, 40000.0, 0.2, 800, 0.3, 0.02, 800, 40, -40);
+        setAdcsParams(80, 2.0, 40.0, 0.2, 800, 0.3, 0.02, 1, 40, -40);
         break;
       default:
         Serial.print(F("Unknown command: "));

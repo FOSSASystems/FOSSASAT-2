@@ -115,14 +115,14 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     FOSSASAT_DEBUG_PRINTLN(adcsState.prevOmegaNorm, 4);
 
     // configure H bridge timer
-    HbridgeTimer->setOverflow(ADCS_BRIDGE_TIMER_UPDATE_PERIOD, MICROSEC_FORMAT);
+    HbridgeTimer->setOverflow(adcsParams.bridgeTimerUpdatePeriod * (uint32_t)1000, MICROSEC_FORMAT);
     HbridgeTimer->attachInterrupt(ADCS_Update_Bridges);
     adcsState.bridgeStateX.outputHigh = false;
     adcsState.bridgeStateY.outputHigh = false;
     adcsState.bridgeStateZ.outputHigh = false;
 
     // configure ADCS timer
-    AdcsTimer->setOverflow(adcsParams.timeStep, MICROSEC_FORMAT);
+    AdcsTimer->setOverflow(adcsParams.timeStep * (uint32_t)1000, MICROSEC_FORMAT);
     AdcsTimer->attachInterrupt(ADCS_Detumble_Update);
 
     // start timers
@@ -236,10 +236,9 @@ void ADCS_Detumble_Update() {
       }
 
       // update H-bridges
-      // TODO us -> ms
-      adcsState.bridgeStateX.pulseLen = (uint32_t)(pulseLength[0] / 1000.0);
-      adcsState.bridgeStateY.pulseLen = (uint32_t)(pulseLength[1] / 1000.0);
-      adcsState.bridgeStateZ.pulseLen = (uint32_t)(pulseLength[2] / 1000.0);
+      adcsState.bridgeStateX.pulseLen = (uint32_t)(pulseLength[0]);
+      adcsState.bridgeStateY.pulseLen = (uint32_t)(pulseLength[1]);
+      adcsState.bridgeStateZ.pulseLen = (uint32_t)(pulseLength[2]);
 
       FOSSASAT_DEBUG_PRINT(F("intensity=\t"));
       FOSSASAT_DEBUG_PRINT(intensity[0], 8); FOSSASAT_DEBUG_PRINT('\t');
