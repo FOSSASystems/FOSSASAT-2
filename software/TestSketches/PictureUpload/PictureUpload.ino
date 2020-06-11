@@ -58,14 +58,13 @@ void loop() {
   uint8_t slot = FOSSASAT_DEBUG_PORT.read();
 
   // erase slot
-  for(uint32_t addr = FLASH_IMAGES_START + slot*FLASH_IMAGE_SLOT_SIZE; addr < FLASH_IMAGES_START + (slot + 1)*FLASH_IMAGE_SLOT_SIZE; addr += FLASH_64K_BLOCK_SIZE) {
+  for(uint32_t addr = FLASH_IMAGES_START + slot*FLASH_IMAGE_SLOT_SIZE; addr < FLASH_IMAGES_START + ((uint32_t)slot + (uint32_t)1)*FLASH_IMAGE_SLOT_SIZE; addr += FLASH_64K_BLOCK_SIZE) {
     PersistentStorage_64kBlockErase(addr);
     digitalWrite(WATCHDOG_IN, !digitalRead(WATCHDOG_IN));
   }
   
   // read data
   uint32_t writtenBytes = fetchData(slot);
-  PersistentStorage_Set_Image_Len(slot, writtenBytes);
-  //FOSSASAT_DEBUG_PRINT_FLASH(FLASH_IMAGE_LENGTHS_2, FLASH_EXT_PAGE_SIZE);
+  PersistentStorage_Set_Image_Properties(slot, writtenBytes, FLASH_IMAGES_START + slot*FLASH_IMAGE_SLOT_SIZE, FLASH_IMAGES_START + slot*FLASH_IMAGE_SLOT_SIZE + writtenBytes);
   digitalWrite(LED_BUILTIN, LOW);
 }
