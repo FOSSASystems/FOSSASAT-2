@@ -354,6 +354,8 @@ void Navigation_GNSS_SerialEvent() {
         gpsLogState.flashPos = FLASH_NMEA_LOG_START;
         gpsLogState.overwrite = true;
       }
+      
+      PowerControl_Watchdog_Heartbeat();
 
     } else {
       // add to buffer

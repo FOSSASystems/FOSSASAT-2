@@ -1471,7 +1471,6 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         while(millis() - gpsLogState.start < duration) {
           // check new data
           Navigation_GNSS_SerialEvent();
-          PowerControl_Watchdog_Heartbeat();
 
           // check new packets
           Communication_Check_New_Packet();
