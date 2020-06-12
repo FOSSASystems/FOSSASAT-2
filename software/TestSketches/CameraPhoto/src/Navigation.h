@@ -27,4 +27,9 @@ uint16_t Navigation_GNSS_Run_Cmd(uint8_t* payload, uint16_t payloadLen, uint8_t*
 bool Navigation_GNSS_Send_Cmd(uint8_t* payload, uint16_t payloadLen);
 uint16_t Navigation_GNSS_Get_Resp(uint8_t* resp, uint32_t timeout = 3000);
 
+void Navigation_GNSS_Wipe_Log();
+void Navigation_GNSS_Setup_Logging();
+void Navigation_GNSS_SerialEvent();
+uint32_t Navigation_GNSS_Finish_Logging();
+
 #endif

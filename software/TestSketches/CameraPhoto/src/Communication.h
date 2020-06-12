@@ -22,7 +22,11 @@ void Communication_Send_Statistics(uint8_t flags);
 template <typename T>
 void Communication_Frame_Add(uint8_t** buffPtr, T val, const char* name, uint32_t mult, const char* unit);
 
+void Communication_Set_ADCS_Param(uint8_t** optDataPtr, uint8_t* adcsPage, uint32_t addr);
+void Communication_Transfer_Picture(uint32_t imgAddress, uint32_t imgLen, uint16_t packetId);
+
 // FOSSA Communication Protocol frame handling
+void Communication_Check_New_Packet();
 void Communication_Acknowledge(uint8_t functionId, uint8_t result);
 void Communication_Process_Packet();
 void Comunication_Parse_Frame(uint8_t* frame, uint8_t len);

@@ -26,7 +26,7 @@ void setup() {
   PersistentStorage_Reset();
   PersistentStorage_Enter4ByteMode();
 
-  Sensors_Setup_Current(currSensorMPPT, CURR_SENSOR_MPPT_OUTPUT_BUS, CURR_SENSOR_MPPT_OUTPUT_ADDRESS);
+  Sensors_Current_Setup(currSensorMPPT);
 
   // initialize camera
   digitalWrite(CAMERA_POWER_FET, HIGH);
@@ -60,6 +60,6 @@ void loop() {
     FOSSASAT_DEBUG_PRINT_FLASH(imgAddress + i*stepSize, stepSize);
 
     // wait for a bit to emulate how long it takes to downlink picture of this size
-    delay(2*RESPONSE_DELAY_SHORT);
+    delay(2*RESPONSE_DELAY_SHORT + 1);
   }
 }
