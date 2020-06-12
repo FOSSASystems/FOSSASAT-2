@@ -314,6 +314,7 @@
                                                           CMD_GET_FULL_SYSTEM_INFO, \
                                                           /* CMD_STORE_AND_FORWARD_ADD,*/ \
                                                           /* CMD_STORE_AND_FORWARD_REQUEST,*/ \
+                                                          /* CMD_REQUEST_PUBLIC_PICTURE, */ \
                                                           CMD_DEPLOY, \
                                                           CMD_RESTART, \
                                                           /* CMD_WIPE_EEPROM,*/ \
@@ -326,9 +327,9 @@
                                                           CMD_CAMERA_CAPTURE, \
                                                           CMD_SET_POWER_LIMITS, \
                                                           CMD_SET_RTC, \
-                                                          /* CMD_RECORD_IMU,*/ \
-                                                          /* CMD_RUN_MANUAL_ACS,*/ \
-                                                          /* CMD_LOG_GPS,*/ \
+                                                          CMD_RECORD_IMU, \
+                                                          CMD_RUN_MANUAL_ACS, \
+                                                          CMD_LOG_GPS, \
                                                           /* CMD_GET_GPS_LOG,*/ \
                                                           CMD_GET_FLASH_CONTENTS, \
                                                           /* CMD_GET_PICTURE_LENGTH,*/ \
@@ -339,9 +340,10 @@
                                                           /* CMD_GET_GPS_LOG_STATE,*/ \
                                                           /* CMD_RUN_GPS_COMMAND,*/ \
                                                           CMD_SET_SLEEP_INTERVALS, \
-                                                          /* CMD_MANEUVER,*/ \
-                                                          /* CMD_SET_ADCS_PARAMETERS*/ \
-                                                          CMD_ABORT \
+                                                          CMD_ABORT, \
+                                                          CMD_MANEUVER \
+                                                          /* CMD_SET_ADCS_PARAMETERS, */ \
+                                                          /* CMD_ERASE_FLASH, */ \
                                                          }          /*!< List of function IDs that remain available in "science mode" (e.g. logging GPS or ADCS closed-loop control) */
 
 // LoRa

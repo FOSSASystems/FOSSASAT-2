@@ -297,6 +297,9 @@ void Navigation_GNSS_Setup_Logging() {
 
   // run for the requested duration
   gpsLogState.start = millis();
+
+  // set science mode flag
+  scienceModeActive = true;
 }
 
 void Navigation_GNSS_SerialEvent() {
@@ -354,7 +357,7 @@ void Navigation_GNSS_SerialEvent() {
         gpsLogState.flashPos = FLASH_NMEA_LOG_START;
         gpsLogState.overwrite = true;
       }
-      
+
       PowerControl_Watchdog_Heartbeat();
 
     } else {
@@ -384,4 +387,7 @@ uint32_t Navigation_GNSS_Finish_Logging() {
   FOSSASAT_DEBUG_PRINTLN(logged);
   PersistentStorage_SystemInfo_Set<uint32_t>(FLASH_NMEA_LOG_LENGTH, logged);
   return(logged);
+
+  // clear science mode flag
+  scienceModeActive = false;
 }
