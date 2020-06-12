@@ -15,6 +15,7 @@
 #define I2C1_SCL                                        PA9
 #define I2C2_SDA                                        PB11
 #define I2C2_SCL                                        PB10
+#define CAMERA_POWER_FET                                PB5
 
 // Light Sensors
 #define LIGHT_SENSOR_GAIN                               VEML7700_GAIN_1_8
@@ -46,9 +47,9 @@ void Sensors_Setup_Light(Adafruit_VEML7700& sensor, TwoWire& wire) {
   // initialize the current sensor
   if (!sensor.begin(&wire)) {
     FOSSASAT_DEBUG_PRINTLN(F("failed!"));
-    return;
   } else {
     FOSSASAT_DEBUG_PRINTLN(F("success!"));
+    return;
   }
 
   // set default properties
@@ -61,6 +62,9 @@ void setup() {
   while(!FOSSASAT_DEBUG_PORT);
   FOSSASAT_DEBUG_PORT.println();
 
+  pinMode(CAMERA_POWER_FET, OUTPUT);
+  digitalWrite(CAMERA_POWER_FET, HIGH);
+
   Wire.setSDA(I2C1_SDA);
   Wire.setSCL(I2C1_SCL);
   Wire.begin();
@@ -68,7 +72,7 @@ void setup() {
   Wire2.setSDA(I2C2_SDA);
   Wire2.setSCL(I2C2_SCL);
   Wire2.begin();
-  
+
   Sensors_Setup_Light(lightSensorPanelY, LIGHT_SENSOR_Y_PANEL_BUS);
   Sensors_Setup_Light(lightSensorTop, LIGHT_SENSOR_TOP_PANEL_BUS);
 
