@@ -10,7 +10,7 @@ extern HardwareSerial debugSerial;
 #define FOSSASAT_DEBUG
 
 #define FOSSASAT_DEBUG_PORT   Serial
-#define FOSSASAT_DEBUG_SPEED  115200
+#define FOSSASAT_DEBUG_SPEED  230400
 
 #ifdef FOSSASAT_DEBUG
 #define FOSSASAT_DEBUG_BEGIN(...) { FOSSASAT_DEBUG_PORT.begin(__VA_ARGS__); delay(500); while(!FOSSASAT_DEBUG_PORT); }
