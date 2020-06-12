@@ -341,9 +341,9 @@
                                                           /* CMD_RUN_GPS_COMMAND,*/ \
                                                           CMD_SET_SLEEP_INTERVALS, \
                                                           CMD_ABORT, \
-                                                          CMD_MANEUVER \
+                                                          CMD_MANEUVER, \
                                                           /* CMD_SET_ADCS_PARAMETERS, */ \
-                                                          /* CMD_ERASE_FLASH, */ \
+                                                          CMD_ERASE_FLASH \
                                                          }          /*!< List of function IDs that remain available in "science mode" (e.g. logging GPS or ADCS closed-loop control) */
 
 // LoRa

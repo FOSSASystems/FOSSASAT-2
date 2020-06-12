@@ -20,6 +20,9 @@ void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, cons
   // save control flags
   adcsParams.control.val = controlFlags;
 
+  // set science mode flag
+  scienceModeActive = true;
+
   // always detumble first
   ADCS_Detumble_Init(detumbleDuration, orbitalInclination, meanOrbitalMotion);
 
@@ -272,6 +275,7 @@ void ADCS_Finish() {
   AdcsTimer->pause();
   AdcsTimer->detachInterrupt();
   HbridgeTimer->pause();
+  scienceModeActive = false;
 }
 
 void ADCS_Update_Bridges() {
