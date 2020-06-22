@@ -1801,7 +1801,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_MAX_LENGTH);
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_OMEGA_TOLERANCE);
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_AMPLITUDE);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_B_MODULE_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_CALCULATION_TOLERANCE);
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_MIN_INERTIAL_MOMENT);
 
         // set the rest

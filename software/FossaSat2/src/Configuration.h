@@ -215,7 +215,7 @@
 #define FLASH_ADCS_OMEGA_TOLERANCE            (FLASH_ADCS_PARAMETERS + 0x10)  //  0x00001010    0x00001017    float or double
 #define FLASH_ADCS_MIN_INERTIAL_MOMENT        (FLASH_ADCS_PARAMETERS + 0x18)  //  0x00001018    0x0000101F    float or double
 #define FLASH_ADCS_PULSE_AMPLITUDE            (FLASH_ADCS_PARAMETERS + 0x20)  //  0x00001020    0x00001027    float or double
-#define FLASH_ADCS_B_MODULE_TOLERANCE         (FLASH_ADCS_PARAMETERS + 0x28)  //  0x00001028    0x0000102F    float or double
+#define FLASH_ADCS_CALCULATION_TOLERANCE      (FLASH_ADCS_PARAMETERS + 0x28)  //  0x00001028    0x0000102F    float or double
 #define FLASH_ADCS_TIME_STEP                  (FLASH_ADCS_PARAMETERS + 0x70)  //  0x00001070    0x00001073    uint32_t
 #define FLASH_ADCS_BRIDGE_TIMER_UPDATE_PERIOD (FLASH_ADCS_PARAMETERS + 0x74)  //  0x00001074    0x00001077    uint32_t
 #define FLASH_ADCS_BRIDGE_OUTPUT_HIGH         (FLASH_ADCS_PARAMETERS + 0x78)  //  0x00001078    0x00001078    int8_t
@@ -478,7 +478,7 @@
 #define ADCS_OMEGA_TOLERANCE                            0.1     // detumbling will be stopped once change in normalized angular velocity drops below this value
 #define ADCS_MIN_INERTIAL_MOMENT                        1000    //
 #define ADCS_PULSE_AMPLITUDE                            0.1     //
-#define ADCS_B_MODULE_TOLERANCE                         0.01    //
+#define ADCS_CALCULATION_TOLERANCE                      0.01    //
 #define ADCS_COIL_CHARACTERISTICS                       { {15.83,   0,        0}, \
                                                           {0,       893.65,   0}, \
                                                           {0,       0,        108.551} }

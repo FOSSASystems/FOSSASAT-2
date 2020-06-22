@@ -333,7 +333,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 8 - 11: detumbling angular velocity tolerance, float
   - 12 - 15: minimum inertial moment, float
   - 16 - 19: pulse amplitude, float
-  - 20 - 23: magnetic intensity vector module tolerance, float
+  - 20 - 23: calculation tolerance, float
   - 24 - 27: time step between ADCS updates in ms, unsigned 32-bit integer, LSB first
   - 28 - 31: H-bridge timer update period in ms, unsigned 32-bit integer, LSB first
   - 32: H-bridge value for "high" output, signed 8-bit integer, -63 to 63

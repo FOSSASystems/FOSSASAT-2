@@ -71,7 +71,7 @@ struct adcsParams_t {
   ADCS_CALC_TYPE meanOrbitalMotion;
   ADCS_CALC_TYPE pulseAmplitude;
   uint32_t detumbleLen;
-  ADCS_CALC_TYPE BmodTol;
+  ADCS_CALC_TYPE calcTol;
   ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES];
   uint32_t bridgeTimerUpdatePeriod;
   int8_t bridgeOutputHigh;

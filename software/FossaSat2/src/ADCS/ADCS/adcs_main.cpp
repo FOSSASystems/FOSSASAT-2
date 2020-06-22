@@ -45,7 +45,7 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     adcsParams.timeStep = PersistentStorage_Get<uint32_t>(FLASH_ADCS_TIME_STEP);           // Time step between to calculation instants
     adcsParams.minInertialMoment = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_MIN_INERTIAL_MOMENT); // Minimum inertial moment
     adcsParams.pulseAmplitude = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_AMPLITUDE);  // Amplitude of pulse for ACS_IntensitiesRectifier
-    adcsParams.BmodTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_B_MODULE_TOLERANCE);
+    adcsParams.calcTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_CALCULATION_TOLERANCE);
     adcsParams.orbInclination = orbitalInclination;
     adcsParams.meanOrbitalMotion = meanOrbitalMotion;
     adcsParams.detumbleLen = detumbleDuration;
