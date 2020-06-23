@@ -25,13 +25,13 @@ void ADS_Measurement_Hybrid(ADCS_CALC_TYPE v_1[], ADCS_CALC_TYPE v_2[], ADCS_CAL
   ADCS_CALC_TYPE v3_norm = ADCS_VectorNorm(v_3);
 
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
-      m_1[i] *= (1.0/m1_norm);
-      m_2[i] *= (1.0/m2_norm);
-      m_3[i] *= (1.0/m3_norm);
+      m_1[i] *= (1.0/(m1_norm+adcsParams.calcTol));
+      m_2[i] *= (1.0/(m2_norm+adcsParams.calcTol));
+      m_3[i] *= (1.0/(m3_norm+adcsParams.calcTol));
 
-      v_1[i] *= (1.0/v1_norm);
-      v_2[i] *= (1.0/v2_norm);
-      v_3[i] *= (1.0/v3_norm);
+      v_1[i] *= (1.0/(v1_norm+adcsParams.calcTol));
+      v_2[i] *= (1.0/(v2_norm+adcsParams.calcTol));
+      v_3[i] *= (1.0/(v3_norm+adcsParams.calcTol));
   }
 
   // Measurements matrix

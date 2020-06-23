@@ -23,7 +23,7 @@ void ADS_Kalman_Filter(const ADCS_CALC_TYPE Q, const ADCS_CALC_TYPE R, const ADC
                        ADCS_CALC_TYPE P[][ADCS_STATE_DIM], ADCS_CALC_TYPE filtered_y[]) {
 
   // Constants and variables declarations and preliminary computations
-  const ADCS_CALC_TYPE u[ADCS_STATE_DIM] = {0, 0, 0, u0[0], u0[1], u0[2]};        // Total control vector
+  const ADCS_CALC_TYPE u[ADCS_STATE_DIM] = {u0[0], u0[1], u0[2]};                      // Total control vector
   const ADCS_CALC_TYPE invI[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{}, {}, {}};            // Inertia tensor inverse
   ADCS_CALC_TYPE M_aux1[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0},{0},{0},{0},{0},{0}};   // Auxiliary matrix
   ADCS_CALC_TYPE M_aux2[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0},{0},{0},{0},{0},{0}};   // Auxiliary matrix
@@ -52,7 +52,7 @@ void ADS_Kalman_Filter(const ADCS_CALC_TYPE Q, const ADCS_CALC_TYPE R, const ADC
     }
   }
 
-  ADCS_CALC_TYPE B[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
+  ADCS_CALC_TYPE B[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
   for(uint8_t i = ADCS_STATE_DIM/2; i < ADCS_STATE_DIM; i++) {
     for(uint8_t j = ADCS_STATE_DIM/2; j < ADCS_STATE_DIM; j++) {
       B[i][j] = invI[(i-ADCS_STATE_DIM/2)][(j-ADCS_STATE_DIM/2)]*delta_t;
