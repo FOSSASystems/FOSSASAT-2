@@ -12,9 +12,57 @@
 
 
 /*************** Auxiliary functions implementation *****************/
-void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[][ADCS_STATE_DIM], ADCS_CALC_TYPE inversedMatrix[][ADCS_STATE_DIM]) {
+void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[][ADCS_STATE_DIM]) {
   // TODO implement
-  return;
+{
+	float temp;
+
+	// Create the augmented matrix
+	for (int i = 0; i < ADCS_STATE_DIM; i++) {
+		for (int j = 0; j < 2 * ADCS_STATE_DIM; j++) {
+			if (j == (i + ADCS_STATE_DIM))
+				matrix[i][j] = 1;
+		}
+	}
+
+	// Interchange the rows of matrix from the end
+	for (int i = ADCS_STATE_DIM - 1; i > 0; i--) {
+		if (matrix[i - 1][0] < matrix[i][0]) {
+			float* temp = matrix[i];
+			matrix[i] = matrix[i - 1];
+			matrix[i - 1] = temp;
+		}
+	}
+
+	// Replace a row by sum of itself and a
+	// constant multiple of another row of the matrix
+	for (int i = 0; i < ADCS_STATE_DIM; i++) {
+
+		for (int j = 0; j < ADCS_STATE_DIM; j++) {
+
+			if (j != i) {
+
+				temp = matrix[j][i] / matrix[i][i];
+				for (int k = 0; k < 2 * ADCS_STATE_DIM; k++) {
+
+					matrix[j][k] -= matrix[i][k] * temp;
+				}
+			}
+		}
+	}
+
+	// Multiply each row by a nonzero integer.
+	// Divide row element by the diagonal element
+	for (int i = 0; i < ADCS_STATE_DIM; i++) {
+
+		temp = matrix[i][i];
+		for (int j = 0; j < 2 * ADCS_STATE_DIM; j++) {
+
+			matrix[i][j] = matrix[i][j] / temp;
+		}
+	}
+
+	return;
 }
 
 /*************** Main function ******************/
@@ -23,7 +71,7 @@ void ADS_Kalman_Filter(const ADCS_CALC_TYPE Q, const ADCS_CALC_TYPE R, const ADC
                        ADCS_CALC_TYPE P[][ADCS_STATE_DIM], ADCS_CALC_TYPE filtered_y[]) {
 
   // Constants and variables declarations and preliminary computations
-  const ADCS_CALC_TYPE u[ADCS_STATE_DIM] = {0, 0, 0, u0[0], u0[1], u0[2]};        // Total control vector
+  const ADCS_CALC_TYPE u[ADCS_STATE_DIM] = {u0[0], u0[1], u0[2]};                      // Total control vector
   const ADCS_CALC_TYPE invI[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{}, {}, {}};            // Inertia tensor inverse
   ADCS_CALC_TYPE M_aux1[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0},{0},{0},{0},{0},{0}};   // Auxiliary matrix
   ADCS_CALC_TYPE M_aux2[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0},{0},{0},{0},{0},{0}};   // Auxiliary matrix
@@ -52,7 +100,7 @@ void ADS_Kalman_Filter(const ADCS_CALC_TYPE Q, const ADCS_CALC_TYPE R, const ADC
     }
   }
 
-  ADCS_CALC_TYPE B[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
+  ADCS_CALC_TYPE B[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
   for(uint8_t i = ADCS_STATE_DIM/2; i < ADCS_STATE_DIM; i++) {
     for(uint8_t j = ADCS_STATE_DIM/2; j < ADCS_STATE_DIM; j++) {
       B[i][j] = invI[(i-ADCS_STATE_DIM/2)][(j-ADCS_STATE_DIM/2)]*delta_t;
@@ -90,7 +138,7 @@ void ADS_Kalman_Filter(const ADCS_CALC_TYPE Q, const ADCS_CALC_TYPE R, const ADC
     }
   }
 
-  ADS_Inverse_Matrix(S, invS);
+  ADS_Inverse_Matrix(S);
 
   // Compute the Kalman filter matrix
   for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
