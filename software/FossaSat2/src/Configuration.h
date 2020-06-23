@@ -216,6 +216,10 @@
 #define FLASH_ADCS_MIN_INERTIAL_MOMENT        (FLASH_ADCS_PARAMETERS + 0x18)  //  0x00001018    0x0000101F    float or double
 #define FLASH_ADCS_PULSE_AMPLITUDE            (FLASH_ADCS_PARAMETERS + 0x20)  //  0x00001020    0x00001027    float or double
 #define FLASH_ADCS_CALCULATION_TOLERANCE      (FLASH_ADCS_PARAMETERS + 0x28)  //  0x00001028    0x0000102F    float or double
+#define FLASH_ADCS_ANGULAR_TOLERANCE          (FLASH_ADCS_PARAMETERS + 0x30)  //  0x00001030    0x00001037    float or double
+#define FLASH_ADCS_ECLIPSE_THRESHOLD          (FLASH_ADCS_PARAMETERS + 0x38)  //  0x00001038    0x0000103F    float or double
+#define FLASH_ADCS_ROTATION_WEIGHT_RATIO      (FLASH_ADCS_PARAMETERS + 0x40)  //  0x00001040    0x00001047    float or double
+#define FLASH_ADCS_ROTATION_TRIGGER           (FLASH_ADCS_PARAMETERS + 0x48)  //  0x00001048    0x0000104F    float or double
 #define FLASH_ADCS_TIME_STEP                  (FLASH_ADCS_PARAMETERS + 0x70)  //  0x00001070    0x00001073    uint32_t
 #define FLASH_ADCS_BRIDGE_TIMER_UPDATE_PERIOD (FLASH_ADCS_PARAMETERS + 0x74)  //  0x00001074    0x00001077    uint32_t
 #define FLASH_ADCS_BRIDGE_OUTPUT_HIGH         (FLASH_ADCS_PARAMETERS + 0x78)  //  0x00001078    0x00001078    int8_t
@@ -471,14 +475,19 @@
 */
 
 #define ADCS_NUM_AXES                                   3       // number of axes to control
+#define ADCS_NUM_PANELS                                 6       // number of solar panels for eclipse decision
 #define ADCS_CALC_TYPE                                  double  // numeric type to use in ADCS calculation, float for single precision, double for double precision
 #define ADCS_TIME_STEP                                  100     // time step between successive ADCS updates, in ms
 #define ADCS_PULSE_MAX_INTENSITY                        1.0     //
 #define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)  // maximum length of H-bridge pulse
 #define ADCS_OMEGA_TOLERANCE                            0.1     // detumbling will be stopped once change in normalized angular velocity drops below this value
+#define ADCS_ANGULAR_TOLERANCE                          1.0     //
 #define ADCS_MIN_INERTIAL_MOMENT                        1000    //
 #define ADCS_PULSE_AMPLITUDE                            0.1     //
 #define ADCS_CALCULATION_TOLERANCE                      0.01    //
+#define ADCS_ECLIPSE_THRESHOLD                          1.0     //
+#define ADCS_ROTATION_WEIGHT_RATIO                      0.5     //
+#define ADCS_ROTATION_TRIGGER                           1.0     //
 #define ADCS_COIL_CHARACTERISTICS                       { {15.83,   0,        0}, \
                                                           {0,       893.65,   0}, \
                                                           {0,       0,        108.551} }

@@ -615,6 +615,15 @@ void PersistentStorage_Reset_ADCS_Params() {
   memcpy(adcsPage + (FLASH_ADCS_PULSE_AMPLITUDE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   f = ADCS_CALCULATION_TOLERANCE;
   memcpy(adcsPage + (FLASH_ADCS_CALCULATION_TOLERANCE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
+  f = ADCS_ANGULAR_TOLERANCE;
+  memcpy(adcsPage + (FLASH_ADCS_ANGULAR_TOLERANCE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
+  f = ADCS_ECLIPSE_THRESHOLD;
+  memcpy(adcsPage + (FLASH_ADCS_ECLIPSE_THRESHOLD - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
+  f = ADCS_ROTATION_WEIGHT_RATIO;
+  memcpy(adcsPage + (FLASH_ADCS_ROTATION_WEIGHT_RATIO - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
+  f = ADCS_ROTATION_TRIGGER;
+  memcpy(adcsPage + (FLASH_ADCS_ROTATION_TRIGGER - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
+
   uint32_t ul = ADCS_TIME_STEP;
   memcpy(adcsPage + (FLASH_ADCS_TIME_STEP - FLASH_ADCS_PARAMETERS), &ul, sizeof(ul));
   ul = ADCS_BRIDGE_TIMER_UPDATE_PERIOD;
