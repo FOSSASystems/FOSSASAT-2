@@ -16,16 +16,7 @@ void ADS_Angles_Determination(const ADCS_CALC_TYPE eulerAnglesMatrix[][ADCS_NUM_
   // Angular determination and desambiguation
   ADCS_CALC_TYPE psi = atan2(eulerAnglesMatrix[1][2], eulerAnglesMatrix[2][2]);
   ADCS_CALC_TYPE theta = atan2(eulerAnglesMatrix[0][1], eulerAnglesMatrix[0][0]);
-  ADCS_CALC_TYPE phi = asin(-1.0 * eulerAnglesMatrix[0][2]);
-  if(sin(phi) < 0.0) {
-    if(cos(phi) > 0.0) {
-      phi = M_PI + phi;
-    }
-  } else {
-    if(cos(phi) < 0.0) {
-      phi = M_PI - phi;
-    }
-  }
+  ADCS_CALC_TYPE phi = atan2(-1.0 * eulerAnglesMatrix[0][2] * sin(psi), eulerAnglesMatrix[1][2]);
 
   // New variables
   newAnglesVector[0] = psi;         // X rotation -Roll-
