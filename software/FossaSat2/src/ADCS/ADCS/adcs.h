@@ -16,9 +16,11 @@
 #include "../../../FossaSat2.h"
 
 #define ADCS_CALC_TYPE                                  double
+#define ADCS_NUM_AXES                                   3
 
 #include "../ACS/acs.h"
 //#include "../ADS/ads.h"
+// TODO no global vars inside aux functions
 
 /*********** Functions declaration ************/
 // Main structure
@@ -29,6 +31,8 @@ ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[]);
 
 void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion);
 void ADCS_Detumble_Update();
+void ADCS_Detumble_Finish(bool startActiveControl);
+
 
 void ADCS_Finish();
 void ADCS_Update_Bridges();

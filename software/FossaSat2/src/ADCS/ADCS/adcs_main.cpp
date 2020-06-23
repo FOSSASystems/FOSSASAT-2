@@ -23,13 +23,14 @@ void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, cons
   // set science mode flag
   scienceModeActive = true;
 
-  // always detumble first
-  ADCS_Detumble_Init(detumbleDuration, orbitalInclination, meanOrbitalMotion);
-
+  // set active control parameters
   if(!adcsParams.control.bits.detumbleOnly) {
-    // Active controlling loop
-    //active_controlling(active_time-detumbleTime, position, pulse_times);
+    adcsParams.activeLen = activeDuration;
+    memcpy(adcsParams.position, position, 6*sizeof(position[0]));
   }
+
+  // always detumble first, active control will be enabled on successful detumble finish
+  ADCS_Detumble_Init(detumbleDuration, orbitalInclination, meanOrbitalMotion);
 }
 
 ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[]) {
@@ -143,7 +144,7 @@ void ADCS_Detumble_Update() {
   // check detumbling length
   if(millis() - adcsState.start > adcsParams.detumbleLen) {
     // time limit reached
-    ADCS_Finish();
+    ADCS_Detumble_Finish(true);
     FOSSASAT_DEBUG_PRINTLN(F("Detumbling done (time limit reached)"));
     return;
   }
@@ -151,7 +152,7 @@ void ADCS_Detumble_Update() {
   // check battery voltage or LP mode
   #ifdef ENABLE_TRANSMISSION_CONTROL
   if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
-    ADCS_Finish();
+    ADCS_Detumble_Finish(false);
     FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (battery too low)"));
     return;
   }
@@ -160,21 +161,21 @@ void ADCS_Detumble_Update() {
   // check Hbridge faults
   uint8_t fault = bridgeX.getFault();
   if((!adcsParams.control.bits.overrideFaultX) && (fault != 0) && (fault & FAULT)) {
-    ADCS_Finish();
+    ADCS_Detumble_Finish(false);
     FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (X axis fault)"));
     return;
   }
 
   fault = bridgeY.getFault();
   if((!adcsParams.control.bits.overrideFaultY) && (fault != 0) && (fault & FAULT)) {
-    ADCS_Finish();
+    ADCS_Detumble_Finish(false);
     FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (Y axis fault)"));
     return;
   }
 
   fault = bridgeZ.getFault();
   if((!adcsParams.control.bits.overrideFaultZ) && (fault != 0) && (fault & FAULT)) {
-    ADCS_Finish();
+    ADCS_Detumble_Finish(false);
     FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (Z axis fault)"));
     return;
   }
@@ -182,7 +183,7 @@ void ADCS_Detumble_Update() {
   // check abort command
   if(abortExecution) {
     abortExecution = false;
-    ADCS_Finish();
+    ADCS_Detumble_Finish(false);
     FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (aborted)"));
     return;
   }
@@ -255,7 +256,7 @@ void ADCS_Detumble_Update() {
 
   } else {
     // tolerance reached, stop detumbling
-    ADCS_Finish();
+    ADCS_Detumble_Finish(true);
     FOSSASAT_DEBUG_PRINTLN(F("Detumbling done (tolerance reached)"));
     return;
   }
@@ -267,15 +268,13 @@ void ADCS_Detumble_Update() {
   adcsState.prevIntensity[2] = intensity[2];
 }
 
-void ADCS_Finish() {
-  adcsState.active = false;
-  bridgeX.stop();
-  bridgeY.stop();
-  bridgeZ.stop();
-  AdcsTimer->pause();
-  AdcsTimer->detachInterrupt();
-  HbridgeTimer->pause();
-  scienceModeActive = false;
+void ADCS_Detumble_Finish(bool startActiveControl) {
+  ADCS_Finish();
+
+  if(startActiveControl && !adcsParams.control.bits.detumbleOnly) {
+    // initialize active control
+    ADCS_ActiveControl_Init(adcsParams.activeLen, adcsParams.position);
+  }
 }
 
 void ADCS_Update_Bridges() {
@@ -410,3 +409,14 @@ void active_controlling(const int active_time, const float T, const int position
 
    return;
 }*/
+void ADCS_Finish() {
+  adcsState.active = false;
+  bridgeX.stop();
+  bridgeY.stop();
+  bridgeZ.stop();
+  AdcsTimer->pause();
+  AdcsTimer->detachInterrupt();
+  HbridgeTimer->pause();
+  scienceModeActive = false;
+}
+
