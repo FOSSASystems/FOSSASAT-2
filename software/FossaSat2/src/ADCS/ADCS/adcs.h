@@ -19,7 +19,8 @@
 #define ADCS_NUM_AXES                                   3
 
 #include "../ACS/acs.h"
-//#include "../ADS/ads.h"
+#include "../ADS/ads.h"
+
 // TODO no global vars inside aux functions
 
 /*********** Functions declaration ************/
@@ -33,15 +34,10 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
 void ADCS_Detumble_Update();
 void ADCS_Detumble_Finish(bool startActiveControl);
 
+void ADCS_ActiveControl_Init(const uint32_t activeDuration, const uint8_t position[]);
+void ADCS_ActiveControl_Update();
 
 void ADCS_Finish();
 void ADCS_Update_Bridges();
-
-// Auxiliary functions
-/*void bdot_function(const double* omega, const double* B,
-                   const float T, const float i, double* I);                        //Detumbling procedure
-float intensities_rectifier(const float intensity1, const float intensity2,
-                            const int delta_t);                                     // Intensities rectifier function
-void onboardcontrol(double* M, double* B, double** K, double* I, double* t);        // Controller function*/
 
 #endif // ADCS_H_INCLUDED

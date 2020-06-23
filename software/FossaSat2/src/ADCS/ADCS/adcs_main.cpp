@@ -10,9 +10,6 @@
 /************** Headers *****************/
 #include "adcs.h"
 
-/********* Auxiliary functions *******/
-//void active_controlling(const int active_time, const int position, float pulse_times[][3]);
-
 /*********** Main function ***************/
 void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, const uint32_t activeDuration,
                const uint8_t position[], const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion) {
@@ -277,6 +274,212 @@ void ADCS_Detumble_Finish(bool startActiveControl) {
   }
 }
 
+void ADCS_ActiveControl_Init(const uint32_t activeDuration, const uint8_t position[]) {
+  // cache parameters
+  adcsParams.maxPulseInt = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_INTENSITY);     // Maximum applicable intensity
+  adcsParams.maxPulseLen = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_LENGTH);    // Maximum pulse time available
+  adcsParams.omegaTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_OMEGA_TOLERANCE);   // Angular velocity tolerance to interrupt the detumbling for safety reasons
+  adcsParams.angularTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ANGULAR_TOLERANCE);   // Angular tolerance between time steps to avoid overcontrolling
+  adcsParams.eclipseThreshold = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ECLIPSE_THRESHOLD);
+  adcsParams.rotationWeightRatio = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ROTATION_WEIGHT_RATIO);
+  adcsParams.rotationTrigger = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ROTATION_TRIGGER);
+
+  // print parameters for debugging
+  FOSSASAT_DEBUG_PRINT(F("maxPulseInt="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.maxPulseInt, 4);
+  FOSSASAT_DEBUG_PRINT(F("maxPulseLen="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.maxPulseLen, 4);
+  FOSSASAT_DEBUG_PRINT(F("omegaTol="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.omegaTol, 4);
+  FOSSASAT_DEBUG_PRINT(F("angularTol="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.angularTol, 4);
+  FOSSASAT_DEBUG_PRINT(F("eclipseThreshold="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.eclipseThreshold, 4);
+  FOSSASAT_DEBUG_PRINT(F("rotationWeightRatio="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.rotationWeightRatio, 4);
+  FOSSASAT_DEBUG_PRINT(F("rotationTrigger="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.rotationTrigger, 4);
+
+  // wake up IMU
+  adcsState.active = true;
+  Sensors_IMU_Sleep(false);
+  delay(50);
+
+  // get initial IMU data
+  Sensors_IMU_Update();
+  ADCS_CALC_TYPE mag[ADCS_NUM_AXES];
+  mag[0] = Sensors_IMU_CalcMag(imu.mx);
+  mag[1] = Sensors_IMU_CalcMag(imu.my);
+  mag[2] = Sensors_IMU_CalcMag(imu.mz);
+  ADCS_CALC_TYPE omega[ADCS_NUM_AXES];
+  omega[0] = Sensors_IMU_CalcGyro(imu.gx);
+  omega[1] = Sensors_IMU_CalcGyro(imu.gy);
+  omega[2] = Sensors_IMU_CalcGyro(imu.gz);
+  adcsState.prevOmegaNorm = ADCS_VectorNorm(omega);
+
+  // set initial state
+  ADCS_CALC_TYPE magneticEphe[ADCS_NUM_AXES];
+  ADCS_CALC_TYPE rotationMatrix[ADCS_NUM_AXES][ADCS_NUM_AXES];
+  ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES];
+  //select_ephemerides(i, position, ephemerides);  // Select the initial position
+
+  // TODO rest of init
+
+  ADS_Eclipse_Hybrid(mag, magneticEphe, rotationMatrix);
+  ADS_Angles_Determination(rotationMatrix, newAnglesVector);
+  for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+    adcsState.prevIntensity[i] = 0;
+  }
+
+  // configure H bridge timer
+  HbridgeTimer->setOverflow(adcsParams.bridgeTimerUpdatePeriod * (uint32_t)1000, MICROSEC_FORMAT);
+  HbridgeTimer->attachInterrupt(ADCS_Update_Bridges);
+  adcsState.bridgeStateX.outputHigh = false;
+  adcsState.bridgeStateY.outputHigh = false;
+  adcsState.bridgeStateZ.outputHigh = false;
+
+  // configure ADCS timer
+  AdcsTimer->setOverflow(adcsParams.timeStep * (uint32_t)1000, MICROSEC_FORMAT);
+  AdcsTimer->attachInterrupt(ADCS_ActiveControl_Update);
+
+  // start timers
+  adcsState.start = millis();
+  adcsState.bridgeStateX.lastUpdate = adcsState.start;
+  adcsState.bridgeStateY.lastUpdate  = adcsState.start;
+  adcsState.bridgeStateZ.lastUpdate  = adcsState.start;
+  HbridgeTimer->resume();
+  AdcsTimer->resume();
+}
+
+void ADCS_ActiveControl_Update() {
+  // TODO loop
+}
+
+/*
+void active_controlling(const int active_time, const float T, const int position[], float pulse_times[][])
+{
+      // Constants declaration
+      const STATE_DIM = 6;        // Number of relevant attitude variables
+      const float MAX_INT = ;     // Maximum applicable intensity
+      const float MAX_TIME = ;    // Maximum pulse time available
+      const float OMEGA_TOL = ;   // Angular velocity tolerance to interrupt the detumbling for safety reasons
+      const float ANGULAR_TOL = ; // Angular tolerance between time steps to avoid overcontrolling
+      const DELTA_T = ;           // Time step between to calculation instants
+
+      const int interval_1 = 1;   // First position interval
+      const int interval_2 = 2;   // Second position interval
+      const int interval_3 = 3;   // Third position interval
+      const int interval_4 = 4;   // Fourth position interval
+
+      // Variables declaration
+      int i = 0;
+      bool go_on = TRUE;
+      float magn_data[STATE_DIM/2];
+      float state_variables[active_time][STATE_DIM];
+
+      float rotation_matrix[STATE_DIM/2][STATE_DIM/2];
+      float new_angles_vector[STATE_DIM/2];
+
+    // Kalman filtering variables initialization
+    float P[STATE_DIM][STATE_DIM] = {{0},{0},{0},{0},{0},{0}};
+    float control_vector[active_time][STATE_DIM/2];
+    control_vector[i] = {{0,0,0}};
+
+      // Initialization of the intensities
+      pulse_times[i][0] = 0;
+      pulse_times[i][1] = 0;
+      pulse_times[i][2] = 0;
+      intensity_norm[i] = 0;
+
+      // Initial data acquisition
+      select_ephemerides(i, position, ephemerides);  // Select the initial position
+      float magnetic_ephe[3] = {ephemerides[0], ephemerides[1], ephemerides[2]};
+
+      magn_data[0] = //Call the magnetometer (x direction);
+      magn_data[1] = //Call the magnetometer (y direction);
+      magn_data[2] = //Call the magnetometer (z direction);
+      eclipse_hybrid(magnetic_data, magnetic_ephe, rotation_matrix);
+      angles_determination(rotation_matrix, new_angles_vector);
+
+    state_variables[i][0] = new_angles_vector[0];
+    state_variables[i][1] = new_angles_vector[1];
+    state_variables[i][2] = new_angles_vector[2];
+      state_variables[i][3] = //Call the IMU (x angular rate);
+      state_variables[i][4] = //Call the IMU (y angular rate);
+      state_variables[i][5] = //Call the IMU (z angular rate);
+
+      omega_norm[i] = sqrt(state_variables[i][0]+state_variables[i][1]+state_variables[i][2]);
+    euler_norm[i] = sqrt(state_variables[i][3]+state_variables[i][4]+state_variables[i][5]);
+
+    i++;
+
+    // Main loop
+    while ((i < active_time) && (go_on == TRUE))
+    {
+        // ADS on
+        select_ephemerides(i, position, ephemerides);                         // Select ephemerides
+        ads_main(state_variables[i-1], control_vector[i-1], P,
+                 ephemerides, state_variables[i]);                            // Main structure
+
+        // Control structure
+        if (((abs(euler_norm[i]-euler_norm[i-1]) >= ANGULAR_TOL) &&( abs(omega_norm[i]-omega_norm[i-1]) >= OMEGA_TOL))
+        {
+            // ACS on
+            switch (position[i][9]) // Choose controller from ADCS parameters
+            {
+            case (interval_1):
+                K = K_1;
+            case (interval_2):
+                K = K_2;
+            case (interval_3):
+                K = K_3;
+            case (interval_4):
+                K = K_4;
+            default:
+                K = K_I;
+            }
+
+            // Active controlling
+            onboardcontrol(state_variables[i], control_law[i], K, magn_data, I[i]);
+            intensity_norm[i] = sqrt(I[i][0]^2+I[i][1]^2+I[i][2]^2);
+            if (intensity_norm[i] < MAX_INT)
+            {
+                // Calculate the intensities
+                pulse_times[i][0] = intensities_rectifier(I[i-1][0], I[i][0], DELTA_T);
+                pulse_times[i][1] = intensities_rectifier(I[i-1][1], I[i][1], DELTA_T);
+                pulse_times[i][2] = intensities_rectifier(I[i-1][2], I[i][2], DELTA_T);
+            }
+            else
+            {
+                pulse_times[i][0] = MAX_TIME;
+                pulse_times[i][1] = MAX_TIME;
+                pulse_times[i][2] = MAX_TIME;
+            }
+        }
+        else
+        {
+            // Do not do anything
+            pulse_times[i][0] = 0;
+            pulse_times[i][1] = 0;
+            pulse_times[i][2] = 0;
+        }
+        i++;
+    }
+
+    return;
+}*/
+
+void ADCS_Finish() {
+  adcsState.active = false;
+  bridgeX.stop();
+  bridgeY.stop();
+  bridgeZ.stop();
+  AdcsTimer->pause();
+  AdcsTimer->detachInterrupt();
+  HbridgeTimer->pause();
+  scienceModeActive = false;
+}
+
 void ADCS_Update_Bridges() {
   uint32_t currTime = millis();
 
@@ -310,113 +513,3 @@ void ADCS_Update_Bridges() {
     adcsState.bridgeStateZ.outputHigh = !adcsState.bridgeStateZ.outputHigh;
   }
 }
-
-/*
-void active_controlling(const int active_time, const float T, const int position[], float pulse_times[][])
-{
-    // Constants declaration
-    const STATE_DIM = 6;        // Number of relevant attitude variables
-    const float MAX_INT = ;     // Maximum applicable intensity
-    const float MAX_TIME = ;    // Maximum pulse time available
-    const float OMEGA_TOL = ;   // Angular velocity tolerance to interrupt the detumbling for safety reasons
-    const float ANGULAR_TOL = ; // Angular tolerance between time steps to avoid overcontrolling
-    const DELTA_T = ;           // Time step between to calculation instants
-
-    const int interval_1 = 1;   // First position interval
-    const int interval_2 = 2;   // Second position interval
-    const int interval_3 = 3;   // Third position interval
-    const int interval_4 = 4;   // Fourth position interval
-
-    // Controllers
-    float K_1[STATE_DIM][STATE_DIM];
-    float K_2[STATE_DIM][STATE_DIM];
-    float K_3[STATE_DIM][STATE_DIM];
-    float K_4[STATE_DIM][STATE_DIM];
-    float K_I[STATE_DIM][STATE_DIM];
-    controller_generation(K_1, K_2, K_3, K_4, K_I); // Call for the controller data�
-
-    // Kalman filter gain generation
-    float kalman_gain[STATE_DIM][STATE_DIM];
-    kalman_filter_generation(kalman_filter);
-
-    // Variables declaration
-    int i = 0;
-    bool go_on = TRUE;
-    float magn_data[STATE_DIM/2];
-    float state_variables[active_time][STATE_DIM];
-
-    //Main Loop
-    pulse_times[i][0] = 0;  // Initialization of the intensities
-    pulse_times[i][1] = 0;
-    pulse_times[i][2] = 0;
-    intensity_norm[i] = 0;
-
-    ads_main(kalman_gain, magn_data, state_variables[i]);
-    omega_norm[i] = sqrt(state_variables[i][0]+state_variables[i][1]+state_variables[i][2]);
-    euler_norm[i] = sqrt(state_variables[i][3]+state_variables[i][4]+state_variables[i][5]);
-
-    i++;
-
-    while ((i < active_time)&&(go_on == TRUE))
-    {
-        // ADS on
-        ads_main(kalman_gain, magn_data, state_variables[i]);
-
-        // Control structure
-        if (((abs(euler_norm[i]-euler_norm[i-1]) >= ANGULAR_TOL)&&(abs(omega_norm[i]-omega_norm[i-1]) >= OMEGA_TOL))
-        {
-            // ACS on
-            switch (position[i]) // Choose controller
-            {
-            case (interval_1):
-                K = K_1;
-            case (interval_2):
-                K = K_2;
-            case (interval_3):
-                K = K_3;
-            case (interval_4):
-                K = K_4;
-            default:
-                K = K_I;
-            }
-
-            // Active controlling
-            onboardcontrol(state_variables, magn_data, K, I[i]);
-            intensity_norm[i] = sqrt(I[i][0]^2+I[i][1]^2+I[i][2]^2);
-            if (intensity_norm[i] < MAX_INT)
-            {
-                // Calculate the intensities
-                pulse_times[i][0] = intensities_rectifier(I[i-1][0], I[i][0], DELTA_T);
-                pulse_times[i][1] = intensities_rectifier(I[i-1][1], I[i][1], DELTA_T);
-                pulse_times[i][2] = intensities_rectifier(I[i-1][2], I[i][2], DELTA_T);
-            }
-            else
-            {
-                pulse_times[i][0] = MAX_TIME;
-                pulse_times[i][1] = MAX_TIME;
-                pulse_times[i][2] = MAX_TIME;
-            }
-        }
-        else
-        {
-            // Do not do anything
-            pulse_times[i][0] = 0;
-            pulse_times[i][1] = 0;
-            pulse_times[i][2] = 0;
-        }
-        i++;
-    }
-
-   return;
-}*/
-void ADCS_Finish() {
-  adcsState.active = false;
-  bridgeX.stop();
-  bridgeY.stop();
-  bridgeZ.stop();
-  AdcsTimer->pause();
-  AdcsTimer->detachInterrupt();
-  HbridgeTimer->pause();
-  scienceModeActive = false;
-}
-
