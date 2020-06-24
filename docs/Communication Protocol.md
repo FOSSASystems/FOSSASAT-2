@@ -326,18 +326,26 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Description: Performs maneuver with closed-loop ADCS control.
 
 ### CMD_SET_ADCS_PARAMETERS
-- Optional data length: 34
+- Optional data length: 63
 - Optional data:
   - 0 - 3: maximum pulse intensity, float
   - 4 - 7: maximum pulse length, float
-  - 8 - 11: detumbling angular velocity tolerance, float
+  - 8 - 11: detumbling angular velocity change tolerance, float
   - 12 - 15: minimum inertial moment, float
   - 16 - 19: pulse amplitude, float
   - 20 - 23: calculation tolerance, float
-  - 24 - 27: time step between ADCS updates in ms, unsigned 32-bit integer, LSB first
-  - 28 - 31: H-bridge timer update period in ms, unsigned 32-bit integer, LSB first
-  - 32: H-bridge value for "high" output, signed 8-bit integer, -63 to 63
-  - 33: H-bridge value for "low" output, signed 8-bit integer, -63 to 63
+  - 24 - 27: active control Euler angle change tolerance, float
+  - 28 - 31: active control angular velocity change tolerance, float
+  - 32 - 35: eclipse threshold, float
+  - 36 - 39: rotation matrix weight ratio, float
+  - 40 - 43: rotation verification trigger level, float
+  - 44 - 47: Kalman filter disturbance covariance, float
+  - 48 - 51: Kalman filter noise covariance, float
+  - 52 - 55: time step between ADCS updates in ms, unsigned 32-bit integer, LSB first
+  - 56 - 59: H-bridge timer update period in ms, unsigned 32-bit integer, LSB first
+  - 60: H-bridge value for "high" output, signed 8-bit integer, -63 to 63
+  - 61: H-bridge value for "low" output, signed 8-bit integer, -63 to 63
+  - 62: number of controllers
 - Response: none
 - Description: Sets configurable ADCS parameters. Floating point numbers should are sent first due to internal automated conversion.
 

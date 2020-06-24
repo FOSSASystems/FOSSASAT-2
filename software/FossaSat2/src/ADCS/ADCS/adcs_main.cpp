@@ -284,6 +284,8 @@ void ADCS_ActiveControl_Init(const uint32_t activeDuration, const uint8_t positi
   adcsParams.rotationWeightRatio = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ROTATION_WEIGHT_RATIO);
   adcsParams.rotationTrigger = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ROTATION_TRIGGER);
   adcsParams.numControllers = PersistentStorage_Get<uint8_t>(FLASH_ADCS_NUM_CONTROLLERS);
+  adcsParams.disturbCovariance = PersistentStorage_Get<ADCS_CALC_TYPE>(ADCS_DISTURBANCE_COVARIANCE);
+  adcsParams.noiseCovariance = PersistentStorage_Get<ADCS_CALC_TYPE>(ADCS_NOISE_COVARIANCE);
   adcsParams.activeLen = activeDuration;
 
   // load controllers

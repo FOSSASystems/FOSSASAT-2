@@ -1803,6 +1803,13 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_AMPLITUDE);
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_CALCULATION_TOLERANCE);
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_MIN_INERTIAL_MOMENT);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ACTIVE_EULER_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ACTIVE_OMEGA_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ECLIPSE_THRESHOLD);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ROTATION_WEIGHT_RATIO);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ROTATION_TRIGGER);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_DISTURBANCE_COVARIANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_NOISE_COVARIANCE);
 
         // set the rest
         memcpy(adcsPage + (FLASH_ADCS_TIME_STEP - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint32_t));
