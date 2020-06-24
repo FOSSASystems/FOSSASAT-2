@@ -46,7 +46,7 @@ void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[][ADCS_STATE_DIM]) {
 		for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
 			if (j != i) {
 				temp = matrix[j][i] / matrix[i][i];
-				for(uint8_t k = 0; k < 2 * ADCS_STATE_DIM; k++) {
+				for(uint8_t k = 0; k < ADCS_STATE_DIM; k++) {
 					matrix[j][k] -= (matrix[i][k] * temp);
 				}
 			}
@@ -57,7 +57,7 @@ void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[][ADCS_STATE_DIM]) {
 	// Divide row element by the diagonal element
 	for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
 		temp = matrix[i][i];
-		for(uint8_t j = 0; j < 2 * ADCS_STATE_DIM; j++) {
+		for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
 			matrix[i][j] = matrix[i][j] / temp;
 		}
 	}
