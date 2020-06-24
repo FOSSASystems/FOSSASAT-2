@@ -448,14 +448,13 @@ void ADCS_ActiveControl_Update() {
   ADCS_CALC_TYPE stateVars[2*ADCS_NUM_AXES];
   ADCS_CALC_TYPE prevStateVars[2*ADCS_NUM_AXES];
   ADCS_CALC_TYPE controlVector[2*ADCS_NUM_AXES];
-  ADCS_CALC_TYPE prevControlVector[2*ADCS_NUM_AXES];
   ADCS_CALC_TYPE filtered_y[2*ADCS_NUM_AXES];
   ADCS_CALC_TYPE kalmanMatrixP[2*ADCS_NUM_AXES][2*ADCS_NUM_AXES];
   ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES];
 
   // copy all the volatile previous states
   for(uint8_t i = 0; i < 2*ADCS_NUM_AXES; i++){
-    prevControlVector[i] = adcsState.prevControlVector[i];
+    controlVector[i] = adcsState.prevControlVector[i];
     prevStateVars[i] = adcsState.prevStateVars[i];
     for(uint8_t j = 0; j < 2*ADCS_NUM_AXES; j++) {
       kalmanMatrixP[i][j] = adcsState.kalmanMatrixP[i][j];
@@ -463,7 +462,7 @@ void ADCS_ActiveControl_Update() {
   }
 
   // Main structure
-  ADS_Main(omega, magData, prevStateVars, prevControlVector, kalmanMatrixP, solarEphe, magEphe, filtered_y, newAnglesVector);
+  ADS_Main(omega, magData, prevStateVars, controlVector, kalmanMatrixP, solarEphe, magEphe, filtered_y, newAnglesVector);
 
   // Control structure
   ADCS_CALC_TYPE eulerNorm = ADCS_VectorNorm(newAnglesVector);
