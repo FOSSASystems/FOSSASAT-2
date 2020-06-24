@@ -39,7 +39,7 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     // cache parameters
     adcsParams.maxPulseInt = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_INTENSITY);     // Maximum applicable intensity
     adcsParams.maxPulseLen = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_LENGTH);    // Maximum pulse time available by energy reasons
-    adcsParams.omegaTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_OMEGA_TOLERANCE);   // Angular velocity tolerance to interrupt the detumbling for safety reasons
+    adcsParams.detumbleOmegaTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_DETUMB_OMEGA_TOLERANCE);   // Angular velocity tolerance to interrupt the detumbling for safety reasons
     adcsParams.timeStep = PersistentStorage_Get<uint32_t>(FLASH_ADCS_TIME_STEP);           // Time step between to calculation instants
     adcsParams.minInertialMoment = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_MIN_INERTIAL_MOMENT); // Minimum inertial moment
     adcsParams.pulseAmplitude = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_AMPLITUDE);  // Amplitude of pulse for ACS_IntensitiesRectifier
@@ -64,8 +64,8 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     FOSSASAT_DEBUG_PRINTLN(adcsParams.maxPulseInt, 4);
     FOSSASAT_DEBUG_PRINT(F("maxPulseLen="));
     FOSSASAT_DEBUG_PRINTLN(adcsParams.maxPulseLen, 4);
-    FOSSASAT_DEBUG_PRINT(F("omegaTol="));
-    FOSSASAT_DEBUG_PRINTLN(adcsParams.omegaTol, 4);
+    FOSSASAT_DEBUG_PRINT(F("detumbleOmegaTol="));
+    FOSSASAT_DEBUG_PRINTLN(adcsParams.detumbleOmegaTol, 4);
     FOSSASAT_DEBUG_PRINT(F("minInertialMoment="));
     FOSSASAT_DEBUG_PRINTLN(adcsParams.minInertialMoment, 4);
     FOSSASAT_DEBUG_PRINT(F("pulseAmplitude="));
@@ -136,7 +136,7 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
 }
 
 void ADCS_Detumble_Update() {
-  // TODO add ADCS result reporting
+  // TODO add ADCS result reporting + ADCS on-going
 
   // check detumbling length
   if(millis() - adcsState.start > adcsParams.detumbleLen) {
@@ -215,7 +215,7 @@ void ADCS_Detumble_Update() {
   FOSSASAT_DEBUG_PRINTLN(omegaNorm, 4);
 
   // check tolerance
-  if ((adcsParams.control.bits.overrideDetumbleTol) || (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.omegaTol)) {
+  if ((adcsParams.control.bits.overrideDetumbleTol) || (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.detumbleOmegaTol)) {
       // Control law generation
       ACS_BdotFunction(omega, mag, intensity);
       ADCS_CALC_TYPE intensityNorm = ADCS_VectorNorm(intensity);
@@ -278,27 +278,41 @@ void ADCS_ActiveControl_Init(const uint32_t activeDuration, const uint8_t positi
   // cache parameters
   adcsParams.maxPulseInt = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_INTENSITY);     // Maximum applicable intensity
   adcsParams.maxPulseLen = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_LENGTH);    // Maximum pulse time available
-  adcsParams.omegaTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_OMEGA_TOLERANCE);   // Angular velocity tolerance to interrupt the detumbling for safety reasons
-  adcsParams.angularTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ANGULAR_TOLERANCE);   // Angular tolerance between time steps to avoid overcontrolling
+  adcsParams.activeEulerTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ACTIVE_EULER_TOLERANCE);   // Angular velocity tolerance to interrupt the detumbling for safety reasons
+  adcsParams.activeOmegaTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ACTIVE_OMEGA_TOLERANCE);   // Angular tolerance between time steps to avoid overcontrolling
   adcsParams.eclipseThreshold = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ECLIPSE_THRESHOLD);
   adcsParams.rotationWeightRatio = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ROTATION_WEIGHT_RATIO);
   adcsParams.rotationTrigger = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ROTATION_TRIGGER);
+  adcsParams.numControllers = PersistentStorage_Get<uint8_t>(FLASH_ADCS_NUM_CONTROLLERS);
+  adcsParams.activeLen = activeDuration;
+
+  // load controllers
+  const size_t controllerBuffLen = 10*FLASH_ADCS_CONTROLLER_SLOT_SIZE;
+  uint8_t controllerBuff[controllerBuffLen];
+  PersistentStorage_Read(FLASH_ADCS_CONTROLLERS, controllerBuff, controllerBuffLen);
+  memcpy(adcsParams.controllers, controllerBuff, controllerBuffLen);
 
   // print parameters for debugging
   FOSSASAT_DEBUG_PRINT(F("maxPulseInt="));
   FOSSASAT_DEBUG_PRINTLN(adcsParams.maxPulseInt, 4);
   FOSSASAT_DEBUG_PRINT(F("maxPulseLen="));
   FOSSASAT_DEBUG_PRINTLN(adcsParams.maxPulseLen, 4);
-  FOSSASAT_DEBUG_PRINT(F("omegaTol="));
-  FOSSASAT_DEBUG_PRINTLN(adcsParams.omegaTol, 4);
-  FOSSASAT_DEBUG_PRINT(F("angularTol="));
-  FOSSASAT_DEBUG_PRINTLN(adcsParams.angularTol, 4);
+  FOSSASAT_DEBUG_PRINT(F("activeEulerTol="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.activeEulerTol, 4);
+  FOSSASAT_DEBUG_PRINT(F("activeOmegaTol="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.activeOmegaTol, 4);
   FOSSASAT_DEBUG_PRINT(F("eclipseThreshold="));
   FOSSASAT_DEBUG_PRINTLN(adcsParams.eclipseThreshold, 4);
   FOSSASAT_DEBUG_PRINT(F("rotationWeightRatio="));
   FOSSASAT_DEBUG_PRINTLN(adcsParams.rotationWeightRatio, 4);
   FOSSASAT_DEBUG_PRINT(F("rotationTrigger="));
   FOSSASAT_DEBUG_PRINTLN(adcsParams.rotationTrigger, 4);
+  FOSSASAT_DEBUG_PRINT(F("disturbCovariance="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.disturbCovariance, 4);
+  FOSSASAT_DEBUG_PRINT(F("noiseCovariance="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.noiseCovariance, 4);
+  FOSSASAT_DEBUG_PRINT(F("numControllers="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.numControllers);
 
   // wake up IMU
   adcsState.active = true;
@@ -321,14 +335,28 @@ void ADCS_ActiveControl_Init(const uint32_t activeDuration, const uint8_t positi
   ADCS_CALC_TYPE magneticEphe[ADCS_NUM_AXES];
   ADCS_CALC_TYPE rotationMatrix[ADCS_NUM_AXES][ADCS_NUM_AXES];
   ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES];
+  // TODO Select ephemerides
   //select_ephemerides(i, position, ephemerides);  // Select the initial position
-
-  // TODO rest of init
+  adcsState.prevControlVector[0] = 0;
+  adcsState.prevControlVector[1] = 0;
+  adcsState.prevControlVector[2] = 0;
 
   ADS_Eclipse_Hybrid(mag, magneticEphe, rotationMatrix);
   ADS_Angles_Determination(rotationMatrix, newAnglesVector);
+  adcsState.prevEulerNorm = ADCS_VectorNorm(newAnglesVector);
+  adcsState.prevStateVars[0] = newAnglesVector[0];
+  adcsState.prevStateVars[1] = newAnglesVector[1];
+  adcsState.prevStateVars[2] = newAnglesVector[2];
+  adcsState.prevStateVars[3] = omega[0];
+  adcsState.prevStateVars[4] = omega[1];
+  adcsState.prevStateVars[5] = omega[2];
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
     adcsState.prevIntensity[i] = 0;
+  }
+  for(uint8_t i = 0; i < 2*ADCS_NUM_AXES; i++) {
+    for(uint8_t j = 0; j < 2*ADCS_NUM_AXES; j++) {
+      adcsState.kalmanMatrixP[i][j] = 0;
+    }
   }
 
   // configure H bridge timer
@@ -352,122 +380,156 @@ void ADCS_ActiveControl_Init(const uint32_t activeDuration, const uint8_t positi
 }
 
 void ADCS_ActiveControl_Update() {
-  // TODO loop
-}
+  // TODO add ADCS result reporting + ADCS on-going
 
-/*
-void active_controlling(const int active_time, const float T, const int position[], float pulse_times[][])
-{
-      // Constants declaration
-      const STATE_DIM = 6;        // Number of relevant attitude variables
-      const float MAX_INT = ;     // Maximum applicable intensity
-      const float MAX_TIME = ;    // Maximum pulse time available
-      const float OMEGA_TOL = ;   // Angular velocity tolerance to interrupt the detumbling for safety reasons
-      const float ANGULAR_TOL = ; // Angular tolerance between time steps to avoid overcontrolling
-      const DELTA_T = ;           // Time step between to calculation instants
+  // check active control length
+  if(millis() - adcsState.start > adcsParams.activeLen) {
+    // time limit reached
+    ADCS_Finish();
+    FOSSASAT_DEBUG_PRINTLN(F("Active control done (time limit reached)"));
+    return;
+  }
 
-      const int interval_1 = 1;   // First position interval
-      const int interval_2 = 2;   // Second position interval
-      const int interval_3 = 3;   // Third position interval
-      const int interval_4 = 4;   // Fourth position interval
+  // check battery voltage or LP mode
+  #ifdef ENABLE_TRANSMISSION_CONTROL
+  if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
+    ADCS_Finish();
+    FOSSASAT_DEBUG_PRINTLN(F("Active control stopped (battery too low)"));
+    return;
+  }
+  #endif
 
-      // Variables declaration
-      int i = 0;
-      bool go_on = TRUE;
-      float magn_data[STATE_DIM/2];
-      float state_variables[active_time][STATE_DIM];
+  // check Hbridge faults
+  uint8_t fault = bridgeX.getFault();
+  if((!adcsParams.control.bits.overrideFaultX) && (fault != 0) && (fault & FAULT)) {
+    ADCS_Finish();
+    FOSSASAT_DEBUG_PRINTLN(F("Active control stopped (X axis fault)"));
+    return;
+  }
 
-      float rotation_matrix[STATE_DIM/2][STATE_DIM/2];
-      float new_angles_vector[STATE_DIM/2];
+  fault = bridgeY.getFault();
+  if((!adcsParams.control.bits.overrideFaultY) && (fault != 0) && (fault & FAULT)) {
+    ADCS_Finish();
+    FOSSASAT_DEBUG_PRINTLN(F("Active control stopped (Y axis fault)"));
+    return;
+  }
 
-    // Kalman filtering variables initialization
-    float P[STATE_DIM][STATE_DIM] = {{0},{0},{0},{0},{0},{0}};
-    float control_vector[active_time][STATE_DIM/2];
-    control_vector[i] = {{0,0,0}};
+  fault = bridgeZ.getFault();
+  if((!adcsParams.control.bits.overrideFaultZ) && (fault != 0) && (fault & FAULT)) {
+    ADCS_Finish();
+    FOSSASAT_DEBUG_PRINTLN(F("Active control stopped (Z axis fault)"));
+    return;
+  }
 
-      // Initialization of the intensities
-      pulse_times[i][0] = 0;
-      pulse_times[i][1] = 0;
-      pulse_times[i][2] = 0;
-      intensity_norm[i] = 0;
+  // check abort command
+  if(abortExecution) {
+    abortExecution = false;
+    ADCS_Finish();
+    FOSSASAT_DEBUG_PRINTLN(F("Active control stopped (aborted)"));
+    return;
+  }
 
-      // Initial data acquisition
-      select_ephemerides(i, position, ephemerides);  // Select the initial position
-      float magnetic_ephe[3] = {ephemerides[0], ephemerides[1], ephemerides[2]};
+  // TODO Select ephemerides
+  uint8_t controller = 0;
+  ADCS_CALC_TYPE solarEphe[ADCS_NUM_AXES];
+  ADCS_CALC_TYPE magEphe[ADCS_NUM_AXES];
 
-      magn_data[0] = //Call the magnetometer (x direction);
-      magn_data[1] = //Call the magnetometer (y direction);
-      magn_data[2] = //Call the magnetometer (z direction);
-      eclipse_hybrid(magnetic_data, magnetic_ephe, rotation_matrix);
-      angles_determination(rotation_matrix, new_angles_vector);
+  // get IMU data
+  Sensors_IMU_Update();
+  ADCS_CALC_TYPE omega[ADCS_NUM_AXES];
+  omega[0] = Sensors_IMU_CalcGyro(imu.gx);
+  omega[1] = Sensors_IMU_CalcGyro(imu.gy);
+  omega[2] = Sensors_IMU_CalcGyro(imu.gz);
+  ADCS_CALC_TYPE magData[ADCS_NUM_AXES];
+  magData[0] = Sensors_IMU_CalcMag(imu.mx);
+  magData[1] = Sensors_IMU_CalcMag(imu.my);
+  magData[2] = Sensors_IMU_CalcMag(imu.mz);
 
-    state_variables[i][0] = new_angles_vector[0];
-    state_variables[i][1] = new_angles_vector[1];
-    state_variables[i][2] = new_angles_vector[2];
-      state_variables[i][3] = //Call the IMU (x angular rate);
-      state_variables[i][4] = //Call the IMU (y angular rate);
-      state_variables[i][5] = //Call the IMU (z angular rate);
+  ADCS_CALC_TYPE stateVars[2*ADCS_NUM_AXES];
+  ADCS_CALC_TYPE prevStateVars[2*ADCS_NUM_AXES];
+  ADCS_CALC_TYPE controlVector[2*ADCS_NUM_AXES];
+  ADCS_CALC_TYPE prevControlVector[2*ADCS_NUM_AXES];
+  ADCS_CALC_TYPE filtered_y[2*ADCS_NUM_AXES];
+  ADCS_CALC_TYPE kalmanMatrixP[2*ADCS_NUM_AXES][2*ADCS_NUM_AXES];
+  ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES];
 
-      omega_norm[i] = sqrt(state_variables[i][0]+state_variables[i][1]+state_variables[i][2]);
-    euler_norm[i] = sqrt(state_variables[i][3]+state_variables[i][4]+state_variables[i][5]);
+  // copy all the volatile previous states
+  for(uint8_t i = 0; i < 2*ADCS_NUM_AXES; i++){
+    prevControlVector[i] = adcsState.prevControlVector[i];
+    prevStateVars[i] = adcsState.prevStateVars[i];
+    for(uint8_t j = 0; j < 2*ADCS_NUM_AXES; j++) {
+      kalmanMatrixP[i][j] = adcsState.kalmanMatrixP[i][j];
+    }
+  }
 
-    i++;
+  // Main structure
+  ADS_Main(omega, magData, prevStateVars, prevControlVector, kalmanMatrixP, solarEphe, magEphe, filtered_y, newAnglesVector);
 
-    // Main loop
-    while ((i < active_time) && (go_on == TRUE))
-    {
-        // ADS on
-        select_ephemerides(i, position, ephemerides);                         // Select ephemerides
-        ads_main(state_variables[i-1], control_vector[i-1], P,
-                 ephemerides, state_variables[i]);                            // Main structure
+  // Control structure
+  ADCS_CALC_TYPE eulerNorm = ADCS_VectorNorm(newAnglesVector);
+  ADCS_CALC_TYPE omegaNorm = ADCS_VectorNorm(omega);
+  bool eulerToleranceReached = (abs(eulerNorm - adcsState.prevEulerNorm) >= adcsParams.activeEulerTol);
+  bool omegaToleranceReached = (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.activeOmegaTol);
+  if ((adcsParams.control.bits.overrideEulerTol || eulerToleranceReached) && (adcsParams.control.bits.overrideOmegaTol || omegaToleranceReached)) {
+    // Choose controller from ADCS parameters
+    // TODO configurable controllers
+    float controllerMatrix[ADCS_NUM_AXES][2*ADCS_NUM_AXES];
+    memcpy(controllerMatrix, adcsParams.controllers + (controller * FLASH_ADCS_CONTROLLER_SLOT_SIZE), FLASH_ADCS_CONTROLLER_SLOT_SIZE);
 
-        // Control structure
-        if (((abs(euler_norm[i]-euler_norm[i-1]) >= ANGULAR_TOL) &&( abs(omega_norm[i]-omega_norm[i-1]) >= OMEGA_TOL))
-        {
-            // ACS on
-            switch (position[i][9]) // Choose controller from ADCS parameters
-            {
-            case (interval_1):
-                K = K_1;
-            case (interval_2):
-                K = K_2;
-            case (interval_3):
-                K = K_3;
-            case (interval_4):
-                K = K_4;
-            default:
-                K = K_I;
-            }
+    // Active controlling
+    ADCS_CALC_TYPE intensity[ADCS_NUM_AXES];
+    ACS_OnboardControl(stateVars, magData, controllerMatrix, intensity);
 
-            // Active controlling
-            onboardcontrol(state_variables[i], control_law[i], K, magn_data, I[i]);
-            intensity_norm[i] = sqrt(I[i][0]^2+I[i][1]^2+I[i][2]^2);
-            if (intensity_norm[i] < MAX_INT)
-            {
-                // Calculate the intensities
-                pulse_times[i][0] = intensities_rectifier(I[i-1][0], I[i][0], DELTA_T);
-                pulse_times[i][1] = intensities_rectifier(I[i-1][1], I[i][1], DELTA_T);
-                pulse_times[i][2] = intensities_rectifier(I[i-1][2], I[i][2], DELTA_T);
-            }
-            else
-            {
-                pulse_times[i][0] = MAX_TIME;
-                pulse_times[i][1] = MAX_TIME;
-                pulse_times[i][2] = MAX_TIME;
-            }
-        }
-        else
-        {
-            // Do not do anything
-            pulse_times[i][0] = 0;
-            pulse_times[i][1] = 0;
-            pulse_times[i][2] = 0;
-        }
-        i++;
+    ADCS_CALC_TYPE intensityNorm = ADCS_VectorNorm(intensity);
+    ADCS_CALC_TYPE pulseLength[ADCS_NUM_AXES];
+    FOSSASAT_DEBUG_PRINT(F("intensityNorm=\t"));
+    FOSSASAT_DEBUG_PRINTLN(intensityNorm, 4);
+
+    if (intensityNorm < adcsParams.maxPulseInt) {
+        // Calculate the intensities
+        pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep);
+        pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep);
+        pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep);
+
+    } else {
+        // Max intensity application
+        pulseLength[0] = adcsParams.maxPulseLen;
+        pulseLength[1] = adcsParams.maxPulseLen;
+        pulseLength[2] = adcsParams.maxPulseLen;
     }
 
+    // update H-bridges
+    adcsState.bridgeStateX.pulseLen = (uint32_t)(pulseLength[0]);
+    adcsState.bridgeStateY.pulseLen = (uint32_t)(pulseLength[1]);
+    adcsState.bridgeStateZ.pulseLen = (uint32_t)(pulseLength[2]);
+
+    FOSSASAT_DEBUG_PRINT(F("intensity=\t"));
+    FOSSASAT_DEBUG_PRINT(intensity[0], 8); FOSSASAT_DEBUG_PRINT('\t');
+    FOSSASAT_DEBUG_PRINT(intensity[1], 8); FOSSASAT_DEBUG_PRINT('\t');
+    FOSSASAT_DEBUG_PRINTLN(intensity[2], 8);
+    FOSSASAT_DEBUG_PRINT(F("pulseLength=\t"));
+    FOSSASAT_DEBUG_PRINT(pulseLength[0], 8); FOSSASAT_DEBUG_PRINT('\t');
+    FOSSASAT_DEBUG_PRINT(pulseLength[1], 8); FOSSASAT_DEBUG_PRINT('\t');
+    FOSSASAT_DEBUG_PRINTLN(pulseLength[2], 8);
+    FOSSASAT_DEBUG_PRINTLN();
+
+  } else {
+    ADCS_Finish();
+    FOSSASAT_DEBUG_PRINTLN(F("Active control done (tolerance reached)"));
     return;
-}*/
+  }
+
+  // save values for the next iteration
+  adcsState.prevEulerNorm = eulerNorm;
+  adcsState.prevOmegaNorm = omegaNorm;
+  for(uint8_t i = 0; i < 2*ADCS_NUM_AXES; i++) {
+    adcsState.prevStateVars[i] = stateVars[i];
+    adcsState.prevControlVector[i] = controlVector[i];
+    for(uint8_t j = 0; j < 2*ADCS_NUM_AXES; j++) {
+      adcsState.kalmanMatrixP[i][j] = kalmanMatrixP[i][j];
+    }
+  }
+}
 
 void ADCS_Finish() {
   adcsState.active = false;

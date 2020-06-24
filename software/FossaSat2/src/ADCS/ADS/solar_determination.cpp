@@ -13,27 +13,8 @@
 /*************** Main function *****************/
 void ADS_Solar_Determination(ADCS_CALC_TYPE luxData[], ADCS_CALC_TYPE solarEph[], ADCS_CALC_TYPE redundantSolarEph[]) {
   // Constants definitions
-  // TODO configurable
   const ADCS_CALC_TYPE maxCurrent = 1.0;                      // Maximum obtainable current
-  ADCS_CALC_TYPE panelUnitVector[ADCS_NUM_PANELS][ADCS_NUM_AXES]; // Unitary vector pointing to the solar panels in inverse form
-  panelUnitVector[0][0] = 1.0;
-  panelUnitVector[0][1] = 1.0;
-  panelUnitVector[0][2] = 1.0;
-  panelUnitVector[1][0] = 1.0;
-  panelUnitVector[1][1] = 1.0;
-  panelUnitVector[1][2] = 1.0;
-  panelUnitVector[2][0] = 1.0;
-  panelUnitVector[2][1] = 1.0;
-  panelUnitVector[2][2] = 1.0;
-  panelUnitVector[3][0] = 1.0;
-  panelUnitVector[3][1] = 1.0;
-  panelUnitVector[3][2] = 1.0;
-  panelUnitVector[4][0] = 1.0;
-  panelUnitVector[4][1] = 1.0;
-  panelUnitVector[4][2] = 1.0;
-  panelUnitVector[5][0] = 1.0;
-  panelUnitVector[5][1] = 1.0;
-  panelUnitVector[5][2] = 1.0;
+  ADCS_CALC_TYPE panelUnitVector[ADCS_NUM_PANELS][ADCS_NUM_AXES] = ADCS_PANEL_UNIT_VECTOR; // Unitary vector pointing to the solar panels in inverse form
 
   // Main calculation
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {

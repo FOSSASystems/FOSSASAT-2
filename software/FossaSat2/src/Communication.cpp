@@ -1799,7 +1799,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // set the parameters that require conversion
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_MAX_INTENSITY);
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_MAX_LENGTH);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_OMEGA_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_DETUMB_OMEGA_TOLERANCE);
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_AMPLITUDE);
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_CALCULATION_TOLERANCE);
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_MIN_INERTIAL_MOMENT);
@@ -1813,6 +1813,8 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         optDataPtr += sizeof(int8_t);
         memcpy(adcsPage + (FLASH_ADCS_BRIDGE_OUTPUT_LOW - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(int8_t));
         optDataPtr += sizeof(int8_t);
+        memcpy(adcsPage + (FLASH_ADCS_NUM_CONTROLLERS - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint8_t));
+        optDataPtr += sizeof(uint8_t);
 
         // write all at once
         PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);

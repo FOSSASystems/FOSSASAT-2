@@ -74,6 +74,7 @@ template float PersistentStorage_Get<float>(uint32_t);
 template double PersistentStorage_Get<double>(uint32_t);
 template uint32_t PersistentStorage_Get<uint32_t>(uint32_t);
 template int8_t PersistentStorage_Get<int8_t>(uint32_t);
+template uint8_t PersistentStorage_Get<uint8_t>(uint32_t);
 
 template<typename T>
 // cppcheck-suppress unusedFunction
@@ -607,22 +608,28 @@ void PersistentStorage_Reset_ADCS_Params() {
   memcpy(adcsPage + (FLASH_ADCS_PULSE_MAX_INTENSITY - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   f = ADCS_PULSE_MAX_LENGTH;
   memcpy(adcsPage + (FLASH_ADCS_PULSE_MAX_LENGTH - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
-  f = ADCS_OMEGA_TOLERANCE;
-  memcpy(adcsPage + (FLASH_ADCS_OMEGA_TOLERANCE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
+  f = ADCS_DETUMB_OMEGA_TOLERANCE;
+  memcpy(adcsPage + (FLASH_ADCS_DETUMB_OMEGA_TOLERANCE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   f = ADCS_MIN_INERTIAL_MOMENT;
   memcpy(adcsPage + (FLASH_ADCS_MIN_INERTIAL_MOMENT - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   f = ADCS_PULSE_AMPLITUDE;
   memcpy(adcsPage + (FLASH_ADCS_PULSE_AMPLITUDE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   f = ADCS_CALCULATION_TOLERANCE;
   memcpy(adcsPage + (FLASH_ADCS_CALCULATION_TOLERANCE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
-  f = ADCS_ANGULAR_TOLERANCE;
-  memcpy(adcsPage + (FLASH_ADCS_ANGULAR_TOLERANCE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
+  f = ADCS_ACTIVE_EULER_TOLERANCE;
+  memcpy(adcsPage + (FLASH_ADCS_ACTIVE_EULER_TOLERANCE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
+  f = ADCS_ACTIVE_OMEGA_TOLERANCE;
+  memcpy(adcsPage + (FLASH_ADCS_ACTIVE_OMEGA_TOLERANCE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   f = ADCS_ECLIPSE_THRESHOLD;
   memcpy(adcsPage + (FLASH_ADCS_ECLIPSE_THRESHOLD - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   f = ADCS_ROTATION_WEIGHT_RATIO;
   memcpy(adcsPage + (FLASH_ADCS_ROTATION_WEIGHT_RATIO - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
   f = ADCS_ROTATION_TRIGGER;
   memcpy(adcsPage + (FLASH_ADCS_ROTATION_TRIGGER - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
+  f = ADCS_DISTURBANCE_COVARIANCE;
+  memcpy(adcsPage + (FLASH_ADCS_DISTURBANCE_COVARIANCE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
+  f = ADCS_NOISE_COVARIANCE;
+  memcpy(adcsPage + (FLASH_ADCS_NOISE_COVARIANCE - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
 
   uint32_t ul = ADCS_TIME_STEP;
   memcpy(adcsPage + (FLASH_ADCS_TIME_STEP - FLASH_ADCS_PARAMETERS), &ul, sizeof(ul));
@@ -632,12 +639,20 @@ void PersistentStorage_Reset_ADCS_Params() {
   memcpy(adcsPage + (FLASH_ADCS_BRIDGE_OUTPUT_HIGH - FLASH_ADCS_PARAMETERS), &ss, sizeof(ss));
   ss = ADCS_BRIDGE_OUTPUT_LOW;
   memcpy(adcsPage + (FLASH_ADCS_BRIDGE_OUTPUT_LOW - FLASH_ADCS_PARAMETERS), &ss, sizeof(ss));
+  uint8_t us = ADCS_NUM_CONTROLLERS;
+  memcpy(adcsPage + (FLASH_ADCS_NUM_CONTROLLERS - FLASH_ADCS_PARAMETERS), &us, sizeof(us));
 
   ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES] = ADCS_COIL_CHARACTERISTICS;
   memcpy(adcsPage + (FLASH_ADCS_COIL_CHAR_MATRIX - FLASH_ADCS_PARAMETERS), coilChar, ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(ADCS_CALC_TYPE));
 
   // write the default ADCS info
   PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);
+
+  // write the default ADCS controller
+  memset(adcsPage, 0, FLASH_EXT_PAGE_SIZE);
+  float controller[ADCS_NUM_AXES][2*ADCS_NUM_AXES] = ADCS_DEFAULT_CONTROLLER;
+  memcpy(adcsPage, controller, ADCS_NUM_AXES*2*ADCS_NUM_AXES*sizeof(float));
+  PersistentStorage_Write(FLASH_ADCS_CONTROLLERS, adcsPage, FLASH_EXT_PAGE_SIZE);
 }
 
 uint8_t PersistentStorage_Get_Message(uint16_t slotNum, uint8_t* buff) {

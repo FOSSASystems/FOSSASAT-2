@@ -12,7 +12,7 @@
 #include "../ADCS/adcs.h"
 
 /****************** Main function *********************/
-void ACS_OnboardControl(ADCS_CALC_TYPE state[], ADCS_CALC_TYPE mag[], ADCS_CALC_TYPE gain[][2*ADCS_NUM_AXES], ADCS_CALC_TYPE intensity[]) {
+void ACS_OnboardControl(ADCS_CALC_TYPE state[], ADCS_CALC_TYPE mag[], float gain[][2*ADCS_NUM_AXES], ADCS_CALC_TYPE intensity[]) {
   // Module of the magnetic field intensity
   const ADCS_CALC_TYPE B_module = ADCS_VectorNorm(mag) + adcsParams.calcTol;
 
@@ -23,7 +23,7 @@ void ACS_OnboardControl(ADCS_CALC_TYPE state[], ADCS_CALC_TYPE mag[], ADCS_CALC_
   // Generation of the control law by means of a matrix product Lc = K*M
   for(uint8_t i = 0; i <= ADCS_NUM_AXES; i++) {
     for(uint8_t j = 0; j <= 2*ADCS_NUM_AXES; j++) {
-      controlLawAux += gain[i][j] * state[j];
+      controlLawAux += (ADCS_CALC_TYPE)gain[i][j] * state[j];
       controlLaw[i] = controlLawAux;
     }
   }

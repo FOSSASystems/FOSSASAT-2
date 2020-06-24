@@ -212,18 +212,22 @@
 
 #define FLASH_ADCS_PULSE_MAX_INTENSITY        (FLASH_ADCS_PARAMETERS + 0x00)  //  0x00001000    0x00001007    float or double
 #define FLASH_ADCS_PULSE_MAX_LENGTH           (FLASH_ADCS_PARAMETERS + 0x08)  //  0x00001008    0x0000100F    float or double
-#define FLASH_ADCS_OMEGA_TOLERANCE            (FLASH_ADCS_PARAMETERS + 0x10)  //  0x00001010    0x00001017    float or double
+#define FLASH_ADCS_DETUMB_OMEGA_TOLERANCE     (FLASH_ADCS_PARAMETERS + 0x10)  //  0x00001010    0x00001017    float or double
 #define FLASH_ADCS_MIN_INERTIAL_MOMENT        (FLASH_ADCS_PARAMETERS + 0x18)  //  0x00001018    0x0000101F    float or double
 #define FLASH_ADCS_PULSE_AMPLITUDE            (FLASH_ADCS_PARAMETERS + 0x20)  //  0x00001020    0x00001027    float or double
 #define FLASH_ADCS_CALCULATION_TOLERANCE      (FLASH_ADCS_PARAMETERS + 0x28)  //  0x00001028    0x0000102F    float or double
-#define FLASH_ADCS_ANGULAR_TOLERANCE          (FLASH_ADCS_PARAMETERS + 0x30)  //  0x00001030    0x00001037    float or double
-#define FLASH_ADCS_ECLIPSE_THRESHOLD          (FLASH_ADCS_PARAMETERS + 0x38)  //  0x00001038    0x0000103F    float or double
-#define FLASH_ADCS_ROTATION_WEIGHT_RATIO      (FLASH_ADCS_PARAMETERS + 0x40)  //  0x00001040    0x00001047    float or double
-#define FLASH_ADCS_ROTATION_TRIGGER           (FLASH_ADCS_PARAMETERS + 0x48)  //  0x00001048    0x0000104F    float or double
+#define FLASH_ADCS_ACTIVE_EULER_TOLERANCE     (FLASH_ADCS_PARAMETERS + 0x30)  //  0x00001030    0x00001037    float or double
+#define FLASH_ADCS_ACTIVE_OMEGA_TOLERANCE     (FLASH_ADCS_PARAMETERS + 0x38)  //  0x00001038    0x0000103F    float or double
+#define FLASH_ADCS_ECLIPSE_THRESHOLD          (FLASH_ADCS_PARAMETERS + 0x40)  //  0x00001040    0x00001047    float or double
+#define FLASH_ADCS_ROTATION_WEIGHT_RATIO      (FLASH_ADCS_PARAMETERS + 0x48)  //  0x00001048    0x0000104F    float or double
+#define FLASH_ADCS_ROTATION_TRIGGER           (FLASH_ADCS_PARAMETERS + 0x50)  //  0x00001050    0x00001057    float or double
+#define FLASH_ADCS_DISTURBANCE_COVARIANCE     (FLASH_ADCS_PARAMETERS + 0x58)  //  0x00001058    0x0000105F    float or double
+#define FLASH_ADCS_NOISE_COVARIANCE           (FLASH_ADCS_PARAMETERS + 0x58)  //  0x00001060    0x00001067    float or double
 #define FLASH_ADCS_TIME_STEP                  (FLASH_ADCS_PARAMETERS + 0x70)  //  0x00001070    0x00001073    uint32_t
 #define FLASH_ADCS_BRIDGE_TIMER_UPDATE_PERIOD (FLASH_ADCS_PARAMETERS + 0x74)  //  0x00001074    0x00001077    uint32_t
 #define FLASH_ADCS_BRIDGE_OUTPUT_HIGH         (FLASH_ADCS_PARAMETERS + 0x78)  //  0x00001078    0x00001078    int8_t
 #define FLASH_ADCS_BRIDGE_OUTPUT_LOW          (FLASH_ADCS_PARAMETERS + 0x79)  //  0x00001079    0x00001079    int8_t
+#define FLASH_ADCS_NUM_CONTROLLERS            (FLASH_ADCS_PARAMETERS + 0x7A)  //  0x0000107A    0x0000107A    uint8_t
 #define FLASH_ADCS_COIL_CHAR_MATRIX           (FLASH_ADCS_PARAMETERS + 0x80)  //  0x00001080    0x000010C8    9x float or double
 
 // sector 2 - stats
@@ -263,8 +267,12 @@
 #define FLASH_STATS_MAG_Y                               (FLASH_STATS + 0xC6)  //  0x000020C6    0x000020D1    3x float
 #define FLASH_STATS_MAG_Z                               (FLASH_STATS + 0xD2)  //  0x000020D2    0x000020DD    3x float
 
-// sectors 3 - 8 - image properites: 12 bytes per picture, 4 bytes total length, 4 bytes scan start address, 4 bytes scan end address
-#define FLASH_IMAGE_PROPERTIES                                    0x00003000  //  0x00003000    0x00008FFF
+// sector 3 - ADCS controllers
+#define FLASH_ADCS_CONTROLLERS                                    0x00003000  //  0x00003000    0x00003FFF
+#define FLASH_ADCS_CONTROLLER_SLOT_SIZE                           (3*6*sizeof(float))
+
+// sectors 4 - 9 - image properites: 12 bytes per picture, 4 bytes total length, 4 bytes scan start address, 4 bytes scan end address
+#define FLASH_IMAGE_PROPERTIES                                    0x00004000  //  0x00004000    0x00009FFF
 #define FLASH_IMAGE_PROPERTIES_SLOT_SIZE                          (21)        //  properties of 21 pictures in each sector
 
 // 64kB block 1 - store & forward slots
@@ -480,17 +488,30 @@
 #define ADCS_TIME_STEP                                  100     // time step between successive ADCS updates, in ms
 #define ADCS_PULSE_MAX_INTENSITY                        1.0     //
 #define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)  // maximum length of H-bridge pulse
-#define ADCS_OMEGA_TOLERANCE                            0.1     // detumbling will be stopped once change in normalized angular velocity drops below this value
-#define ADCS_ANGULAR_TOLERANCE                          1.0     //
+#define ADCS_DETUMB_OMEGA_TOLERANCE                     0.1     // detumbling will be stopped once change in normalized angular velocity drops below this value
+#define ADCS_ACTIVE_EULER_TOLERANCE                     1.0     //
+#define ADCS_ACTIVE_OMEGA_TOLERANCE                     0.1     //
 #define ADCS_MIN_INERTIAL_MOMENT                        1000    //
 #define ADCS_PULSE_AMPLITUDE                            0.1     //
 #define ADCS_CALCULATION_TOLERANCE                      0.01    //
 #define ADCS_ECLIPSE_THRESHOLD                          1.0     //
 #define ADCS_ROTATION_WEIGHT_RATIO                      0.5     //
 #define ADCS_ROTATION_TRIGGER                           1.0     //
+#define ADCS_DISTURBANCE_COVARIANCE                     1.0     //
+#define ADCS_NOISE_COVARIANCE                           1.0     //
 #define ADCS_COIL_CHARACTERISTICS                       { {15.83,   0,        0}, \
                                                           {0,       893.65,   0}, \
                                                           {0,       0,        108.551} }
+#define ADCS_PANEL_UNIT_VECTOR                          { {1.0, 1.0, 1.0}, \
+                                                          {1.0, 1.0, 1.0}, \
+                                                          {1.0, 1.0, 1.0}, \
+                                                          {1.0, 1.0, 1.0}, \
+                                                          {1.0, 1.0, 1.0}, \
+                                                          {1.0, 1.0, 1.0} }
+#define ADCS_DEFAULT_CONTROLLER                         { {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
+                                                          {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
+                                                          {1.0, 1.0, 1.0, 1.0, 1.0, 1.0} }
+#define ADCS_NUM_CONTROLLERS                            1       //  use only one controller by default
 #define ADCS_BRIDGE_TIMER_UPDATE_PERIOD                 (ADCS_TIME_STEP/100)  // time step between successive H bridge output updates, in ms
 #define ADCS_BRIDGE_OUTPUT_HIGH                         63      // H bridge drive strength to be used as "high"
 #define ADCS_BRIDGE_OUTPUT_LOW                         -63      // H bridge drive strength to be used as "low"

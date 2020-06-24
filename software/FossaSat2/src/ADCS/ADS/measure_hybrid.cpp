@@ -11,8 +11,8 @@
 #include "../ADCS/adcs.h"
 
 /********************* Main function *********************/
-void ADS_Measurement_Hybrid(ADCS_CALC_TYPE v_1[], ADCS_CALC_TYPE v_2[], ADCS_CALC_TYPE v_3[],
-                            ADCS_CALC_TYPE m_1[], ADCS_CALC_TYPE m_2[], ADCS_CALC_TYPE m_3[],
+void ADS_Measurement_Hybrid(const ADCS_CALC_TYPE v_1[], const ADCS_CALC_TYPE v_2[], const ADCS_CALC_TYPE v_3[],
+                            const ADCS_CALC_TYPE m_1[], const ADCS_CALC_TYPE m_2[], const ADCS_CALC_TYPE m_3[],
                             ADCS_CALC_TYPE eulerAnglesMatrix[][ADCS_NUM_AXES]) {
 
   // Normalize both ephemeris and measurements vectors
@@ -24,32 +24,38 @@ void ADS_Measurement_Hybrid(ADCS_CALC_TYPE v_1[], ADCS_CALC_TYPE v_2[], ADCS_CAL
   ADCS_CALC_TYPE v2_norm = ADCS_VectorNorm(v_2);
   ADCS_CALC_TYPE v3_norm = ADCS_VectorNorm(v_3);
 
+  ADCS_CALC_TYPE m1[ADCS_NUM_AXES];
+  ADCS_CALC_TYPE m2[ADCS_NUM_AXES];
+  ADCS_CALC_TYPE m3[ADCS_NUM_AXES];
+  ADCS_CALC_TYPE v1[ADCS_NUM_AXES];
+  ADCS_CALC_TYPE v2[ADCS_NUM_AXES];
+  ADCS_CALC_TYPE v3[ADCS_NUM_AXES];
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
-      m_1[i] *= (1.0/(m1_norm+adcsParams.calcTol));
-      m_2[i] *= (1.0/(m2_norm+adcsParams.calcTol));
-      m_3[i] *= (1.0/(m3_norm+adcsParams.calcTol));
+      m1[i] = m_1[i] * (1.0/(m1_norm + adcsParams.calcTol));
+      m2[i] = m_2[i] * (1.0/(m2_norm + adcsParams.calcTol));
+      m3[i] = m_3[i] * (1.0/(m3_norm + adcsParams.calcTol));
 
-      v_1[i] *= (1.0/(v1_norm+adcsParams.calcTol));
-      v_2[i] *= (1.0/(v2_norm+adcsParams.calcTol));
-      v_3[i] *= (1.0/(v3_norm+adcsParams.calcTol));
+      v1[i] = v_1[i] * (1.0/(v1_norm + adcsParams.calcTol));
+      v2[i] = v_2[i] * (1.0/(v2_norm + adcsParams.calcTol));
+      v3[i] = v_3[i] * (1.0/(v3_norm + adcsParams.calcTol));
   }
 
   // Measurements matrix
   ADCS_CALC_TYPE measMaxtrix[ADCS_NUM_AXES][ADCS_NUM_AXES];
-  measMaxtrix[0][0] = m_1[0];
-  measMaxtrix[0][1] = m_2[0];
-  measMaxtrix[0][2] = m_3[0];
-  measMaxtrix[1][0] = m_1[1];
-  measMaxtrix[1][1] = m_2[1];
-  measMaxtrix[1][2] = m_3[1];
-  measMaxtrix[2][0] = m_1[2];
-  measMaxtrix[2][1] = m_2[2];
-  measMaxtrix[2][2] = m_3[2];
+  measMaxtrix[0][0] = m1[0];
+  measMaxtrix[0][1] = m2[0];
+  measMaxtrix[0][2] = m3[0];
+  measMaxtrix[1][0] = m1[1];
+  measMaxtrix[1][1] = m2[1];
+  measMaxtrix[1][2] = m3[1];
+  measMaxtrix[2][0] = m1[2];
+  measMaxtrix[2][1] = m2[2];
+  measMaxtrix[2][2] = m3[2];
 
   // Inverse theoretical matrix
   ADCS_CALC_TYPE invV[ADCS_NUM_AXES][ADCS_NUM_AXES];
-  const ADCS_CALC_TYPE det_V = (  (v_1[0]*v_2[1]*v_3[2]) - (v_1[2]*v_2[1]*v_3[0]) + (v_1[1]*v_2[2]*v_3[0])
-                                + (v_1[2]*v_2[0]*v_3[1]) - (v_1[1]*v_2[0]*v_3[2]) - (v_1[0]*v_2[2]*v_3[1])  );
+  const ADCS_CALC_TYPE det_V = (  (v1[0]*v2[1]*v3[2]) - (v1[2]*v2[1]*v3[0]) + (v1[1]*v2[2]*v3[0])
+                                + (v1[2]*v2[0]*v3[1]) - (v1[1]*v2[0]*v3[2]) - (v1[0]*v2[2]*v3[1])  );
 
   // det_V == -calcTol check
   ADCS_CALC_TYPE gain;
@@ -59,15 +65,15 @@ void ADS_Measurement_Hybrid(ADCS_CALC_TYPE v_1[], ADCS_CALC_TYPE v_2[], ADCS_CAL
     gain = 1.0/(det_V + adcsParams.calcTol);
   }
 
-  invV[0][0] = gain * (v_2[1]*v_3[2] - v_2[2]*v_3[1]);
-  invV[0][1] = gain * (v_2[2]*v_3[0] - v_2[0]*v_3[2]);
-  invV[0][2] = gain * (v_2[0]*v_3[1] - v_2[1]*v_3[0]);
-  invV[1][0] = gain * (v_1[2]*v_3[1] - v_1[1]*v_3[2]);
-  invV[1][1] = gain * (v_1[0]*v_3[2] - v_1[2]*v_3[0]);
-  invV[1][2] = gain * (v_1[1]*v_3[0] - v_1[0]*v_3[1]);
-  invV[2][0] = gain * (v_1[1]*v_2[2] - v_1[2]*v_2[1]);
-  invV[2][1] = gain * (v_1[2]*v_2[0] - v_1[0]*v_2[2]);
-  invV[2][2] = gain * (v_1[0]*v_2[1] - v_1[1]*v_2[0]);
+  invV[0][0] = gain * (v2[1]*v3[2] - v2[2]*v3[1]);
+  invV[0][1] = gain * (v2[2]*v3[0] - v2[0]*v3[2]);
+  invV[0][2] = gain * (v2[0]*v3[1] - v2[1]*v3[0]);
+  invV[1][0] = gain * (v1[2]*v3[1] - v1[1]*v3[2]);
+  invV[1][1] = gain * (v1[0]*v3[2] - v1[2]*v3[0]);
+  invV[1][2] = gain * (v1[1]*v3[0] - v1[0]*v3[1]);
+  invV[2][0] = gain * (v1[1]*v2[2] - v1[2]*v2[1]);
+  invV[2][1] = gain * (v1[2]*v2[0] - v1[0]*v2[2]);
+  invV[2][2] = gain * (v1[0]*v2[1] - v1[1]*v2[0]);
 
   // Euler angles matrix (matrices multiplication)
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {

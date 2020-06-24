@@ -10,15 +10,13 @@
 #ifndef ADS_H_INCLUDED
 #define ADS_H_INCLUDED
 
-// TODO measure_generation unused?
-
 #define ADCS_STATE_DIM          (2*ADCS_NUM_AXES)
 
 /********** Functions declaration *************/
 bool ADS_Eclipse_Decision(const ADCS_CALC_TYPE luxData[]);
 
 // Main ADS structure
-void ADS_Main(ADCS_CALC_TYPE state[], ADCS_CALC_TYPE controlVector[], ADCS_CALC_TYPE P[][ADCS_NUM_AXES], ADCS_CALC_TYPE ephemerides[], ADCS_CALC_TYPE filtered_y[]);
+void ADS_Main(ADCS_CALC_TYPE omega[], ADCS_CALC_TYPE magData[], ADCS_CALC_TYPE stateVars[], ADCS_CALC_TYPE controlVector[], ADCS_CALC_TYPE P[][2*ADCS_NUM_AXES], ADCS_CALC_TYPE solarEphe[], ADCS_CALC_TYPE magEphe[], ADCS_CALC_TYPE filtered_y[], ADCS_CALC_TYPE newAnglesVector[]);
 
 // Rotation matrix calculation in eclipse situation
 void ADS_Eclipse_Hybrid(const ADCS_CALC_TYPE magData[], const ADCS_CALC_TYPE magEphe[], ADCS_CALC_TYPE rotationMatrix[][ADCS_NUM_AXES]);
@@ -27,7 +25,7 @@ void ADS_Eclipse_Hybrid(const ADCS_CALC_TYPE magData[], const ADCS_CALC_TYPE mag
 void ADS_Angles_Determination(const ADCS_CALC_TYPE eulerAnglesMatrix[][ADCS_NUM_AXES], ADCS_CALC_TYPE newAnglesVector[]);
 
 // Forward Euler integration scheme
-void ADS_Euler_Integrator(const ADCS_CALC_TYPE p, const ADCS_CALC_TYPE q, const ADCS_CALC_TYPE r, const ADCS_CALC_TYPE currentAngles[], ADCS_CALC_TYPE nextAngles[], const ADCS_CALC_TYPE delta_t);
+void ADS_Euler_Integrator(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE currentAngles[], ADCS_CALC_TYPE nextAngles[], const ADCS_CALC_TYPE delta_t);
 
 // Verify both magnetic and IMU data coincide
 bool ADS_Rotation_Verification(ADCS_CALC_TYPE angles1[], ADCS_CALC_TYPE angles2[]);
@@ -36,8 +34,8 @@ bool ADS_Rotation_Verification(ADCS_CALC_TYPE angles1[], ADCS_CALC_TYPE angles2[
 void ADS_Solar_Determination(ADCS_CALC_TYPE luxData[], ADCS_CALC_TYPE solarEph[], ADCS_CALC_TYPE redundantSolarEph[]);
 
 // Rotation matrix calculation in not eclipse situation
-void ADS_Measurement_Hybrid(ADCS_CALC_TYPE v_1[], ADCS_CALC_TYPE v_2[], ADCS_CALC_TYPE v_3[],
-                            ADCS_CALC_TYPE m_1[], ADCS_CALC_TYPE m_2[], ADCS_CALC_TYPE m_3[],
+void ADS_Measurement_Hybrid(const ADCS_CALC_TYPE v_1[], const ADCS_CALC_TYPE v_2[], const ADCS_CALC_TYPE v_3[],
+                            const ADCS_CALC_TYPE m_1[], const ADCS_CALC_TYPE m_2[], const ADCS_CALC_TYPE m_3[],
                             ADCS_CALC_TYPE eulerAnglesMatrix[][ADCS_NUM_AXES]);
 
 // Filtering function
