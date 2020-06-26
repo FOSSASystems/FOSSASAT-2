@@ -44,7 +44,12 @@ void ADS_Main(ADCS_CALC_TYPE omega[], ADCS_CALC_TYPE magData[], ADCS_CALC_TYPE s
 
   // Measurements from sensors
   ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS];
-  // TODO solar measurements
+  luxData[0] = Sensors_Current_ReadPower(currSensorXA);
+  luxData[1] = Sensors_Current_ReadPower(currSensorXB);
+  luxData[2] = Sensors_Current_ReadPower(currSensorZA);
+  luxData[3] = Sensors_Current_ReadPower(currSensorZB);
+  luxData[4] = Sensors_Current_ReadPower(currSensorY);
+  luxData[5] = Sensors_Read_Light(lightSensorPanelY);
 
   // Decide whether the satellite is in eclipse situation or under light
   if(ADS_Eclipse_Decision(luxData)) {
