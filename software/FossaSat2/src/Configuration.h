@@ -287,12 +287,17 @@
 #define FLASH_STORE_AND_FORWARD_NUM_SLOTS                         (FLASH_64K_BLOCK_SIZE / MAX_STRING_LENGTH)
 
 // 64kB blocks 2 - 31 - NMEA sentences: null-terminated C-strings, each starts with 4-byte timestamp (offset since recording start)
-#define FLASH_NMEA_LOG_START                                      0x00020000  //  0x00030000    0x001FFFFF
-#define FLASH_NMEA_LOG_END                                        (FLASH_IMAGES_START)
+#define FLASH_NMEA_LOG_START                                      0x00020000  //  0x00020000    0x001FFFFF
+#define FLASH_NMEA_LOG_END                                        (FLASH_ADCS_EPHEMERIDES_START)
 #define FLASH_NMEA_LOG_SLOT_SIZE                                  (128)
 
-// 64kB blocks 32 - 1023 - image slots: 8 blocks per slot
-#define FLASH_IMAGES_START                                        0x00200000  //  0x00200000    0x03FFFFFF
+// 64kB blocks 32 - 39 - ADCS ephemerides storage. 25 bytes per ephemeris model row, 5 rows in each 128-byte chunk
+#define FLASH_ADCS_EPHEMERIDES_START                              0x00200000  //  0x00200000    0x0027FFFF
+#define FLASH_ADCS_EPHEMERIDES_END                                (FLASH_IMAGES_START)
+#define FLASH_ADCS_EPHEMERIDES_SLOT_SIZE                          (6*sizeof(float) + 1)
+
+// 64kB blocks 40 - 1023 - image slots: 8 blocks per slot
+#define FLASH_IMAGES_START                                        0x00280000  //  0x00280000    0x03FFFFFF
 #define FLASH_IMAGE_SLOT_SIZE                                     (FLASH_IMAGE_NUM_64K_BLOCKS * FLASH_64K_BLOCK_SIZE)
 #define FLASH_PUBLIC_PICTURES_START                               (80)
 #define FLASH_PUBLIC_PICTURES_END                                 (100)

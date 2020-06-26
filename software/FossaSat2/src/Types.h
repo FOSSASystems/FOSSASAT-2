@@ -50,6 +50,7 @@ struct adcsState_t {
   ADCS_CALC_TYPE prevStateVars[2*ADCS_NUM_AXES];
   ADCS_CALC_TYPE prevControlVector[2*ADCS_NUM_AXES];
   ADCS_CALC_TYPE kalmanMatrixP[2*ADCS_NUM_AXES][2*ADCS_NUM_AXES];
+  uint32_t currentEpheRow;
   uint32_t start;
   bool active;
   adcsBridgeState_t bridgeStateX;

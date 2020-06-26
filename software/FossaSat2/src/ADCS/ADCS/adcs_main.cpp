@@ -276,6 +276,7 @@ void ADCS_ActiveControl_Init(const uint32_t activeDuration) {
 
   // wake up IMU
   adcsState.active = true;
+  adcsState.currentEpheRow = 0;
   Sensors_IMU_Sleep(false);
   delay(50);
 
@@ -291,17 +292,21 @@ void ADCS_ActiveControl_Init(const uint32_t activeDuration) {
   omega[2] = Sensors_IMU_CalcGyro(imu.gz);
   adcsState.prevOmegaNorm = ADCS_VectorNorm(omega);
 
+  // Select ephemerides
+  ADCS_CALC_TYPE solarEphe[ADCS_NUM_AXES];
+  ADCS_CALC_TYPE magEphe[ADCS_NUM_AXES];
+  uint32_t row = adcsState.currentEpheRow;
+  uint8_t controller = ADCS_Load_Ephemerides(row, solarEphe, magEphe);
+  adcsState.currentEpheRow++;
+
   // set initial state
-  ADCS_CALC_TYPE magneticEphe[ADCS_NUM_AXES];
   ADCS_CALC_TYPE rotationMatrix[ADCS_NUM_AXES][ADCS_NUM_AXES];
   ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES];
-  // TODO Select ephemerides
-  //select_ephemerides(i, position, ephemerides);  // Select the initial position
   adcsState.prevControlVector[0] = 0;
   adcsState.prevControlVector[1] = 0;
   adcsState.prevControlVector[2] = 0;
 
-  ADS_Eclipse_Hybrid(mag, magneticEphe, rotationMatrix);
+  ADS_Eclipse_Hybrid(mag, magEphe, rotationMatrix);
   ADS_Angles_Determination(rotationMatrix, newAnglesVector);
   adcsState.prevEulerNorm = ADCS_VectorNorm(newAnglesVector);
   adcsState.prevStateVars[0] = newAnglesVector[0];
@@ -345,10 +350,12 @@ void ADCS_ActiveControl_Update() {
     return;
   }
 
-  // TODO Select ephemerides
-  uint8_t controller = 0;
+  // Select ephemerides
   ADCS_CALC_TYPE solarEphe[ADCS_NUM_AXES];
   ADCS_CALC_TYPE magEphe[ADCS_NUM_AXES];
+  uint32_t row = adcsState.currentEpheRow;
+  uint8_t controller = ADCS_Load_Ephemerides(row, solarEphe, magEphe);
+  adcsState.currentEpheRow++;
 
   // get IMU data
   Sensors_IMU_Update();
@@ -443,6 +450,36 @@ void ADCS_ActiveControl_Update() {
       adcsState.kalmanMatrixP[i][j] = kalmanMatrixP[i][j];
     }
   }
+}
+
+uint8_t ADCS_Load_Ephemerides(uint32_t row, ADCS_CALC_TYPE solarEph[], ADCS_CALC_TYPE magEph[]) {
+  // get addresses
+  const uint32_t rowsPerPage = (FLASH_EXT_PAGE_SIZE / FLASH_ADCS_EPHEMERIDES_SLOT_SIZE);
+  uint32_t pageAddr = (row / rowsPerPage) + FLASH_ADCS_EPHEMERIDES_START;
+
+  // ephemerides are stored in 128-byte chunks, 5 rows per chunk, followed by 3 free bytes
+  uint32_t epheAddr = (row % rowsPerPage) * FLASH_ADCS_EPHEMERIDES_SLOT_SIZE;
+  if((row % rowsPerPage) >= (rowsPerPage / 2)) {
+    // second chunk, add 3 bytes
+    epheAddr += 3;
+  }
+
+  // read the requested row
+  const uint8_t epheLineLen = 6*sizeof(float) + sizeof(uint8_t);
+  uint8_t epheLineBuff[epheLineLen];
+  PersistentStorage_Read(pageAddr + epheAddr, epheLineBuff, epheLineLen);
+
+  // parse the data
+  float val;
+  for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+    memcpy(&val, epheLineBuff + i*sizeof(float), sizeof(float));
+    solarEph[i] = (ADCS_CALC_TYPE)val;
+    memcpy(&val, epheLineBuff + (i + ADCS_NUM_AXES)*sizeof(float), sizeof(float));
+    magEph[i] = (ADCS_CALC_TYPE)val;
+  }
+
+  // get the controller type
+  return(epheLineBuff[epheLineLen - 1]);
 }
 
 bool ADCS_Check() {

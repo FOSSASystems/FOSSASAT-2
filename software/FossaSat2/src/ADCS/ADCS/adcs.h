@@ -31,6 +31,8 @@
 #include "../ADS/ads.h"
 
 // TODO no global vars inside aux functions
+// TODO extract common code
+// TODO specify array dimensions in declarations
 
 /*********** Functions declaration ************/
 // Main structure
@@ -46,6 +48,7 @@ void ADCS_Detumble_Finish(uint8_t result, bool startActiveControl);
 void ADCS_ActiveControl_Init(const uint32_t activeDuration);
 void ADCS_ActiveControl_Update();
 
+uint8_t ADCS_Load_Ephemerides(uint32_t row, ADCS_CALC_TYPE solarEph[], ADCS_CALC_TYPE magEph[]);
 bool ADCS_Check();
 void ADCS_Finish(uint8_t result);
 void ADCS_Update_Bridges();
