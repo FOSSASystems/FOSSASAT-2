@@ -33,8 +33,6 @@ void ADS_Main(ADCS_CALC_TYPE omega[], ADCS_CALC_TYPE magData[], ADCS_CALC_TYPE s
   // Relevant variables declaration
   ADCS_CALC_TYPE anglesInt[ADCS_NUM_AXES];                      // Angular determination variables
   ADCS_CALC_TYPE rotationMatrix[ADCS_NUM_AXES][ADCS_NUM_AXES];  // Rotation matrix
-  ADCS_CALC_TYPE solarEphBody[ADCS_NUM_AXES];                   // Solar ephemerides in the body frame
-  ADCS_CALC_TYPE redundantSolarEph[ADCS_NUM_AXES];              // Redundant solar ephemerides in the body frame
 
   // Previous state of the system from t = t_1-1
   ADCS_CALC_TYPE prevAngles[ADCS_NUM_AXES];
@@ -58,6 +56,9 @@ void ADS_Main(ADCS_CALC_TYPE omega[], ADCS_CALC_TYPE magData[], ADCS_CALC_TYPE s
     ADS_Eclipse_Hybrid(magData, magEphe, rotationMatrix);
 
   } else {
+    ADCS_CALC_TYPE solarEphBody[ADCS_NUM_AXES];                   // Solar ephemerides in the body frame
+    ADCS_CALC_TYPE redundantSolarEph[ADCS_NUM_AXES];              // Redundant solar ephemerides in the body frame
+    
     // Generation of the measurements
     ADS_Euler_Integrator(omega, prevAngles, anglesInt, adcsParams.timeStep);
     ADS_Solar_Determination(luxData, solarEphBody, redundantSolarEph);
