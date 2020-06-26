@@ -13,21 +13,21 @@
 /*************** Main function *****************/
 void ADS_Solar_Determination(ADCS_CALC_TYPE luxData[], ADCS_CALC_TYPE solarEph[], ADCS_CALC_TYPE redundantSolarEph[]) {
   // Constants definitions
-  const ADCS_CALC_TYPE maxCurrent = 1.0;                      // Maximum obtainable current
+  const ADCS_CALC_TYPE maxPower[ADCS_NUM_PANELS] = {//fill with power logging};                      // Maximum obtainable power/lux array
   ADCS_CALC_TYPE panelUnitVector[ADCS_NUM_PANELS][ADCS_NUM_AXES] = ADCS_PANEL_UNIT_VECTOR; // Unitary vector pointing to the solar panels in inverse form
 
   // Main calculation
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
     solarEph[i] = 0;
     for(uint8_t j = 0; j < ADCS_NUM_AXES; j++) {
-      solarEph[i] += panelUnitVector[i][j]*luxData[j]*(1.0/maxCurrent);
+      solarEph[i] += panelUnitVector[i][j]*luxData[j]*(1.0/maxPower[j]);
     }
   }
 
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
     redundantSolarEph[i] = 0;
     for(uint8_t j = 0; j < ADCS_NUM_AXES; j++) {
-      redundantSolarEph[i] += panelUnitVector[ADCS_NUM_AXES + i][j]*luxData[ADCS_NUM_AXES + j]*(1.0/maxCurrent);
+      redundantSolarEph[i] += panelUnitVector[ADCS_NUM_AXES + i][j]*luxData[ADCS_NUM_AXES + j]*(1.0/maxPower[ADCS_NUM_AXES + j]);
     }
   }
 }
