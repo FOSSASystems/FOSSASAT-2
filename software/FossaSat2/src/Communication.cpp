@@ -939,7 +939,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             FOSSASAT_DEBUG_PRINTLN(F("Resetting ADCS parameters"));
             PersistentStorage_Reset_ADCS_Params();
             PowerControl_Watchdog_Heartbeat();
+          }
 
+          if(optData[0] & 0b01000000) {
             // wipe ephemerides data storage
             FOSSASAT_DEBUG_PRINTLN(F("Wiping ephemerides storage"));
             for(uint32_t addr = FLASH_ADCS_EPHEMERIDES_START; addr < FLASH_ADCS_EPHEMERIDES_END; addr += FLASH_64K_BLOCK_SIZE) {

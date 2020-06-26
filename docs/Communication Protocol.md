@@ -110,6 +110,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
     - 0x08: NMEA log
     - 0x10: image storage (execution of this command will take several minutes)
     - 0x20: ADCS parameters (all settings in persistent storage will be reset to the default values)
+    - 0x40: ADCS ephemerids
 - Response: none
 - Description: Wipes persistent storages.
 
