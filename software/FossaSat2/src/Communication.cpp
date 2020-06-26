@@ -313,8 +313,8 @@ void Communication_Send_Full_System_Info() {
                          (uint8_t)lightSensorPanelY.available << 1 | (uint8_t)lightSensorTop.available << 0;
   Communication_Frame_Add(&optDataPtr, sensorStates, "sensors", 1, "");
 
-  uint8_t adcsState = PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LAST_ADCS_RESULT);
-  Communication_Frame_Add(&optDataPtr, sensorStates, "adcsState", 1, "");
+  uint8_t adcsResult = PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LAST_ADCS_RESULT);
+  Communication_Frame_Add(&optDataPtr, adcsResult, "adcsResult", 1, "");
 
   FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
 
