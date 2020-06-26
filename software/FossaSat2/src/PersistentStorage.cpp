@@ -138,8 +138,9 @@ template void PersistentStorage_Update_Stat<float>(uint8_t*, uint32_t, float);
 
 void PersistentStorage_Update_Stats(uint8_t flags) {
   // read stats page
-  uint8_t statsBuffer[FLASH_EXT_PAGE_SIZE];
-  PersistentStorage_Read(FLASH_STATS, statsBuffer, FLASH_EXT_PAGE_SIZE);
+  const size_t statsBufferLen = 2*FLASH_EXT_PAGE_SIZE;
+  uint8_t statsBuffer[statsBufferLen];
+  PersistentStorage_Read(FLASH_STATS, statsBuffer, statsBufferLen);
 
   if(flags & STATS_FLAGS_TEMPERATURES) {
     // temperatures
@@ -191,19 +192,30 @@ void PersistentStorage_Update_Stats(uint8_t flags) {
     PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_MAG_Z, Sensors_IMU_CalcMag(imu.mz));
   }
 
+  if(flags & STATS_FLAGS_POWER) {
+    // solar cells output power
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_POWER_XA, Sensors_Current_ReadPower(currSensorXA));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_POWER_XB, Sensors_Current_ReadPower(currSensorXB));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_POWER_ZA, Sensors_Current_ReadPower(currSensorZA));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_POWER_ZB, Sensors_Current_ReadPower(currSensorZB));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_POWER_Y, Sensors_Current_ReadPower(currSensorY));
+  }
+
   // write updated page
-  PersistentStorage_Write(FLASH_STATS, statsBuffer, FLASH_EXT_PAGE_SIZE);
+  PersistentStorage_Write(FLASH_STATS, statsBuffer, statsBufferLen);
 
   FOSSASAT_DEBUG_PRINTLN(F("Stats:"));
   FOSSASAT_DEBUG_PRINT_FLASH(FLASH_STATS, FLASH_EXT_PAGE_SIZE);
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_STATS + FLASH_EXT_PAGE_SIZE, FLASH_EXT_PAGE_SIZE);
 }
 
 void PersistentStorage_Reset_Stats() {
   // build a completely new stats page
-  uint8_t statsPage[FLASH_EXT_PAGE_SIZE];
+  const size_t statsBufferLen = 2*FLASH_EXT_PAGE_SIZE;
+  uint8_t statsPage[statsBufferLen];
 
   // set everything to 0 by default
-  memset(statsPage, 0, FLASH_EXT_PAGE_SIZE);
+  memset(statsPage, 0, statsBufferLen);
 
   // get minimum and maximum values for all used data types
   int16_t intMax = 0x7FFF;
@@ -305,8 +317,9 @@ void PersistentStorage_Reset_Stats() {
   memcpy(statsPage + (FLASH_STATS_VOLT_MPPT - FLASH_STATS) + 2*sizeof(byteMin), &byteMin, sizeof(byteMin));
 
   // set light sensors
-  memcpy(statsPage + (FLASH_STATS_LIGHT_PANEL_Y - FLASH_STATS), &floatMax, sizeof(floatMax));
-  memcpy(statsPage + (FLASH_STATS_LIGHT_TOP - FLASH_STATS), &floatMax, sizeof(floatMax));
+  float solarMax = ADCS_SOLAR_SENSOR_MAX;
+  memcpy(statsPage + (FLASH_STATS_LIGHT_PANEL_Y - FLASH_STATS), &solarMax, sizeof(floatMax));
+  memcpy(statsPage + (FLASH_STATS_LIGHT_TOP - FLASH_STATS), &solarMax, sizeof(floatMax));
 
   floatVal = Sensors_Read_Light(lightSensorPanelY);
   memcpy(statsPage + (FLASH_STATS_LIGHT_PANEL_Y - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
@@ -357,8 +370,34 @@ void PersistentStorage_Reset_Stats() {
   memcpy(statsPage + (FLASH_STATS_MAG_Y - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
   memcpy(statsPage + (FLASH_STATS_MAG_Z - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
 
+  // set powers
+  float powerMax = ADCS_SOLAR_POWER_XZ_MAX;
+  memcpy(statsPage + (FLASH_STATS_POWER_XA - FLASH_STATS), &powerMax, sizeof(floatMax));
+  memcpy(statsPage + (FLASH_STATS_POWER_XB - FLASH_STATS), &powerMax, sizeof(floatMax));
+  memcpy(statsPage + (FLASH_STATS_POWER_ZA - FLASH_STATS), &powerMax, sizeof(floatMax));
+  memcpy(statsPage + (FLASH_STATS_POWER_ZB - FLASH_STATS), &powerMax, sizeof(floatMax));
+  powerMax = ADCS_SOLAR_POWER_Y_MAX;
+  memcpy(statsPage + (FLASH_STATS_POWER_Y - FLASH_STATS), &powerMax, sizeof(floatMax));
+
+  floatVal = Sensors_Current_ReadPower(currSensorXA);
+  memcpy(statsPage + (FLASH_STATS_POWER_XA - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  floatVal = Sensors_Current_ReadPower(currSensorXB);
+  memcpy(statsPage + (FLASH_STATS_POWER_XB - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  floatVal = Sensors_Current_ReadPower(currSensorZA);
+  memcpy(statsPage + (FLASH_STATS_POWER_ZA - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  floatVal = Sensors_Current_ReadPower(currSensorZB);
+  memcpy(statsPage + (FLASH_STATS_POWER_ZB - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+  floatVal = Sensors_Current_ReadPower(currSensorY);
+  memcpy(statsPage + (FLASH_STATS_POWER_Y - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
+
+  memcpy(statsPage + (FLASH_STATS_POWER_XA - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+  memcpy(statsPage + (FLASH_STATS_POWER_XB - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+  memcpy(statsPage + (FLASH_STATS_POWER_ZA - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+  memcpy(statsPage + (FLASH_STATS_POWER_ZB - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+  memcpy(statsPage + (FLASH_STATS_POWER_Y - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
+
   // write all at once
-  PersistentStorage_Write(FLASH_STATS, statsPage, FLASH_EXT_PAGE_SIZE);
+  PersistentStorage_Write(FLASH_STATS, statsPage, statsBufferLen);
 }
 
 void PersistentStorage_Increment_Counter(uint16_t addr) {

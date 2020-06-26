@@ -145,6 +145,27 @@ float Sensors_Current_ReadVoltage(currentSensor_t& sensor) {
   return(voltage);
 }
 
+float Sensors_Current_ReadPower(currentSensor_t& sensor) {
+  if(!(sensor.available)) {
+    return(0);
+  }
+
+  // wake up the sensor
+  sensor.driver->setMode(INA260_MODE_CONTINUOUS);
+
+  // wait for full recovery
+  delayMicroseconds(60);
+
+  // read the value
+  float power = sensor.driver->readPower();
+
+  // set the sensor back to sleep
+  sensor.driver->setMode(INA260_MODE_SHUTDOWN);
+
+  return(power);
+}
+
+
 // TODO timeout on disconnected sensors
 bool Sensors_Setup_Light(lightSensor_t& sensor) {
   FOSSASAT_DEBUG_PRINT(F("Light sensor I2C"));

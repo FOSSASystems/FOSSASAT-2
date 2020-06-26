@@ -16,6 +16,7 @@ float Sensors_IMU_CalcMag(int16_t raw);
 bool Sensors_Current_Setup(currentSensor_t& sensor);
 float Sensors_Current_Read(currentSensor_t& sensor);
 float Sensors_Current_ReadVoltage(currentSensor_t& sensor);
+float Sensors_Current_ReadPower(currentSensor_t& sensor);
 
 bool Sensors_Setup_Light(lightSensor_t& sensor);
 float Sensors_Read_Light(lightSensor_t& sensor);

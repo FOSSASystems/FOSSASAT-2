@@ -268,6 +268,12 @@
 #define FLASH_STATS_MAG_Y                               (FLASH_STATS + 0xC6)  //  0x000020C6    0x000020D1    3x float
 #define FLASH_STATS_MAG_Z                               (FLASH_STATS + 0xD2)  //  0x000020D2    0x000020DD    3x float
 
+#define FLASH_STATS_POWER_XA                            (FLASH_STATS + 0x100) //  0x00002100    0x0000210B    3x float
+#define FLASH_STATS_POWER_XB                            (FLASH_STATS + 0x10C) //  0x0000210C    0x00002117    3x float
+#define FLASH_STATS_POWER_ZA                            (FLASH_STATS + 0x118) //  0x00002118    0x00002123    3x float
+#define FLASH_STATS_POWER_ZB                            (FLASH_STATS + 0x124) //  0x00002124    0x0000212F    3x float
+#define FLASH_STATS_POWER_Y                             (FLASH_STATS + 0x130) //  0x00002130    0x0000213B    3x float
+
 // sector 3 - ADCS controllers
 #define FLASH_ADCS_CONTROLLERS                                    0x00003000  //  0x00003000    0x00003FFF
 #define FLASH_ADCS_CONTROLLER_SLOT_SIZE                           (3*6*sizeof(float))
@@ -516,6 +522,9 @@
 #define ADCS_BRIDGE_TIMER_UPDATE_PERIOD                 (ADCS_TIME_STEP/100)  // time step between successive H bridge output updates, in ms
 #define ADCS_BRIDGE_OUTPUT_HIGH                         63      // H bridge drive strength to be used as "high"
 #define ADCS_BRIDGE_OUTPUT_LOW                         -63      // H bridge drive strength to be used as "low"
+#define ADCS_SOLAR_POWER_XZ_MAX                        (967.0)  // maximum output power of solar panels X and Z, in mW
+#define ADCS_SOLAR_POWER_Y_MAX                         (242.0)  // maximum output power of solar panel Y, in mW
+#define ADCS_SOLAR_SENSOR_MAX                          (172911.0) // maximum light intensity output of solar sensors, in lux
 
 /*
     Global Variables
