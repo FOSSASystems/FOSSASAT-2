@@ -432,7 +432,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 108 bytes for IMU, floats
 
 ### RESP_FULL_SYSTEM_INFO
-- Optional data length: 55
+- Optional data length: 56
 - Optional data:
   - 0: MPPT output voltage * 20 mV, unsigned 8-bit integer
   - 1 - 2: MPPT output current * 10 uA, signed 16-bit integer
@@ -443,6 +443,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
     - bits 2 - 4: currently active low power mode
     - bit 5: MPPT temperature switch enabled
     - bit 6: MPPT keep alive enabled
+    - bit 7: science mode active
   - 8 - 9: reset counter, unsigned 16-bit integer
   - 10: solar panel XA voltage * 20 mV, unsigned 8-bit integer
   - 11 - 12: solar panel XA current * 10 uA, signed 16-bit integer
@@ -469,14 +470,15 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 52: FSK window receive length in seconds
   - 53: LoRa window receive length in seconds
   - 54: sensor states:
-    - bit 7: current sensor XA
-    - bit 6: current sensor XB
-    - bit 5: current sensor ZA
-    - bit 4: current sensor ZB
-    - bit 3: current sensor Y
-    - bit 2: current sensor MPPT
-    - bit 1: light sensor Y
     - bit 0: light sensor top
+    - bit 1: light sensor Y
+    - bit 2: current sensor MPPT
+    - bit 3: current sensor Y
+    - bit 4: current sensor ZB
+    - bit 5: current sensor ZA
+    - bit 6: current sensor XB
+    - bit 7: current sensor XA
+  - 55: last ADCS result
 
 ### RESP_STORE_AND_FORWARD_ASSIGNED_SLOT
 - Optional data length: 2

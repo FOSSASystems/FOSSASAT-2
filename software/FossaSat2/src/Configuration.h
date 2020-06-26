@@ -202,7 +202,8 @@
 #define FLASH_NMEA_LOG_LATEST_ENTRY               (FLASH_SYSTEM_INFO + 0xA5)  //  0x000000A5    0x000000A8    uint32_t
 #define FLASH_NMEA_LOG_LATEST_FIX                 (FLASH_SYSTEM_INFO + 0xA9)  //  0x000000A9    0x000000AC    uint32_t
 #define FLASH_LOOP_COUNTER                        (FLASH_SYSTEM_INFO + 0xAD)  //  0x000000AD    0x000000AD    uint8_t
-#define FLASH_NUM_SLEEP_INTERVALS                 (FLASH_SYSTEM_INFO + 0xAE)  //  0x000000AE    0x000000AE    uint8_t
+#define FLASH_LAST_ADCS_RESULT                    (FLASH_SYSTEM_INFO + 0xAE)  //  0x000000AE    0x000000AE    uint8_t
+#define FLASH_NUM_SLEEP_INTERVALS                 (FLASH_SYSTEM_INFO + 0xAF)  //  0x000000AF    0x000000AF    uint8_t
 #define FLASH_SLEEP_INTERVALS                     (FLASH_SYSTEM_INFO + 0xB0)  //  0x000000B0    0x000000BF    FLASH_NUM_SLEEP_INTERVALS x (int16_t + uint16_t)
 #define FLASH_SYSTEM_INFO_CRC                     (FLASH_SYSTEM_INFO + 0xF8)  //  0x000000F8    0x000000FB    uint32_t
 #define FLASH_MEMORY_ERROR_COUNTER                (FLASH_SYSTEM_INFO + 0xFC)  //  0x000000FC    0x000000FF    uint32_t

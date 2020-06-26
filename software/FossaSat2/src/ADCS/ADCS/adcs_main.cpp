@@ -26,6 +26,9 @@ void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, cons
     memcpy(adcsParams.position, position, 6*sizeof(position[0]));
   }
 
+  // reset previous ADCS result
+  PersistentStorage_SystemInfo_Set<uint8_t>(FLASH_LAST_ADCS_RESULT, ADCS_RUNNING);
+
   // always detumble first, active control will be enabled on successful detumble finish
   ADCS_Detumble_Init(detumbleDuration, orbitalInclination, meanOrbitalMotion);
 }
@@ -136,52 +139,8 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
 }
 
 void ADCS_Detumble_Update() {
-  // TODO add ADCS result reporting + ADCS on-going
-
-  // check detumbling length
-  if(millis() - adcsState.start > adcsParams.detumbleLen) {
-    // time limit reached
-    ADCS_Detumble_Finish(true);
-    FOSSASAT_DEBUG_PRINTLN(F("Detumbling done (time limit reached)"));
-    return;
-  }
-
-  // check battery voltage or LP mode
-  #ifdef ENABLE_TRANSMISSION_CONTROL
-  if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
-    ADCS_Detumble_Finish(false);
-    FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (battery too low)"));
-    return;
-  }
-  #endif
-
-  // check Hbridge faults
-  uint8_t fault = bridgeX.getFault();
-  if((!adcsParams.control.bits.overrideFaultX) && (fault != 0) && (fault & FAULT)) {
-    ADCS_Detumble_Finish(false);
-    FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (X axis fault)"));
-    return;
-  }
-
-  fault = bridgeY.getFault();
-  if((!adcsParams.control.bits.overrideFaultY) && (fault != 0) && (fault & FAULT)) {
-    ADCS_Detumble_Finish(false);
-    FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (Y axis fault)"));
-    return;
-  }
-
-  fault = bridgeZ.getFault();
-  if((!adcsParams.control.bits.overrideFaultZ) && (fault != 0) && (fault & FAULT)) {
-    ADCS_Detumble_Finish(false);
-    FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (Z axis fault)"));
-    return;
-  }
-
-  // check abort command
-  if(abortExecution) {
-    abortExecution = false;
-    ADCS_Detumble_Finish(false);
-    FOSSASAT_DEBUG_PRINTLN(F("Detumbling stopped (aborted)"));
+  // check all conditions
+  if(!ADCS_Check()) {
     return;
   }
 
@@ -253,7 +212,7 @@ void ADCS_Detumble_Update() {
 
   } else {
     // tolerance reached, stop detumbling
-    ADCS_Detumble_Finish(true);
+    ADCS_Detumble_Finish(ADCS_RES_DONE_TOL_REACHED, true);
     FOSSASAT_DEBUG_PRINTLN(F("Detumbling done (tolerance reached)"));
     return;
   }
@@ -265,8 +224,8 @@ void ADCS_Detumble_Update() {
   adcsState.prevIntensity[2] = intensity[2];
 }
 
-void ADCS_Detumble_Finish(bool startActiveControl) {
-  ADCS_Finish();
+void ADCS_Detumble_Finish(uint8_t result, bool startActiveControl) {
+  ADCS_Finish(result);
 
   if(startActiveControl && !adcsParams.control.bits.detumbleOnly) {
     // initialize active control
@@ -382,52 +341,8 @@ void ADCS_ActiveControl_Init(const uint32_t activeDuration, const uint8_t positi
 }
 
 void ADCS_ActiveControl_Update() {
-  // TODO add ADCS result reporting + ADCS on-going
-
-  // check active control length
-  if(millis() - adcsState.start > adcsParams.activeLen) {
-    // time limit reached
-    ADCS_Finish();
-    FOSSASAT_DEBUG_PRINTLN(F("Active control done (time limit reached)"));
-    return;
-  }
-
-  // check battery voltage or LP mode
-  #ifdef ENABLE_TRANSMISSION_CONTROL
-  if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
-    ADCS_Finish();
-    FOSSASAT_DEBUG_PRINTLN(F("Active control stopped (battery too low)"));
-    return;
-  }
-  #endif
-
-  // check Hbridge faults
-  uint8_t fault = bridgeX.getFault();
-  if((!adcsParams.control.bits.overrideFaultX) && (fault != 0) && (fault & FAULT)) {
-    ADCS_Finish();
-    FOSSASAT_DEBUG_PRINTLN(F("Active control stopped (X axis fault)"));
-    return;
-  }
-
-  fault = bridgeY.getFault();
-  if((!adcsParams.control.bits.overrideFaultY) && (fault != 0) && (fault & FAULT)) {
-    ADCS_Finish();
-    FOSSASAT_DEBUG_PRINTLN(F("Active control stopped (Y axis fault)"));
-    return;
-  }
-
-  fault = bridgeZ.getFault();
-  if((!adcsParams.control.bits.overrideFaultZ) && (fault != 0) && (fault & FAULT)) {
-    ADCS_Finish();
-    FOSSASAT_DEBUG_PRINTLN(F("Active control stopped (Z axis fault)"));
-    return;
-  }
-
-  // check abort command
-  if(abortExecution) {
-    abortExecution = false;
-    ADCS_Finish();
-    FOSSASAT_DEBUG_PRINTLN(F("Active control stopped (aborted)"));
+  // check all conditions
+  if(!ADCS_Check()) {
     return;
   }
 
@@ -473,7 +388,6 @@ void ADCS_ActiveControl_Update() {
   bool omegaToleranceReached = (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.activeOmegaTol);
   if ((adcsParams.control.bits.overrideEulerTol || eulerToleranceReached) && (adcsParams.control.bits.overrideOmegaTol || omegaToleranceReached)) {
     // Choose controller from ADCS parameters
-    // TODO configurable controllers
     float controllerMatrix[ADCS_NUM_AXES][2*ADCS_NUM_AXES];
     memcpy(controllerMatrix, adcsParams.controllers + (controller * FLASH_ADCS_CONTROLLER_SLOT_SIZE), FLASH_ADCS_CONTROLLER_SLOT_SIZE);
 
@@ -515,7 +429,7 @@ void ADCS_ActiveControl_Update() {
     FOSSASAT_DEBUG_PRINTLN();
 
   } else {
-    ADCS_Finish();
+    ADCS_Finish(ADCS_RES_DONE_TOL_REACHED);
     FOSSASAT_DEBUG_PRINTLN(F("Active control done (tolerance reached)"));
     return;
   }
@@ -532,7 +446,59 @@ void ADCS_ActiveControl_Update() {
   }
 }
 
-void ADCS_Finish() {
+bool ADCS_Check() {
+  // check detumbling length
+  if(millis() - adcsState.start > adcsParams.detumbleLen) {
+    // time limit reached
+    ADCS_Detumble_Finish(ADCS_RES_DONE_TIME_LIMIT, true);
+    FOSSASAT_DEBUG_PRINTLN(F("ADCS done (time limit reached)"));
+    return(false);
+  }
+
+  // check battery voltage or LP mode
+  #ifdef ENABLE_TRANSMISSION_CONTROL
+  if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
+    ADCS_Detumble_Finish(ADCS_RES_STOPPED_LOW_POWER, false);
+    FOSSASAT_DEBUG_PRINTLN(F("ADCS stopped (battery too low)"));
+    return(false);
+  }
+  #endif
+
+  // check Hbridge faults
+  uint8_t fault = bridgeX.getFault();
+  if((!adcsParams.control.bits.overrideFaultX) && (fault != 0) && (fault & FAULT)) {
+    ADCS_Detumble_Finish(((fault & FAULT) << 3 ) | ADCS_RES_STOPPED_FAULT_X, false);
+    FOSSASAT_DEBUG_PRINTLN(F("ADCS stopped (X axis fault)"));
+    return(false);
+  }
+
+  fault = bridgeY.getFault();
+  if((!adcsParams.control.bits.overrideFaultY) && (fault != 0) && (fault & FAULT)) {
+    ADCS_Detumble_Finish(((fault & FAULT) << 3 ) | ADCS_RES_STOPPED_FAULT_Y, false);
+    FOSSASAT_DEBUG_PRINTLN(F("ADCS stopped (Y axis fault)"));
+    return(false);
+  }
+
+  fault = bridgeZ.getFault();
+  if((!adcsParams.control.bits.overrideFaultZ) && (fault != 0) && (fault & FAULT)) {
+    ADCS_Detumble_Finish(((fault & FAULT) << 3 ) | ADCS_RES_STOPPED_FAULT_Z, false);
+    FOSSASAT_DEBUG_PRINTLN(F("ADCS stopped (Z axis fault)"));
+    return(false);
+  }
+
+  // check abort command
+  if(abortExecution) {
+    abortExecution = false;
+    ADCS_Detumble_Finish(ADCS_RES_STOPPED_ABORT, false);
+    FOSSASAT_DEBUG_PRINTLN(F("ADCS stopped (aborted)"));
+    return(false);
+  }
+
+  return(true);
+}
+
+void ADCS_Finish(uint8_t result) {
+  PersistentStorage_SystemInfo_Set<uint8_t>(FLASH_LAST_ADCS_RESULT, result);
   adcsState.active = false;
   bridgeX.stop();
   bridgeY.stop();

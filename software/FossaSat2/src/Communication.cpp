@@ -208,7 +208,7 @@ void Communication_Send_Basic_System_Info() {
 
 void Communication_Send_Full_System_Info() {
   // build response frame
-  static const uint8_t optDataLen = 13*sizeof(uint8_t) + 12*sizeof(int16_t) + sizeof(uint16_t) + 2*sizeof(uint32_t) + 2*sizeof(float);
+  static const uint8_t optDataLen = 14*sizeof(uint8_t) + 12*sizeof(int16_t) + sizeof(uint16_t) + 2*sizeof(uint32_t) + 2*sizeof(float);
   uint8_t optData[optDataLen];
   uint8_t* optDataPtr = optData;
 
@@ -228,7 +228,8 @@ void Communication_Send_Full_System_Info() {
                         ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED)    << 1) & 0b00000010) |
                         ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE)            << 2) & 0b00011100) |
                         ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_MPPT_TEMP_SWITCH_ENABLED)  << 5) & 0b00100000) |
-                        ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_MPPT_KEEP_ALIVE_ENABLED)   << 6) & 0b01000000));
+                        ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_MPPT_KEEP_ALIVE_ENABLED)   << 6) & 0b01000000) |
+                        ((scienceModeActive << 7) & 0b10000000));
   Communication_Frame_Add(&optDataPtr, powerConfig, "powerConfig", 1, "");
 
   uint16_t resetCounter = PersistentStorage_SystemInfo_Get<uint16_t>(FLASH_RESTART_COUNTER);
@@ -311,6 +312,9 @@ void Communication_Send_Full_System_Info() {
                          (uint8_t)currSensorY.available << 3 | (uint8_t)currSensorMPPT.available << 2 |
                          (uint8_t)lightSensorPanelY.available << 1 | (uint8_t)lightSensorTop.available << 0;
   Communication_Frame_Add(&optDataPtr, sensorStates, "sensors", 1, "");
+
+  uint8_t adcsState = PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LAST_ADCS_RESULT);
+  Communication_Frame_Add(&optDataPtr, sensorStates, "adcsState", 1, "");
 
   FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
 
@@ -1717,7 +1721,6 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       uint16_t respOptDataLen = Navigation_GNSS_Run_Cmd(optData, optDataLen, respOptData);
 
       // send the response
-      // TODO: send ACK/NACK state?
       if((respOptDataLen == 0) || (respOptDataLen == 0xFFFF)) {
         Communication_Send_Response(RESP_GPS_COMMAND_RESPONSE);
       } else {
@@ -1837,6 +1840,14 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         PersistentStorage_SectorErase(addr);
       }
 
+    } break;
+
+    case CMD_SET_ADCS_CONTROLLER: {
+      // TODO CMD_SET_ADCS_CONTROLLER
+    } break;
+
+    case CMD_SET_ADCS_EPHEMERIDES: {
+      // TODO CMD_SET_ADCS_CONTROLLER
     } break;
 
     default:
