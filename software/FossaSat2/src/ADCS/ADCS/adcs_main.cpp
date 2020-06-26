@@ -296,7 +296,7 @@ void ADCS_ActiveControl_Init(const uint32_t activeDuration) {
   ADCS_CALC_TYPE solarEphe[ADCS_NUM_AXES];
   ADCS_CALC_TYPE magEphe[ADCS_NUM_AXES];
   uint32_t row = adcsState.currentEpheRow;
-  uint8_t controller = ADCS_Load_Ephemerides(row, solarEphe, magEphe);
+  ADCS_Load_Ephemerides(row, solarEphe, magEphe);
   adcsState.currentEpheRow++;
 
   // set initial state
