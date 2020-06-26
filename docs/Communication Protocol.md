@@ -311,7 +311,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Description: Aborts the currently running operation (e.g. GPS logging or ADCS control).
 
 ### CMD_MANEUVER
-- Optional data length: 15
+- Optional data length: 9
 - Optional data:
   - 0: control flags
     - bit 0: only perform detumbling (0x01) or both detumbling and maneuver (0x00)
@@ -321,7 +321,6 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
     - bit 4: override Z axis H-bridge fault check
   - 1 - 4: detumbling length in ms, unsigned 32-bit integer, LSB first
   - 5 - 8: maneuver length in ms (ignored if detumble-only flag is set), unsigned 32-bit integer, LSB first
-  - 9 - 14: target position, uint8_t array
 - Response: none
 - Description: Performs maneuver with closed-loop ADCS control.
 

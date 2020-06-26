@@ -1767,7 +1767,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_MANEUVER: {
-      if(Communication_Check_OptDataLen(15, optDataLen)) {
+      if(Communication_Check_OptDataLen(9, optDataLen)) {
         // extract parameters
         uint32_t detumbleLen = 0;
         memcpy(&detumbleLen, optData + 1, sizeof(detumbleLen));
@@ -1788,7 +1788,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         double meanOrbitalMotion = (2.0 * M_PI * PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_MEAN_MOTION)) / (24.0 * 3600.0);
 
         // initialize ADCS
-        ADCS_Main(controlFlags, detumbleLen, maneuverLen, optData + 9, orbitalInclination, meanOrbitalMotion);
+        ADCS_Main(controlFlags, detumbleLen, maneuverLen, orbitalInclination, meanOrbitalMotion);
       }
     } break;
 

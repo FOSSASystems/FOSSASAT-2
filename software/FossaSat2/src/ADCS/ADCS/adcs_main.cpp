@@ -12,7 +12,7 @@
 
 /*********** Main function ***************/
 void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, const uint32_t activeDuration,
-               const uint8_t position[], const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion) {
+               const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion) {
 
   // save control flags
   adcsParams.control.val = controlFlags;
@@ -23,7 +23,6 @@ void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, cons
   // set active control parameters
   if(!adcsParams.control.bits.detumbleOnly) {
     adcsParams.activeLen = activeDuration;
-    memcpy(adcsParams.position, position, 6*sizeof(position[0]));
   }
 
   // reset previous ADCS result
@@ -229,11 +228,11 @@ void ADCS_Detumble_Finish(uint8_t result, bool startActiveControl) {
 
   if(startActiveControl && !adcsParams.control.bits.detumbleOnly) {
     // initialize active control
-    ADCS_ActiveControl_Init(adcsParams.activeLen, adcsParams.position);
+    ADCS_ActiveControl_Init(adcsParams.activeLen);
   }
 }
 
-void ADCS_ActiveControl_Init(const uint32_t activeDuration, const uint8_t position[]) {
+void ADCS_ActiveControl_Init(const uint32_t activeDuration) {
   // cache parameters
   adcsParams.maxPulseInt = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_INTENSITY);     // Maximum applicable intensity
   adcsParams.maxPulseLen = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_LENGTH);    // Maximum pulse time available
@@ -248,7 +247,7 @@ void ADCS_ActiveControl_Init(const uint32_t activeDuration, const uint8_t positi
   adcsParams.activeLen = activeDuration;
 
   // load controllers
-  const size_t controllerBuffLen = 10*FLASH_ADCS_CONTROLLER_SLOT_SIZE;
+  const size_t controllerBuffLen = ADCS_MAX_NUM_CONTROLLERS*FLASH_ADCS_CONTROLLER_SLOT_SIZE;
   uint8_t controllerBuff[controllerBuffLen];
   PersistentStorage_Read(FLASH_ADCS_CONTROLLERS, controllerBuff, controllerBuffLen);
   memcpy(adcsParams.controllers, controllerBuff, controllerBuffLen);

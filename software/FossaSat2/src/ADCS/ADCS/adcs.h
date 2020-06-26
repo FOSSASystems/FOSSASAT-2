@@ -35,7 +35,7 @@
 /*********** Functions declaration ************/
 // Main structure
 void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, const uint32_t activeDuration,
-               const uint8_t position[], const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion);
+               const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion);
 
 ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[]);
 
@@ -43,7 +43,7 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
 void ADCS_Detumble_Update();
 void ADCS_Detumble_Finish(uint8_t result, bool startActiveControl);
 
-void ADCS_ActiveControl_Init(const uint32_t activeDuration, const uint8_t position[]);
+void ADCS_ActiveControl_Init(const uint32_t activeDuration);
 void ADCS_ActiveControl_Update();
 
 bool ADCS_Check();

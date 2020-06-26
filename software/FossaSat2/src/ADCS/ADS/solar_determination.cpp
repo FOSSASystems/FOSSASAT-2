@@ -13,7 +13,7 @@
 /*************** Main function *****************/
 void ADS_Solar_Determination(ADCS_CALC_TYPE luxData[], ADCS_CALC_TYPE solarEph[], ADCS_CALC_TYPE redundantSolarEph[]) {
   // Constants definitions
-  const ADCS_CALC_TYPE maxPower[ADCS_NUM_PANELS] = {//fill with power logging};                      // Maximum obtainable power/lux array
+  ADCS_CALC_TYPE maxPower[ADCS_NUM_PANELS];                      // Maximum obtainable power/lux array
   ADCS_CALC_TYPE panelUnitVector[ADCS_NUM_PANELS][ADCS_NUM_AXES] = ADCS_PANEL_UNIT_VECTOR; // Unitary vector pointing to the solar panels in inverse form
 
   // Main calculation
