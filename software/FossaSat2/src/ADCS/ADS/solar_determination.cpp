@@ -13,8 +13,17 @@
 /*************** Main function *****************/
 void ADS_Solar_Determination(ADCS_CALC_TYPE luxData[], ADCS_CALC_TYPE solarEph[], ADCS_CALC_TYPE redundantSolarEph[]) {
   // Constants definitions
-  ADCS_CALC_TYPE maxPower[ADCS_NUM_PANELS];                      // Maximum obtainable power/lux array
   ADCS_CALC_TYPE panelUnitVector[ADCS_NUM_PANELS][ADCS_NUM_AXES] = ADCS_PANEL_UNIT_VECTOR; // Unitary vector pointing to the solar panels in inverse form
+
+  // Maximum obtainable power/lux array
+  float val;
+  ADCS_CALC_TYPE maxPower[ADCS_NUM_PANELS];
+  for(uint8_t i = 0; i < ADCS_NUM_PANELS - 1; i++) {
+    val = PersistentStorage_Get<float>(FLASH_STATS_POWER_XA + 2*(sizeof(float)) + i*3*(sizeof(float)));
+    maxPower[i] = (ADCS_CALC_TYPE)val;
+  }
+  val = PersistentStorage_Get<float>(FLASH_STATS_LIGHT_PANEL_Y + 2*(sizeof(float)));
+  maxPower[ADCS_NUM_PANELS - 1] = (ADCS_CALC_TYPE)val;
 
   // Main calculation
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {

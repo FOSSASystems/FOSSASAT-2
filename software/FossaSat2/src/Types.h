@@ -84,7 +84,6 @@ struct adcsParams_t {
   uint32_t activeLen;
   ADCS_CALC_TYPE calcTol;
   ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES];
-  uint8_t position[2*ADCS_NUM_AXES];
   ADCS_CALC_TYPE eclipseThreshold;
   ADCS_CALC_TYPE rotationWeightRatio;
   ADCS_CALC_TYPE rotationTrigger;
