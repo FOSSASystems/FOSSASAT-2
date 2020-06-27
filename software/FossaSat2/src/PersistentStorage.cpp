@@ -738,7 +738,8 @@ void PersistentStorage_Set_ADCS_Ephemerides(uint32_t row, float ephemerides[2*AD
   PersistentStorage_Read(sectorAddr, sectorBuff, FLASH_SECTOR_SIZE);
 
   // update buffer
-  memcpy(sectorBuff + epheAddr, ephemerides, FLASH_ADCS_EPHEMERIDES_SLOT_SIZE);
+  memcpy(sectorBuff + epheAddr, ephemerides, 2*ADCS_NUM_AXES*sizeof(float));
+  sectorBuff[epheAddr + 2*ADCS_NUM_AXES*sizeof(float)] = controllerId;
 
   // write update buffer
   PersistentStorage_Write(sectorAddr, sectorBuff, FLASH_SECTOR_SIZE);
