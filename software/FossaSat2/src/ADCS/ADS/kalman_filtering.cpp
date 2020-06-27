@@ -17,29 +17,29 @@ void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[ADCS_STATE_DIM][ADCS_STATE_DIM]) {
 	ADCS_CALC_TYPE matrix_aux[ADCS_STATE_DIM][2*ADCS_STATE_DIM];
 
 	// Create the augmented matrix
-    for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
-        for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
-            matrix_aux[i][j] = matrix[i][j];
-        }
+  for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
+    for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
+      matrix_aux[i][j] = matrix[i][j];
+    }
 	}
 
 	for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
-        for(uint8_t j = 0; j < 2 * ADCS_STATE_DIM; j++) {
+    for(uint8_t j = 0; j < 2 * ADCS_STATE_DIM; j++) {
 			if(j == (i + ADCS_STATE_DIM)) {
-                matrix_aux[i][j] = 1;
-            }
-        }
+        matrix_aux[i][j] = 1;
+      }
+    }
 	}
 
 	// Interchange the rows of matrix from the end
-    ADCS_CALC_TYPE tempArr[ADCS_STATE_DIM];
+  ADCS_CALC_TYPE tempArr;
 	for (uint8_t i = ADCS_STATE_DIM - 1; i > 0; i--) {
 		if(matrix_aux[i - 1][0] < matrix_aux[i][0]) {
-            for(uint8_t j = 0; j < 2*ADCS_STATE_DIM; j++) {
-                tempArr = matrix_aux[i][j];
-                matrix_aux[i][j] = matrix_aux[i - 1][j];
-                matrix_aux[i - 1][j] = tempArr;
-            }
+      for(uint8_t j = 0; j < 2*ADCS_STATE_DIM; j++) {
+        tempArr = matrix_aux[i][j];
+        matrix_aux[i][j] = matrix_aux[i - 1][j];
+        matrix_aux[i - 1][j] = tempArr;
+      }
 		}
 	}
 
@@ -85,7 +85,6 @@ void ADS_Kalman_Filter(const ADCS_CALC_TYPE Q, const ADCS_CALC_TYPE R, const ADC
   ADCS_CALC_TYPE M_aux3[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0},{0},{0},{0},{0},{0}};   // Auxiliary matrix
 
   ADCS_CALC_TYPE S[ADCS_STATE_DIM][ADCS_STATE_DIM];                                          // Partial solution of the CARE
-  ADCS_CALC_TYPE invS[ADCS_STATE_DIM][ADCS_STATE_DIM];                                       // Inverse of the matrix
   ADCS_CALC_TYPE kalman_gain[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0},{0},{0},{0},{0},{0}};    // Proper Kalman filter
 
   // Initialization of the algorithm in the general case
