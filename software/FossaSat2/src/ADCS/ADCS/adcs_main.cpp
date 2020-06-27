@@ -160,39 +160,9 @@ void ADCS_Detumble_Update() {
   if ((adcsParams.control.bits.overrideDetumbleTol) || (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.detumbleOmegaTol)) {
       // Control law generation
       ACS_BdotFunction(omega, mag, adcsParams.coilChar, adcsParams.meanOrbitalMotion, adcsParams.orbInclination, adcsParams.minInertialMoment, intensity);
-      ADCS_CALC_TYPE intensityNorm = ADCS_VectorNorm(intensity);
-      ADCS_CALC_TYPE pulseLength[ADCS_NUM_AXES];
-      FOSSASAT_DEBUG_PRINT(F("intensityNorm=\t"));
-      FOSSASAT_DEBUG_PRINTLN(intensityNorm, 4);
 
-      if (intensityNorm < adcsParams.maxPulseInt) {
-          // Calculate the intensities
-          pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep, adcsParams.pulseAmplitude);
-          pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep, adcsParams.pulseAmplitude);
-          pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep, adcsParams.pulseAmplitude);
-
-      } else {
-          // Max intensity application
-          pulseLength[0] = adcsParams.maxPulseLen;
-          pulseLength[1] = adcsParams.maxPulseLen;
-          pulseLength[2] = adcsParams.maxPulseLen;
-
-      }
-
-      // update H-bridges
-      adcsState.bridgeStateX.pulseLen = (uint32_t)(pulseLength[0]);
-      adcsState.bridgeStateY.pulseLen = (uint32_t)(pulseLength[1]);
-      adcsState.bridgeStateZ.pulseLen = (uint32_t)(pulseLength[2]);
-
-      FOSSASAT_DEBUG_PRINT(F("intensity=\t"));
-      FOSSASAT_DEBUG_PRINT(intensity[0], 8); FOSSASAT_DEBUG_PRINT('\t');
-      FOSSASAT_DEBUG_PRINT(intensity[1], 8); FOSSASAT_DEBUG_PRINT('\t');
-      FOSSASAT_DEBUG_PRINTLN(intensity[2], 8);
-      FOSSASAT_DEBUG_PRINT(F("pulseLength=\t"));
-      FOSSASAT_DEBUG_PRINT(pulseLength[0], 8); FOSSASAT_DEBUG_PRINT('\t');
-      FOSSASAT_DEBUG_PRINT(pulseLength[1], 8); FOSSASAT_DEBUG_PRINT('\t');
-      FOSSASAT_DEBUG_PRINTLN(pulseLength[2], 8);
-      FOSSASAT_DEBUG_PRINTLN();
+      // calculate and update pulse length
+      ADCS_Set_Pulse_Lengths(intensity);
 
   } else {
     // tolerance reached, stop detumbling
@@ -309,24 +279,8 @@ void ADCS_ActiveControl_Init(const uint32_t activeDuration) {
     }
   }
 
-  // configure H bridge timer
-  HbridgeTimer->setOverflow(adcsParams.bridgeTimerUpdatePeriod * (uint32_t)1000, MICROSEC_FORMAT);
-  HbridgeTimer->attachInterrupt(ADCS_Update_Bridges);
-  adcsState.bridgeStateX.outputHigh = false;
-  adcsState.bridgeStateY.outputHigh = false;
-  adcsState.bridgeStateZ.outputHigh = false;
-
-  // configure ADCS timer
-  AdcsTimer->setOverflow(adcsParams.timeStep * (uint32_t)1000, MICROSEC_FORMAT);
-  AdcsTimer->attachInterrupt(ADCS_ActiveControl_Update);
-
-  // start timers
-  adcsState.start = millis();
-  adcsState.bridgeStateX.lastUpdate = adcsState.start;
-  adcsState.bridgeStateY.lastUpdate  = adcsState.start;
-  adcsState.bridgeStateZ.lastUpdate  = adcsState.start;
-  HbridgeTimer->resume();
-  AdcsTimer->resume();
+  // configure timers
+  ADCS_Setup_Timers(ADCS_ActiveControl_Update);
 }
 
 void ADCS_ActiveControl_Update() {
@@ -386,39 +340,8 @@ void ADCS_ActiveControl_Update() {
     ADCS_CALC_TYPE intensity[ADCS_NUM_AXES];
     ACS_OnboardControl(stateVars, magData, controllerMatrix, adcsParams.coilChar, intensity);
 
-    ADCS_CALC_TYPE intensityNorm = ADCS_VectorNorm(intensity);
-    ADCS_CALC_TYPE pulseLength[ADCS_NUM_AXES];
-    FOSSASAT_DEBUG_PRINT(F("intensityNorm=\t"));
-    FOSSASAT_DEBUG_PRINTLN(intensityNorm, 4);
-
-    if (intensityNorm < adcsParams.maxPulseInt) {
-        // Calculate the intensities
-        pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep, adcsParams.pulseAmplitude);
-        pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep, adcsParams.pulseAmplitude);
-        pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep, adcsParams.pulseAmplitude);
-
-    } else {
-        // Max intensity application
-        pulseLength[0] = adcsParams.maxPulseLen;
-        pulseLength[1] = adcsParams.maxPulseLen;
-        pulseLength[2] = adcsParams.maxPulseLen;
-
-    }
-
-    // update H-bridges
-    adcsState.bridgeStateX.pulseLen = (uint32_t)(pulseLength[0]);
-    adcsState.bridgeStateY.pulseLen = (uint32_t)(pulseLength[1]);
-    adcsState.bridgeStateZ.pulseLen = (uint32_t)(pulseLength[2]);
-
-    FOSSASAT_DEBUG_PRINT(F("intensity=\t"));
-    FOSSASAT_DEBUG_PRINT(intensity[0], 8); FOSSASAT_DEBUG_PRINT('\t');
-    FOSSASAT_DEBUG_PRINT(intensity[1], 8); FOSSASAT_DEBUG_PRINT('\t');
-    FOSSASAT_DEBUG_PRINTLN(intensity[2], 8);
-    FOSSASAT_DEBUG_PRINT(F("pulseLength=\t"));
-    FOSSASAT_DEBUG_PRINT(pulseLength[0], 8); FOSSASAT_DEBUG_PRINT('\t');
-    FOSSASAT_DEBUG_PRINT(pulseLength[1], 8); FOSSASAT_DEBUG_PRINT('\t');
-    FOSSASAT_DEBUG_PRINTLN(pulseLength[2], 8);
-    FOSSASAT_DEBUG_PRINTLN();
+    // calculate and update pulse length
+    ADCS_Set_Pulse_Lengths(intensity);
 
   } else {
     ADCS_Finish(ADCS_RES_DONE_TOL_REACHED);
@@ -529,6 +452,63 @@ void ADCS_Finish(uint8_t result) {
   AdcsTimer->detachInterrupt();
   HbridgeTimer->pause();
   scienceModeActive = false;
+}
+
+void ADCS_Set_Pulse_Lengths(ADCS_CALC_TYPE intensity[ADCS_NUM_AXES]) {
+  ADCS_CALC_TYPE intensityNorm = ADCS_VectorNorm(intensity);
+  ADCS_CALC_TYPE pulseLength[ADCS_NUM_AXES];
+  FOSSASAT_DEBUG_PRINT(F("intensityNorm=\t"));
+  FOSSASAT_DEBUG_PRINTLN(intensityNorm, 4);
+
+  if(intensityNorm < adcsParams.maxPulseInt) {
+    // Calculate the intensities
+    pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep, adcsParams.pulseAmplitude);
+    pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep, adcsParams.pulseAmplitude);
+    pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep, adcsParams.pulseAmplitude);
+
+  } else {
+    // Max intensity application
+    pulseLength[0] = adcsParams.maxPulseLen;
+    pulseLength[1] = adcsParams.maxPulseLen;
+    pulseLength[2] = adcsParams.maxPulseLen;
+
+  }
+
+  // update H-bridges
+  adcsState.bridgeStateX.pulseLen = (uint32_t)(pulseLength[0]);
+  adcsState.bridgeStateY.pulseLen = (uint32_t)(pulseLength[1]);
+  adcsState.bridgeStateZ.pulseLen = (uint32_t)(pulseLength[2]);
+
+  FOSSASAT_DEBUG_PRINT(F("intensity=\t"));
+  FOSSASAT_DEBUG_PRINT(intensity[0], 8); FOSSASAT_DEBUG_PRINT('\t');
+  FOSSASAT_DEBUG_PRINT(intensity[1], 8); FOSSASAT_DEBUG_PRINT('\t');
+  FOSSASAT_DEBUG_PRINTLN(intensity[2], 8);
+  FOSSASAT_DEBUG_PRINT(F("pulseLength=\t"));
+  FOSSASAT_DEBUG_PRINT(pulseLength[0], 8); FOSSASAT_DEBUG_PRINT('\t');
+  FOSSASAT_DEBUG_PRINT(pulseLength[1], 8); FOSSASAT_DEBUG_PRINT('\t');
+  FOSSASAT_DEBUG_PRINTLN(pulseLength[2], 8);
+  FOSSASAT_DEBUG_PRINTLN();
+}
+
+void ADCS_Setup_Timers(void (*func)(void)) {
+  // configure H bridge timer
+  HbridgeTimer->setOverflow(adcsParams.bridgeTimerUpdatePeriod * (uint32_t)1000, MICROSEC_FORMAT);
+  HbridgeTimer->attachInterrupt(ADCS_Update_Bridges);
+  adcsState.bridgeStateX.outputHigh = false;
+  adcsState.bridgeStateY.outputHigh = false;
+  adcsState.bridgeStateZ.outputHigh = false;
+
+  // configure ADCS timer
+  AdcsTimer->setOverflow(adcsParams.timeStep * (uint32_t)1000, MICROSEC_FORMAT);
+  AdcsTimer->attachInterrupt(func);
+
+  // start timers
+  adcsState.start = millis();
+  adcsState.bridgeStateX.lastUpdate = adcsState.start;
+  adcsState.bridgeStateY.lastUpdate  = adcsState.start;
+  adcsState.bridgeStateZ.lastUpdate  = adcsState.start;
+  HbridgeTimer->resume();
+  AdcsTimer->resume();
 }
 
 void ADCS_Update_Bridges() {
