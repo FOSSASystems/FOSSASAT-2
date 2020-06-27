@@ -32,8 +32,6 @@
 #include "../ACS/acs.h"
 #include "../ADS/ads.h"
 
-// TODO extract common code
-
 /*********** Functions declaration ************/
 // Main structure
 void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, const uint32_t activeDuration,

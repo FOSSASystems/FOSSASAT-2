@@ -1852,7 +1852,27 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_SET_ADCS_CONTROLLER: {
-      // TODO CMD_SET_ADCS_CONTROLLER
+      if(Communication_Check_OptDataLen(77, optDataLen)) {
+        uint8_t id = optData[0];
+        FOSSASAT_DEBUG_PRINT(F("ADCS controller ID: "));
+        FOSSASAT_DEBUG_PRINTLN(id);
+
+        FOSSASAT_DEBUG_PRINTLN(F("Controller: "));
+        float val = 0;
+        float controller[ADCS_NUM_AXES][2*ADCS_NUM_AXES];
+        for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+          for(uint8_t j = 0; j < 2*ADCS_NUM_AXES; j++) {
+            memcpy(&val, optData + 1 + (2*ADCS_NUM_AXES*i + j) * sizeof(float), sizeof(float));
+            FOSSASAT_DEBUG_PRINT(val, 4);
+            FOSSASAT_DEBUG_PRINT('\t');
+            controller[i][j] = val;
+          }
+          FOSSASAT_DEBUG_PRINTLN();
+        }
+        PersistentStorage_Set_ADCS_Controller(id, controller);
+
+      }
+
     } break;
 
     case CMD_SET_ADCS_EPHEMERIDES: {

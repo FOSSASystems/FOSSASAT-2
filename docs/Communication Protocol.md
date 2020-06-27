@@ -356,6 +356,14 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Response: none
 - Description: Erases one external flash sector.
 
+### CMD_SET_ADCS_CONTROLLER
+- Optional data length: 77
+- Optional data:
+  - 0: controller ID
+  - 1 - 76: ADCS controller matrix, 3x6 array, float
+- Response: none
+- Description: Sets one of the ADCS controllers. The number of active controllers must be updated using CMD_SET_ADCS_PARAMETERS! Controller array values are sent in the order [0][0] -> [0][1] -> [0][2] ... [2][3] -> [2][4] -> [2][5], each value is sent LSB first.
+
 ---
 # Responses
 

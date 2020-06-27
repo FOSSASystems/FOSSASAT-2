@@ -724,6 +724,20 @@ void PersistentStorage_Set_Message(uint16_t slotNum, uint8_t* buff, uint8_t len)
   FOSSASAT_DEBUG_PRINT_FLASH(addr, FLASH_EXT_PAGE_SIZE);
 }
 
+void PersistentStorage_Set_ADCS_Controller(uint8_t id, float controller[ADCS_NUM_AXES][2*ADCS_NUM_AXES]) {
+  // read the controller sector
+  uint8_t sectorBuff[FLASH_SECTOR_SIZE];
+  PersistentStorage_Read(FLASH_ADCS_CONTROLLERS, sectorBuff, FLASH_SECTOR_SIZE);
+
+  // update buffer
+  uint32_t controllerLen = ADCS_NUM_AXES*2*ADCS_NUM_AXES*sizeof(float);
+  memcpy(sectorBuff + id*controllerLen, controller, controllerLen);
+
+  // write updated buffer
+  PersistentStorage_Write(FLASH_ADCS_CONTROLLERS, sectorBuff, FLASH_SECTOR_SIZE);
+  FOSSASAT_DEBUG_PRINT_FLASH(FLASH_ADCS_CONTROLLERS, FLASH_EXT_PAGE_SIZE);
+}
+
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len) {
   uint8_t cmdBuff[] = {MX25L51245G_CMD_READ, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
   PersistentStorage_SPItransaction(cmdBuff, 5, false, buff, len);
