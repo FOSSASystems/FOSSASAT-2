@@ -809,13 +809,27 @@ void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool auto
     // set WEL bit again
     PersistentStorage_WaitForWriteEnable();
 
-    // write the remainder
-    newAddr = (addr & 0xFFFFFF00) + FLASH_EXT_PAGE_SIZE;
-    cmdBuff[1] = (uint8_t)((newAddr >> 24) & 0xFF);
-    cmdBuff[2] = (uint8_t)((newAddr >> 16) & 0xFF);
-    cmdBuff[3] = (uint8_t)((newAddr >> 8) & 0xFF);
-    cmdBuff[4] = (uint8_t)(newAddr & 0xFF);
-    PersistentStorage_SPItransaction(cmdBuff, 5, true, buff + firstPageLen, len - firstPageLen);
+    // some bytes are in the following page(s)
+    uint32_t remLen = len - firstPageLen;
+    uint8_t numPages = (remLen / FLASH_EXT_PAGE_SIZE) + 1;
+    for(uint8_t i = 0; i < numPages; i++) {
+      // get address of the next page
+      newAddr = (addr & 0xFFFFFF00) + ((uint32_t)(i + 1)) * FLASH_EXT_PAGE_SIZE;
+      cmdBuff[1] = (uint8_t)((newAddr >> 24) & 0xFF);
+      cmdBuff[2] = (uint8_t)((newAddr >> 16) & 0xFF);
+      cmdBuff[3] = (uint8_t)((newAddr >> 8) & 0xFF);
+      cmdBuff[4] = (uint8_t)(newAddr & 0xFF);
+
+      // calculate length
+      uint32_t writeLen = FLASH_EXT_PAGE_SIZE;
+      if(remLen < FLASH_EXT_PAGE_SIZE) {
+        writeLen = remLen;
+      }
+
+      // write the buffer
+      PersistentStorage_SPItransaction(cmdBuff, 5, true, buff + (len - remLen), writeLen);
+      remLen -= writeLen;
+    }
   }
 
   // wait until page is written
