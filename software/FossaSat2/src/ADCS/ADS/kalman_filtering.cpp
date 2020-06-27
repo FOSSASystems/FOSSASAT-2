@@ -16,27 +16,29 @@ void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[][ADCS_STATE_DIM]) {
 	ADCS_CALC_TYPE temp;
 
 	// Create the augmented matrix
+    for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
+        for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
+            matrix_aux[i][j] = matrix[i][j];
+        }
+	}
+
 	for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
-		for(uint8_t j = 0; j < 2 * ADCS_STATE_DIM; j++) {
+        for(uint8_t j = 0; j < 2 * ADCS_STATE_DIM; j++) {
 			if(j == (i + ADCS_STATE_DIM)) {
-        matrix[i][j] = 1;
-      }
-		}
+                matrix_aux[i][j] = 1;
+            }
+        }
 	}
 
 	// Interchange the rows of matrix from the end
-  ADCS_CALC_TYPE tempArr[ADCS_STATE_DIM];
+    ADCS_CALC_TYPE tempArr[ADCS_STATE_DIM];
 	for (uint8_t i = ADCS_STATE_DIM - 1; i > 0; i--) {
-		if(matrix[i - 1][0] < matrix[i][0]) {
-      for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
-        tempArr[j] = matrix[i][j];
-      }
-      for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
-        matrix[i][j] = matrix[i - 1][j];
-      }
-      for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
-        matrix[i - 1][j] = tempArr[j];
-      }
+		if(matrix_aux[i - 1][0] < matrix_aux[i][0]) {
+            for(uint8_t j = 0; j < 2*ADCS_STATE_DIM; j++) {
+                tempArr = matrix_aux[i][j];
+                matrix_aux[i][j] = matrix_aux[i - 1][j];
+                matrix_aux[i - 1][j] = tempArr;
+            }
 		}
 	}
 
@@ -45,9 +47,9 @@ void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[][ADCS_STATE_DIM]) {
 	for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
 		for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
 			if (j != i) {
-				temp = matrix[j][i] / matrix[i][i];
-				for(uint8_t k = 0; k < ADCS_STATE_DIM; k++) {
-					matrix[j][k] -= (matrix[i][k] * temp);
+				temp = matrix_aux[j][i] / matrix_aux[i][i];
+				for(uint8_t k = 0; k < 2*ADCS_STATE_DIM; k++) {
+					matrix_aux[j][k] -= (matrix_aux[i][k] * temp);
 				}
 			}
 		}
@@ -57,8 +59,14 @@ void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[][ADCS_STATE_DIM]) {
 	// Divide row element by the diagonal element
 	for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
 		temp = matrix[i][i];
+		for(uint8_t j = 0; j < 2*ADCS_STATE_DIM; j++) {
+			matrix_aux[i][j] = matrix_aux[i][j] / temp;
+		}
+	}
+
+    for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
 		for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
-			matrix[i][j] = matrix[i][j] / temp;
+			matrix[i][j] = matrix_aux[i][ADCS_STATE_DIM+j];
 		}
 	}
 }
