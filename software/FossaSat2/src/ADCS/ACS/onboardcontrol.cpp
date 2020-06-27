@@ -12,7 +12,8 @@
 #include "../ADCS/adcs.h"
 
 /****************** Main function *********************/
-void ACS_OnboardControl(ADCS_CALC_TYPE state[], ADCS_CALC_TYPE mag[], float gain[][2*ADCS_NUM_AXES], ADCS_CALC_TYPE intensity[]) {
+void ACS_OnboardControl(const ADCS_CALC_TYPE state[2*ADCS_NUM_AXES], const ADCS_CALC_TYPE mag[ADCS_NUM_AXES], const float gain[ADCS_NUM_AXES][2*ADCS_NUM_AXES],
+                        const ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES], ADCS_CALC_TYPE intensity[ADCS_NUM_AXES]) {
   // Module of the magnetic field intensity
   const ADCS_CALC_TYPE B_module = ADCS_VectorNorm(mag) + adcsParams.calcTol;
 
@@ -29,13 +30,13 @@ void ACS_OnboardControl(ADCS_CALC_TYPE state[], ADCS_CALC_TYPE mag[], float gain
   }
 
   // Calculation of magnetic dipole applied on the coils
-  ADCS_CALC_TYPE magMoment[3];
+  ADCS_CALC_TYPE magMoment[ADCS_NUM_AXES];
   magMoment[0] = (controlLaw[2]*mag[1] - mag[2]*controlLaw[1])/pow(B_module, 2);
   magMoment[1] = (controlLaw[0]*mag[2] - mag[0]*controlLaw[2])/pow(B_module, 2);
   magMoment[2] = (controlLaw[1]*mag[0] - mag[1]*controlLaw[0])/pow(B_module, 2);
 
   // Definition of intensity output -solving the equation: A*I = m-
-  intensity[0] = magMoment[0]*adcsParams.coilChar[0][0] + magMoment[1]*adcsParams.coilChar[0][1] + magMoment[2]*adcsParams.coilChar[0][2];
-  intensity[1] = magMoment[0]*adcsParams.coilChar[1][0] + magMoment[1]*adcsParams.coilChar[1][1] + magMoment[2]*adcsParams.coilChar[1][2];
-  intensity[2] = magMoment[0]*adcsParams.coilChar[2][0] + magMoment[1]*adcsParams.coilChar[2][1] + magMoment[2]*adcsParams.coilChar[2][2];
+  intensity[0] = magMoment[0]*coilChar[0][0] + magMoment[1]*coilChar[0][1] + magMoment[2]*coilChar[0][2];
+  intensity[1] = magMoment[0]*coilChar[1][0] + magMoment[1]*coilChar[1][1] + magMoment[2]*coilChar[1][2];
+  intensity[2] = magMoment[0]*coilChar[2][0] + magMoment[1]*coilChar[2][1] + magMoment[2]*coilChar[2][2];
 }

@@ -32,7 +32,7 @@ void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, cons
   ADCS_Detumble_Init(detumbleDuration, orbitalInclination, meanOrbitalMotion);
 }
 
-ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[]) {
+ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[ADCS_NUM_AXES]) {
   return(sqrt(pow(dim[0], 2) + pow(dim[1], 2) + pow(dim[2], 2)));
 }
 
@@ -175,7 +175,7 @@ void ADCS_Detumble_Update() {
   // check tolerance
   if ((adcsParams.control.bits.overrideDetumbleTol) || (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.detumbleOmegaTol)) {
       // Control law generation
-      ACS_BdotFunction(omega, mag, intensity);
+      ACS_BdotFunction(omega, mag, adcsParams.coilChar, adcsParams.meanOrbitalMotion, adcsParams.orbInclination, adcsParams.minInertialMoment, intensity);
       ADCS_CALC_TYPE intensityNorm = ADCS_VectorNorm(intensity);
       ADCS_CALC_TYPE pulseLength[ADCS_NUM_AXES];
       FOSSASAT_DEBUG_PRINT(F("intensityNorm=\t"));
@@ -183,15 +183,16 @@ void ADCS_Detumble_Update() {
 
       if (intensityNorm < adcsParams.maxPulseInt) {
           // Calculate the intensities
-          pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep);
-          pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep);
-          pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep);
+          pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep, adcsParams.pulseAmplitude);
+          pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep, adcsParams.pulseAmplitude);
+          pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep, adcsParams.pulseAmplitude);
 
       } else {
           // Max intensity application
           pulseLength[0] = adcsParams.maxPulseLen;
           pulseLength[1] = adcsParams.maxPulseLen;
           pulseLength[2] = adcsParams.maxPulseLen;
+
       }
 
       // update H-bridges
@@ -399,7 +400,7 @@ void ADCS_ActiveControl_Update() {
 
     // Active controlling
     ADCS_CALC_TYPE intensity[ADCS_NUM_AXES];
-    ACS_OnboardControl(stateVars, magData, controllerMatrix, intensity);
+    ACS_OnboardControl(stateVars, magData, controllerMatrix, adcsParams.coilChar, intensity);
 
     ADCS_CALC_TYPE intensityNorm = ADCS_VectorNorm(intensity);
     ADCS_CALC_TYPE pulseLength[ADCS_NUM_AXES];
@@ -408,15 +409,16 @@ void ADCS_ActiveControl_Update() {
 
     if (intensityNorm < adcsParams.maxPulseInt) {
         // Calculate the intensities
-        pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep);
-        pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep);
-        pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep);
+        pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep, adcsParams.pulseAmplitude);
+        pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep, adcsParams.pulseAmplitude);
+        pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep, adcsParams.pulseAmplitude);
 
     } else {
         // Max intensity application
         pulseLength[0] = adcsParams.maxPulseLen;
         pulseLength[1] = adcsParams.maxPulseLen;
         pulseLength[2] = adcsParams.maxPulseLen;
+
     }
 
     // update H-bridges
@@ -452,7 +454,7 @@ void ADCS_ActiveControl_Update() {
   }
 }
 
-uint8_t ADCS_Load_Ephemerides(uint32_t row, ADCS_CALC_TYPE solarEph[], ADCS_CALC_TYPE magEph[]) {
+uint8_t ADCS_Load_Ephemerides(const uint32_t row, ADCS_CALC_TYPE solarEph[ADCS_NUM_AXES], ADCS_CALC_TYPE magEph[ADCS_NUM_AXES]) {
   // get addresses
   const uint32_t rowsPerPage = (FLASH_EXT_PAGE_SIZE / FLASH_ADCS_EPHEMERIDES_SLOT_SIZE);
   uint32_t pageAddr = (row / rowsPerPage) + FLASH_ADCS_EPHEMERIDES_START;

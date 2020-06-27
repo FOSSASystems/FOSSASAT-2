@@ -39,7 +39,7 @@
 void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, const uint32_t activeDuration,
                const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion);
 
-ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[]);
+ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[ADCS_NUM_AXES]);
 
 void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion);
 void ADCS_Detumble_Update();
@@ -48,7 +48,7 @@ void ADCS_Detumble_Finish(uint8_t result, bool startActiveControl);
 void ADCS_ActiveControl_Init(const uint32_t activeDuration);
 void ADCS_ActiveControl_Update();
 
-uint8_t ADCS_Load_Ephemerides(uint32_t row, ADCS_CALC_TYPE solarEph[], ADCS_CALC_TYPE magEph[]);
+uint8_t ADCS_Load_Ephemerides(const uint32_t row, ADCS_CALC_TYPE solarEph[ADCS_NUM_AXES], ADCS_CALC_TYPE magEph[ADCS_NUM_AXES]);
 bool ADCS_Check();
 void ADCS_Finish(uint8_t result);
 void ADCS_Update_Bridges();

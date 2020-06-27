@@ -69,7 +69,7 @@ void setup() {
 
   // initialize temperature sensors
   FOSSASAT_DEBUG_PORT.println(F("Temperature sensors init:"));
-  
+
   FOSSASAT_DEBUG_PORT.print(F("Y panel: "));
   Sensors_Temperature_Setup(tempSensorPanelY);
   FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorPanelY));
@@ -93,7 +93,7 @@ void setup() {
   FOSSASAT_DEBUG_PORT.print(F("MCU: "));
   Sensors_Temperature_Setup(tempSensorMCU);
   FOSSASAT_DEBUG_PORT.println(Sensors_Temperature_Read(tempSensorMCU));
-  
+
   // initialize light sensors
   FOSSASAT_DEBUG_PORT.println(F("Light sensors init:"));
   FOSSASAT_DEBUG_PORT.print(F("Y: "));
@@ -132,7 +132,7 @@ void setup() {
     // integration, reset system info
     PersistentStorage_Reset_System_Info();
     PersistentStorage_Reset_ADCS_Params();
-    
+
     // print data for integration purposes (independently of FOSSASAT_DEBUG macro!)
     start = millis();
     uint32_t lastSample = 0;
@@ -249,7 +249,7 @@ void setup() {
 
   } else if(attemptNumber <= 3) {
     // mid-flight reset, deploy
-  
+
     // sleep before deployment
 #ifdef ENABLE_DEPLOYMENT_SLEEP
     PowerControl_Wait(DEPLOYMENT_SLEEP_LENGTH, LOW_POWER_SLEEP);
@@ -296,7 +296,7 @@ void loop() {
   if(!PersistentStorage_Check_CRC(systemInfoBuffer, FLASH_SYSTEM_INFO_CRC)) {
     FOSSASAT_DEBUG_PRINTLN(F("CRC check failed!"));
   }
-  
+
   // check RTC time
   if(!rtc.isTimeSet()) {
     FOSSASAT_DEBUG_PRINTLN(F("RTC time not set, restoring last saved epoch"));
@@ -307,7 +307,7 @@ void loop() {
   }
   FOSSASAT_DEBUG_PRINT(F("On-board time: "));
   FOSSASAT_DEBUG_PRINT_RTC_TIME();
-  
+
   // check battery voltage
   FOSSASAT_DEBUG_PRINT(F("Battery check: "));
   float battVoltage = PowerControl_Get_Battery_Voltage();
@@ -327,10 +327,10 @@ void loop() {
   // CW beacon
   Communication_Set_Modem(MODEM_FSK);
   FOSSASAT_DEBUG_DELAY(10);
-  
+
   // get loop number
   uint8_t numLoops = PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOOP_COUNTER);
-  
+
   #ifdef ENABLE_TRANSMISSION_CONTROL
   if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_TRANSMISSIONS_ENABLED) == 0) {
     FOSSASAT_DEBUG_PRINTLN(F("Tx off by cmd"));
@@ -338,9 +338,9 @@ void loop() {
     if((battVoltage >= PersistentStorage_SystemInfo_Get<int16_t>(FLASH_BATTERY_CW_BEEP_VOLTAGE_LIMIT)) && (numLoops % MORSE_BEACON_LOOP_FREQ == 0)) {
     // transmit full Morse beacon
   #endif
-  
+
     Communication_Send_Morse_Beacon(battVoltage);
-  
+
   #ifdef ENABLE_TRANSMISSION_CONTROL
     } else {
       // set delay between beeps according to battery voltage
@@ -360,8 +360,8 @@ void loop() {
 
   // send FSK system info
   Communication_Set_Modem(MODEM_FSK);
-  Communication_Send_Full_System_Info(); 
-  
+  Communication_Send_Full_System_Info();
+
   // send stats too (if it's enabled)
   if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_AUTO_STATISTICS) == 1) {
     Communication_Send_Statistics(0xFF);
@@ -389,6 +389,7 @@ void loop() {
   FOSSASAT_DEBUG_DELAY(100);
   radio.startReceive();
 
+  // TODO check packets won't shorten Rx window len - RTC timer?
   for(uint8_t i = 0; i < windowLenLoRa; i++) {
     PowerControl_Wait(1000, LOW_POWER_SLEEP);
     Communication_Check_New_Packet();
@@ -407,6 +408,7 @@ void loop() {
   FOSSASAT_DEBUG_DELAY(100);
   radio.startReceive();
 
+  // TODO check packets won't shorten Rx window len
   for(uint8_t i = 0; i < windowLenFsk; i++) {
     PowerControl_Wait(1000, LOW_POWER_SLEEP);
     Communication_Check_New_Packet();
