@@ -1876,7 +1876,50 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_SET_ADCS_EPHEMERIDES: {
-      // TODO CMD_SET_ADCS_CONTROLLER
+      if(optDataLen >= 27) {
+        uint16_t chunkId = 0;
+        memcpy(&chunkId, optData, sizeof(chunkId));
+        FOSSASAT_DEBUG_PRINT(F("ADCS ephemerides chunk ID: "));
+        FOSSASAT_DEBUG_PRINTLN(chunkId);
+
+        uint8_t rowCount = (optDataLen - 2) / FLASH_ADCS_EPHEMERIDES_SLOT_SIZE;
+        FOSSASAT_DEBUG_PRINT(F("Number of ephemerides rows: "));
+        FOSSASAT_DEBUG_PRINTLN(rowCount);
+
+        uint8_t controllerId = optData[optDataLen - 1];
+        FOSSASAT_DEBUG_PRINT(F("Controller type: "));
+        FOSSASAT_DEBUG_PRINTLN(controllerId);
+
+        for(uint8_t row = 0; row < rowCount; row++) {
+          FOSSASAT_DEBUG_PRINT(F("Ephe row #: "));
+          FOSSASAT_DEBUG_PRINTLN(row);
+
+          float val = 0;
+          uint8_t i = 0;
+          float ephemerides[2*ADCS_NUM_AXES];
+
+          FOSSASAT_DEBUG_PRINTLN(F("Mag. ephemeris: "));
+          for(; i < ADCS_NUM_AXES; i++) {
+              memcpy(&val, optData + 2 + row*FLASH_ADCS_EPHEMERIDES_SLOT_SIZE + i*(sizeof(float)), sizeof(float));
+              FOSSASAT_DEBUG_PRINT(val, 4);
+              FOSSASAT_DEBUG_PRINT('\t');
+              ephemerides[i] = val;
+          }
+          FOSSASAT_DEBUG_PRINTLN();
+
+          FOSSASAT_DEBUG_PRINTLN(F("Solar ephemeris: "));
+          for(; i < 2*ADCS_NUM_AXES; i++) {
+              memcpy(&val, optData + 2 + row*FLASH_ADCS_EPHEMERIDES_SLOT_SIZE + i*(sizeof(float)), sizeof(float));
+              FOSSASAT_DEBUG_PRINT(val, 4);
+              FOSSASAT_DEBUG_PRINT('\t');
+              ephemerides[i] = val;
+          }
+          FOSSASAT_DEBUG_PRINTLN();
+
+          PersistentStorage_Set_ADCS_Ephemerides(chunkId*5 + row, ephemerides, controllerId);
+        }
+      }
+
     } break;
 
     default:

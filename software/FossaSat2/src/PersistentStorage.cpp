@@ -724,6 +724,26 @@ void PersistentStorage_Set_Message(uint16_t slotNum, uint8_t* buff, uint8_t len)
   FOSSASAT_DEBUG_PRINT_FLASH(addr, FLASH_EXT_PAGE_SIZE);
 }
 
+void PersistentStorage_Set_ADCS_Ephemerides(uint32_t row, float ephemerides[2*ADCS_NUM_AXES], uint8_t controllerId) {
+  // calculate address in flash
+  const uint32_t rowsPerSector = (FLASH_SECTOR_SIZE / FLASH_EXT_PAGE_SIZE) * (FLASH_EXT_PAGE_SIZE / FLASH_ADCS_EPHEMERIDES_SLOT_SIZE);
+  uint32_t sectorAddr = (row / rowsPerSector) + FLASH_ADCS_EPHEMERIDES_START;
+
+  // ephemerides are stored in 128-byte chunks, 5 rows per chunk, followed by 3 free bytes
+  const uint32_t rowsPerChunk = ((FLASH_EXT_PAGE_SIZE / FLASH_ADCS_EPHEMERIDES_SLOT_SIZE) / 2);
+  uint32_t epheAddr = (row / rowsPerChunk) * (FLASH_EXT_PAGE_SIZE / 2) + (row % rowsPerChunk);
+
+  // read the sector
+  uint8_t sectorBuff[FLASH_SECTOR_SIZE];
+  PersistentStorage_Read(sectorAddr, sectorBuff, FLASH_SECTOR_SIZE);
+
+  // update buffer
+  memcpy(sectorBuff + epheAddr, ephemerides, FLASH_ADCS_EPHEMERIDES_SLOT_SIZE);
+
+  // write update buffer
+  PersistentStorage_Write(sectorAddr, sectorBuff, FLASH_SECTOR_SIZE);
+}
+
 void PersistentStorage_Set_ADCS_Controller(uint8_t id, float controller[ADCS_NUM_AXES][2*ADCS_NUM_AXES]) {
   // read the controller sector
   uint8_t sectorBuff[FLASH_SECTOR_SIZE];
@@ -764,6 +784,7 @@ void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool auto
   // set WEL bit again
   PersistentStorage_WaitForWriteEnable();
 
+  // TODO extend for arbitrary number of pages in one sector
   // check if all bytes are in the same page
   uint32_t addrInPage = (addr & 0xFF) + len;
   if(addrInPage <= FLASH_EXT_PAGE_SIZE) {

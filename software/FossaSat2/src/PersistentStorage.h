@@ -43,6 +43,7 @@ void PersistentStorage_Set_Image_Properties(uint8_t slot, uint32_t len, uint32_t
 uint8_t PersistentStorage_Get_Message(uint16_t slotNum, uint8_t* buff);
 void PersistentStorage_Set_Message(uint16_t slotNum, uint8_t* buff, uint8_t len);
 
+void PersistentStorage_Set_ADCS_Ephemerides(uint32_t row, float ephemerides[2*ADCS_NUM_AXES], uint8_t controllerId);
 void PersistentStorage_Set_ADCS_Controller(uint8_t id, float controller[ADCS_NUM_AXES][2*ADCS_NUM_AXES]);
 
 void PersistentStorage_Read(uint32_t addr, uint8_t* buff, size_t len);

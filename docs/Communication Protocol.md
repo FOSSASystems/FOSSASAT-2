@@ -364,6 +364,14 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Response: none
 - Description: Sets one of the ADCS controllers. The number of active controllers must be updated using CMD_SET_ADCS_PARAMETERS! Controller array values are sent in the order [0][0] -> [0][1] -> [0][2] ... [2][3] -> [2][4] -> [2][5], each value is sent LSB first.
 
+### CMD_SET_ADCS_EPHEMERIDES
+- Optional data length:
+- Optional data:
+  - 0 - 1: ephemerides 128-byte chunk ID (0 - 4095), unsigned 16-bit integer, LSB first
+  - 2 - N: ephemerides data: 3x solar ephemeris (float, X - Y - Z), 3x magnetic ephemeris (float, X - Y - Z) and 1x controller ID (unsigned 8-bit integer) per each row.
+- Response: none
+- Description: Sets ephemerides data. One frame can contain up to 5 ephemerides rows, which will be written to the address of provided 128-byte chunk.
+
 ---
 # Responses
 
@@ -398,7 +406,7 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 4 - N: repeated message
 
 ### RESP_SYSTEM_INFO
-- Optional data length: 20
+- Optional data length: 23
 - Optional data:
   - 0: MPPT output voltage * 20 mV, unsigned 8-bit integer
   - 1 - 2: MPPT output current * 10 uA, signed 16-bit integer
