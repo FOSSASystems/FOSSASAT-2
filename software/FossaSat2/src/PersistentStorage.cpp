@@ -785,7 +785,6 @@ void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool auto
   // set WEL bit again
   PersistentStorage_WaitForWriteEnable();
 
-  // TODO extend for arbitrary number of pages in one sector
   // check if all bytes are in the same page
   uint32_t addrInPage = (addr & 0xFF) + len;
   if(addrInPage <= FLASH_EXT_PAGE_SIZE) {
@@ -793,12 +792,12 @@ void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool auto
     uint8_t cmdBuff[] = {MX25L51245G_CMD_PP, (uint8_t)((addr >> 24) & 0xFF), (uint8_t)((addr >> 16) & 0xFF), (uint8_t)((addr >> 8) & 0xFF), (uint8_t)(addr & 0xFF)};
     PersistentStorage_SPItransaction(cmdBuff, 5, true, buff, len);
   } else {
-    // some bytes are in the following page
+      // some bytes are in the following page(s)
 
     // get the number of bytes in the first page
     size_t firstPageLen = FLASH_EXT_PAGE_SIZE - (addr & 0xFF);
 
-    // write the first page
+    // write the first page - might start in any position in the page
     uint32_t newAddr = addr;
     uint8_t cmdBuff[] = {MX25L51245G_CMD_PP, (uint8_t)((newAddr >> 24) & 0xFF), (uint8_t)((newAddr >> 16) & 0xFF), (uint8_t)((newAddr >> 8) & 0xFF), (uint8_t)(newAddr & 0xFF)};
     PersistentStorage_SPItransaction(cmdBuff, 5, true, buff, firstPageLen);
@@ -809,7 +808,7 @@ void PersistentStorage_Write(uint32_t addr, uint8_t* buff, size_t len, bool auto
     // set WEL bit again
     PersistentStorage_WaitForWriteEnable();
 
-    // some bytes are in the following page(s)
+    // write the other pages - will always start at the page boundary
     uint32_t remLen = len - firstPageLen;
     uint8_t numPages = (remLen / FLASH_EXT_PAGE_SIZE) + 1;
     for(uint8_t i = 0; i < numPages; i++) {
