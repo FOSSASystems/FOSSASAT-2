@@ -14,6 +14,7 @@
 /*************** Auxiliary functions implementation *****************/
 void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[][ADCS_STATE_DIM]) {
 	ADCS_CALC_TYPE temp;
+	ADCS_CALC_TYPE matrix_aux[ADCS_STATE_DIM][2*ADCS_STATE_DIM];
 
 	// Create the augmented matrix
     for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
