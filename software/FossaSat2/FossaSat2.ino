@@ -389,8 +389,8 @@ void loop() {
   FOSSASAT_DEBUG_DELAY(100);
   radio.startReceive();
 
-  // TODO check packets won't shorten Rx window len - RTC timer?
-  for(uint8_t i = 0; i < windowLenLoRa; i++) {
+  uint32_t loraStart = rtc.getEpoch();
+  while(rtc.getEpoch() - loraStart < windowLenLoRa) {
     PowerControl_Wait(1000, LOW_POWER_SLEEP);
     Communication_Check_New_Packet();
   }
@@ -408,8 +408,8 @@ void loop() {
   FOSSASAT_DEBUG_DELAY(100);
   radio.startReceive();
 
-  // TODO check packets won't shorten Rx window len
-  for(uint8_t i = 0; i < windowLenFsk; i++) {
+  uint32_t gfskStart = rtc.getEpoch();
+  while(rtc.getEpoch() - gfskStart < windowLenFsk) {
     PowerControl_Wait(1000, LOW_POWER_SLEEP);
     Communication_Check_New_Packet();
   }
