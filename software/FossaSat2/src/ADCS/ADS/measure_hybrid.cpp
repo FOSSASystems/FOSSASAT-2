@@ -11,9 +11,9 @@
 #include "../ADCS/adcs.h"
 
 /********************* Main function *********************/
-void ADS_Measurement_Hybrid(const ADCS_CALC_TYPE v_1[], const ADCS_CALC_TYPE v_2[], const ADCS_CALC_TYPE v_3[],
-                            const ADCS_CALC_TYPE m_1[], const ADCS_CALC_TYPE m_2[], const ADCS_CALC_TYPE m_3[],
-                            ADCS_CALC_TYPE eulerAnglesMatrix[][ADCS_NUM_AXES]) {
+void ADS_Measurement_Hybrid(const ADCS_CALC_TYPE v_1[ADCS_NUM_AXES], const ADCS_CALC_TYPE v_2[ADCS_NUM_AXES], const ADCS_CALC_TYPE v_3[ADCS_NUM_AXES],
+                            const ADCS_CALC_TYPE m_1[ADCS_NUM_AXES], const ADCS_CALC_TYPE m_2[ADCS_NUM_AXES], const ADCS_CALC_TYPE m_3[ADCS_NUM_AXES],
+                            ADCS_CALC_TYPE eulerAnglesMatrix[ADCS_NUM_AXES][ADCS_NUM_AXES]) {
 
   // Normalize both ephemeris and measurements vectors
   ADCS_CALC_TYPE m1_norm = ADCS_VectorNorm(m_1);

@@ -13,13 +13,13 @@
 #include "../ADCS/adcs.h"
 
 /*****************  Auxiliary functions implementation *********************/
-bool ADS_Eclipse_Decision(const ADCS_CALC_TYPE luxData[]) {
+bool ADS_Eclipse_Decision(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], const ADCS_CALC_TYPE threshold) {
   ADCS_CALC_TYPE sum = 0;
   for(uint8_t i = 0; i < ADCS_NUM_PANELS; i++) {
     sum += luxData[i];
   }
 
-  if(sum < adcsParams.eclipseThreshold) {
+  if(sum < threshold) {
     return(true);
   }
 
@@ -27,8 +27,9 @@ bool ADS_Eclipse_Decision(const ADCS_CALC_TYPE luxData[]) {
 }
 
 /**************** Main structure ****************/
-void ADS_Main(ADCS_CALC_TYPE omega[], ADCS_CALC_TYPE magData[], ADCS_CALC_TYPE stateVars[], ADCS_CALC_TYPE controlVector[], ADCS_CALC_TYPE P[][2*ADCS_NUM_AXES], ADCS_CALC_TYPE solarEphe[], ADCS_CALC_TYPE magEphe[], ADCS_CALC_TYPE filtered_y[], ADCS_CALC_TYPE newAnglesVector[]) {
-  // Constants declaration
+void ADS_Main(ADCS_CALC_TYPE omega[ADCS_NUM_AXES], ADCS_CALC_TYPE magData[ADCS_NUM_AXES], ADCS_CALC_TYPE stateVars[ADCS_STATE_DIM],
+              ADCS_CALC_TYPE controlVector[ADCS_STATE_DIM], ADCS_CALC_TYPE matrixP[ADCS_STATE_DIM][ADCS_STATE_DIM], ADCS_CALC_TYPE solarEphe[ADCS_STATE_DIM],
+              ADCS_CALC_TYPE magEphe[ADCS_STATE_DIM], ADCS_CALC_TYPE filtered_y[ADCS_STATE_DIM], ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES]) {
 
   // Relevant variables declaration
   ADCS_CALC_TYPE anglesInt[ADCS_NUM_AXES];                      // Angular determination variables
@@ -50,7 +51,7 @@ void ADS_Main(ADCS_CALC_TYPE omega[], ADCS_CALC_TYPE magData[], ADCS_CALC_TYPE s
   luxData[5] = Sensors_Read_Light(lightSensorPanelY);
 
   // Decide whether the satellite is in eclipse situation or under light
-  if(ADS_Eclipse_Decision(luxData)) {
+  if(ADS_Eclipse_Decision(luxData, adcsParams.eclipseThreshold)) {
     // Generation of the measurements
     ADS_Euler_Integrator(omega, prevAngles, anglesInt, adcsParams.timeStep);
     ADS_Eclipse_Hybrid(magData, magEphe, rotationMatrix);
@@ -58,7 +59,7 @@ void ADS_Main(ADCS_CALC_TYPE omega[], ADCS_CALC_TYPE magData[], ADCS_CALC_TYPE s
   } else {
     ADCS_CALC_TYPE solarEphBody[ADCS_NUM_AXES];                   // Solar ephemerides in the body frame
     ADCS_CALC_TYPE redundantSolarEph[ADCS_NUM_AXES];              // Redundant solar ephemerides in the body frame
-    
+
     // Generation of the measurements
     ADS_Euler_Integrator(omega, prevAngles, anglesInt, adcsParams.timeStep);
     ADS_Solar_Determination(luxData, solarEphBody, redundantSolarEph);
@@ -68,11 +69,10 @@ void ADS_Main(ADCS_CALC_TYPE omega[], ADCS_CALC_TYPE magData[], ADCS_CALC_TYPE s
 
   // Processing of the measurements
   ADS_Angles_Determination(rotationMatrix, newAnglesVector);
-  // TODO rotation verification debug-only?
-  ADS_Rotation_Verification(newAnglesVector, anglesInt);
+  ADS_Rotation_Verification(newAnglesVector, anglesInt, adcsParams.rotationWeightRatio, adcsParams.rotationTrigger);
 
   // Generation of the state point
-  ADCS_CALC_TYPE measurements[2*ADCS_NUM_AXES];
+  ADCS_CALC_TYPE measurements[ADCS_STATE_DIM];
   measurements[0] = newAnglesVector[0];
   measurements[1] = newAnglesVector[1];
   measurements[2] = newAnglesVector[2];
@@ -81,5 +81,5 @@ void ADS_Main(ADCS_CALC_TYPE omega[], ADCS_CALC_TYPE magData[], ADCS_CALC_TYPE s
   measurements[5] = omega[2];
 
   // Filtering of the signal
-  ADS_Kalman_Filter(adcsParams.disturbCovariance, adcsParams.noiseCovariance, adcsParams.timeStep, stateVars, measurements, controlVector, P, filtered_y);
+  ADS_Kalman_Filter(adcsParams.disturbCovariance, adcsParams.noiseCovariance, adcsParams.timeStep, stateVars, measurements, controlVector, matrixP, filtered_y);
 }

@@ -11,7 +11,8 @@
 #include "../ADCS/adcs.h"
 
 /********** Main function **************/
-void ADS_Euler_Integrator(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE currentAngles[], ADCS_CALC_TYPE nextAngles[], const ADCS_CALC_TYPE delta_t) {
+void ADS_Euler_Integrator(const ADCS_CALC_TYPE omega[ADCS_NUM_AXES], const ADCS_CALC_TYPE currentAngles[ADCS_NUM_AXES],
+                          ADCS_CALC_TYPE nextAngles[ADCS_NUM_AXES], const ADCS_CALC_TYPE delta_t) {
   ADCS_CALC_TYPE p = omega[0];
   ADCS_CALC_TYPE q = omega[1];
   ADCS_CALC_TYPE r = omega[2];

@@ -12,7 +12,8 @@
 #include "../ADCS/adcs.h"
 
 /******************** Main function ***************************/
-void ADS_Eclipse_Hybrid(const ADCS_CALC_TYPE magData[], const ADCS_CALC_TYPE magEphe[], ADCS_CALC_TYPE rotationMatrix[][ADCS_NUM_AXES]) {
+void ADS_Eclipse_Hybrid(const ADCS_CALC_TYPE magData[ADCS_NUM_AXES], const ADCS_CALC_TYPE magEphe[ADCS_NUM_AXES],
+                        ADCS_CALC_TYPE rotationMatrix[ADCS_NUM_AXES][ADCS_NUM_AXES]) {
   // Variables declaration
   ADCS_CALC_TYPE bodyFrame[ADCS_NUM_AXES];
   ADCS_CALC_TYPE lvFrame[ADCS_NUM_AXES];

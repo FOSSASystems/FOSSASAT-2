@@ -12,7 +12,7 @@
 #include "../ADCS/adcs.h"
 
 /**************** Main function *************/
-void ADS_Angles_Determination(const ADCS_CALC_TYPE eulerAnglesMatrix[][ADCS_NUM_AXES], ADCS_CALC_TYPE newAnglesVector[]) {
+void ADS_Angles_Determination(const ADCS_CALC_TYPE eulerAnglesMatrix[ADCS_NUM_AXES][ADCS_NUM_AXES], ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES]) {
   // Angular determination and desambiguation
   ADCS_CALC_TYPE psi = atan2(eulerAnglesMatrix[1][2], eulerAnglesMatrix[2][2]);
   ADCS_CALC_TYPE theta = atan2(eulerAnglesMatrix[0][1], eulerAnglesMatrix[0][0]);

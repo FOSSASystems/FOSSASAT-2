@@ -12,11 +12,11 @@
 #include "../ADCS/adcs.h"
 
 /*************** Main function ***************/
-bool ADS_Rotation_Verification(ADCS_CALC_TYPE angles1[], ADCS_CALC_TYPE angles2[]) {
+bool ADS_Rotation_Verification(ADCS_CALC_TYPE angles1[ADCS_NUM_AXES], ADCS_CALC_TYPE angles2[ADCS_NUM_AXES],
+                               const ADCS_CALC_TYPE weightRatio, const ADCS_CALC_TYPE trigger) {
   // Constants definition
-  const ADCS_CALC_TYPE weight1 = adcsParams.rotationWeightRatio;
+  const ADCS_CALC_TYPE weight1 = weightRatio;
   const ADCS_CALC_TYPE weight2 = 1.0 - weight1;
-  const ADCS_CALC_TYPE trigger = adcsParams.rotationTrigger;                     // Trigger to activate the combination rule
 
   // Compare both vectors and compute the norm
   ADCS_CALC_TYPE diff[ADCS_NUM_AXES];

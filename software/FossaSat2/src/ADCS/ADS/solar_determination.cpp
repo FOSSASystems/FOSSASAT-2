@@ -11,7 +11,8 @@
 #include "../ADCS/adcs.h"
 
 /*************** Main function *****************/
-void ADS_Solar_Determination(ADCS_CALC_TYPE luxData[], ADCS_CALC_TYPE solarEph[], ADCS_CALC_TYPE redundantSolarEph[]) {
+void ADS_Solar_Determination(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], ADCS_CALC_TYPE solarEph[ADCS_NUM_AXES], 
+                             ADCS_CALC_TYPE redundantSolarEph[ADCS_NUM_AXES]) {
   // Constants definitions
   ADCS_CALC_TYPE panelUnitVector[ADCS_NUM_PANELS][ADCS_NUM_AXES] = ADCS_PANEL_UNIT_VECTOR; // Unitary vector pointing to the solar panels in inverse form
 

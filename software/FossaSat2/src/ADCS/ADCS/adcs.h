@@ -17,6 +17,8 @@
 
 #define ADCS_CALC_TYPE                                  double
 #define ADCS_NUM_AXES                                   3
+#define ADCS_STATE_DIM                                  (2*ADCS_NUM_AXES)
+#define ADCS_NUM_PANELS                                 6
 
 #define ADCS_RES_DONE_TOL_REACHED                       0x00
 #define ADCS_RES_DONE_TIME_LIMIT                        0x01

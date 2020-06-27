@@ -319,8 +319,8 @@ void ADCS_ActiveControl_Init(const uint32_t activeDuration) {
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
     adcsState.prevIntensity[i] = 0;
   }
-  for(uint8_t i = 0; i < 2*ADCS_NUM_AXES; i++) {
-    for(uint8_t j = 0; j < 2*ADCS_NUM_AXES; j++) {
+  for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
+    for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
       adcsState.kalmanMatrixP[i][j] = 0;
     }
   }
@@ -369,18 +369,18 @@ void ADCS_ActiveControl_Update() {
   magData[1] = Sensors_IMU_CalcMag(imu.my);
   magData[2] = Sensors_IMU_CalcMag(imu.mz);
 
-  ADCS_CALC_TYPE stateVars[2*ADCS_NUM_AXES];
-  ADCS_CALC_TYPE prevStateVars[2*ADCS_NUM_AXES];
-  ADCS_CALC_TYPE controlVector[2*ADCS_NUM_AXES];
-  ADCS_CALC_TYPE filtered_y[2*ADCS_NUM_AXES];
-  ADCS_CALC_TYPE kalmanMatrixP[2*ADCS_NUM_AXES][2*ADCS_NUM_AXES];
+  ADCS_CALC_TYPE stateVars[ADCS_STATE_DIM];
+  ADCS_CALC_TYPE prevStateVars[ADCS_STATE_DIM];
+  ADCS_CALC_TYPE controlVector[ADCS_STATE_DIM];
+  ADCS_CALC_TYPE filtered_y[ADCS_STATE_DIM];
+  ADCS_CALC_TYPE kalmanMatrixP[ADCS_STATE_DIM][ADCS_STATE_DIM];
   ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES];
 
   // copy all the volatile previous states
-  for(uint8_t i = 0; i < 2*ADCS_NUM_AXES; i++){
+  for(uint8_t i = 0; i < ADCS_STATE_DIM; i++){
     controlVector[i] = adcsState.prevControlVector[i];
     prevStateVars[i] = adcsState.prevStateVars[i];
-    for(uint8_t j = 0; j < 2*ADCS_NUM_AXES; j++) {
+    for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
       kalmanMatrixP[i][j] = adcsState.kalmanMatrixP[i][j];
     }
   }
@@ -395,7 +395,7 @@ void ADCS_ActiveControl_Update() {
   bool omegaToleranceReached = (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.activeOmegaTol);
   if ((adcsParams.control.bits.overrideEulerTol || eulerToleranceReached) && (adcsParams.control.bits.overrideOmegaTol || omegaToleranceReached)) {
     // Choose controller from ADCS parameters
-    float controllerMatrix[ADCS_NUM_AXES][2*ADCS_NUM_AXES];
+    float controllerMatrix[ADCS_NUM_AXES][ADCS_STATE_DIM];
     memcpy(controllerMatrix, adcsParams.controllers + (controller * FLASH_ADCS_CONTROLLER_SLOT_SIZE), FLASH_ADCS_CONTROLLER_SLOT_SIZE);
 
     // Active controlling
