@@ -32,9 +32,7 @@
 #include "../ACS/acs.h"
 #include "../ADS/ads.h"
 
-// TODO no global vars inside aux functions
 // TODO extract common code
-// TODO specify array dimensions in declarations
 
 /*********** Functions declaration ************/
 // Main structure
@@ -53,6 +51,9 @@ void ADCS_ActiveControl_Update();
 uint8_t ADCS_Load_Ephemerides(const uint32_t row, ADCS_CALC_TYPE solarEph[ADCS_NUM_AXES], ADCS_CALC_TYPE magEph[ADCS_NUM_AXES]);
 bool ADCS_Check();
 void ADCS_Finish(uint8_t result);
+
+void ADCS_Set_Pulse_Lengths(ADCS_CALC_TYPE intensity[ADCS_NUM_AXES]);
+void ADCS_Setup_Timers(void (*func)(void));
 void ADCS_Update_Bridges();
 
 #endif // ADCS_H_INCLUDED

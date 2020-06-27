@@ -117,24 +117,8 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     FOSSASAT_DEBUG_PRINT(F("omegaNorm=\t"));
     FOSSASAT_DEBUG_PRINTLN(adcsState.prevOmegaNorm, 4);
 
-    // configure H bridge timer
-    HbridgeTimer->setOverflow(adcsParams.bridgeTimerUpdatePeriod * (uint32_t)1000, MICROSEC_FORMAT);
-    HbridgeTimer->attachInterrupt(ADCS_Update_Bridges);
-    adcsState.bridgeStateX.outputHigh = false;
-    adcsState.bridgeStateY.outputHigh = false;
-    adcsState.bridgeStateZ.outputHigh = false;
-
-    // configure ADCS timer
-    AdcsTimer->setOverflow(adcsParams.timeStep * (uint32_t)1000, MICROSEC_FORMAT);
-    AdcsTimer->attachInterrupt(ADCS_Detumble_Update);
-
-    // start timers
-    adcsState.start = millis();
-    adcsState.bridgeStateX.lastUpdate = adcsState.start;
-    adcsState.bridgeStateY.lastUpdate  = adcsState.start;
-    adcsState.bridgeStateZ.lastUpdate  = adcsState.start;
-    HbridgeTimer->resume();
-    AdcsTimer->resume();
+    // configure timers
+    ADCS_Setup_Timers(ADCS_Detumble_Update);
 }
 
 void ADCS_Detumble_Update() {
