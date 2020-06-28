@@ -36,6 +36,21 @@ ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[ADCS_NUM_AXES]) {
   return(sqrt(pow(dim[0], 2) + pow(dim[1], 2) + pow(dim[2], 2)));
 }
 
+ADCS_CALC_TYPE ADCS_Add_Tolerance(ADCS_CALC_TYPE var, ADCS_CALC_TYPE forbiddenVal) {
+  // check if variable is within the interval <forbiddenVal - tolerance, forbiddenVal + tolerace>
+  ADCS_CALC_TYPE limitHigh = forbiddenVal + adcsParams.calcTol;
+  ADCS_CALC_TYPE limitLow = forbiddenVal - adcsParams.calcTol;
+  if((var < limitLow) || (var > limitHigh)) {
+    return(var);
+  }
+
+  // variable is within range, clamp to limits
+  if(var > forbiddenVal) {
+    return(limitHigh);
+  }
+  return(limitLow);
+}
+
 /************ Auxiliary functions implementation ***********/
 void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion) {
     // cache parameters

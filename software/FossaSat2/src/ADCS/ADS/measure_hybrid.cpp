@@ -31,13 +31,13 @@ void ADS_Measurement_Hybrid(const ADCS_CALC_TYPE v_1[ADCS_NUM_AXES], const ADCS_
   ADCS_CALC_TYPE v2[ADCS_NUM_AXES];
   ADCS_CALC_TYPE v3[ADCS_NUM_AXES];
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
-      m1[i] = m_1[i] * (1.0/(m1_norm + adcsParams.calcTol));
-      m2[i] = m_2[i] * (1.0/(m2_norm + adcsParams.calcTol));
-      m3[i] = m_3[i] * (1.0/(m3_norm + adcsParams.calcTol));
+      m1[i] = m_1[i] * (1.0/ADCS_Add_Tolerance(m1_norm, 0));
+      m2[i] = m_2[i] * (1.0/ADCS_Add_Tolerance(m2_norm, 0));
+      m3[i] = m_3[i] * (1.0/ADCS_Add_Tolerance(m3_norm, 0));
 
-      v1[i] = v_1[i] * (1.0/(v1_norm + adcsParams.calcTol));
-      v2[i] = v_2[i] * (1.0/(v2_norm + adcsParams.calcTol));
-      v3[i] = v_3[i] * (1.0/(v3_norm + adcsParams.calcTol));
+      v1[i] = v_1[i] * (1.0/ADCS_Add_Tolerance(v1_norm, 0));
+      v2[i] = v_2[i] * (1.0/ADCS_Add_Tolerance(v2_norm, 0));
+      v3[i] = v_3[i] * (1.0/ADCS_Add_Tolerance(v3_norm, 0));
   }
 
   // Measurements matrix
@@ -57,14 +57,7 @@ void ADS_Measurement_Hybrid(const ADCS_CALC_TYPE v_1[ADCS_NUM_AXES], const ADCS_
   const ADCS_CALC_TYPE det_V = (  (v1[0]*v2[1]*v3[2]) - (v1[2]*v2[1]*v3[0]) + (v1[1]*v2[2]*v3[0])
                                 + (v1[2]*v2[0]*v3[1]) - (v1[1]*v2[0]*v3[2]) - (v1[0]*v2[2]*v3[1])  );
 
-  // det_V == -calcTol check
-  ADCS_CALC_TYPE gain;
-  if(det_V == (-1.0 * adcsParams.calcTol)) {
-    gain = 1.0/(det_V - adcsParams.calcTol);
-  } else {
-    gain = 1.0/(det_V + adcsParams.calcTol);
-  }
-
+  ADCS_CALC_TYPE gain = 1.0/(ADCS_Add_Tolerance(det_V, 0));
   invV[0][0] = gain * (v2[1]*v3[2] - v2[2]*v3[1]);
   invV[0][1] = gain * (v2[2]*v3[0] - v2[0]*v3[2]);
   invV[0][2] = gain * (v2[0]*v3[1] - v2[1]*v3[0]);

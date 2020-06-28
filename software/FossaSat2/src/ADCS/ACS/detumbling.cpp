@@ -17,7 +17,7 @@ void ACS_BdotFunction(const ADCS_CALC_TYPE omega[ADCS_NUM_AXES], const ADCS_CALC
                       ADCS_CALC_TYPE intensity[ADCS_NUM_AXES]) {
     // Constants definition
     // Module of the magnetic field intensity
-    const ADCS_CALC_TYPE B_module = ADCS_VectorNorm(mag) + adcsParams.calcTol;
+    const ADCS_CALC_TYPE B_module = ADCS_Add_Tolerance(ADCS_VectorNorm(mag), 0);
     FOSSASAT_DEBUG_PRINT(F("B_module = \t"));
     FOSSASAT_DEBUG_PRINTLN(B_module, 4);
 
