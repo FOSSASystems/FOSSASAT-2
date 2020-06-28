@@ -1266,25 +1266,52 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_RUN_MANUAL_ACS: {
-      if(Communication_Check_OptDataLen(8, optDataLen)) {
-        int8_t x = optData[0];
-        FOSSASAT_DEBUG_PRINT(F("x = "));
-        FOSSASAT_DEBUG_PRINTLN(x);
+      if(Communication_Check_OptDataLen(19, optDataLen)) {
+        int8_t xHigh = optData[0];
+        FOSSASAT_DEBUG_PRINT(F("x high = "));
+        FOSSASAT_DEBUG_PRINTLN(xHigh);
 
-        int8_t y = optData[1];
-        FOSSASAT_DEBUG_PRINT(F("y = "));
-        FOSSASAT_DEBUG_PRINTLN(y);
+        int8_t xLow = optData[1];
+        FOSSASAT_DEBUG_PRINT(F("x low = "));
+        FOSSASAT_DEBUG_PRINTLN(xLow);
 
-        int8_t z = optData[2];
-        FOSSASAT_DEBUG_PRINT(F("z = "));
-        FOSSASAT_DEBUG_PRINTLN(z);
+        int8_t yHigh = optData[2];
+        FOSSASAT_DEBUG_PRINT(F("y high = "));
+        FOSSASAT_DEBUG_PRINTLN(yHigh);
+
+        int8_t yLow = optData[3];
+        FOSSASAT_DEBUG_PRINT(F("y low = "));
+        FOSSASAT_DEBUG_PRINTLN(yLow);
+
+        int8_t zHigh = optData[4];
+        FOSSASAT_DEBUG_PRINT(F("z high = "));
+        FOSSASAT_DEBUG_PRINTLN(zHigh);
+
+        int8_t zLow = optData[5];
+        FOSSASAT_DEBUG_PRINT(F("z low = "));
+        FOSSASAT_DEBUG_PRINTLN(zLow);
+
+        uint32_t xLen = 0;
+        memcpy(&xLen, optData + 6, sizeof(uint32_t));
+        FOSSASAT_DEBUG_PRINT(F("x pulse len = "));
+        FOSSASAT_DEBUG_PRINTLN(xLen);
+
+        uint32_t yLen = 0;
+        memcpy(&yLen, optData + 6 + sizeof(uint32_t), sizeof(uint32_t));
+        FOSSASAT_DEBUG_PRINT(F("y pulse len = "));
+        FOSSASAT_DEBUG_PRINTLN(yLen);
+
+        uint32_t zLen = 0;
+        memcpy(&zLen, optData + 6 + 2*sizeof(uint32_t), sizeof(uint32_t));
+        FOSSASAT_DEBUG_PRINT(F("z pulse len = "));
+        FOSSASAT_DEBUG_PRINTLN(zLen);
 
         uint32_t duration = 0;
-        memcpy(&duration, optData + 3, sizeof(uint32_t));
+        memcpy(&duration, optData + 6 + 3*sizeof(uint32_t), sizeof(uint32_t));
         FOSSASAT_DEBUG_PRINT(F("duration = "));
         FOSSASAT_DEBUG_PRINTLN(duration);
 
-        uint8_t ignoreFlags = optData[7];
+        uint8_t ignoreFlags = optData[18];
         FOSSASAT_DEBUG_PRINT(F("ignoreFlags = 0x"));
         FOSSASAT_DEBUG_PRINTLN(ignoreFlags, HEX);
 
@@ -1298,13 +1325,47 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         bridgeY.getFault();
         bridgeZ.getFault();
 
-        // set H-bridge outputs
+        // run for the requested duration
         uint32_t start = millis();
         uint32_t elapsed = 0;
-        bridgeX.drive(x);
-        bridgeY.drive(y);
-        bridgeZ.drive(z);
+        uint32_t lastUpdateX = 0;
+        uint32_t lastUpdateY = 0;
+        uint32_t lastUpdateZ = 0;
+        bool bridgeHighX = false;
+        bool bridgeHighY = false;
+        bool bridgeHighZ = false;
         while(millis() - start < duration) {
+          // set H-bridge outputs
+          if(millis() - lastUpdateX >= xLen) {
+            if(bridgeHighX) {
+              bridgeX.drive(xLow);
+            } else {
+              bridgeX.drive(xHigh);
+            }
+            bridgeHighX = !bridgeHighX;
+            lastUpdateX = millis();
+          }
+
+          if(millis() - lastUpdateY >= yLen) {
+            if(bridgeHighY) {
+              bridgeY.drive(yLow);
+            } else {
+              bridgeY.drive(yHigh);
+            }
+            bridgeHighY = !bridgeHighY;
+            lastUpdateY = millis();
+          }
+
+          if(millis() - lastUpdateZ >= zLen) {
+            if(bridgeHighZ) {
+              bridgeZ.drive(zLow);
+            } else {
+              bridgeZ.drive(zHigh);
+            }
+            bridgeHighZ = !bridgeHighZ;
+            lastUpdateZ = millis();
+          }
+
           // check battery
           #ifdef ENABLE_TRANSMISSION_CONTROL
           if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
@@ -1318,15 +1379,15 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // check faults
           respOptData[0] = bridgeX.getFault();
-          if((x != 0) && (respOptData[0] & FAULT) && (respOptData[0] != 0) && ((ignoreFlags & 0x01) == 0x00)) {
+          if((xHigh != 0) && (xLow != 0) && (respOptData[0] & FAULT) && (respOptData[0] != 0) && ((ignoreFlags & 0x01) == 0x00)) {
             break;
           }
           respOptData[1] = bridgeY.getFault();
-          if((y != 0) && (respOptData[1] & FAULT) && (respOptData[1] != 0) && ((ignoreFlags & 0x02) == 0x00)) {
+          if((yHigh != 0) && (yLow != 0) && (respOptData[1] & FAULT) && (respOptData[1] != 0) && ((ignoreFlags & 0x02) == 0x00)) {
             break;
           }
           respOptData[2] = bridgeZ.getFault();
-          if((z != 0) && (respOptData[2] & FAULT) && (respOptData[2] != 0) && ((ignoreFlags & 0x04) == 0x00)) {
+          if((zHigh != 0) && (zLow != 0) && (respOptData[2] & FAULT) && (respOptData[2] != 0) && ((ignoreFlags & 0x04) == 0x00)) {
             break;
           }
 

@@ -208,13 +208,19 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Description: Records selected IMU device(s). Logging will be stopped if battery voltage drops below low power mode level. Only available in FSK mode, each sample is sent in separate response
 
 ### CMD_RUN_MANUAL_ACS
-- Optional data length: 8
+- Optional data length: 23
 - Optional data:
-  - 0: X axis H-bridge magnitude, signed 8-bit integer, -63 to 63
-  - 1: Y axis H-bridge magnitude, signed 8-bit integer, -63 to 63
-  - 2: Z axis H-bridge magnitude, signed 8-bit integer, -63 to 63
-  - 3 - 6: maneuver duration in ms, unsigned 32-bit integer, LSB first
-  - 7: flags which specify whether to ignore H-bridge fault:
+  - 0: X axis H-bridge high magnitude, signed 8-bit integer, -63 to 63
+  - 1: X axis H-bridge low magnitude, signed 8-bit integer, -63 to 63
+  - 2: Y axis H-bridge high magnitude, signed 8-bit integer, -63 to 63
+  - 3: Y axis H-bridge low magnitude, signed 8-bit integer, -63 to 63
+  - 4: Z axis H-bridge high magnitude, signed 8-bit integer, -63 to 63
+  - 5: Z axis H-bridge low magnitude, signed 8-bit integer, -63 to 63
+  - 6 - 9: X axis pulse length in ms, unsigned 32-bit integer, LSB first
+  - 10 - 13: Y axis pulse length in ms, unsigned 32-bit integer, LSB first
+  - 14 - 17: Z axis pulse length in ms, unsigned 32-bit integer, LSB first
+  - 18 - 21 maneuver duration in ms, unsigned 32-bit integer, LSB first
+  - 22: flags which specify whether to ignore H-bridge fault:
     - 0x01: X axis
     - 0x02: Y axis
     - 0x04: Z axis

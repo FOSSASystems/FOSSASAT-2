@@ -519,8 +519,8 @@ void ADCS_Setup_Timers(void (*func)(void)) {
   // start timers
   adcsState.start = millis();
   adcsState.bridgeStateX.lastUpdate = adcsState.start;
-  adcsState.bridgeStateY.lastUpdate  = adcsState.start;
-  adcsState.bridgeStateZ.lastUpdate  = adcsState.start;
+  adcsState.bridgeStateY.lastUpdate = adcsState.start;
+  adcsState.bridgeStateZ.lastUpdate = adcsState.start;
   HbridgeTimer->resume();
   AdcsTimer->resume();
 }
