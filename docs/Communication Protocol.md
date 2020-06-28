@@ -224,8 +224,8 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 ### CMD_LOG_GPS
 - Optional data length: 8
 - Optional data:
-  - 0 - 3: GPS logging duration in ms, unsigned 32-bit integer, LSB first
-  - 4 - 7: GPS logging start offset in ms, unsigned 32-bit integer, LSB first
+  - 0 - 3: GPS logging duration in seconds, unsigned 32-bit integer, LSB first
+  - 4 - 7: GPS logging start offset in seconds, unsigned 32-bit integer, LSB first
 - Response: [RESP_GPS_LOG_STATE](#RESP_GPS_LOG_STATE)
 - Description: Records GPS output. Logging will be stopped if battery voltage drops below low power mode level.
 

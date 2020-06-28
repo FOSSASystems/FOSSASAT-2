@@ -296,7 +296,7 @@ void Navigation_GNSS_Setup_Logging() {
   gpsLogState.overwrite = false;
 
   // run for the requested duration
-  gpsLogState.start = millis();
+  gpsLogState.start = rtc.getEpoch();
 
   // set science mode flag
   scienceModeActive = true;
@@ -367,6 +367,7 @@ void Navigation_GNSS_SerialEvent() {
     }
   }
 }
+
 uint32_t Navigation_GNSS_Finish_Logging() {
   // update last fix addres
   PersistentStorage_SystemInfo_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, gpsLogState.lastFixAddr);

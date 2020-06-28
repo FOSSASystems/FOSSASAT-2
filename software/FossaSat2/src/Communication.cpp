@@ -1474,14 +1474,13 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // wait for offset to elapse
         FOSSASAT_DEBUG_PRINTLN(F("Waiting for offset to elapse"));
-        PowerControl_Wait(offset, LOW_POWER_SLEEP);
+        PowerControl_Wait(offset * 1000, LOW_POWER_SLEEP);
 
         // setup logging variables
         Navigation_GNSS_Setup_Logging();
 
         // run for the requested duration
-        // TODO change millis() for RTC - millis() timer is not updated in sleep mode
-        while(millis() - gpsLogState.start < duration) {
+        while(rtc.getEpoch() - gpsLogState.start < duration) {
           // check new data
           Navigation_GNSS_SerialEvent();
 
@@ -1500,6 +1499,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             break;
           }
           #endif
+
+          // sleep for one second
+          PowerControl_Wait(1000, LOW_POWER_SLEEP);
         }
 
         // finish logging
