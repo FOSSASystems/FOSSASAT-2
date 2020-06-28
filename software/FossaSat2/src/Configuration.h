@@ -528,8 +528,8 @@
 #define ADCS_BRIDGE_TIMER_UPDATE_PERIOD                 (ADCS_TIME_STEP/100)  // time step between successive H bridge output updates, in ms
 #define ADCS_BRIDGE_OUTPUT_HIGH                         63      // H bridge drive strength to be used as "high"
 #define ADCS_BRIDGE_OUTPUT_LOW                         -63      // H bridge drive strength to be used as "low"
-#define ADCS_SOLAR_POWER_XZ_MAX                        (967.0)  // maximum output power of solar panels X and Z, in mW
-#define ADCS_SOLAR_POWER_Y_MAX                         (242.0)  // maximum output power of solar panel Y, in mW
+#define ADCS_SOLAR_POWER_XZ_MAX                        (0.9670)  // maximum output power of solar panels X and Z, in W
+#define ADCS_SOLAR_POWER_Y_MAX                         (0.2420)  // maximum output power of solar panel Y, in W
 #define ADCS_SOLAR_SENSOR_MAX                          (172911.0) // maximum light intensity output of solar sensors, in lux
 
 /*
