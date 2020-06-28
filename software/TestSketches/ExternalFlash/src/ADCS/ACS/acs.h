@@ -6,11 +6,15 @@
 
 /*********** Functions declaration ************/
 //Detumbling procedure
-void ACS_BdotFunction(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE mag[], ADCS_CALC_TYPE intensity[]);
+void ACS_BdotFunction(const ADCS_CALC_TYPE omega[ADCS_NUM_AXES], const ADCS_CALC_TYPE mag[ADCS_NUM_AXES], const ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES],
+                      const ADCS_CALC_TYPE meanOrbitalMotion, const ADCS_CALC_TYPE orbInclination, const ADCS_CALC_TYPE minInertialMoment,
+                      ADCS_CALC_TYPE intensity[ADCS_NUM_AXES]);
 
 // Intensities rectifier function
-float ACS_IntensitiesRectifier(const ADCS_CALC_TYPE intensity1, const ADCS_CALC_TYPE intensity2, const uint32_t delta_t);
+ADCS_CALC_TYPE ACS_IntensitiesRectifier(const ADCS_CALC_TYPE intensity1, const ADCS_CALC_TYPE intensity2, const uint32_t delta_t, const ADCS_CALC_TYPE amplitude);
 
-//void onboardcontrol(double* M, double* B, double** K, double* I, double* t);        // Controller function
+// Controller function
+void ACS_OnboardControl(const ADCS_CALC_TYPE state[ADCS_STATE_DIM], const ADCS_CALC_TYPE mag[ADCS_NUM_AXES], const float gain[ADCS_NUM_AXES][ADCS_STATE_DIM],
+                        const ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES], ADCS_CALC_TYPE intensity[ADCS_NUM_AXES]);
 
 #endif // ADCS_H_INCLUDED

@@ -297,6 +297,9 @@ void Navigation_GNSS_Setup_Logging() {
 
   // run for the requested duration
   gpsLogState.start = millis();
+
+  // set science mode flag
+  scienceModeActive = true;
 }
 
 void Navigation_GNSS_SerialEvent() {
@@ -355,6 +358,8 @@ void Navigation_GNSS_SerialEvent() {
         gpsLogState.overwrite = true;
       }
 
+      PowerControl_Watchdog_Heartbeat();
+
     } else {
       // add to buffer
       gpsLogState.buff[gpsLogState.buffPos] = c;
@@ -371,6 +376,9 @@ uint32_t Navigation_GNSS_Finish_Logging() {
 
   // stop UART interface (to prevent it from waking up the MCU)
   GpsSerial.end();
+
+  // clear science mode flag
+  scienceModeActive = false;
 
   // save the number of logged bytes and send it
   uint32_t logged = gpsLogState.flashPos - FLASH_NMEA_LOG_START;

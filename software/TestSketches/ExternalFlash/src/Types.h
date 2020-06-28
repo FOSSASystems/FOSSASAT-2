@@ -44,8 +44,13 @@ struct adcsBridgeState_t {
 };
 
 struct adcsState_t {
-  float prevIntensity[ADCS_NUM_AXES];
-  float prevOmegaNorm;
+  ADCS_CALC_TYPE prevIntensity[ADCS_NUM_AXES];
+  ADCS_CALC_TYPE prevOmegaNorm;
+  ADCS_CALC_TYPE prevEulerNorm;
+  ADCS_CALC_TYPE prevStateVars[2*ADCS_NUM_AXES];
+  ADCS_CALC_TYPE prevControlVector[2*ADCS_NUM_AXES];
+  ADCS_CALC_TYPE kalmanMatrixP[2*ADCS_NUM_AXES][2*ADCS_NUM_AXES];
+  uint32_t currentEpheRow;
   uint32_t start;
   bool active;
   adcsBridgeState_t bridgeStateX;
@@ -56,6 +61,8 @@ struct adcsState_t {
 struct adcsControlBits_t {
   uint8_t detumbleOnly : 1;       // LSB
   uint8_t overrideDetumbleTol : 1;
+  uint8_t overrideEulerTol : 1;
+  uint8_t overrideOmegaTol : 1;
   uint8_t overrideFaultX : 1;
   uint8_t overrideFaultY : 1;
   uint8_t overrideFaultZ : 1;
@@ -64,18 +71,28 @@ struct adcsControlBits_t {
 struct adcsParams_t {
   ADCS_CALC_TYPE maxPulseInt;
   ADCS_CALC_TYPE maxPulseLen;
-  ADCS_CALC_TYPE omegaTol;
+  ADCS_CALC_TYPE detumbleOmegaTol;
+  ADCS_CALC_TYPE activeEulerTol;
+  ADCS_CALC_TYPE activeOmegaTol;
+  ADCS_CALC_TYPE disturbCovariance;
+  ADCS_CALC_TYPE noiseCovariance;
   uint32_t timeStep;
   ADCS_CALC_TYPE minInertialMoment;
   ADCS_CALC_TYPE orbInclination;
   ADCS_CALC_TYPE meanOrbitalMotion;
   ADCS_CALC_TYPE pulseAmplitude;
   uint32_t detumbleLen;
-  ADCS_CALC_TYPE BmodTol;
+  uint32_t activeLen;
+  ADCS_CALC_TYPE calcTol;
   ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES];
+  ADCS_CALC_TYPE eclipseThreshold;
+  ADCS_CALC_TYPE rotationWeightRatio;
+  ADCS_CALC_TYPE rotationTrigger;
   uint32_t bridgeTimerUpdatePeriod;
   int8_t bridgeOutputHigh;
   int8_t bridgeOutputLow;
+  uint8_t numControllers;
+  float controllers[10][ADCS_NUM_AXES][2*ADCS_NUM_AXES];
   union {
     adcsControlBits_t bits;
     uint8_t val;

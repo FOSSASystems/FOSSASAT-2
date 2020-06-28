@@ -208,7 +208,7 @@ void Communication_Send_Basic_System_Info() {
 
 void Communication_Send_Full_System_Info() {
   // build response frame
-  static const uint8_t optDataLen = 13*sizeof(uint8_t) + 12*sizeof(int16_t) + sizeof(uint16_t) + 2*sizeof(uint32_t) + 2*sizeof(float);
+  static const uint8_t optDataLen = 14*sizeof(uint8_t) + 12*sizeof(int16_t) + sizeof(uint16_t) + 2*sizeof(uint32_t) + 2*sizeof(float);
   uint8_t optData[optDataLen];
   uint8_t* optDataPtr = optData;
 
@@ -228,7 +228,8 @@ void Communication_Send_Full_System_Info() {
                         ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED)    << 1) & 0b00000010) |
                         ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE)            << 2) & 0b00011100) |
                         ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_MPPT_TEMP_SWITCH_ENABLED)  << 5) & 0b00100000) |
-                        ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_MPPT_KEEP_ALIVE_ENABLED)   << 6) & 0b01000000));
+                        ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_MPPT_KEEP_ALIVE_ENABLED)   << 6) & 0b01000000) |
+                        (((uint8_t)scienceModeActive << 7) & 0b10000000));
   Communication_Frame_Add(&optDataPtr, powerConfig, "powerConfig", 1, "");
 
   uint16_t resetCounter = PersistentStorage_SystemInfo_Get<uint16_t>(FLASH_RESTART_COUNTER);
@@ -311,6 +312,9 @@ void Communication_Send_Full_System_Info() {
                          (uint8_t)currSensorY.available << 3 | (uint8_t)currSensorMPPT.available << 2 |
                          (uint8_t)lightSensorPanelY.available << 1 | (uint8_t)lightSensorTop.available << 0;
   Communication_Frame_Add(&optDataPtr, sensorStates, "sensors", 1, "");
+
+  uint8_t adcsResult = PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LAST_ADCS_RESULT);
+  Communication_Frame_Add(&optDataPtr, adcsResult, "adcsResult", 1, "");
 
   FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
 
@@ -936,6 +940,15 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             PersistentStorage_Reset_ADCS_Params();
             PowerControl_Watchdog_Heartbeat();
           }
+
+          if(optData[0] & 0b01000000) {
+            // wipe ephemerides data storage
+            FOSSASAT_DEBUG_PRINTLN(F("Wiping ephemerides storage"));
+            for(uint32_t addr = FLASH_ADCS_EPHEMERIDES_START; addr < FLASH_ADCS_EPHEMERIDES_END; addr += FLASH_64K_BLOCK_SIZE) {
+              PersistentStorage_64kBlockErase(addr);
+              PowerControl_Watchdog_Heartbeat();
+            }
+          }
         }
       } break;
 
@@ -1252,6 +1265,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       }
     } break;
 
+    // TODO add pulse length parameter
     case CMD_RUN_MANUAL_ACS: {
       if(Communication_Check_OptDataLen(8, optDataLen)) {
         int8_t x = optData[0];
@@ -1471,7 +1485,6 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         while(millis() - gpsLogState.start < duration) {
           // check new data
           Navigation_GNSS_SerialEvent();
-          PowerControl_Watchdog_Heartbeat();
 
           // check new packets
           Communication_Check_New_Packet();
@@ -1718,7 +1731,6 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       uint16_t respOptDataLen = Navigation_GNSS_Run_Cmd(optData, optDataLen, respOptData);
 
       // send the response
-      // TODO: send ACK/NACK state?
       if((respOptDataLen == 0) || (respOptDataLen == 0xFFFF)) {
         Communication_Send_Response(RESP_GPS_COMMAND_RESPONSE);
       } else {
@@ -1765,7 +1777,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_MANEUVER: {
-      if(Communication_Check_OptDataLen(15, optDataLen)) {
+      if(Communication_Check_OptDataLen(9, optDataLen)) {
         // extract parameters
         uint32_t detumbleLen = 0;
         memcpy(&detumbleLen, optData + 1, sizeof(detumbleLen));
@@ -1786,7 +1798,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         double meanOrbitalMotion = (2.0 * M_PI * PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_MEAN_MOTION)) / (24.0 * 3600.0);
 
         // initialize ADCS
-        ADCS_Main(controlFlags, detumbleLen, maneuverLen, optData + 9, orbitalInclination, meanOrbitalMotion);
+        ADCS_Main(controlFlags, detumbleLen, maneuverLen, orbitalInclination, meanOrbitalMotion);
       }
     } break;
 
@@ -1800,10 +1812,17 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // set the parameters that require conversion
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_MAX_INTENSITY);
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_MAX_LENGTH);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_OMEGA_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_DETUMB_OMEGA_TOLERANCE);
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_AMPLITUDE);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_B_MODULE_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_CALCULATION_TOLERANCE);
         Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_MIN_INERTIAL_MOMENT);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ACTIVE_EULER_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ACTIVE_OMEGA_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ECLIPSE_THRESHOLD);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ROTATION_WEIGHT_RATIO);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ROTATION_TRIGGER);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_DISTURBANCE_COVARIANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_NOISE_COVARIANCE);
 
         // set the rest
         memcpy(adcsPage + (FLASH_ADCS_TIME_STEP - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint32_t));
@@ -1814,6 +1833,8 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         optDataPtr += sizeof(int8_t);
         memcpy(adcsPage + (FLASH_ADCS_BRIDGE_OUTPUT_LOW - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(int8_t));
         optDataPtr += sizeof(int8_t);
+        memcpy(adcsPage + (FLASH_ADCS_NUM_CONTROLLERS - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint8_t));
+        optDataPtr += sizeof(uint8_t);
 
         // write all at once
         PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);
@@ -1827,6 +1848,77 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINT(F("Erasing flash sector at address 0x"));
         FOSSASAT_DEBUG_PRINTLN(addr, HEX);
         PersistentStorage_SectorErase(addr);
+      }
+
+    } break;
+
+    case CMD_SET_ADCS_CONTROLLER: {
+      if(Communication_Check_OptDataLen(77, optDataLen)) {
+        uint8_t id = optData[0];
+        FOSSASAT_DEBUG_PRINT(F("ADCS controller ID: "));
+        FOSSASAT_DEBUG_PRINTLN(id);
+
+        FOSSASAT_DEBUG_PRINTLN(F("Controller: "));
+        float val = 0;
+        float controller[ADCS_NUM_AXES][2*ADCS_NUM_AXES];
+        for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+          for(uint8_t j = 0; j < 2*ADCS_NUM_AXES; j++) {
+            memcpy(&val, optData + 1 + (2*ADCS_NUM_AXES*i + j) * sizeof(float), sizeof(float));
+            FOSSASAT_DEBUG_PRINT(val, 4);
+            FOSSASAT_DEBUG_PRINT('\t');
+            controller[i][j] = val;
+          }
+          FOSSASAT_DEBUG_PRINTLN();
+        }
+        PersistentStorage_Set_ADCS_Controller(id, controller);
+
+      }
+
+    } break;
+
+    case CMD_SET_ADCS_EPHEMERIDES: {
+      if(optDataLen >= 27) {
+        uint16_t chunkId = 0;
+        memcpy(&chunkId, optData, sizeof(chunkId));
+        FOSSASAT_DEBUG_PRINT(F("ADCS ephemerides chunk ID: "));
+        FOSSASAT_DEBUG_PRINTLN(chunkId);
+
+        uint8_t rowCount = (optDataLen - 2) / FLASH_ADCS_EPHEMERIDES_SLOT_SIZE;
+        FOSSASAT_DEBUG_PRINT(F("Number of ephemerides rows: "));
+        FOSSASAT_DEBUG_PRINTLN(rowCount);
+
+        uint8_t controllerId = optData[optDataLen - 1];
+        FOSSASAT_DEBUG_PRINT(F("Controller type: "));
+        FOSSASAT_DEBUG_PRINTLN(controllerId);
+
+        for(uint8_t row = 0; row < rowCount; row++) {
+          FOSSASAT_DEBUG_PRINT(F("Ephe row #: "));
+          FOSSASAT_DEBUG_PRINTLN(row);
+
+          float val = 0;
+          uint8_t i = 0;
+          float ephemerides[2*ADCS_NUM_AXES];
+
+          FOSSASAT_DEBUG_PRINTLN(F("Mag. ephemeris: "));
+          for(; i < ADCS_NUM_AXES; i++) {
+              memcpy(&val, optData + 2 + row*FLASH_ADCS_EPHEMERIDES_SLOT_SIZE + i*(sizeof(float)), sizeof(float));
+              FOSSASAT_DEBUG_PRINT(val, 4);
+              FOSSASAT_DEBUG_PRINT('\t');
+              ephemerides[i] = val;
+          }
+          FOSSASAT_DEBUG_PRINTLN();
+
+          FOSSASAT_DEBUG_PRINTLN(F("Solar ephemeris: "));
+          for(; i < 2*ADCS_NUM_AXES; i++) {
+              memcpy(&val, optData + 2 + row*FLASH_ADCS_EPHEMERIDES_SLOT_SIZE + i*(sizeof(float)), sizeof(float));
+              FOSSASAT_DEBUG_PRINT(val, 4);
+              FOSSASAT_DEBUG_PRINT('\t');
+              ephemerides[i] = val;
+          }
+          FOSSASAT_DEBUG_PRINTLN();
+
+          PersistentStorage_Set_ADCS_Ephemerides(chunkId*5 + row, ephemerides, controllerId);
+        }
       }
 
     } break;
