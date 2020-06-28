@@ -19,6 +19,12 @@ void ADS_Euler_Integrator(const ADCS_CALC_TYPE omega[], const ADCS_CALC_TYPE cur
   ADCS_CALC_TYPE phi = currentAngles[1];
   ADCS_CALC_TYPE theta = currentAngles[2];
 
+  // Prevent NaN
+  if ((phi < M_PI/2.0 + ADCS_CALCULATION_TOLERANCE) && (phi >= M_PI/2.0 ))
+    phi = M_PI/2.0 + ADCS_CALCULATION_TOLERANCE;
+  else if ((phi > M_PI/2.0 - ADCS_CALCULATION_TOLERANCE) && (phi < M_PI/2.0 ))
+    phi = M_PI/2.0 - ADCS_CALCULATION_TOLERANCE;
+
   // New Euler angles at time t+1
   nextAngles[0] = psi + delta_t*(p + (q*sin(psi) + r*cos(psi))*tan(phi));
   nextAngles[1] = phi + delta_t*(q*cos(psi) - r*sin(psi));
