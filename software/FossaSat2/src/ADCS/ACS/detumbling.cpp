@@ -36,20 +36,14 @@ void ACS_BdotFunction(const ADCS_CALC_TYPE omega[ADCS_NUM_AXES], const ADCS_CALC
     controlLaw[0] = gainGeneral*(omega[1]*mag[2] - omega[2]*mag[1]);
     controlLaw[1] = gainGeneral*(omega[2]*mag[0] - omega[0]*mag[2]);
     controlLaw[2] = gainGeneral*(omega[0]*mag[1] - omega[1]*mag[0]);
-    FOSSASAT_DEBUG_PRINT(F("controlLaw=\t"));
-    FOSSASAT_DEBUG_PRINT(controlLaw[0], 4); FOSSASAT_DEBUG_PRINT('\t');
-    FOSSASAT_DEBUG_PRINT(controlLaw[1], 4); FOSSASAT_DEBUG_PRINT('\t');
-    FOSSASAT_DEBUG_PRINTLN(controlLaw[2], 4);
+    FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(controlLaw, ADCS_NUM_AXES);
 
     // Magnetic moment needed at the axes: calculated by minimization of a least squares problem
     ADCS_CALC_TYPE magMoment[ADCS_NUM_AXES];
     magMoment[0] = (controlLaw[2]*mag[1] - mag[2]*controlLaw[1])/pow(B_module,2);
     magMoment[1] = (controlLaw[0]*mag[2] - mag[0]*controlLaw[2])/pow(B_module,2);
     magMoment[2] = (controlLaw[1]*mag[0] - mag[1]*controlLaw[0])/pow(B_module,2);
-    FOSSASAT_DEBUG_PRINT(F("magMoment=\t"));
-    FOSSASAT_DEBUG_PRINT(magMoment[0], 4); FOSSASAT_DEBUG_PRINT('\t');
-    FOSSASAT_DEBUG_PRINT(magMoment[1], 4); FOSSASAT_DEBUG_PRINT('\t');
-    FOSSASAT_DEBUG_PRINTLN(magMoment[2], 4);
+    FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(magMoment, ADCS_NUM_AXES);
 
     // Definition of intensity output -solving the equation: A*I = m-
     intensity[0] = magMoment[0]*coilChar[0][0] + magMoment[1]*coilChar[0][1] + magMoment[2]*coilChar[0][2];

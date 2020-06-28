@@ -12,6 +12,8 @@ extern HardwareSerial debugSerial;
 #define FOSSASAT_DEBUG_PORT   debugSerial
 #define FOSSASAT_DEBUG_SPEED  9600
 
+#define STR(VAR) (#VAR)
+
 #ifdef FOSSASAT_DEBUG
 #define FOSSASAT_DEBUG_BEGIN(...) { FOSSASAT_DEBUG_PORT.begin(__VA_ARGS__); delay(500); while(!FOSSASAT_DEBUG_PORT); }
 #define FOSSASAT_DEBUG_PRINT(...) { FOSSASAT_DEBUG_PORT.print(__VA_ARGS__); }
@@ -50,6 +52,25 @@ extern HardwareSerial debugSerial;
     FOSSASAT_DEBUG_PORT.println(rtc.getSeconds()); \
   }
 #define FOSSASAT_DEBUG_DELAY(MS) { delay(MS); }
+#define FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(VECTOR, SIZE) { \
+  FOSSASAT_DEBUG_PRINT(STR(VECTOR)); \
+  FOSSASAT_DEBUG_PRINT(F("=\t\t")); \
+  for(uint8_t i = 0; i < SIZE; i++) { \
+    FOSSASAT_DEBUG_PRINT(VECTOR[i], 6); FOSSASAT_DEBUG_PRINT('\t'); \
+  } \
+  FOSSASAT_DEBUG_PRINTLN(); \
+}
+#define FOSSASAT_DEBUG_PRINT_ADCS_MATRIX(MATRIX, ROWS, COLS) { \
+  FOSSASAT_DEBUG_PRINTLN(STR(MATRIX)); \
+  for(uint8_t row = 0; row < ROWS; row++) { \
+    for(uint8_t col = 0; col < COLS; col++) { \
+      FOSSASAT_DEBUG_PRINT(MATRIX[row][col], 6); \
+      FOSSASAT_DEBUG_PRINT('\t'); \
+    } \
+    FOSSASAT_DEBUG_PRINTLN(); \
+  } \
+  FOSSASAT_DEBUG_PRINTLN(); \
+}
 #else
 #define FOSSASAT_DEBUG_BEGIN(...) {}
 #define FOSSASAT_DEBUG_PRINT(...) {}
@@ -59,6 +80,8 @@ extern HardwareSerial debugSerial;
 #define FOSSASAT_DEBUG_PRINT_FLASH(ADDR, LEN) {}
 #define FOSSASAT_DEBUG_PRINT_RTC_TIME() {}
 #define FOSSASAT_DEBUG_DELAY(MS) {}
+#define FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(NAME, VAR) {}
+#define FOSSASAT_DEBUG_PRINT_ADCS_MATRIX(NAME, VAR, ROWS, COLS) {}
 #endif
 
 #endif

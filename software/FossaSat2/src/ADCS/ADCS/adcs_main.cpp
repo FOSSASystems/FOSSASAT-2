@@ -76,15 +76,7 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     FOSSASAT_DEBUG_PRINTLN(adcsParams.orbInclination, 4);
     FOSSASAT_DEBUG_PRINT(F("meanOrbitalMotion="));
     FOSSASAT_DEBUG_PRINTLN(adcsParams.meanOrbitalMotion, 8);
-    FOSSASAT_DEBUG_PRINTLN(F("coilChar="));
-    for(uint8_t row = 0; row < ADCS_NUM_AXES; row++) {
-      for(uint8_t col = 0; col < ADCS_NUM_AXES; col++) {
-        FOSSASAT_DEBUG_PRINT(adcsParams.coilChar[row][col], 4);
-        FOSSASAT_DEBUG_PRINT('\t');
-      }
-      FOSSASAT_DEBUG_PRINTLN();
-    }
-    FOSSASAT_DEBUG_PRINTLN();
+    FOSSASAT_DEBUG_PRINT_ADCS_MATRIX(adcsParams.coilChar, ADCS_NUM_AXES, ADCS_NUM_AXES);
     FOSSASAT_DEBUG_PRINT(F("bridgeTimerUpdatePeriod="));
     FOSSASAT_DEBUG_PRINTLN(adcsParams.bridgeTimerUpdatePeriod);
     FOSSASAT_DEBUG_PRINT(F("bridgeOutputHigh="));
@@ -110,10 +102,7 @@ void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE or
     omega[2] = Sensors_IMU_CalcGyro(imu.gz);
     adcsState.prevOmegaNorm = ADCS_VectorNorm(omega);
 
-    FOSSASAT_DEBUG_PRINT(F("omega= \t"));
-    FOSSASAT_DEBUG_PRINT(omega[0], 4); FOSSASAT_DEBUG_PRINT('\t');
-    FOSSASAT_DEBUG_PRINT(omega[1], 4); FOSSASAT_DEBUG_PRINT('\t');
-    FOSSASAT_DEBUG_PRINTLN(omega[2], 4);
+    FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(omega, ADCS_NUM_AXES);
     FOSSASAT_DEBUG_PRINT(F("omegaNorm=\t"));
     FOSSASAT_DEBUG_PRINTLN(adcsState.prevOmegaNorm, 4);
 
@@ -145,14 +134,8 @@ void ADCS_Detumble_Update() {
   ADCS_CALC_TYPE omegaNorm = ADCS_VectorNorm(omega);
   ADCS_CALC_TYPE intensity[ADCS_NUM_AXES];
 
-  FOSSASAT_DEBUG_PRINT(F("mag=\t\t"));
-  FOSSASAT_DEBUG_PRINT(mag[0], 4); FOSSASAT_DEBUG_PRINT('\t');
-  FOSSASAT_DEBUG_PRINT(mag[1], 4); FOSSASAT_DEBUG_PRINT('\t');
-  FOSSASAT_DEBUG_PRINTLN(mag[2], 4);
-  FOSSASAT_DEBUG_PRINT(F("omega= \t"));
-  FOSSASAT_DEBUG_PRINT(omega[0], 4); FOSSASAT_DEBUG_PRINT('\t');
-  FOSSASAT_DEBUG_PRINT(omega[1], 4); FOSSASAT_DEBUG_PRINT('\t');
-  FOSSASAT_DEBUG_PRINTLN(omega[2], 4);
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(mag, ADCS_NUM_AXES);
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(omega, ADCS_NUM_AXES);
   FOSSASAT_DEBUG_PRINT(F("omegaNorm=\t"));
   FOSSASAT_DEBUG_PRINTLN(omegaNorm, 4);
 
@@ -222,12 +205,12 @@ void ADCS_ActiveControl_Init(const uint32_t activeDuration) {
   FOSSASAT_DEBUG_PRINTLN(adcsParams.rotationWeightRatio, 4);
   FOSSASAT_DEBUG_PRINT(F("rotationTrigger="));
   FOSSASAT_DEBUG_PRINTLN(adcsParams.rotationTrigger, 4);
+  FOSSASAT_DEBUG_PRINT(F("numControllers="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.numControllers);
   FOSSASAT_DEBUG_PRINT(F("disturbCovariance="));
   FOSSASAT_DEBUG_PRINTLN(adcsParams.disturbCovariance, 4);
   FOSSASAT_DEBUG_PRINT(F("noiseCovariance="));
   FOSSASAT_DEBUG_PRINTLN(adcsParams.noiseCovariance, 4);
-  FOSSASAT_DEBUG_PRINT(F("numControllers="));
-  FOSSASAT_DEBUG_PRINTLN(adcsParams.numControllers);
 
   // wake up IMU
   adcsState.active = true;
@@ -246,6 +229,11 @@ void ADCS_ActiveControl_Init(const uint32_t activeDuration) {
   omega[1] = Sensors_IMU_CalcGyro(imu.gy);
   omega[2] = Sensors_IMU_CalcGyro(imu.gz);
   adcsState.prevOmegaNorm = ADCS_VectorNorm(omega);
+
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(mag, ADCS_NUM_AXES);
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(omega, ADCS_NUM_AXES);
+  FOSSASAT_DEBUG_PRINT(F("omegaNorm=\t"));
+  FOSSASAT_DEBUG_PRINTLN(adcsState.prevOmegaNorm, 4);
 
   // Select ephemerides
   ADCS_CALC_TYPE solarEphe[ADCS_NUM_AXES];
@@ -306,6 +294,8 @@ void ADCS_ActiveControl_Update() {
   magData[0] = Sensors_IMU_CalcMag(imu.mx);
   magData[1] = Sensors_IMU_CalcMag(imu.my);
   magData[2] = Sensors_IMU_CalcMag(imu.mz);
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(omega, ADCS_NUM_AXES);
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(magData, ADCS_NUM_AXES);
 
   ADCS_CALC_TYPE stateVars[ADCS_STATE_DIM];
   ADCS_CALC_TYPE prevStateVars[ADCS_STATE_DIM];
@@ -323,12 +313,20 @@ void ADCS_ActiveControl_Update() {
     }
   }
 
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(controlVector, ADCS_STATE_DIM);
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(prevStateVars, ADCS_STATE_DIM);
+  FOSSASAT_DEBUG_PRINT_ADCS_MATRIX(kalmanMatrixP, ADCS_STATE_DIM, ADCS_STATE_DIM);
+
   // Main structure
   ADS_Main(omega, magData, prevStateVars, controlVector, kalmanMatrixP, solarEphe, magEphe, filtered_y, newAnglesVector);
 
   // Control structure
   ADCS_CALC_TYPE eulerNorm = ADCS_VectorNorm(newAnglesVector);
   ADCS_CALC_TYPE omegaNorm = ADCS_VectorNorm(omega);
+  FOSSASAT_DEBUG_PRINT(F("eulerNorm=\t"));
+  FOSSASAT_DEBUG_PRINTLN(eulerNorm, 4);
+  FOSSASAT_DEBUG_PRINT(F("omegaNorm=\t"));
+  FOSSASAT_DEBUG_PRINTLN(omegaNorm, 4);
   bool eulerToleranceReached = (abs(eulerNorm - adcsState.prevEulerNorm) >= adcsParams.activeEulerTol);
   bool omegaToleranceReached = (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.activeOmegaTol);
   if ((adcsParams.control.bits.overrideEulerTol || eulerToleranceReached) && (adcsParams.control.bits.overrideOmegaTol || omegaToleranceReached)) {
@@ -386,6 +384,13 @@ uint8_t ADCS_Load_Ephemerides(const uint32_t row, ADCS_CALC_TYPE solarEph[ADCS_N
     memcpy(&val, epheLineBuff + (i + ADCS_NUM_AXES)*sizeof(float), sizeof(float));
     magEph[i] = (ADCS_CALC_TYPE)val;
   }
+
+  FOSSASAT_DEBUG_PRINT(F("row = "));
+  FOSSASAT_DEBUG_PRINTLN(row);
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(solarEph, ADCS_NUM_AXES);
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(magEph, ADCS_NUM_AXES);
+  FOSSASAT_DEBUG_PRINT(F("controller = "));
+  FOSSASAT_DEBUG_PRINTLN(epheLineBuff[epheLineLen - 1]);
 
   // get the controller type
   return(epheLineBuff[epheLineLen - 1]);
@@ -479,14 +484,8 @@ void ADCS_Set_Pulse_Lengths(ADCS_CALC_TYPE intensity[ADCS_NUM_AXES]) {
   adcsState.bridgeStateY.pulseLen = (uint32_t)(pulseLength[1]);
   adcsState.bridgeStateZ.pulseLen = (uint32_t)(pulseLength[2]);
 
-  FOSSASAT_DEBUG_PRINT(F("intensity=\t"));
-  FOSSASAT_DEBUG_PRINT(intensity[0], 8); FOSSASAT_DEBUG_PRINT('\t');
-  FOSSASAT_DEBUG_PRINT(intensity[1], 8); FOSSASAT_DEBUG_PRINT('\t');
-  FOSSASAT_DEBUG_PRINTLN(intensity[2], 8);
-  FOSSASAT_DEBUG_PRINT(F("pulseLength=\t"));
-  FOSSASAT_DEBUG_PRINT(pulseLength[0], 8); FOSSASAT_DEBUG_PRINT('\t');
-  FOSSASAT_DEBUG_PRINT(pulseLength[1], 8); FOSSASAT_DEBUG_PRINT('\t');
-  FOSSASAT_DEBUG_PRINTLN(pulseLength[2], 8);
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(intensity, ADCS_NUM_AXES);
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(pulseLength, ADCS_NUM_AXES);
   FOSSASAT_DEBUG_PRINTLN();
 }
 

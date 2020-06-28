@@ -28,12 +28,14 @@ void ACS_OnboardControl(const ADCS_CALC_TYPE state[ADCS_STATE_DIM], const ADCS_C
       controlLaw[i] = controlLawAux;
     }
   }
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(controlLaw, ADCS_NUM_AXES);
 
   // Calculation of magnetic dipole applied on the coils
   ADCS_CALC_TYPE magMoment[ADCS_NUM_AXES];
   magMoment[0] = (controlLaw[2]*mag[1] - mag[2]*controlLaw[1])/pow(B_module, 2);
   magMoment[1] = (controlLaw[0]*mag[2] - mag[0]*controlLaw[2])/pow(B_module, 2);
   magMoment[2] = (controlLaw[1]*mag[0] - mag[1]*controlLaw[0])/pow(B_module, 2);
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(magMoment, ADCS_NUM_AXES);
 
   // Definition of intensity output -solving the equation: A*I = m-
   intensity[0] = magMoment[0]*coilChar[0][0] + magMoment[1]*coilChar[0][1] + magMoment[2]*coilChar[0][2];
