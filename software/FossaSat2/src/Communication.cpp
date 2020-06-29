@@ -1839,17 +1839,12 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_MANEUVER: {
-      if(Communication_Check_OptDataLen(9, optDataLen)) {
+      if(Communication_Check_OptDataLen(5, optDataLen)) {
         // extract parameters
-        uint32_t detumbleLen = 0;
-        memcpy(&detumbleLen, optData + 1, sizeof(detumbleLen));
-        FOSSASAT_DEBUG_PRINT(F("detumbleLen = "));
-        FOSSASAT_DEBUG_PRINTLN(detumbleLen);
-
-        uint32_t maneuverLen = 0;
-        memcpy(&maneuverLen, optData + 5, sizeof(maneuverLen));
-        FOSSASAT_DEBUG_PRINT(F("maneuverLen = "));
-        FOSSASAT_DEBUG_PRINTLN(maneuverLen);
+        uint32_t len = 0;
+        memcpy(&len, optData + 1, sizeof(len));
+        FOSSASAT_DEBUG_PRINT(F("len = "));
+        FOSSASAT_DEBUG_PRINTLN(len);
 
         uint8_t controlFlags = optData[0];
         FOSSASAT_DEBUG_PRINT(F("controlFlags = "));
@@ -1860,7 +1855,28 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         double meanOrbitalMotion = (2.0 * M_PI * PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_MEAN_MOTION)) / (24.0 * 3600.0);
 
         // initialize ADCS
-        ADCS_Main(controlFlags, detumbleLen, maneuverLen, orbitalInclination, meanOrbitalMotion);
+        ADCS_ActiveControl_Init(controlFlags, len, orbitalInclination, meanOrbitalMotion);
+      }
+    } break;
+
+    case CMD_DETUMBLE: {
+      if(Communication_Check_OptDataLen(5, optDataLen)) {
+        // extract parameters
+        uint32_t len = 0;
+        memcpy(&len, optData + 1, sizeof(len));
+        FOSSASAT_DEBUG_PRINT(F("len = "));
+        FOSSASAT_DEBUG_PRINTLN(len);
+
+        uint8_t controlFlags = optData[0];
+        FOSSASAT_DEBUG_PRINT(F("controlFlags = "));
+        FOSSASAT_DEBUG_PRINTLN(controlFlags, HEX);
+
+        // read orbital period and inclination from TLE
+        double orbitalInclination = PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_INCLINATION) * (M_PI/180.0);
+        double meanOrbitalMotion = (2.0 * M_PI * PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_MEAN_MOTION)) / (24.0 * 3600.0);
+
+        // initialize ADCS
+        ADCS_Detumble_Init(controlFlags, len, orbitalInclination, meanOrbitalMotion);
       }
     } break;
 

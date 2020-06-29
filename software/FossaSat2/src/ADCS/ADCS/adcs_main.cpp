@@ -10,28 +10,6 @@
 /************** Headers *****************/
 #include "adcs.h"
 
-/*********** Main function ***************/
-void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, const uint32_t activeDuration,
-               const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion) {
-
-  // save control flags
-  adcsParams.control.val = controlFlags;
-
-  // set science mode flag
-  scienceModeActive = true;
-
-  // set active control parameters
-  if(!adcsParams.control.bits.detumbleOnly) {
-    adcsParams.activeLen = activeDuration;
-  }
-
-  // reset previous ADCS result
-  PersistentStorage_SystemInfo_Set<uint8_t>(FLASH_LAST_ADCS_RESULT, ADCS_RUNNING);
-
-  // always detumble first, active control will be enabled on successful detumble finish
-  ADCS_Detumble_Init(detumbleDuration, orbitalInclination, meanOrbitalMotion);
-}
-
 ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[ADCS_NUM_AXES]) {
   return(sqrt(pow(dim[0], 2) + pow(dim[1], 2) + pow(dim[2], 2)));
 }
@@ -52,52 +30,17 @@ ADCS_CALC_TYPE ADCS_Add_Tolerance(ADCS_CALC_TYPE var, ADCS_CALC_TYPE forbiddenVa
 }
 
 /************ Auxiliary functions implementation ***********/
-void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion) {
-    // cache parameters
-    adcsParams.maxPulseInt = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_INTENSITY);     // Maximum applicable intensity
-    adcsParams.maxPulseLen = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_LENGTH);    // Maximum pulse time available by energy reasons
-    adcsParams.detumbleOmegaTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_DETUMB_OMEGA_TOLERANCE);   // Angular velocity tolerance to interrupt the detumbling for safety reasons
-    adcsParams.timeStep = PersistentStorage_Get<uint32_t>(FLASH_ADCS_TIME_STEP);           // Time step between to calculation instants
-    adcsParams.minInertialMoment = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_MIN_INERTIAL_MOMENT); // Minimum inertial moment
-    adcsParams.pulseAmplitude = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_AMPLITUDE);  // Amplitude of pulse for ACS_IntensitiesRectifier
-    adcsParams.calcTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_CALCULATION_TOLERANCE);
-    adcsParams.orbInclination = orbitalInclination;
-    adcsParams.meanOrbitalMotion = meanOrbitalMotion;
-    adcsParams.detumbleLen = detumbleDuration;
-    adcsParams.bridgeTimerUpdatePeriod = PersistentStorage_Get<uint32_t>(FLASH_ADCS_BRIDGE_TIMER_UPDATE_PERIOD);
-    adcsParams.bridgeOutputHigh = PersistentStorage_Get<int8_t>(FLASH_ADCS_BRIDGE_OUTPUT_HIGH);
-    adcsParams.bridgeOutputLow = PersistentStorage_Get<int8_t>(FLASH_ADCS_BRIDGE_OUTPUT_LOW);
+void ADCS_Detumble_Init(const uint8_t controlFlags, const uint32_t detumbleDuration, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion) {
+    // execute common part
+    ADCS_Common_Init(controlFlags, orbitalInclination, meanOrbitalMotion);
 
-    // Coil magnetic characteristics -shall be introduced already inversed-.
-    const uint8_t coilCharLen = ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(ADCS_CALC_TYPE);
-    uint8_t coilCharBuff[coilCharLen];
-    PersistentStorage_Read(FLASH_ADCS_COIL_CHAR_MATRIX, coilCharBuff, coilCharLen);
-    memcpy(adcsParams.coilChar, coilCharBuff, coilCharLen);
+    // cache parameters
+    adcsParams.detumbleOmegaTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_DETUMB_OMEGA_TOLERANCE);   // Angular velocity tolerance to interrupt the detumbling for safety reasons
+    adcsParams.detumbleLen = detumbleDuration;
 
     // print parameters for debugging
-    FOSSASAT_DEBUG_PRINT(F("timeStep="));
-    FOSSASAT_DEBUG_PRINTLN(adcsParams.timeStep);
-    FOSSASAT_DEBUG_PRINT(F("maxPulseInt="));
-    FOSSASAT_DEBUG_PRINTLN(adcsParams.maxPulseInt, 4);
-    FOSSASAT_DEBUG_PRINT(F("maxPulseLen="));
-    FOSSASAT_DEBUG_PRINTLN(adcsParams.maxPulseLen, 4);
     FOSSASAT_DEBUG_PRINT(F("detumbleOmegaTol="));
     FOSSASAT_DEBUG_PRINTLN(adcsParams.detumbleOmegaTol, 4);
-    FOSSASAT_DEBUG_PRINT(F("minInertialMoment="));
-    FOSSASAT_DEBUG_PRINTLN(adcsParams.minInertialMoment, 4);
-    FOSSASAT_DEBUG_PRINT(F("pulseAmplitude="));
-    FOSSASAT_DEBUG_PRINTLN(adcsParams.pulseAmplitude, 4);
-    FOSSASAT_DEBUG_PRINT(F("orbInclination="));
-    FOSSASAT_DEBUG_PRINTLN(adcsParams.orbInclination, 4);
-    FOSSASAT_DEBUG_PRINT(F("meanOrbitalMotion="));
-    FOSSASAT_DEBUG_PRINTLN(adcsParams.meanOrbitalMotion, 8);
-    FOSSASAT_DEBUG_PRINT_ADCS_MATRIX(adcsParams.coilChar, ADCS_NUM_AXES, ADCS_NUM_AXES);
-    FOSSASAT_DEBUG_PRINT(F("bridgeTimerUpdatePeriod="));
-    FOSSASAT_DEBUG_PRINTLN(adcsParams.bridgeTimerUpdatePeriod);
-    FOSSASAT_DEBUG_PRINT(F("bridgeOutputHigh="));
-    FOSSASAT_DEBUG_PRINTLN(adcsParams.bridgeOutputHigh);
-    FOSSASAT_DEBUG_PRINT(F("bridgeOutputLow="));
-    FOSSASAT_DEBUG_PRINTLN(adcsParams.bridgeOutputLow);
 
     // wake up IMU
     adcsState.active = true;
@@ -164,7 +107,7 @@ void ADCS_Detumble_Update() {
 
   } else {
     // tolerance reached, stop detumbling
-    ADCS_Detumble_Finish(ADCS_RES_DONE_TOL_REACHED, true);
+    ADCS_Finish(ADCS_RES_DONE_TOL_REACHED);
     FOSSASAT_DEBUG_PRINTLN(F("Detumbling done (tolerance reached)"));
     return;
   }
@@ -176,19 +119,11 @@ void ADCS_Detumble_Update() {
   adcsState.prevIntensity[2] = intensity[2];
 }
 
-void ADCS_Detumble_Finish(uint8_t result, bool startActiveControl) {
-  ADCS_Finish(result);
+void ADCS_ActiveControl_Init(const uint8_t controlFlags, const uint32_t activeDuration, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion) {
+  // execute common part
+  ADCS_Common_Init(controlFlags, orbitalInclination, meanOrbitalMotion);
 
-  if(startActiveControl && !adcsParams.control.bits.detumbleOnly) {
-    // initialize active control
-    ADCS_ActiveControl_Init(adcsParams.activeLen);
-  }
-}
-
-void ADCS_ActiveControl_Init(const uint32_t activeDuration) {
   // cache parameters
-  adcsParams.maxPulseInt = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_INTENSITY);     // Maximum applicable intensity
-  adcsParams.maxPulseLen = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_LENGTH);    // Maximum pulse time available
   adcsParams.activeEulerTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ACTIVE_EULER_TOLERANCE);   // Angular velocity tolerance to interrupt the detumbling for safety reasons
   adcsParams.activeOmegaTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ACTIVE_OMEGA_TOLERANCE);   // Angular tolerance between time steps to avoid overcontrolling
   adcsParams.eclipseThreshold = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_ECLIPSE_THRESHOLD);
@@ -206,10 +141,6 @@ void ADCS_ActiveControl_Init(const uint32_t activeDuration) {
   memcpy(adcsParams.controllers, controllerBuff, controllerBuffLen);
 
   // print parameters for debugging
-  FOSSASAT_DEBUG_PRINT(F("maxPulseInt="));
-  FOSSASAT_DEBUG_PRINTLN(adcsParams.maxPulseInt, 4);
-  FOSSASAT_DEBUG_PRINT(F("maxPulseLen="));
-  FOSSASAT_DEBUG_PRINTLN(adcsParams.maxPulseLen, 4);
   FOSSASAT_DEBUG_PRINT(F("activeEulerTol="));
   FOSSASAT_DEBUG_PRINTLN(adcsParams.activeEulerTol, 4);
   FOSSASAT_DEBUG_PRINT(F("activeOmegaTol="));
@@ -415,7 +346,7 @@ bool ADCS_Check() {
   // check detumbling length
   if(millis() - adcsState.start > adcsParams.detumbleLen) {
     // time limit reached
-    ADCS_Detumble_Finish(ADCS_RES_DONE_TIME_LIMIT, true);
+    ADCS_Finish(ADCS_RES_DONE_TIME_LIMIT);
     FOSSASAT_DEBUG_PRINTLN(F("ADCS done (time limit reached)"));
     return(false);
   }
@@ -423,7 +354,7 @@ bool ADCS_Check() {
   // check battery voltage or LP mode
   #ifdef ENABLE_TRANSMISSION_CONTROL
   if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
-    ADCS_Detumble_Finish(ADCS_RES_STOPPED_LOW_POWER, false);
+    ADCS_Finish(ADCS_RES_STOPPED_LOW_POWER);
     FOSSASAT_DEBUG_PRINTLN(F("ADCS stopped (battery too low)"));
     return(false);
   }
@@ -432,21 +363,21 @@ bool ADCS_Check() {
   // check Hbridge faults
   uint8_t fault = bridgeX.getFault();
   if((!adcsParams.control.bits.overrideFaultX) && (fault != 0) && (fault & FAULT)) {
-    ADCS_Detumble_Finish(((fault & FAULT) << 3 ) | ADCS_RES_STOPPED_FAULT_X, false);
+    ADCS_Finish(((fault & FAULT) << 3 ) | ADCS_RES_STOPPED_FAULT_X);
     FOSSASAT_DEBUG_PRINTLN(F("ADCS stopped (X axis fault)"));
     return(false);
   }
 
   fault = bridgeY.getFault();
   if((!adcsParams.control.bits.overrideFaultY) && (fault != 0) && (fault & FAULT)) {
-    ADCS_Detumble_Finish(((fault & FAULT) << 3 ) | ADCS_RES_STOPPED_FAULT_Y, false);
+    ADCS_Finish(((fault & FAULT) << 3 ) | ADCS_RES_STOPPED_FAULT_Y);
     FOSSASAT_DEBUG_PRINTLN(F("ADCS stopped (Y axis fault)"));
     return(false);
   }
 
   fault = bridgeZ.getFault();
   if((!adcsParams.control.bits.overrideFaultZ) && (fault != 0) && (fault & FAULT)) {
-    ADCS_Detumble_Finish(((fault & FAULT) << 3 ) | ADCS_RES_STOPPED_FAULT_Z, false);
+    ADCS_Finish(((fault & FAULT) << 3 ) | ADCS_RES_STOPPED_FAULT_Z);
     FOSSASAT_DEBUG_PRINTLN(F("ADCS stopped (Z axis fault)"));
     return(false);
   }
@@ -454,12 +385,67 @@ bool ADCS_Check() {
   // check abort command
   if(abortExecution) {
     abortExecution = false;
-    ADCS_Detumble_Finish(ADCS_RES_STOPPED_ABORT, false);
+    ADCS_Finish(ADCS_RES_STOPPED_ABORT);
     FOSSASAT_DEBUG_PRINTLN(F("ADCS stopped (aborted)"));
     return(false);
   }
 
   return(true);
+}
+
+void ADCS_Common_Init(const uint8_t controlFlags, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion) {
+  // save control flags
+  adcsParams.control.val = controlFlags;
+
+  // set science mode flag
+  scienceModeActive = true;
+
+  // reset previous ADCS result
+  PersistentStorage_SystemInfo_Set<uint8_t>(FLASH_LAST_ADCS_RESULT, ADCS_RUNNING);
+
+  // cache common parameters
+  adcsParams.maxPulseInt = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_INTENSITY);     // Maximum applicable intensity
+  adcsParams.maxPulseLen = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_MAX_LENGTH);    // Maximum pulse time available
+  adcsParams.timeStep = PersistentStorage_Get<uint32_t>(FLASH_ADCS_TIME_STEP);           // Time step between to calculation instants
+  adcsParams.minInertialMoment = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_MIN_INERTIAL_MOMENT); // Minimum inertial moment
+  adcsParams.pulseAmplitude = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_PULSE_AMPLITUDE);  // Amplitude of pulse for ACS_IntensitiesRectifier
+  adcsParams.calcTol = PersistentStorage_Get<ADCS_CALC_TYPE>(FLASH_ADCS_CALCULATION_TOLERANCE);
+  adcsParams.bridgeTimerUpdatePeriod = PersistentStorage_Get<uint32_t>(FLASH_ADCS_BRIDGE_TIMER_UPDATE_PERIOD);
+  adcsParams.bridgeOutputHigh = PersistentStorage_Get<int8_t>(FLASH_ADCS_BRIDGE_OUTPUT_HIGH);
+  adcsParams.bridgeOutputLow = PersistentStorage_Get<int8_t>(FLASH_ADCS_BRIDGE_OUTPUT_LOW);
+  adcsParams.orbInclination = orbitalInclination;
+  adcsParams.meanOrbitalMotion = meanOrbitalMotion;
+
+  // Coil magnetic characteristics -shall be introduced already inversed-.
+  const uint8_t coilCharLen = ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(ADCS_CALC_TYPE);
+  uint8_t coilCharBuff[coilCharLen];
+  PersistentStorage_Read(FLASH_ADCS_COIL_CHAR_MATRIX, coilCharBuff, coilCharLen);
+  memcpy(adcsParams.coilChar, coilCharBuff, coilCharLen);
+
+  // print everything for debugging
+  FOSSASAT_DEBUG_PRINT(F("maxPulseInt="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.maxPulseInt, 4);
+  FOSSASAT_DEBUG_PRINT(F("maxPulseLen="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.maxPulseLen, 4);
+  FOSSASAT_DEBUG_PRINT(F("timeStep="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.timeStep);
+  FOSSASAT_DEBUG_PRINT(F("minInertialMoment="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.minInertialMoment, 4);
+  FOSSASAT_DEBUG_PRINT(F("pulseAmplitude="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.pulseAmplitude, 4);
+  FOSSASAT_DEBUG_PRINT(F("calcTol="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.calcTol, 4);
+  FOSSASAT_DEBUG_PRINT(F("bridgeTimerUpdatePeriod="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.bridgeTimerUpdatePeriod);
+  FOSSASAT_DEBUG_PRINT(F("bridgeOutputHigh="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.bridgeOutputHigh);
+  FOSSASAT_DEBUG_PRINT(F("bridgeOutputLow="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.bridgeOutputLow);
+  FOSSASAT_DEBUG_PRINT(F("orbitalInclination="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.orbInclination);
+  FOSSASAT_DEBUG_PRINT(F("meanOrbitalMotion="));
+  FOSSASAT_DEBUG_PRINTLN(adcsParams.meanOrbitalMotion);
+  FOSSASAT_DEBUG_PRINT_ADCS_MATRIX(adcsParams.coilChar, ADCS_NUM_AXES, ADCS_NUM_AXES);
 }
 
 void ADCS_Finish(uint8_t result) {

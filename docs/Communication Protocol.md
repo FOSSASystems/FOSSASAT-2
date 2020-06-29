@@ -318,16 +318,16 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Description: Aborts the currently running operation (e.g. GPS logging or ADCS control).
 
 ### CMD_MANEUVER
-- Optional data length: 9
+- Optional data length: 5
 - Optional data:
   - 0: control flags
-    - bit 0: only perform detumbling (0x01) or both detumbling and maneuver (0x00)
-    - bit 1: override detumbling angular velocity tolerance check
-    - bit 2: override X axis H-bridge fault check
-    - bit 3: override Y axis H-bridge fault check
-    - bit 4: override Z axis H-bridge fault check
-  - 1 - 4: detumbling length in ms, unsigned 32-bit integer, LSB first
-  - 5 - 8: maneuver length in ms (ignored if detumble-only flag is set), unsigned 32-bit integer, LSB first
+    - bit 0: override X axis H-bridge fault check
+    - bit 1: override Y axis H-bridge fault check
+    - bit 2: override Z axis H-bridge fault check
+    - bit 3: ignored (see [CMD_DETUMBLE](#CMD_DETUMBLE))
+    - bit 4: override Euler angle tolerance check
+    - bit 5: override angular velocity tolerance check
+  - 1 - 4: maneuver length in ms, unsigned 32-bit integer, LSB first
 - Response: none
 - Description: Performs maneuver with closed-loop ADCS control.
 
@@ -377,6 +377,20 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
   - 2 - N: ephemerides data: 3x solar ephemeris (float, X - Y - Z), 3x magnetic ephemeris (float, X - Y - Z) and 1x controller ID (unsigned 8-bit integer) per each row.
 - Response: none
 - Description: Sets ephemerides data. One frame can contain up to 5 ephemerides rows, which will be written to the address of provided 128-byte chunk.
+
+### CMD_DETUMBLE
+- Optional data length: 5
+- Optional data:
+  - 0: control flags
+    - bit 0: override X axis H-bridge fault check
+    - bit 1: override Y axis H-bridge fault check
+    - bit 2: override Z axis H-bridge fault check
+    - bit 3: override detumbling angular velocity tolerance check
+    - bit 4: ignored (see [CMD_MANEUVER](#CMD_MANEUVER))
+    - bit 5: ignored (see [CMD_MANEUVER](#CMD_MANEUVER))
+  - 1 - 4: detumbling length in ms (ignored if detumble-only flag is set), unsigned 32-bit integer, LSB first
+- Response: none
+- Description: Performs detumbling with closed-loop ADCS control.
 
 ---
 # Responses

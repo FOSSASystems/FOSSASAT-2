@@ -35,21 +35,18 @@
 // TODO check units
 
 /*********** Functions declaration ************/
-// Main structure
-void ADCS_Main(const uint8_t controlFlags, const uint32_t detumbleDuration, const uint32_t activeDuration,
-               const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion);
-
 ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[ADCS_NUM_AXES]);
 ADCS_CALC_TYPE ADCS_Add_Tolerance(ADCS_CALC_TYPE var, ADCS_CALC_TYPE forbiddenVal);
 
-void ADCS_Detumble_Init(const uint32_t detumbleDuration, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion);
+void ADCS_Detumble_Init(const uint8_t controlFlags, const uint32_t detumbleDuration, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion);
 void ADCS_Detumble_Update();
 void ADCS_Detumble_Finish(uint8_t result, bool startActiveControl);
 
-void ADCS_ActiveControl_Init(const uint32_t activeDuration);
+void ADCS_ActiveControl_Init(const uint8_t controlFlags, const uint32_t activeDuration, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion);
 void ADCS_ActiveControl_Update();
 
 uint8_t ADCS_Load_Ephemerides(const uint32_t row, ADCS_CALC_TYPE solarEph[ADCS_NUM_AXES], ADCS_CALC_TYPE magEph[ADCS_NUM_AXES]);
+void ADCS_Common_Init(const uint8_t controlFlags, const ADCS_CALC_TYPE orbitalInclination, const ADCS_CALC_TYPE meanOrbitalMotion);
 bool ADCS_Check();
 void ADCS_Finish(uint8_t result);
 

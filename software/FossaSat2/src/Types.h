@@ -59,13 +59,12 @@ struct adcsState_t {
 };
 
 struct adcsControlBits_t {
-  uint8_t detumbleOnly : 1;       // LSB
+  uint8_t overrideFaultX : 1; // LSB
+  uint8_t overrideFaultY : 1;
+  uint8_t overrideFaultZ : 1;
   uint8_t overrideDetumbleTol : 1;
   uint8_t overrideEulerTol : 1;
   uint8_t overrideOmegaTol : 1;
-  uint8_t overrideFaultX : 1;
-  uint8_t overrideFaultY : 1;
-  uint8_t overrideFaultZ : 1;
 };
 
 struct adcsParams_t {
