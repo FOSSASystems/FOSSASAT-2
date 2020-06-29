@@ -229,7 +229,8 @@
 #define FLASH_ADCS_BRIDGE_OUTPUT_HIGH         (FLASH_ADCS_PARAMETERS + 0x78)  //  0x00001078    0x00001078    int8_t
 #define FLASH_ADCS_BRIDGE_OUTPUT_LOW          (FLASH_ADCS_PARAMETERS + 0x79)  //  0x00001079    0x00001079    int8_t
 #define FLASH_ADCS_NUM_CONTROLLERS            (FLASH_ADCS_PARAMETERS + 0x7A)  //  0x0000107A    0x0000107A    uint8_t
-#define FLASH_ADCS_COIL_CHAR_MATRIX           (FLASH_ADCS_PARAMETERS + 0x80)  //  0x00001080    0x000010C8    9x float or double
+#define FLASH_ADCS_COIL_CHAR_MATRIX           (FLASH_ADCS_PARAMETERS + 0x100) //  0x00001100    0x00001123    9x float
+#define FLASH_ADCS_INERTIA_TENSOR_MATRIX      (FLASH_ADCS_PARAMETERS + 0x124) //  0x00001124    0x000011B3    36x float
 
 // sector 2 - stats
 #define FLASH_STATS                                               0x00002000  //  0x00002000    0x000020FF
@@ -522,6 +523,12 @@
                                                           {1.0, 1.0, 1.0} }
 #define ADCS_MAX_NUM_CONTROLLERS                        10      //
 #define ADCS_DEFAULT_CONTROLLER                         { {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
+                                                          {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
+                                                          {1.0, 1.0, 1.0, 1.0, 1.0, 1.0} }
+#define ADCS_INERTIA_TENSOR                             { {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
+                                                          {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
+                                                          {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
+                                                          {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0} }
 #define ADCS_NUM_CONTROLLERS                            1       //  use only one controller by default

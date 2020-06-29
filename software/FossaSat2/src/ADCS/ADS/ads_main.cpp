@@ -84,5 +84,5 @@ void ADS_Main(ADCS_CALC_TYPE omega[ADCS_NUM_AXES], ADCS_CALC_TYPE magData[ADCS_N
   measurements[5] = omega[2];
 
   // Filtering of the signal
-  ADS_Kalman_Filter(adcsParams.disturbCovariance, adcsParams.noiseCovariance, adcsParams.timeStep, stateVars, measurements, controlVector, matrixP, filtered_y);
+  ADS_Kalman_Filter(adcsParams.disturbCovariance, adcsParams.noiseCovariance, adcsParams.timeStep, stateVars, measurements, controlVector, adcsParams.inertiaTensor, matrixP, filtered_y);
 }

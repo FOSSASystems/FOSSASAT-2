@@ -1883,39 +1883,39 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     case CMD_SET_ADCS_PARAMETERS: {
       if(Communication_Check_OptDataLen(34, optDataLen)) {
         // read the current ADCS parameters
-        uint8_t adcsPage[FLASH_EXT_PAGE_SIZE];
-        PersistentStorage_Read(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);
+        uint8_t adcsSector[FLASH_SECTOR_SIZE];
+        PersistentStorage_Read(FLASH_ADCS_PARAMETERS, adcsSector, FLASH_SECTOR_SIZE);
         uint8_t* optDataPtr = optData;
 
         // set the parameters that require conversion
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_MAX_INTENSITY);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_MAX_LENGTH);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_DETUMB_OMEGA_TOLERANCE);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_AMPLITUDE);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_CALCULATION_TOLERANCE);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_MIN_INERTIAL_MOMENT);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ACTIVE_EULER_TOLERANCE);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ACTIVE_OMEGA_TOLERANCE);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ECLIPSE_THRESHOLD);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ROTATION_WEIGHT_RATIO);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_ROTATION_TRIGGER);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_DISTURBANCE_COVARIANCE);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_NOISE_COVARIANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_PULSE_MAX_INTENSITY);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_PULSE_MAX_LENGTH);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_DETUMB_OMEGA_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_PULSE_AMPLITUDE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_CALCULATION_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_MIN_INERTIAL_MOMENT);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_ACTIVE_EULER_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_ACTIVE_OMEGA_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_ECLIPSE_THRESHOLD);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_ROTATION_WEIGHT_RATIO);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_ROTATION_TRIGGER);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_DISTURBANCE_COVARIANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_NOISE_COVARIANCE);
 
         // set the rest
-        memcpy(adcsPage + (FLASH_ADCS_TIME_STEP - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint32_t));
+        memcpy(adcsSector + (FLASH_ADCS_TIME_STEP - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint32_t));
         optDataPtr += sizeof(uint32_t);
-        memcpy(adcsPage + (FLASH_ADCS_BRIDGE_TIMER_UPDATE_PERIOD - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint32_t));
+        memcpy(adcsSector + (FLASH_ADCS_BRIDGE_TIMER_UPDATE_PERIOD - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint32_t));
         optDataPtr += sizeof(uint32_t);
-        memcpy(adcsPage + (FLASH_ADCS_BRIDGE_OUTPUT_HIGH - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(int8_t));
+        memcpy(adcsSector + (FLASH_ADCS_BRIDGE_OUTPUT_HIGH - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(int8_t));
         optDataPtr += sizeof(int8_t);
-        memcpy(adcsPage + (FLASH_ADCS_BRIDGE_OUTPUT_LOW - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(int8_t));
+        memcpy(adcsSector + (FLASH_ADCS_BRIDGE_OUTPUT_LOW - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(int8_t));
         optDataPtr += sizeof(int8_t);
-        memcpy(adcsPage + (FLASH_ADCS_NUM_CONTROLLERS - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint8_t));
+        memcpy(adcsSector + (FLASH_ADCS_NUM_CONTROLLERS - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint8_t));
         optDataPtr += sizeof(uint8_t);
 
         // write all at once
-        PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);
+        PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsSector, FLASH_SECTOR_SIZE);
       }
     } break;
 

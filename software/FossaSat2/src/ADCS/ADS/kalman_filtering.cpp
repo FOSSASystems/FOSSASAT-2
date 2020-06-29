@@ -80,13 +80,11 @@ void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[ADCS_STATE_DIM][ADCS_STATE_DIM]) {
 /*************** Main function ******************/
 void ADS_Kalman_Filter(const ADCS_CALC_TYPE Q, const ADCS_CALC_TYPE R, const ADCS_CALC_TYPE delta_t,
                        const ADCS_CALC_TYPE x0[ADCS_STATE_DIM], const ADCS_CALC_TYPE y0[ADCS_STATE_DIM],
-                       const ADCS_CALC_TYPE u0[ADCS_NUM_AXES], ADCS_CALC_TYPE P[][ADCS_STATE_DIM],
-                       ADCS_CALC_TYPE filtered_y[]) {
+                       const ADCS_CALC_TYPE u0[ADCS_NUM_AXES], const ADCS_CALC_TYPE invI[ADCS_STATE_DIM][ADCS_STATE_DIM],
+                       ADCS_CALC_TYPE P[][ADCS_STATE_DIM], ADCS_CALC_TYPE filtered_y[]) {
 
   // Constants and variables declarations and preliminary computations
   const ADCS_CALC_TYPE u[ADCS_STATE_DIM] = {u0[0], u0[1], u0[2]};                      // Total control vector
-  // TODO config (same as coil char)
-  const ADCS_CALC_TYPE invI[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{}, {}, {}};            // Inertia tensor inverse
   ADCS_CALC_TYPE M_aux1[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0},{0},{0},{0},{0},{0}};   // Auxiliary matrix
   ADCS_CALC_TYPE M_aux2[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0},{0},{0},{0},{0},{0}};   // Auxiliary matrix
   ADCS_CALC_TYPE M_aux3[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0},{0},{0},{0},{0},{0}};   // Auxiliary matrix

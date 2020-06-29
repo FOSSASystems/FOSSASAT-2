@@ -638,10 +638,10 @@ void PersistentStorage_Reset_System_Info() {
 
 void PersistentStorage_Reset_ADCS_Params() {
   // build a completely new page
-  uint8_t adcsPage[FLASH_EXT_PAGE_SIZE];
+  uint8_t adcsPage[2*FLASH_EXT_PAGE_SIZE];
 
   // set everything to 0 by default
-  memset(adcsPage, 0, FLASH_EXT_PAGE_SIZE);
+  memset(adcsPage, 0, 2*FLASH_EXT_PAGE_SIZE);
 
   ADCS_CALC_TYPE f = ADCS_PULSE_MAX_INTENSITY;
   memcpy(adcsPage + (FLASH_ADCS_PULSE_MAX_INTENSITY - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
@@ -681,11 +681,26 @@ void PersistentStorage_Reset_ADCS_Params() {
   uint8_t us = ADCS_NUM_CONTROLLERS;
   memcpy(adcsPage + (FLASH_ADCS_NUM_CONTROLLERS - FLASH_ADCS_PARAMETERS), &us, sizeof(us));
 
-  ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES] = ADCS_COIL_CHARACTERISTICS;
-  memcpy(adcsPage + (FLASH_ADCS_COIL_CHAR_MATRIX - FLASH_ADCS_PARAMETERS), coilChar, ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(ADCS_CALC_TYPE));
+  // write default coil characteristics
+  float coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES] = ADCS_COIL_CHARACTERISTICS;
+  for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+    for(uint8_t j = 0; j < ADCS_NUM_AXES; j++) {
+      float val = coilChar[i][j];
+      memcpy(adcsPage + (FLASH_ADCS_COIL_CHAR_MATRIX - FLASH_ADCS_PARAMETERS) + (i*ADCS_NUM_AXES*sizeof(val) + j*sizeof(val)), &val, sizeof(val));
+    }
+  }
+
+  // write default inertia tensor matrix
+  float inertiaTensor[2*ADCS_NUM_AXES][2*ADCS_NUM_AXES] = ADCS_INERTIA_TENSOR;
+  for(uint8_t i = 0; i < 2*ADCS_NUM_AXES; i++) {
+    for(uint8_t j = 0; j < 2*ADCS_NUM_AXES; j++) {
+      float val = inertiaTensor[i][j];
+      memcpy(adcsPage + (FLASH_ADCS_INERTIA_TENSOR_MATRIX - FLASH_ADCS_PARAMETERS) + (i*2*ADCS_NUM_AXES*sizeof(val) + j*sizeof(val)), &val, sizeof(val));
+    }
+  }
 
   // write the default ADCS info
-  PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);
+  PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, 2*FLASH_EXT_PAGE_SIZE);
 
   // write the default ADCS controller
   memset(adcsPage, 0, FLASH_EXT_PAGE_SIZE);
