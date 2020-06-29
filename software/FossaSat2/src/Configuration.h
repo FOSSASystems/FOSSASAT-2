@@ -508,7 +508,7 @@
 #define ADCS_CALCULATION_TOLERANCE                      0.001    //
 #define ADCS_ECLIPSE_THRESHOLD                          1.0     //
 #define ADCS_ROTATION_WEIGHT_RATIO                      0.7     //  Weight ratio to average sensor, referred to the Euler integrator scheme (less accurate)
-#define ADCS_ROTATION_TRIGGER                           M_Pi/6.0 // Angular difference between sensor to trigger their averaging
+#define ADCS_ROTATION_TRIGGER                           (M_PI/6.0) // Angular difference between sensor to trigger their averaging
 #define ADCS_DISTURBANCE_COVARIANCE                     0.01     // Covariance of the dynamical disturbances
 #define ADCS_NOISE_COVARIANCE                           0.01     // Covariance of the sensor noise
 #define ADCS_COIL_CHARACTERISTICS                       { {15.833,   0,        0}, \
