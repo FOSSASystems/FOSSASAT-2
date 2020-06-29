@@ -12,38 +12,42 @@
 
 
 /*************** Auxiliary functions implementation *****************/
-void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[][ADCS_STATE_DIM]) {
+void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[ADCS_STATE_DIM][ADCS_STATE_DIM]) {
 	ADCS_CALC_TYPE temp;
 	ADCS_CALC_TYPE matrix_aux[ADCS_STATE_DIM][2*ADCS_STATE_DIM];
 
 	// Create the augmented matrix
-    for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
-        for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
-            matrix_aux[i][j] = matrix[i][j];
-        }
+  for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
+    for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
+      matrix_aux[i][j] = matrix[i][j];
     }
-    for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
-        for(uint8_t j = 0; j < 2 * ADCS_STATE_DIM; j++) {
-			if(j == (i + ADCS_STATE_DIM)) {
-                matrix_aux[i][j] = 1;
-            }
-        }
+  }
+
+  for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
+    for(uint8_t j = 0; j < 2 * ADCS_STATE_DIM; j++) {
+		  if(j == (i + ADCS_STATE_DIM)) {
+        matrix_aux[i][j] = 1;
+      }
     }
+  }
 
 	// Interchange the rows of matrix, taking into account singular pivots
-	for (uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
-		if (matrix_aux[j][j] == 0) {
-            uint8_t position = j;
-            for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
-                if (abs(matrix_aux[i][j]) > abs(matrix_aux[position][j]))
-                    position = i;
-            }
-		}
-        for (uint8_t k = 0; k < 2*ADCS_STATE_DIM; k++) {
-           temp = matrix_aux(j,k);
-           matrix_aux(j,k) = matrix_aux(position,k);
-           matrix_aux(position,k) = temp;
+  uint8_t position = 0;
+	for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
+		if(matrix_aux[j][j] == 0) {
+      position = j;
+      for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
+        if(abs(matrix_aux[i][j]) > abs(matrix_aux[position][j])) {
+          position = i;
         }
+      }
+		}
+
+    for(uint8_t k = 0; k < 2*ADCS_STATE_DIM; k++) {
+      temp = matrix_aux[j][k];
+      matrix_aux[j][k] = matrix_aux[position][k];
+      matrix_aux[position][k] = temp;
+    }
 	}
 
 	// Replace a row by sum of itself and a constant multiple of another row of the matrix
