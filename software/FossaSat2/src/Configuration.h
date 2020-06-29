@@ -500,19 +500,19 @@
 #define ADCS_TIME_STEP                                  100     // time step between successive ADCS updates, in ms
 #define ADCS_PULSE_MAX_INTENSITY                        1.0     //
 #define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)  // maximum length of H-bridge pulse
-#define ADCS_DETUMB_OMEGA_TOLERANCE                     0.1     // detumbling will be stopped once change in normalized angular velocity drops below this value
-#define ADCS_ACTIVE_EULER_TOLERANCE                     1.0     //
-#define ADCS_ACTIVE_OMEGA_TOLERANCE                     0.1     //
+#define ADCS_DETUMB_OMEGA_TOLERANCE                     0.001     // detumbling will be stopped once change in normalized angular velocity drops below this value
+#define ADCS_ACTIVE_EULER_TOLERANCE                     0.01     //
+#define ADCS_ACTIVE_OMEGA_TOLERANCE                     0.01     //
 #define ADCS_MIN_INERTIAL_MOMENT                        1000    //
 #define ADCS_PULSE_AMPLITUDE                            0.1     //
-#define ADCS_CALCULATION_TOLERANCE                      0.01    //
+#define ADCS_CALCULATION_TOLERANCE                      0.001    //
 #define ADCS_ECLIPSE_THRESHOLD                          1.0     //
-#define ADCS_ROTATION_WEIGHT_RATIO                      0.5     //
-#define ADCS_ROTATION_TRIGGER                           1.0     //
-#define ADCS_DISTURBANCE_COVARIANCE                     1.0     //
-#define ADCS_NOISE_COVARIANCE                           1.0     //
-#define ADCS_COIL_CHARACTERISTICS                       { {15.83,   0,        0}, \
-                                                          {0,       893.65,   0}, \
+#define ADCS_ROTATION_WEIGHT_RATIO                      0.7     //  Weight ratio to average sensor, referred to the Euler integrator scheme (less accurate)
+#define ADCS_ROTATION_TRIGGER                           M_Pi/6.0 // Angular difference between sensor to trigger their averaging
+#define ADCS_DISTURBANCE_COVARIANCE                     0.01     // Covariance of the dynamical disturbances
+#define ADCS_NOISE_COVARIANCE                           0.01     // Covariance of the sensor noise
+#define ADCS_COIL_CHARACTERISTICS                       { {15.833,   0,        0}, \
+                                                          {0,       893.655,   0}, \
                                                           {0,       0,        108.551} }
 #define ADCS_PANEL_UNIT_VECTOR                          { {1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0}, \
