@@ -12,43 +12,58 @@
 
 
 /*************** Auxiliary functions implementation *****************/
-void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[ADCS_STATE_DIM][ADCS_STATE_DIM]) {
+ADCS_CALC_TYPE absolute(ADCS_CALC_TYPE value)
+{
+    ADCS_CALC_TYPE abs_value;
+
+    // Take the absolute value of the parameter
+    if (value < 0)
+        abs_value = -1.0*value;
+
+    return (value);
+}
+
+void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[][ADCS_STATE_DIM]) {
 	ADCS_CALC_TYPE temp;
 	ADCS_CALC_TYPE matrix_aux[ADCS_STATE_DIM][2*ADCS_STATE_DIM];
 
 	// Create the augmented matrix
-  for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
-    for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
-      matrix_aux[i][j] = matrix[i][j];
+    for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
+        for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
+            matrix_aux[i][j] = matrix[i][j];
+        }
     }
-	}
-
-	for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
-    for(uint8_t j = 0; j < 2 * ADCS_STATE_DIM; j++) {
+    for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
+        for(uint8_t j = 0; j < 2 * ADCS_STATE_DIM; j++) {
 			if(j == (i + ADCS_STATE_DIM)) {
-        matrix_aux[i][j] = 1;
-      }
+                matrix_aux[i][j] = 1;
+            }
+        }
     }
-	}
 
-	// Interchange the rows of matrix from the end
-  ADCS_CALC_TYPE tempArr;
-	for (uint8_t i = ADCS_STATE_DIM - 1; i > 0; i--) {
-		if(matrix_aux[i - 1][0] < matrix_aux[i][0]) {
-      for(uint8_t j = 0; j < 2*ADCS_STATE_DIM; j++) {
-        tempArr = matrix_aux[i][j];
-        matrix_aux[i][j] = matrix_aux[i - 1][j];
-        matrix_aux[i - 1][j] = tempArr;
-      }
+	// Interchange the rows of matrix, taking into account singular pivots
+	for (uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
+		if (matrix_aux[j][j] == 0) {
+            uint8_t position = j;
+            for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
+                ADCS_CALC_TYPE abs_1 = absolute(matrix_aux[i][j]);
+                ADCS_CALC_TYPE abs_2 = absolute(matrix_aux[position][j]);
+                if (abs_1 > abs_2)
+                    position = i;
+            }
 		}
+        for (uint8_t k = 0; k < 2*ADCS_STATE_DIM; k++) {
+           temp = matrix_aux(j,k);
+           matrix_aux(j,k) = matrix_aux(position,k);
+           matrix_aux(position,k) = temp;
+        }
 	}
 
-	// Replace a row by sum of itself and a
-	// constant multiple of another row of the matrix
+	// Replace a row by sum of itself and a constant multiple of another row of the matrix
 	for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
 		for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
 			if (j != i) {
-				temp = matrix_aux[j][i] / ADCS_Add_Tolerance(matrix_aux[i][i], 0);
+				temp = matrix_aux[j][i] / matrix_aux[i][i];
 				for(uint8_t k = 0; k < 2*ADCS_STATE_DIM; k++) {
 					matrix_aux[j][k] -= (matrix_aux[i][k] * temp);
 				}
@@ -56,12 +71,11 @@ void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[ADCS_STATE_DIM][ADCS_STATE_DIM]) {
 		}
 	}
 
-	// Multiply each row by a nonzero integer.
 	// Divide row element by the diagonal element
 	for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
-		temp = ADCS_Add_Tolerance(matrix[i][i], 0);
+		temp = matrix[i][i];
 		for(uint8_t j = 0; j < 2*ADCS_STATE_DIM; j++) {
-			matrix_aux[i][j] = matrix_aux[i][j] / temp;
+			matrix_aux[i][j] /= temp;
 		}
 	}
 
@@ -74,8 +88,8 @@ void ADS_Inverse_Matrix(ADCS_CALC_TYPE matrix[ADCS_STATE_DIM][ADCS_STATE_DIM]) {
 
 /*************** Main function ******************/
 void ADS_Kalman_Filter(const ADCS_CALC_TYPE Q, const ADCS_CALC_TYPE R, const ADCS_CALC_TYPE delta_t,
-                       const ADCS_CALC_TYPE x0[ADCS_STATE_DIM], const ADCS_CALC_TYPE y0[ADCS_STATE_DIM], const ADCS_CALC_TYPE u0[ADCS_STATE_DIM],
-                       ADCS_CALC_TYPE P[ADCS_STATE_DIM][ADCS_STATE_DIM], ADCS_CALC_TYPE filtered_y[ADCS_STATE_DIM]) {
+                       const ADCS_CALC_TYPE x0[], const ADCS_CALC_TYPE y0[], const ADCS_CALC_TYPE u0[],
+                       ADCS_CALC_TYPE P[][ADCS_STATE_DIM], ADCS_CALC_TYPE filtered_y[]) {
 
   // Constants and variables declarations and preliminary computations
   const ADCS_CALC_TYPE u[ADCS_STATE_DIM] = {u0[0], u0[1], u0[2]};                      // Total control vector
@@ -85,6 +99,7 @@ void ADS_Kalman_Filter(const ADCS_CALC_TYPE Q, const ADCS_CALC_TYPE R, const ADC
   ADCS_CALC_TYPE M_aux3[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0},{0},{0},{0},{0},{0}};   // Auxiliary matrix
 
   ADCS_CALC_TYPE S[ADCS_STATE_DIM][ADCS_STATE_DIM];                                          // Partial solution of the CARE
+  ADCS_CALC_TYPE invS[ADCS_STATE_DIM][ADCS_STATE_DIM];                                       // Inverse of the matrix
   ADCS_CALC_TYPE kalman_gain[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0},{0},{0},{0},{0},{0}};    // Proper Kalman filter
 
   // Initialization of the algorithm in the general case
