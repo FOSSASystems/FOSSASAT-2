@@ -19,7 +19,6 @@
 #include <SparkFunLSM9DS1.h>
 
 // RadioLib
-#define RADIOLIB_STATIC_ONLY
 #include <RadioLib.h>
 
 // files

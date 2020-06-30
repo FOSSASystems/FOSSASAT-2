@@ -6,7 +6,7 @@
 #endif
 
 #if (!defined(RADIOLIB_STATIC_ONLY))
-  #error "RadioLib is using dynamic memory management, make sure static only is enabled in FossaSat2.h"
+  #error "RadioLib is using dynamic memory management, make sure static only is enabled in RadioLib/src/BuildOpt.h"
 #endif
 
 // cppcheck-suppress unusedFunction
