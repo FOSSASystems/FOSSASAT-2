@@ -32,8 +32,6 @@
 #include "../ACS/acs.h"
 #include "../ADS/ads.h"
 
-// TODO check units
-
 /*********** Functions declaration ************/
 ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[ADCS_NUM_AXES]);
 ADCS_CALC_TYPE ADCS_Add_Tolerance(ADCS_CALC_TYPE var, ADCS_CALC_TYPE forbiddenVal);

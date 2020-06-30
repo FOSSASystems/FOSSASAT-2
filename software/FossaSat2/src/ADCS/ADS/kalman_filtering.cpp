@@ -100,9 +100,12 @@ void ADS_Kalman_Filter(const ADCS_CALC_TYPE Q, const ADCS_CALC_TYPE R, const ADC
   const ADCS_CALC_TYPE Q_m[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{Q,0,0,0,0,0},{0,Q,0,0,0,0},{0,0,Q,0,0,0},{0,0,0,Q,0,0},{0,0,0,0,Q,0},{0,0,0,0,0,Q}};
   const ADCS_CALC_TYPE R_m[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{R,0,0,0,0,0},{0,R,0,0,0,0},{0,0,R,0,0,0},{0,0,0,R,0,0},{0,0,0,0,R,0},{0,0,0,0,0,R}};
 
+  // convert to SI units
+  ADCS_CALC_TYPE delta_t_sec = delta_t / 1000.0;
+
   // State space linearised matrices
   const ADCS_CALC_TYPE C[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{1,0,0,0,0,0},{0,1,0,0,0,0},{0,0,1,0,0,0},{0,0,0,1,0,0},{0,0,0,0,1,0},{0,0,0,0,0,1}};
-  const ADCS_CALC_TYPE A[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{1,0,0,delta_t,0,0},{0,1,0,0,delta_t,0},{0,0,1,0,0,delta_t},{0,0,0,1,0,0},{0,0,0,0,1,0},{0,0,0,0,0,1}};
+  const ADCS_CALC_TYPE A[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{1,0,0,delta_t_sec,0,0},{0,1,0,0,delta_t_sec,0},{0,0,1,0,0,delta_t_sec},{0,0,0,1,0,0},{0,0,0,0,1,0},{0,0,0,0,0,1}};
 
   ADCS_CALC_TYPE A_trans[ADCS_STATE_DIM][ADCS_STATE_DIM];
   for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
@@ -114,7 +117,7 @@ void ADS_Kalman_Filter(const ADCS_CALC_TYPE Q, const ADCS_CALC_TYPE R, const ADC
   ADCS_CALC_TYPE B[ADCS_STATE_DIM][ADCS_STATE_DIM] = {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
   for(uint8_t i = ADCS_STATE_DIM/2; i < ADCS_STATE_DIM; i++) {
     for(uint8_t j = ADCS_STATE_DIM/2; j < ADCS_STATE_DIM; j++) {
-      B[i][j] = invI[(i-ADCS_STATE_DIM/2)][(j-ADCS_STATE_DIM/2)]*delta_t;
+      B[i][j] = invI[(i-ADCS_STATE_DIM/2)][(j-ADCS_STATE_DIM/2)]*delta_t_sec;
     }
   }
 
