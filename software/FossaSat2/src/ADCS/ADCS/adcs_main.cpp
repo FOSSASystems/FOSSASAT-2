@@ -485,24 +485,41 @@ void ADCS_Set_Pulse_Lengths(ADCS_CALC_TYPE intensity[ADCS_NUM_AXES]) {
   FOSSASAT_DEBUG_PRINT(F("intensityNorm=\t"));
   FOSSASAT_DEBUG_PRINTLN(intensityNorm, 4);
 
-  if(intensityNorm < adcsParams.maxPulseInt) {
-    // Calculate the intensities
-    pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep, adcsParams.pulseAmplitude);
-    pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep, adcsParams.pulseAmplitude);
-    pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep, adcsParams.pulseAmplitude);
+  // Calculate the intensities
+  pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep, adcsParams.pulseAmplitude);
+  pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep, adcsParams.pulseAmplitude);
+  pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep, adcsParams.pulseAmplitude);
 
+  // set directions
+  if(pulseLength[0] > 0) {
+    adcsState.bridgeStateX.forward = true;
   } else {
-    // Max intensity application
+    adcsState.bridgeStateX.forward = false;
+  }
+
+  if(pulseLength[1] > 0) {
+    adcsState.bridgeStateY.forward = true;
+  } else {
+    adcsState.bridgeStateY.forward = false;
+  }
+
+  if(pulseLength[2] > 0) {
+    adcsState.bridgeStateZ.forward = true;
+  } else {
+    adcsState.bridgeStateZ.forward = false;
+  }
+
+  // check maximum applicable intensity
+  if(intensityNorm > adcsParams.maxPulseInt) {
     pulseLength[0] = adcsParams.maxPulseLen;
     pulseLength[1] = adcsParams.maxPulseLen;
     pulseLength[2] = adcsParams.maxPulseLen;
-
   }
 
   // update H-bridges
-  adcsState.bridgeStateX.pulseLen = (uint32_t)(pulseLength[0]);
-  adcsState.bridgeStateY.pulseLen = (uint32_t)(pulseLength[1]);
-  adcsState.bridgeStateZ.pulseLen = (uint32_t)(pulseLength[2]);
+  adcsState.bridgeStateX.pulseLen = (uint32_t)(abs(pulseLength[0]));
+  adcsState.bridgeStateY.pulseLen = (uint32_t)(abs(pulseLength[1]));
+  adcsState.bridgeStateZ.pulseLen = (uint32_t)(abs(pulseLength[2]));
 
   FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(intensity, ADCS_NUM_AXES);
   FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(pulseLength, ADCS_NUM_AXES);
@@ -533,33 +550,63 @@ void ADCS_Setup_Timers(void (*func)(void)) {
 void ADCS_Update_Bridges() {
   uint32_t currTime = millis();
 
+  // bridge X update
   if(currTime - adcsState.bridgeStateX.lastUpdate >= adcsState.bridgeStateX.pulseLen) {
+    // update timestamp
     adcsState.bridgeStateX.lastUpdate = currTime;
+
+    // set value and direction
     if(adcsState.bridgeStateX.outputHigh) {
-      bridgeX.drive(adcsParams.bridgeOutputHigh);
+      int8_t val = adcsParams.bridgeOutputHigh;
+      if(!adcsState.bridgeStateX.forward) {
+        val = adcsParams.bridgeOutputLow;
+      }
+      bridgeX.drive(val);
     } else {
-      bridgeX.drive(adcsParams.bridgeOutputLow);
+      bridgeX.drive(0);
     }
+
+    // flip pulse bit
     adcsState.bridgeStateX.outputHigh = !adcsState.bridgeStateX.outputHigh;
   }
 
+  // bridge Y update
   if(currTime - adcsState.bridgeStateY.lastUpdate >= adcsState.bridgeStateY.pulseLen) {
+    // update timestamp
     adcsState.bridgeStateY.lastUpdate = currTime;
+
+    // set value and direction
     if(adcsState.bridgeStateY.outputHigh) {
-      bridgeY.drive(adcsParams.bridgeOutputHigh);
+      int8_t val = adcsParams.bridgeOutputHigh;
+      if(!adcsState.bridgeStateY.forward) {
+        val = adcsParams.bridgeOutputLow;
+      }
+      bridgeY.drive(val);
     } else {
-      bridgeY.drive(adcsParams.bridgeOutputLow);
+      bridgeY.drive(0);
     }
+
+    // flip pulse bit
     adcsState.bridgeStateY.outputHigh = !adcsState.bridgeStateY.outputHigh;
   }
 
+  // bridge Z update
   if(currTime - adcsState.bridgeStateZ.lastUpdate >= adcsState.bridgeStateZ.pulseLen) {
+    // update timestamp
     adcsState.bridgeStateZ.lastUpdate = currTime;
+
+    // set value and direction
     if(adcsState.bridgeStateZ.outputHigh) {
-      bridgeZ.drive(adcsParams.bridgeOutputHigh);
+      int8_t val = adcsParams.bridgeOutputHigh;
+      if(!adcsState.bridgeStateZ.forward) {
+        val = adcsParams.bridgeOutputLow;
+      }
+      bridgeZ.drive(val);
     } else {
-      bridgeZ.drive(adcsParams.bridgeOutputLow);
+      bridgeZ.drive(0);
     }
+
+    // flip pulse bit
     adcsState.bridgeStateZ.outputHigh = !adcsState.bridgeStateZ.outputHigh;
   }
 }

@@ -39,6 +39,7 @@ struct gpsLogState_t {
 
 struct adcsBridgeState_t {
   bool outputHigh;
+  bool forward;
   uint32_t lastUpdate;
   uint32_t pulseLen;
 };
