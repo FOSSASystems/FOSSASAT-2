@@ -515,22 +515,19 @@
 #define ADCS_COIL_CHARACTERISTICS                       { {15.833,   0,        0}, \
                                                           {0,       893.655,   0}, \
                                                           {0,       0,        108.551} }
-#define ADCS_PANEL_UNIT_VECTOR                          { {1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0} }
+#define ADCS_PANEL_UNIT_VECTOR                          { {1.0, 0, 0}, \
+                                                          {-1.0, 0, 0} \
+                                                          {0, 0, 1.0}, \
+                                                          {0, 0, -1.0}, \
+                                                          {0, -1.0, 0}, \
+                                                          {0, 1.0, 0} }
 #define ADCS_MAX_NUM_CONTROLLERS                        10      //
 #define ADCS_DEFAULT_CONTROLLER                         { {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0} }
-#define ADCS_INERTIA_TENSOR                             { {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0, 1.0, 1.0, 1.0} }
+#define ADCS_INERTIA_TENSOR                             { {1.0, 1.0, 1.0}, \
+                                                          {1.0, 1.0, 1.0}, \
+                                                          {1.0, 1.0, 1.0}, }
 #define ADCS_NUM_CONTROLLERS                            1       //  use only one controller by default
 #define ADCS_BRIDGE_TIMER_UPDATE_PERIOD                 (ADCS_TIME_STEP/100)  // time step between successive H bridge output updates, in ms
 #define ADCS_BRIDGE_OUTPUT_HIGH                         63      // H bridge drive strength to be used as "high"
