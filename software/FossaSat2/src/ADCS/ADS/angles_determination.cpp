@@ -19,7 +19,7 @@ void ADS_Angles_Determination(const ADCS_CALC_TYPE eulerAnglesMatrix[ADCS_NUM_AX
   ADCS_CALC_TYPE phi = atan2(-1.0 * eulerAnglesMatrix[0][2] * sin(psi), eulerAnglesMatrix[1][2]);
 
   // New variables
-  newAnglesVector[0] = psi;         // X rotation -Roll-
-  newAnglesVector[1] = phi;         // Y rotation -Pitch-
-  newAnglesVector[2] = theta;       // Z rotation -Yaw-
+  newAnglesVector[0] = psi;     // X rotation -Roll-
+  newAnglesVector[1] = phi;     // Y rotation -Pitch-
+  newAnglesVector[2] = theta;   // Z rotation -Yaw-
 }
