@@ -691,11 +691,11 @@ void PersistentStorage_Reset_ADCS_Params() {
   }
 
   // write default inertia tensor matrix
-  float inertiaTensor[2*ADCS_NUM_AXES][2*ADCS_NUM_AXES] = ADCS_INERTIA_TENSOR;
-  for(uint8_t i = 0; i < 2*ADCS_NUM_AXES; i++) {
-    for(uint8_t j = 0; j < 2*ADCS_NUM_AXES; j++) {
+  float inertiaTensor[ADCS_NUM_AXES][ADCS_NUM_AXES] = ADCS_INERTIA_TENSOR;
+  for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+    for(uint8_t j = 0; j < ADCS_NUM_AXES; j++) {
       float val = inertiaTensor[i][j];
-      memcpy(adcsPage + (FLASH_ADCS_INERTIA_TENSOR_MATRIX - FLASH_ADCS_PARAMETERS) + (i*2*ADCS_NUM_AXES*sizeof(val) + j*sizeof(val)), &val, sizeof(val));
+      memcpy(adcsPage + (FLASH_ADCS_INERTIA_TENSOR_MATRIX - FLASH_ADCS_PARAMETERS) + (i*ADCS_NUM_AXES*sizeof(val) + j*sizeof(val)), &val, sizeof(val));
     }
   }
 
