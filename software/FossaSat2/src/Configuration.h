@@ -499,12 +499,12 @@
 #define ADCS_NUM_PANELS                                 6       // number of solar panels for eclipse decision
 #define ADCS_CALC_TYPE                                  double  // numeric type to use in ADCS calculation, float for single precision, double for double precision
 #define ADCS_TIME_STEP                                  100     // time step between successive ADCS updates, in ms
-#define ADCS_PULSE_MAX_INTENSITY                        1.0     //
+#define ADCS_PULSE_MAX_INTENSITY                        0.2     //
 #define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)  // maximum length of H-bridge pulse
 #define ADCS_DETUMB_OMEGA_TOLERANCE                     0.001     // detumbling will be stopped once change in normalized angular velocity drops below this value
 #define ADCS_ACTIVE_EULER_TOLERANCE                     0.01     //
 #define ADCS_ACTIVE_OMEGA_TOLERANCE                     0.01     //
-#define ADCS_MIN_INERTIAL_MOMENT                        1000    //
+#define ADCS_MIN_INERTIAL_MOMENT                        0.0003782 //
 #define ADCS_PULSE_AMPLITUDE                            0.1     //
 #define ADCS_CALCULATION_TOLERANCE                      0.001    //
 #define ADCS_ECLIPSE_THRESHOLD                          1.0     //
@@ -525,9 +525,9 @@
 #define ADCS_DEFAULT_CONTROLLER                         { {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0} }
-#define ADCS_INERTIA_TENSOR                             { {1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0} }
+#define ADCS_INERTIA_TENSOR                             { {1167.3, -0.1, 2.0}, \
+                                                          {-0.1, 1090.9, 4.41}, \
+                                                          {2.0, 4.41, 2645.9} } // Inertia tensor is introduced in its inversed form
 #define ADCS_NUM_CONTROLLERS                            1       //  use only one controller by default
 #define ADCS_BRIDGE_TIMER_UPDATE_PERIOD                 (ADCS_TIME_STEP/100)  // time step between successive H bridge output updates, in ms
 #define ADCS_BRIDGE_OUTPUT_HIGH                         63      // H bridge drive strength to be used as "high"
