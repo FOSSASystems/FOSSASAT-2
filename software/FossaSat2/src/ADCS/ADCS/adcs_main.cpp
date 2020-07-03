@@ -429,13 +429,13 @@ void ADCS_Common_Init(const uint8_t controlFlags, const ADCS_CALC_TYPE orbitalIn
   }
 
   // inverted inertia tensor matrix for Kalman filter
-  const uint8_t inertiaTensorLen = ADCS_STATE_DIM*ADCS_STATE_DIM*sizeof(float);
+  const uint8_t inertiaTensorLen = ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(float);
   uint8_t inertiaTensorBuff[inertiaTensorLen];
   PersistentStorage_Read(FLASH_ADCS_COIL_CHAR_MATRIX, inertiaTensorBuff, inertiaTensorLen);
-  for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
-    for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
+  for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+    for(uint8_t j = 0; j < ADCS_NUM_AXES; j++) {
       float val = 0;
-      memcpy(&val, inertiaTensorBuff + (i*ADCS_STATE_DIM*sizeof(val) + j*sizeof(val)), sizeof(val));
+      memcpy(&val, inertiaTensorBuff + (i*ADCS_NUM_AXES*sizeof(val) + j*sizeof(val)), sizeof(val));
       adcsParams.inertiaTensor[i][j] = val;
     }
   }
@@ -464,7 +464,7 @@ void ADCS_Common_Init(const uint8_t controlFlags, const ADCS_CALC_TYPE orbitalIn
   FOSSASAT_DEBUG_PRINT(F("meanOrbitalMotion="));
   FOSSASAT_DEBUG_PRINTLN(adcsParams.meanOrbitalMotion);
   FOSSASAT_DEBUG_PRINT_ADCS_MATRIX(adcsParams.coilChar, ADCS_NUM_AXES, ADCS_NUM_AXES);
-  FOSSASAT_DEBUG_PRINT_ADCS_MATRIX(adcsParams.inertiaTensor, ADCS_STATE_DIM, ADCS_STATE_DIM);
+  FOSSASAT_DEBUG_PRINT_ADCS_MATRIX(adcsParams.inertiaTensor, ADCS_NUM_AXES, ADCS_NUM_AXES);
 }
 
 void ADCS_Finish(uint8_t result) {
