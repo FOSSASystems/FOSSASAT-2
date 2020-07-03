@@ -1,6 +1,8 @@
 # FOSSASAT-2
+[![Build Status](https://Github.com/FOSSASystems/FOSSASAT-2/workflows/CI/badge.svg)](https://github.com/FOSSASystems/FOSSASAT-2/actions)
 
-[![Build Status](https://buildbot.fossa.systems/badges/FossaSat-2.svg)](https://buildbot.fossa.systems/#/builders/3)
+[Doxygen Documentation](https://fossasystems.github.io/FOSSASAT-2)
+
 
 First generation 2P Satellite dedicated to demonstrating new miniaturized technology for picosatellites developed by FOSSA. To be launched in Q1 2020 aboard a Firefly Alpha launch vehicle. 
 
