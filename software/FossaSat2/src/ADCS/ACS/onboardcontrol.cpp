@@ -13,12 +13,11 @@
 
 /****************** Main function *********************/
 void ACS_OnboardControl(const ADCS_CALC_TYPE state[ADCS_STATE_DIM], const ADCS_CALC_TYPE mag[ADCS_NUM_AXES], const float gain[ADCS_NUM_AXES][ADCS_STATE_DIM],
-                        const ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES], ADCS_CALC_TYPE intensity[ADCS_NUM_AXES]) {
+                        const ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES], ADCS_CALC_TYPE intensity[ADCS_NUM_AXES], ADCS_CALC_TYPE controlLaw[ADCS_NUM_AXES]) {
   // Module of the magnetic field intensity
   const ADCS_CALC_TYPE B_module = ADCS_Add_Tolerance(ADCS_VectorNorm(mag), 0);
 
   // Variables initialization
-  ADCS_CALC_TYPE controlLaw[ADCS_NUM_AXES];
   ADCS_CALC_TYPE controlLawAux = 0;
 
   // Generation of the control law by means of a matrix product Lc = K*M

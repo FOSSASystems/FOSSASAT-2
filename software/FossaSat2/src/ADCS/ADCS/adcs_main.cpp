@@ -245,21 +245,23 @@ void ADCS_ActiveControl_Update() {
 
   ADCS_CALC_TYPE stateVars[ADCS_STATE_DIM];
   ADCS_CALC_TYPE prevStateVars[ADCS_STATE_DIM];
-  ADCS_CALC_TYPE controlVector[ADCS_STATE_DIM];
+  ADCS_CALC_TYPE controlVector[ADCS_NUM_AXES];
   ADCS_CALC_TYPE filtered_y[ADCS_STATE_DIM];
   ADCS_CALC_TYPE kalmanMatrixP[ADCS_STATE_DIM][ADCS_STATE_DIM];
   ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES];
 
   // copy all the volatile previous states
-  for(uint8_t i = 0; i < ADCS_STATE_DIM; i++){
+  for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
     controlVector[i] = adcsState.prevControlVector[i];
+  }
+  for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
     prevStateVars[i] = adcsState.prevStateVars[i];
     for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
       kalmanMatrixP[i][j] = adcsState.kalmanMatrixP[i][j];
     }
   }
 
-  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(controlVector, ADCS_STATE_DIM);
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(controlVector, ADCS_NUM_AXES);
   FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(prevStateVars, ADCS_STATE_DIM);
   FOSSASAT_DEBUG_PRINT_ADCS_MATRIX(kalmanMatrixP, ADCS_STATE_DIM, ADCS_STATE_DIM);
 
@@ -282,7 +284,7 @@ void ADCS_ActiveControl_Update() {
 
     // Active controlling
     ADCS_CALC_TYPE intensity[ADCS_NUM_AXES];
-    ACS_OnboardControl(stateVars, magData, controllerMatrix, adcsParams.coilChar, intensity);
+    ACS_OnboardControl(stateVars, magData, controllerMatrix, adcsParams.coilChar, intensity, controlVector);
 
     // calculate and update pulse length
     ADCS_Set_Pulse_Lengths(intensity);
@@ -296,10 +298,12 @@ void ADCS_ActiveControl_Update() {
   // save values for the next iteration
   adcsState.prevEulerNorm = eulerNorm;
   adcsState.prevOmegaNorm = omegaNorm;
-  for(uint8_t i = 0; i < 2*ADCS_NUM_AXES; i++) {
+  for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+    controlVector[i] = adcsState.prevControlVector[i];
+  }
+  for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
     adcsState.prevStateVars[i] = stateVars[i];
-    adcsState.prevControlVector[i] = controlVector[i];
-    for(uint8_t j = 0; j < 2*ADCS_NUM_AXES; j++) {
+    for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
       adcsState.kalmanMatrixP[i][j] = kalmanMatrixP[i][j];
     }
   }
