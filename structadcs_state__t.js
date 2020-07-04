@@ -6,7 +6,7 @@ var structadcs_state__t =
     [ "bridgeStateZ", "structadcs_state__t.html#a21db7c94b240f2708db5e250888906a4", null ],
     [ "currentEpheRow", "structadcs_state__t.html#a375faaff896fab73d0c26e4555a43df3", null ],
     [ "kalmanMatrixP", "structadcs_state__t.html#a127bf496d714fce2dab3f05af0cd8dbf", null ],
-    [ "prevControlVector", "structadcs_state__t.html#a0e5f85353318154ec6008034fc3b9003", null ],
+    [ "prevControlVector", "structadcs_state__t.html#ae1b2dce535aab69bcf358af4d322ea8d", null ],
     [ "prevEulerNorm", "structadcs_state__t.html#a6d67e13ade4cce590b8aebd40818e360", null ],
     [ "prevIntensity", "structadcs_state__t.html#aa8e116def791a159a474c004fd7ee1b0", null ],
     [ "prevOmegaNorm", "structadcs_state__t.html#a065a18a21ba2c78b6062e76f2be09ebf", null ],
