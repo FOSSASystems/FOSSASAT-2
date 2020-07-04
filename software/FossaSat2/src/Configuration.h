@@ -515,12 +515,12 @@
 #define ADCS_COIL_CHARACTERISTICS                       { {15.833,       0,       0}, \
                                                           {     0, 893.655,       0}, \
                                                           {     0,       0, 108.551} }
-#define ADCS_PANEL_UNIT_VECTOR                          { { 1.0,    0,    0}, \
-                                                          {-1.0,    0,    0}, \
-                                                          {   0,    0,  1.0}, \
-                                                          {   0,    0, -1.0}, \
-                                                          {   0, -1.0,    0}, \
-                                                          {   0,  1.0,    0} }
+#define ADCS_PANEL_UNIT_VECTOR                          { {1.0, 0, 0}, \
+                                                          {0, 1.0, 0}, \
+                                                          {0, 0, 1.0}, \
+                                                          {-1.0, 0, 0}, \
+                                                          {0, -1.0, 0}, \
+                                                          {0,  0,-1.0}  }
 #define ADCS_MAX_NUM_CONTROLLERS                        10      //
 #define ADCS_DEFAULT_CONTROLLER                         { {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \

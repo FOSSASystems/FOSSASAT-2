@@ -17,7 +17,6 @@ bool ADS_Rotation_Verification(ADCS_CALC_TYPE angles1[ADCS_NUM_AXES], ADCS_CALC_
   // Constants definition
   const ADCS_CALC_TYPE weight1 = weightRatio;
   const ADCS_CALC_TYPE weight2 = 1.0 - weight1;
-  const trigger = ADCS_ROTATION_TRIGGER;
 
   // Compare both vectors and compute the norm
   ADCS_CALC_TYPE diff[ADCS_NUM_AXES];

@@ -44,11 +44,11 @@ void ADS_Main(ADCS_CALC_TYPE omega[ADCS_NUM_AXES], ADCS_CALC_TYPE magData[ADCS_N
   // Measurements from sensors
   ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS];
   luxData[0] = Sensors_Current_ReadPower(currSensorXA);
-  luxData[1] = Sensors_Current_ReadPower(currSensorXB);
+  luxData[1] = Sensors_Current_ReadPower(lightSensorPanelY);
   luxData[2] = Sensors_Current_ReadPower(currSensorZA);
-  luxData[3] = Sensors_Current_ReadPower(currSensorZB);
+  luxData[3] = Sensors_Current_ReadPower(currSensorXB);
   luxData[4] = Sensors_Current_ReadPower(currSensorY);
-  luxData[5] = Sensors_Read_Light(lightSensorPanelY);
+  luxData[5] = Sensors_Read_Light(currSensorZB);
   FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(luxData, ADCS_NUM_PANELS);
 
   // Decide whether the satellite is in eclipse situation or under light
