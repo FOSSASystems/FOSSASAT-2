@@ -698,7 +698,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     case CMD_GET_STATISTICS: {
       if(Communication_Check_OptDataLen(1, optDataLen)) {
         // check FSK is active
-        if(currentModem != MODEM_FSK) {
+        if((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_FSK_ONLY_ENABLED) != 0x00) && (currentModem != MODEM_FSK)) {
           FOSSASAT_DEBUG_PRINTLN(F("FSK is required to get stats"));
           return;
         }
@@ -709,7 +709,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_GET_FULL_SYSTEM_INFO: {
       // check FSK is active
-      if(currentModem != MODEM_FSK) {
+      if((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_FSK_ONLY_ENABLED) != 0x00) && (currentModem != MODEM_FSK)) {
         FOSSASAT_DEBUG_PRINTLN(F("FSK is required to get full system info"));
         return;
       }
@@ -801,7 +801,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_REQUEST_PUBLIC_PICTURE: {
       // check FSK is active
-      if(currentModem != MODEM_FSK) {
+      if((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_FSK_ONLY_ENABLED) != 0x00) && (currentModem != MODEM_FSK)) {
         FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer picture"));
         return;
       }
@@ -957,6 +957,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         if(Communication_Check_OptDataLen(2, optDataLen)) {
           PersistentStorage_SystemInfo_Set<uint8_t>(FLASH_TRANSMISSIONS_ENABLED, optData[0]);
           PersistentStorage_SystemInfo_Set<uint8_t>(FLASH_AUTO_STATISTICS, optData[1]);
+          PersistentStorage_SystemInfo_Set<uint8_t>(FLASH_FSK_ONLY_ENABLED, optData[2]);
         }
       } break;
 
@@ -1139,7 +1140,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_RECORD_IMU: {
       // check FSK is active
-      if(currentModem != MODEM_FSK) {
+      if((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_FSK_ONLY_ENABLED) != 0x00) && (currentModem != MODEM_FSK)) {
         FOSSASAT_DEBUG_PRINTLN(F("FSK is required to record IMU"));
         return;
       }
@@ -1417,7 +1418,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_GET_PICTURE_BURST: {
       // check FSK is active
-      if(currentModem != MODEM_FSK) {
+      if((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_FSK_ONLY_ENABLED) != 0x00) && (currentModem != MODEM_FSK)) {
         FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer picture"));
         return;
       }
@@ -1581,7 +1582,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_GET_GPS_LOG: {
       // check FSK is active
-      if(currentModem != MODEM_FSK) {
+      if((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_FSK_ONLY_ENABLED) != 0x00) && (currentModem != MODEM_FSK)) {
         FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer GPS log"));
         return;
       }

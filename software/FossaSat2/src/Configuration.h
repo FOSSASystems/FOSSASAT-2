@@ -205,6 +205,7 @@
 #define FLASH_LAST_ADCS_RESULT                    (FLASH_SYSTEM_INFO + 0xAE)  //  0x000000AE    0x000000AE    uint8_t
 #define FLASH_NUM_SLEEP_INTERVALS                 (FLASH_SYSTEM_INFO + 0xAF)  //  0x000000AF    0x000000AF    uint8_t
 #define FLASH_SLEEP_INTERVALS                     (FLASH_SYSTEM_INFO + 0xB0)  //  0x000000B0    0x000000BF    FLASH_NUM_SLEEP_INTERVALS x (int16_t + uint16_t)
+#define FLASH_FSK_ONLY_ENABLED                    (FLASH_SYSTEM_INFO + 0xC0)  //  0x000000AF    0x000000AF    uint8_t
 #define FLASH_SYSTEM_INFO_CRC                     (FLASH_SYSTEM_INFO + 0xF8)  //  0x000000F8    0x000000FB    uint32_t
 #define FLASH_MEMORY_ERROR_COUNTER                (FLASH_SYSTEM_INFO + 0xFC)  //  0x000000FC    0x000000FF    uint32_t
 
@@ -368,7 +369,10 @@
                                                           CMD_ABORT, \
                                                           CMD_MANEUVER, \
                                                           /* CMD_SET_ADCS_PARAMETERS, */ \
-                                                          CMD_ERASE_FLASH \
+                                                          CMD_ERASE_FLASH, \
+                                                          /* CMD_SET_ADCS_CONTROLLER, */ \
+                                                          /* CMD_SET_ADCS_EPHEMERIDES, */ \
+                                                          /* CMD_DETUMBLE */ \
                                                          }          /*!< List of function IDs that remain available in "science mode" (e.g. logging GPS or ADCS closed-loop control) */
 
 // LoRa
