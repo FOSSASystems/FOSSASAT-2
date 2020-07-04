@@ -982,16 +982,18 @@ void PersistentStorage_SPItransaction(uint8_t* cmd, uint8_t cmdLen, bool write, 
     FlashSPI.transfer(cmd[n]);
   }
 
-  // send data
-  if(write) {
-    for(size_t n = 0; n < numBytes; n++) {
-      // send byte
-      FlashSPI.transfer(data[n]);
-    }
+  if(data != NULL) {
+    // send data
+    if(write) {
+      for(size_t n = 0; n < numBytes; n++) {
+        // send byte
+        FlashSPI.transfer(data[n]);
+      }
 
-  } else {
-    for(size_t n = 0; n < numBytes; n++) {
-      data[n] = FlashSPI.transfer(MX25L51245G_CMD_NOP);
+    } else {
+      for(size_t n = 0; n < numBytes; n++) {
+        data[n] = FlashSPI.transfer(MX25L51245G_CMD_NOP);
+      }
     }
   }
 
