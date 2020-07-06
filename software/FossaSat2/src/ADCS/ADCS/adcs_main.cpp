@@ -266,7 +266,7 @@ void ADCS_ActiveControl_Update() {
   FOSSASAT_DEBUG_PRINT_ADCS_MATRIX(kalmanMatrixP, ADCS_STATE_DIM, ADCS_STATE_DIM);
 
   // Main structure
-  ADS_Main(omega, magData, prevStateVars, controlVector, kalmanMatrixP, solarEphe, magEphe, filtered_y, newAnglesVector);
+  ADS_Main(omega, magData, prevStateVars, controlVector, kalmanMatrixP, solarEphe, magEphe, stateVars, newAnglesVector);
 
   // Control structure
   ADCS_CALC_TYPE eulerNorm = ADCS_VectorNorm(newAnglesVector);
@@ -299,7 +299,7 @@ void ADCS_ActiveControl_Update() {
   adcsState.prevEulerNorm = eulerNorm;
   adcsState.prevOmegaNorm = omegaNorm;
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
-    controlVector[i] = adcsState.prevControlVector[i];
+    adcsState.prevControlVector = controlVector[i];
   }
   for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
     adcsState.prevStateVars[i] = stateVars[i];
