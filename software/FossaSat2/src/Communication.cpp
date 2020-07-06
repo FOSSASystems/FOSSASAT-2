@@ -57,10 +57,10 @@ int16_t Communication_Set_Modem(uint8_t modem) {
                             LORA_CODING_RATE,
                             SYNC_WORD,
                             LORA_OUTPUT_POWER,
-                            LORA_CURRENT_LIMIT,
                             LORA_PREAMBLE_LENGTH,
                             TCXO_VOLTAGE);
         radio.setCRC(true);
+        radio.setCurrentLimit(LORA_CURRENT_LIMIT);
       break;
     case MODEM_FSK: {
         state = radio.beginFSK(FSK_FREQUENCY,
@@ -68,13 +68,13 @@ int16_t Communication_Set_Modem(uint8_t modem) {
                                FSK_FREQUENCY_DEVIATION,
                                FSK_RX_BANDWIDTH,
                                FSK_OUTPUT_POWER,
-                               FSK_CURRENT_LIMIT,
                                FSK_PREAMBLE_LENGTH,
-                               FSK_DATA_SHAPING,
                                TCXO_VOLTAGE);
         uint8_t syncWordFSK[2] = {SYNC_WORD, SYNC_WORD};
         radio.setSyncWord(syncWordFSK, 2);
         radio.setCRC(2);
+        radio.setDataShaping(FSK_DATA_SHAPING);
+        radio.setCurrentLimit(FSK_CURRENT_LIMIT);
       } break;
     default:
       FOSSASAT_DEBUG_PRINT(F("Unkown modem "));

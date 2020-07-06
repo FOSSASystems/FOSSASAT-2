@@ -392,7 +392,7 @@
 #define FSK_RX_BANDWIDTH                                39.0        /*!< kHz single-sideband */
 #define FSK_OUTPUT_POWER                                20          /*!< dBm */
 #define FSK_PREAMBLE_LENGTH                             16          /*!< bits */
-#define FSK_DATA_SHAPING                                0.5         /*!< GFSK filter BT product */
+#define FSK_DATA_SHAPING                                RADIOLIB_SHAPING_0_5  /*!< GFSK filter BT product */
 #define FSK_CURRENT_LIMIT                               140.0       /*!< mA */
 
 // Morse Code
