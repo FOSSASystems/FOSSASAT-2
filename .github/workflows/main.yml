@@ -1,0 +1,92 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  L452RE-P:
+    runs-on: ubuntu-latest
+    steps:
+      - run: mkdir -p ~/.local/bin
+      - run: echo "::add-path::~/.local/bin"
+      - run: curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=~/.local/bin sh
+      - run: arduino-cli core update-index --additional-urls https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json
+      - run: arduino-cli lib update-index
+      - run: arduino-cli core install STM32:stm32 --additional-urls https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json
+      - run: arduino-cli lib install RadioLib "Adafruit BusIO" "Adafruit INA260 Library" "Adafruit VEML7700 Library" "SparkFun LSM9DS1 IMU" "STM32duino RTC" "STM32duino Low Power"
+      - run: git clone https://github.com/FOSSASystems/FOSSA-Comms.git $HOME/Arduino/libraries/FOSSA-Comms
+      - run: git clone https://github.com/FOSSASystems/tiny-AES-c.git $HOME/Arduino/libraries/tiny-AES-c
+      - run: git clone https://github.com/kkoiwai/Grove_Mini_I2C_Motor_Driver.git $HOME/Arduino/libraries/Grove_Mini_I2C_Motor_Driver
+      - run: git clone https://github.com/FOSSASystems/ArduCAM.git $HOME/Arduino/libraries/ArduCAM
+      - uses: actions/checkout@v2
+      - run: cd software && arduino-cli compile -v --fqbn STM32:stm32:Nucleo_64:pnum=NUCLEO_L452REP --build-properties compiler.cpp.extra_flags=-DRADIOLIB_STATIC_ONLY FossaSat2 --warnings=all --build-path=$PWD/avr-build/
+      - uses: actions/upload-artifact@v2
+        with:
+          name: L452RE-P
+          path: software/avr-build/*.hex
+      - uses: actions/upload-artifact@v2
+        with:
+          name: L452RE-P
+          path: software/avr-build/*.elf
+
+  L452RE:
+    runs-on: ubuntu-latest
+    steps:
+      - run: mkdir -p ~/.local/bin
+      - run: echo "::add-path::~/.local/bin"
+      - run: curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=~/.local/bin sh
+      - run: arduino-cli core update-index --additional-urls https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json
+      - run: arduino-cli lib update-index
+      - run: arduino-cli core install STM32:stm32 --additional-urls https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json
+      - run: arduino-cli lib install RadioLib "Adafruit BusIO" "Adafruit INA260 Library" "Adafruit VEML7700 Library" "SparkFun LSM9DS1 IMU" "STM32duino RTC" "STM32duino Low Power"
+      - run: git clone https://github.com/FOSSASystems/FOSSA-Comms.git $HOME/Arduino/libraries/FOSSA-Comms
+      - run: git clone https://github.com/FOSSASystems/tiny-AES-c.git $HOME/Arduino/libraries/tiny-AES-c
+      - run: git clone https://github.com/kkoiwai/Grove_Mini_I2C_Motor_Driver.git $HOME/Arduino/libraries/Grove_Mini_I2C_Motor_Driver
+      - run: git clone https://github.com/FOSSASystems/ArduCAM.git $HOME/Arduino/libraries/ArduCAM
+      - uses: actions/checkout@v2
+      - run: cd software && arduino-cli compile -v --fqbn STM32:stm32:Nucleo_64:pnum=NUCLEO_L452RE --build-properties compiler.cpp.extra_flags=-DRADIOLIB_STATIC_ONLY FossaSat2 --warnings=all --build-path=$PWD/avr-build/
+      - uses: actions/upload-artifact@v2
+        with:
+          name: L452RE
+          path: software/avr-build/*.hex
+      - uses: actions/upload-artifact@v2
+        with:
+          name: L452RE
+          path: software/avr-build/*.elf
+
+  cppcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - run: sudo apt install snapd && sudo snap install cppcheck
+      - run: cppcheck --version
+      - uses: actions/checkout@v2
+      - run: cd software && cppcheck --language=c++ -f -DRADIOLIB_VERSION=0xF0000000 -DRADIOLIB_STATIC_ONLY --enable=all --suppress=missingIncludeSystem --inconclusive --inline-suppr --error-exitcode=1 -IFossaSat2 FossaSat2 FossaSat2/FossaSat2.ino
+
+  doxygen:
+    runs-on: ubuntu-latest
+    steps:
+      - run: sudo apt-get install --no-install-recommends doxygen graphviz
+      - run: doxygen --version
+      - uses: actions/checkout@v2
+      - run: cd software && doxygen Doxyfile
+      - uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: software/Doxygen/html
+
+#  PlatformIO-Build:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - run: sudo apt-get install python3-setuptools python3-wheel
+#      - run: pip3 install platformio
+#      - run: echo "::add-path::~/.local/bin"
+#      - uses: actions/checkout@v2
+#      - run: cd software && platformio check --fail-on-defect low --fail-on-defect medium --fail-on-defect high
+#      - run: cd software && platformio run -v
+#
+#  PlatformIO-UnitTest:
+#    runs-on: self-hosted
+#    steps:
+#      - uses: actions/checkout@v2
+#      - run: platformio update
+#      - run: cd software && platformio test -e ATmega328PB -v

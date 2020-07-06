@@ -115,12 +115,13 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Description: Wipes persistent storages.
 
 ### CMD_SET_TRANSMIT_ENABLE
-- Optional data length: 2
+- Optional data length: 3
 - Optional data:
   - 0: transmit enable (0x01) or disable (0x00)
   - 1: automated statistics transmission enable (0x01) or disable (0x00)
+  - 2: FSK mandated for large packets enable (0x01) or disable (0x00)
 - Response: none
-- Description: Can be used to completely disable all transmissions from satellite. Additionally controls whether satellite transmits statistics automatically (enabled by default).
+- Description: Can be used to completely disable all transmissions from satellite. Additionally controls whether satellite transmits statistics automatically (enabled by default) and whether FSK mode is mandated for large packets (enabled by default).
 
 ### CMD_SET_CALLSIGN
 - Optional data length: 0 - 32

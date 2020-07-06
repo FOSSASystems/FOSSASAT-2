@@ -628,6 +628,9 @@ void PersistentStorage_Reset_System_Info() {
     memcpy(systemInfoBuffer + FLASH_SLEEP_INTERVALS + sizeof(int16_t) + i*intervalSize, &l, sizeof(uint16_t));
   }
 
+  // set default FSK only flag
+  systemInfoBuffer[FLASH_FSK_ONLY_ENABLED] = 1;
+
   // set CRC
   uint32_t crc = CRC32_Get(systemInfoBuffer, FLASH_SYSTEM_INFO_CRC);
   memcpy(systemInfoBuffer + FLASH_SYSTEM_INFO_CRC, &crc, sizeof(uint32_t));
@@ -982,16 +985,18 @@ void PersistentStorage_SPItransaction(uint8_t* cmd, uint8_t cmdLen, bool write, 
     FlashSPI.transfer(cmd[n]);
   }
 
-  // send data
-  if(write) {
-    for(size_t n = 0; n < numBytes; n++) {
-      // send byte
-      FlashSPI.transfer(data[n]);
-    }
+  if(data != NULL) {
+    // send data
+    if(write) {
+      for(size_t n = 0; n < numBytes; n++) {
+        // send byte
+        FlashSPI.transfer(data[n]);
+      }
 
-  } else {
-    for(size_t n = 0; n < numBytes; n++) {
-      data[n] = FlashSPI.transfer(MX25L51245G_CMD_NOP);
+    } else {
+      for(size_t n = 0; n < numBytes; n++) {
+        data[n] = FlashSPI.transfer(MX25L51245G_CMD_NOP);
+      }
     }
   }
 

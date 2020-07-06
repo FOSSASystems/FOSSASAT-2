@@ -41,7 +41,7 @@
 #define FREQ_DEV              5.0     // kHz SSB
 #define RX_BANDWIDTH          39.0    // kHz SSB
 #define FSK_PREAMBLE_LEN      16      // bits
-#define DATA_SHAPING          0.5     // BT product
+#define DATA_SHAPING          RADIOLIB_SHAPING_0_5     // BT product
 #define TCXO_VOLTAGE          1.6
 #define WHITENING_INITIAL     0x1FF   // initial whitening LFSR value
 
@@ -100,7 +100,7 @@
 #ifdef USE_SX126X
 SX1268 radio = new Module(CS, DIO, NRST, BUSY);
 #else
-SX1278 radio = new Module(CS, DIO, NRST, NC);
+SX1278 radio = new Module(CS, DIO, NRST, RADIOLIB_NC);
 #endif
 
 // flags
@@ -405,7 +405,7 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
           printStatTemperature("Temp battery\t\tdeg C\t", respOptData, pos);
           printStatTemperature("Temp sec. battery\tdeg C\t", respOptData, pos);
         }
-        
+
         if (flags & 0x02) {
           printStatCurrent("Current XA\t\tmA\t", respOptData, pos);
           printStatCurrent("Current XB\t\tmA\t", respOptData, pos);
@@ -414,7 +414,7 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
           printStatCurrent("Current Y\t\tmA\t", respOptData, pos);
           printStatCurrent("Current MPPT\t\tmA\t", respOptData, pos);
         }
-        
+
         if (flags & 0x04) {
           printStatVoltage("Voltage XA\t\tV\t", respOptData, pos);
           printStatVoltage("Voltage XB\t\tV\t", respOptData, pos);
@@ -423,12 +423,12 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
           printStatVoltage("Voltage Y\t\tV\t", respOptData, pos);
           printStatVoltage("Voltage MPPT\t\tV\t", respOptData, pos);
         }
-        
+
         if (flags & 0x08) {
           printStatFloat("Light panel Y\t\tlux\t", respOptData, pos);
           printStatFloat("Light top\t\tlux\t", respOptData, pos);
         }
-        
+
         if (flags & 0x10) {
           printStatFloat("Angle velocity X\trad/s\t", respOptData, pos);
           printStatFloat("Angle velocity Y\trad/s\t", respOptData, pos);
@@ -564,7 +564,7 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
         memcpy(&rxLen, respOptData + 52, sizeof(uint8_t));
         Serial.print(F("fskRxLen = "));
         Serial.println(rxLen);
-        
+
         memcpy(&rxLen, respOptData + 53, sizeof(uint8_t));
         Serial.print(F("loraRxLen = "));
         Serial.println(rxLen);
@@ -595,7 +595,7 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
         Serial.print(buff);
       }
       Serial.println();
-      
+
     } break;
 
     case RESP_GPS_LOG: {
@@ -603,21 +603,21 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
         Serial.write(respOptData[i]);
       }
       Serial.println();
-      
+
     } break;
 
     case RESP_GPS_LOG_STATE: {
       Serial.println(F("GPS log state:"));
       uint32_t ul = 0;
-      
+
       memcpy(&ul, respOptData, sizeof(uint32_t));
       Serial.print(F("length = "));
       Serial.println(ul);
-      
+
       memcpy(&ul, respOptData + sizeof(uint32_t), sizeof(uint32_t));
       Serial.print(F("last entry = "));
       Serial.println(ul, HEX);
-      
+
       memcpy(&ul, respOptData + 2*sizeof(uint32_t), sizeof(uint32_t));
       Serial.print(F("last fix = "));
       Serial.println(ul, HEX);
@@ -628,58 +628,58 @@ void decode(uint8_t* respFrame, uint8_t respLen) {
       uint8_t flags = respOptData[0];
       uint8_t* respOptDataPtr = respOptData + 1;
       float f = 0;
-      
+
       if(flags & 0x01) {
         memcpy(&f, respOptDataPtr, sizeof(float));
         respOptDataPtr += sizeof(float);
         Serial.print(F("G X "));
         Serial.println(f, 2);
-        
+
         memcpy(&f, respOptDataPtr, sizeof(float));
         respOptDataPtr += sizeof(float);
         Serial.print(F("G Y "));
         Serial.println(f, 2);
-        
+
         memcpy(&f, respOptDataPtr, sizeof(float));
         respOptDataPtr += sizeof(float);
         Serial.print(F("G Z "));
         Serial.println(f, 2);
       }
-      
+
       if(flags & 0x02) {
         memcpy(&f, respOptDataPtr, sizeof(float));
         respOptDataPtr += sizeof(float);
         Serial.print(F("A X "));
         Serial.println(f, 2);
-        
+
         memcpy(&f, respOptDataPtr, sizeof(float));
         respOptDataPtr += sizeof(float);
         Serial.print(F("A Y "));
         Serial.println(f, 2);
-        
+
         memcpy(&f, respOptDataPtr, sizeof(float));
         respOptDataPtr += sizeof(float);
         Serial.print(F("A Z "));
         Serial.println(f, 2);
       }
-      
+
       if(flags & 0x04) {
         memcpy(&f, respOptDataPtr, sizeof(float));
         respOptDataPtr += sizeof(float);
         Serial.print(F("M X "));
         Serial.println(f, 2);
-        
+
         memcpy(&f, respOptDataPtr, sizeof(float));
         respOptDataPtr += sizeof(float);
         Serial.print(F("M Y "));
         Serial.println(f, 2);
-        
+
         memcpy(&f, respOptDataPtr, sizeof(float));
         respOptDataPtr += sizeof(float);
         Serial.print(F("M Z "));
         Serial.println(f, 2);
       }
-      
+
     } break;
 
     case RESP_ACKNOWLEDGE: {
@@ -870,16 +870,16 @@ void requestRetransmitCustom() {
 }
 
 int16_t setLoRa() {
-  int state = radio.begin(LORA_FREQUENCY,
+  int state = radio.begin(FREQUENCY,
                           BANDWIDTH,
                           SPREADING_FACTOR,
                           CODING_RATE,
                           SYNC_WORD,
                           OUTPUT_POWER,
-                          CURRENT_LIMIT,
                           LORA_PREAMBLE_LEN,
                           TCXO_VOLTAGE);
   radio.setCRC(true);
+  radio.setCurrentLimit(CURRENT_LIMIT);
   #ifdef USE_SX126X
   radio.setWhitening(true, WHITENING_INITIAL);
   #endif
@@ -887,17 +887,17 @@ int16_t setLoRa() {
 }
 
 int16_t setGFSK() {
-  int state = radio.beginFSK(FSK_FREQUENCY,
+  int state = radio.beginFSK(FREQUENCY,
                              BIT_RATE,
                              FREQ_DEV,
                              RX_BANDWIDTH,
                              OUTPUT_POWER,
-                             CURRENT_LIMIT,
                              FSK_PREAMBLE_LEN,
-                             DATA_SHAPING,
                              TCXO_VOLTAGE);
   uint8_t syncWordFSK[2] = {SYNC_WORD, SYNC_WORD};
   radio.setSyncWord(syncWordFSK, 2);
+  radio.setDataShaping(FSK_DATA_SHAPING);
+  radio.setCurrentLimit(FSK_CURRENT_LIMIT);
   #ifdef USE_SX126X
     radio.setCRC(2);
     radio.setWhitening(true, WHITENING_INITIAL);
@@ -1075,7 +1075,7 @@ void maneuver(uint8_t controlFlags, uint32_t detumbleLen, uint32_t activeLen, ui
   sendFrameEncrypted(CMD_MANEUVER, optDataLen, optData);
 }
 
-void setAdcsParams(uint32_t timeStep, float pulseMaxIntensity, float maxPulseLength, 
+void setAdcsParams(uint32_t timeStep, float pulseMaxIntensity, float maxPulseLength,
                    float omegaTol, float minInertialMoment, float pulseAmplitude, float bModTol,
                    uint32_t bridgeTimerPeriod, int8_t bridgeValHigh, int8_t bridgeValLow) {
   Serial.print(F("Sending ADCS parameters ... "));
@@ -1234,7 +1234,7 @@ void loop() {
         readFlash(0x80, 128);
         break;
       case 'g':
-        logGps(1*60*1000UL, 0);
+        logGps(20*60UL, 0);
         break;
       case 'G':
         getGpsLog(1, 0, 50);
@@ -1272,7 +1272,7 @@ void loop() {
         break;
       case 'z': {
         uint8_t pos[] = { 1, 2, 3, 4, 5, 6 };
-        maneuver(0b00011111, 5000, 6000, pos);
+        maneuver(0b00011111, 50*1000, 6000, pos);
       } break;
       case 'Z':
         setAdcsParams(80, 2.0, 40.0, 0.2, 800, 0.3, 0.02, 1, 40, -40);
