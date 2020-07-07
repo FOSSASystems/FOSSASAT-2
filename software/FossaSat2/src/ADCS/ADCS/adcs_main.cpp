@@ -306,6 +306,9 @@ void ADCS_ActiveControl_Update() {
       adcsState.kalmanMatrixP[i][j] = kalmanMatrixP[i][j];
     }
   }
+  adcsState.prevIntensity[0] = intensity[0];
+  adcsState.prevIntensity[1] = intensity[1];
+  adcsState.prevIntensity[2] = intensity[2];
 }
 
 uint8_t ADCS_Load_Ephemerides(const uint32_t row, ADCS_CALC_TYPE solarEph[ADCS_NUM_AXES], ADCS_CALC_TYPE magEph[ADCS_NUM_AXES]) {

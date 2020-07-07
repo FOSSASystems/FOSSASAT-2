@@ -11,7 +11,7 @@
 #include "../ADCS/adcs.h"
 
 /*************** Main function *****************/
-void ADS_Solar_Determination(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], ADCS_CALC_TYPE solarEph[ADCS_NUM_AXES], 
+void ADS_Solar_Determination(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], ADCS_CALC_TYPE solarEph[ADCS_NUM_AXES],
                              ADCS_CALC_TYPE redundantSolarEph[ADCS_NUM_AXES]) {
   // Constants definitions
   ADCS_CALC_TYPE panelUnitVector[ADCS_NUM_PANELS][ADCS_NUM_AXES] = ADCS_PANEL_UNIT_VECTOR; // Unitary vector pointing to the solar panels in inverse form
@@ -41,3 +41,15 @@ void ADS_Solar_Determination(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], ADCS
     }
   }
 }
+
+  // Normalize the solar ephemerides
+  ADCS_CALC_TYPE solarEphNorm = ADCS_VectorNorm(solarEph);
+  ADCS_CALC_TYPE redundantSolarEphNorm = ADCS_VectorNorm(redundantSolarEph);
+
+   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+    solarEph[i] /= ADCS_Add_Tolerance(solarEphNorm, 0.0);
+    redundantSolarEph[i] /= ADCS_Add_Tolerance(redundantSolarEphNorm, 0.0);
+  }
+
+
+
