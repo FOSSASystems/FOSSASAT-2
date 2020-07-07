@@ -244,6 +244,7 @@ void ADCS_ActiveControl_Update() {
   FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(magData, ADCS_NUM_AXES);
 
   ADCS_CALC_TYPE stateVars[ADCS_STATE_DIM];
+  ADCS_CALC_TYPE intensity[ADCS_NUM_AXES];
   ADCS_CALC_TYPE prevStateVars[ADCS_STATE_DIM];
   ADCS_CALC_TYPE controlVector[ADCS_NUM_AXES];
   ADCS_CALC_TYPE kalmanMatrixP[ADCS_STATE_DIM][ADCS_STATE_DIM];
@@ -282,7 +283,6 @@ void ADCS_ActiveControl_Update() {
     memcpy(controllerMatrix, adcsParams.controllers + (controller * FLASH_ADCS_CONTROLLER_SLOT_SIZE), FLASH_ADCS_CONTROLLER_SLOT_SIZE);
 
     // Active controlling
-    ADCS_CALC_TYPE intensity[ADCS_NUM_AXES];
     ACS_OnboardControl(stateVars, magData, controllerMatrix, adcsParams.coilChar, intensity, controlVector);
 
     // calculate and update pulse length
@@ -299,6 +299,7 @@ void ADCS_ActiveControl_Update() {
   adcsState.prevOmegaNorm = omegaNorm;
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
     adcsState.prevControlVector[i] = controlVector[i];
+    adcsState.prevIntensity[i] = intensity[i];
   }
   for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
     adcsState.prevStateVars[i] = stateVars[i];
@@ -306,9 +307,6 @@ void ADCS_ActiveControl_Update() {
       adcsState.kalmanMatrixP[i][j] = kalmanMatrixP[i][j];
     }
   }
-  adcsState.prevIntensity[0] = intensity[0];
-  adcsState.prevIntensity[1] = intensity[1];
-  adcsState.prevIntensity[2] = intensity[2];
 }
 
 uint8_t ADCS_Load_Ephemerides(const uint32_t row, ADCS_CALC_TYPE solarEph[ADCS_NUM_AXES], ADCS_CALC_TYPE magEph[ADCS_NUM_AXES]) {
