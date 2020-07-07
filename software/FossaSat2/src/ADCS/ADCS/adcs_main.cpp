@@ -246,7 +246,6 @@ void ADCS_ActiveControl_Update() {
   ADCS_CALC_TYPE stateVars[ADCS_STATE_DIM];
   ADCS_CALC_TYPE prevStateVars[ADCS_STATE_DIM];
   ADCS_CALC_TYPE controlVector[ADCS_NUM_AXES];
-  ADCS_CALC_TYPE filtered_y[ADCS_STATE_DIM];
   ADCS_CALC_TYPE kalmanMatrixP[ADCS_STATE_DIM][ADCS_STATE_DIM];
   ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES];
 
@@ -299,7 +298,7 @@ void ADCS_ActiveControl_Update() {
   adcsState.prevEulerNorm = eulerNorm;
   adcsState.prevOmegaNorm = omegaNorm;
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
-    adcsState.prevControlVector = controlVector[i];
+    adcsState.prevControlVector[i] = controlVector[i];
   }
   for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
     adcsState.prevStateVars[i] = stateVars[i];
