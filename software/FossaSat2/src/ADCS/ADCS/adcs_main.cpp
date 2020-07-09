@@ -485,14 +485,18 @@ void ADCS_Finish(uint8_t result) {
 
 void ADCS_Set_Pulse_Lengths(ADCS_CALC_TYPE intensity[ADCS_NUM_AXES]) {
   ADCS_CALC_TYPE intensityNorm = ADCS_VectorNorm(intensity);
-  ADCS_CALC_TYPE pulseLength[ADCS_NUM_AXES];
   FOSSASAT_DEBUG_PRINT(F("intensityNorm=\t"));
   FOSSASAT_DEBUG_PRINTLN(intensityNorm, 4);
 
   // Calculate the intensities
-  pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep, adcsParams.pulseAmplitude);
-  pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep, adcsParams.pulseAmplitude);
-  pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep, adcsParams.pulseAmplitude);
+  // pulseLength vector follows solar panel reference frame, not ADCS frame!
+  // solar X+ = ADCS Y+
+  // solar Y+ = ADCS Z+
+  // solar Z+ = ADCS X+
+  ADCS_CALC_TYPE pulseLength[ADCS_NUM_AXES];
+  pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep, adcsParams.pulseAmplitude);
+  pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep, adcsParams.pulseAmplitude);
+  pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep, adcsParams.pulseAmplitude);
 
   // set directions
   if(pulseLength[0] > 0) {
