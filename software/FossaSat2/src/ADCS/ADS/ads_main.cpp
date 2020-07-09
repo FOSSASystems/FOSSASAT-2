@@ -48,8 +48,8 @@ void ADS_Main(ADCS_CALC_TYPE omega[ADCS_NUM_AXES], ADCS_CALC_TYPE magData[ADCS_N
   luxData[0] = Sensors_Read_Light(lightSensorPanelY);
   luxData[1] = Sensors_Current_ReadPower(currSensorXA);
   luxData[2] = Sensors_Current_ReadPower(currSensorZA);
-  luxData[4] = Sensors_Current_ReadPower(currSensorY);
-  luxData[3] = Sensors_Current_ReadPower(currSensorXB);
+  luxData[3] = Sensors_Current_ReadPower(currSensorY);
+  luxData[4] = Sensors_Current_ReadPower(currSensorXB);
   luxData[5] = Sensors_Current_ReadPower(currSensorZB);
   FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(luxData, ADCS_NUM_PANELS);
 
