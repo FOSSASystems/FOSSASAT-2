@@ -40,16 +40,13 @@ void ADS_Solar_Determination(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], ADCS
       redundantSolarEph[i] += panelUnitVector[ADCS_NUM_AXES + i][j]*luxData[ADCS_NUM_AXES + j]*(1.0/maxPower[ADCS_NUM_AXES + j]);
     }
   }
-}
 
   // Normalize the solar ephemerides
   ADCS_CALC_TYPE solarEphNorm = ADCS_VectorNorm(solarEph);
   ADCS_CALC_TYPE redundantSolarEphNorm = ADCS_VectorNorm(redundantSolarEph);
 
-   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+  for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
     solarEph[i] /= ADCS_Add_Tolerance(solarEphNorm, 0.0);
     redundantSolarEph[i] /= ADCS_Add_Tolerance(redundantSolarEphNorm, 0.0);
   }
-
-
-
+}
