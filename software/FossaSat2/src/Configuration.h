@@ -529,9 +529,9 @@
 #define ADCS_DEFAULT_CONTROLLER                         { {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0} }
-#define ADCS_INERTIA_TENSOR                             { {1167.3, -0.1, 2.0}, \
-                                                          {-0.1, 1090.9, 4.41}, \
-                                                          {2.0, 4.41, 2645.9} } // Inertia tensor is introduced in its inversed form
+#define ADCS_INERTIA_TENSOR                             { {2645.9, -2.2, -4.41}, \
+                                                          {-2.2, 1167.3, 0.2}, \
+                                                          {-4.41, 0.2, 1090.9} } // Inertia tensor is introduced in its inversed form
 #define ADCS_NUM_CONTROLLERS                            1       //  use only one controller by default
 #define ADCS_BRIDGE_TIMER_UPDATE_PERIOD                 (ADCS_TIME_STEP/100)  // time step between successive H bridge output updates, in ms
 #define ADCS_BRIDGE_OUTPUT_HIGH                         63      // H bridge drive strength to be used as "high"
