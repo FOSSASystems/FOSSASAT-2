@@ -71,6 +71,7 @@ void ADS_Measurement_Hybrid(const ADCS_CALC_TYPE v_1[ADCS_NUM_AXES], const ADCS_
   // Euler angles matrix (matrices multiplication)
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
     for(uint8_t j = 0; j < ADCS_NUM_AXES; j++) {
+      eulerAnglesMatrix[i][j] = 0;
       for(uint8_t k = 0; k < ADCS_NUM_AXES; k++) {
         eulerAnglesMatrix[i][j] += (measMaxtrix[i][k] * invV[k][j]);
       }
