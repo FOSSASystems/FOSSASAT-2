@@ -25,13 +25,6 @@ void ADS_Solar_Determination(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], ADCS
   maxPower[4] = (ADCS_CALC_TYPE)PersistentStorage_Get<float>(FLASH_STATS_POWER_XB + 2*(sizeof(float)));
   maxPower[5] = (ADCS_CALC_TYPE)PersistentStorage_Get<float>(FLASH_STATS_POWER_ZB + 2*(sizeof(float)));
 
-  for(uint8_t i = 0; i < ADCS_NUM_PANELS - 1; i++) {
-    val = PersistentStorage_Get<float>(FLASH_STATS_POWER_XA + 2*(sizeof(float)) + i*3*(sizeof(float)));
-    maxPower[i] = (ADCS_CALC_TYPE)val;
-  }
-  val = PersistentStorage_Get<float>(FLASH_STATS_LIGHT_PANEL_Y + 2*(sizeof(float)));
-  maxPower[ADCS_NUM_PANELS - 1] = (ADCS_CALC_TYPE)val;
-
   // Main calculation
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
     solarEph[i] = 0;
