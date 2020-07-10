@@ -54,6 +54,8 @@ template void PersistentStorage_SystemInfo_Set<int16_t>(uint8_t, int16_t);
 template void PersistentStorage_SystemInfo_Set<uint16_t>(uint8_t, uint16_t);
 template void PersistentStorage_SystemInfo_Set<int32_t>(uint8_t, int32_t);
 template void PersistentStorage_SystemInfo_Set<uint32_t>(uint8_t, uint32_t);
+template void PersistentStorage_SystemInfo_Set<float>(uint8_t, float);
+template void PersistentStorage_SystemInfo_Set<double>(uint8_t, double);
 
 template<typename T>
 // cppcheck-suppress unusedFunction
@@ -181,15 +183,15 @@ void PersistentStorage_Update_Stats(uint8_t flags) {
   if(flags & STATS_FLAGS_IMU) {
     // IMU
     Sensors_IMU_Update();
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_GYRO_X, Sensors_IMU_CalcGyro(imu.gx));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_GYRO_Y, Sensors_IMU_CalcGyro(imu.gy));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_GYRO_Z, Sensors_IMU_CalcGyro(imu.gz));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_ACCEL_X, Sensors_IMU_CalcAccel(imu.ax));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_ACCEL_Y, Sensors_IMU_CalcAccel(imu.ay));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_ACCEL_Z, Sensors_IMU_CalcAccel(imu.az));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_MAG_X, Sensors_IMU_CalcMag(imu.mx));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_MAG_Y, Sensors_IMU_CalcMag(imu.my));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_MAG_Z, Sensors_IMU_CalcMag(imu.mz));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_GYRO_X, Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_GYRO_Y, Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_GYRO_Z, Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_ACCEL_X, Sensors_IMU_CalcAccel(imu.ax, FLASH_IMU_OFFSET_ACCEL_X));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_ACCEL_Y, Sensors_IMU_CalcAccel(imu.ay, FLASH_IMU_OFFSET_ACCEL_Y));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_ACCEL_Z, Sensors_IMU_CalcAccel(imu.az, FLASH_IMU_OFFSET_ACCEL_Z));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_MAG_X, Sensors_IMU_CalcMag(imu.mx, FLASH_IMU_OFFSET_MAG_X));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_MAG_Y, Sensors_IMU_CalcMag(imu.my, FLASH_IMU_OFFSET_MAG_Y));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_MAG_Z, Sensors_IMU_CalcMag(imu.mz, FLASH_IMU_OFFSET_MAG_Z));
   }
 
   if(flags & STATS_FLAGS_POWER) {
@@ -341,23 +343,23 @@ void PersistentStorage_Reset_Stats() {
   memcpy(statsPage + (FLASH_STATS_MAG_Z - FLASH_STATS), &floatMax, sizeof(floatMax));
 
   Sensors_IMU_Update();
-  floatVal = Sensors_IMU_CalcGyro(imu.gx);
+  floatVal = Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X);
   memcpy(statsPage + (FLASH_STATS_GYRO_X - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcGyro(imu.gy);
+  floatVal = Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y);
   memcpy(statsPage + (FLASH_STATS_GYRO_Y - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcGyro(imu.gz);
+  floatVal = Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z);
   memcpy(statsPage + (FLASH_STATS_GYRO_Z - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcAccel(imu.ax);
+  floatVal = Sensors_IMU_CalcAccel(imu.ax, FLASH_IMU_OFFSET_ACCEL_X);
   memcpy(statsPage + (FLASH_STATS_ACCEL_X - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcAccel(imu.ay);
+  floatVal = Sensors_IMU_CalcAccel(imu.ay, FLASH_IMU_OFFSET_ACCEL_Y);
   memcpy(statsPage + (FLASH_STATS_ACCEL_Y - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcAccel(imu.az);
+  floatVal = Sensors_IMU_CalcAccel(imu.az, FLASH_IMU_OFFSET_ACCEL_Z);
   memcpy(statsPage + (FLASH_STATS_ACCEL_Z - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcMag(imu.mx);
+  floatVal = Sensors_IMU_CalcMag(imu.mx, FLASH_IMU_OFFSET_MAG_X);
   memcpy(statsPage + (FLASH_STATS_MAG_X - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcMag(imu.my);
+  floatVal = Sensors_IMU_CalcMag(imu.my, FLASH_IMU_OFFSET_MAG_Y);
   memcpy(statsPage + (FLASH_STATS_MAG_Y - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcMag(imu.mz);
+  floatVal = Sensors_IMU_CalcMag(imu.mz, FLASH_IMU_OFFSET_MAG_Z);
   memcpy(statsPage + (FLASH_STATS_MAG_Z - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
 
   memcpy(statsPage + (FLASH_STATS_GYRO_X - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
@@ -627,6 +629,26 @@ void PersistentStorage_Reset_System_Info() {
     uint16_t l = lengths[i];
     memcpy(systemInfoBuffer + FLASH_SLEEP_INTERVALS + sizeof(int16_t) + i*intervalSize, &l, sizeof(uint16_t));
   }
+
+  // set default IMU offsets
+  float f = IMU_OFFSET_GYRO_X;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_GYRO_X, &f, sizeof(f));
+  f = IMU_OFFSET_GYRO_Y;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_GYRO_Y, &f, sizeof(f));
+  f = IMU_OFFSET_GYRO_Z;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_GYRO_Z, &f, sizeof(f));
+  f = IMU_OFFSET_ACCEL_X;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_ACCEL_X, &f, sizeof(f));
+  f = IMU_OFFSET_ACCEL_Y;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_ACCEL_Y, &f, sizeof(f));
+  f = IMU_OFFSET_ACCEL_Z;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_ACCEL_Z, &f, sizeof(f));
+  f = IMU_OFFSET_MAG_X;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_MAG_X, &f, sizeof(f));
+  f = IMU_OFFSET_MAG_Y;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_MAG_Y, &f, sizeof(f));
+  f = IMU_OFFSET_MAG_Z;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_MAG_Z, &f, sizeof(f));
 
   // set default FSK only flag
   systemInfoBuffer[FLASH_FSK_ONLY_ENABLED] = 1;

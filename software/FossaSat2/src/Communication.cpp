@@ -1208,9 +1208,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // gyroscope
           if(flags & 0x01) {
-            valX = Sensors_IMU_CalcGyro(imu.gx);
-            valY = Sensors_IMU_CalcGyro(imu.gy);
-            valZ = Sensors_IMU_CalcGyro(imu.gz);
+            valX = Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X);
+            valY = Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y);
+            valZ = Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z);
 
             Communication_Frame_Add(&respOptDataPtr, valX, "G X", 1, "deg/s");
             Communication_Frame_Add(&respOptDataPtr, valY, "G Y", 1, "deg/s");
@@ -1219,9 +1219,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // accelerometer
           if(flags & 0x02) {
-            valX = Sensors_IMU_CalcAccel(imu.ax);
-            valY = Sensors_IMU_CalcAccel(imu.ay);
-            valZ = Sensors_IMU_CalcAccel(imu.az);
+            valX = Sensors_IMU_CalcAccel(imu.ax, FLASH_IMU_OFFSET_ACCEL_X);
+            valY = Sensors_IMU_CalcAccel(imu.ay, FLASH_IMU_OFFSET_ACCEL_Y);
+            valZ = Sensors_IMU_CalcAccel(imu.az, FLASH_IMU_OFFSET_ACCEL_Z);
 
             Communication_Frame_Add(&respOptDataPtr, valX, "A X", 1, "m/s^2");
             Communication_Frame_Add(&respOptDataPtr, valY, "A Y", 1, "m/s^2");
@@ -1230,9 +1230,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // magnetometer
           if(flags & 0x04) {
-            valX = Sensors_IMU_CalcMag(imu.mx);
-            valY = Sensors_IMU_CalcMag(imu.my);
-            valZ = Sensors_IMU_CalcMag(imu.mz);
+            valX = Sensors_IMU_CalcMag(imu.mx, FLASH_IMU_OFFSET_MAG_X);
+            valY = Sensors_IMU_CalcMag(imu.my, FLASH_IMU_OFFSET_MAG_Y);
+            valZ = Sensors_IMU_CalcMag(imu.mz, FLASH_IMU_OFFSET_MAG_Z);
 
             Communication_Frame_Add(&respOptDataPtr, valX, "M X", 1, "gauss");
             Communication_Frame_Add(&respOptDataPtr, valY, "M Y", 1, "gauss");
@@ -1998,6 +1998,60 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           PersistentStorage_Set_ADCS_Ephemerides(chunkId*5 + row, ephemerides, controllerId);
         }
+      }
+
+    } break;
+
+    case CMD_SET_IMU_OFFSET: {
+      if(Communication_Check_OptDataLen(12, optDataLen)) {
+        float x = 0;
+        float y = 0;
+        float z = 0;
+
+        memcpy(&x, optData, sizeof(float));
+        memcpy(&y, optData + sizeof(float), sizeof(float));
+        memcpy(&z, optData + 2*sizeof(float), sizeof(float));
+
+        FOSSASAT_DEBUG_PRINT(F("Gyroscope:\t"));
+        FOSSASAT_DEBUG_PRINTLN(x);
+        FOSSASAT_DEBUG_PRINT('\t');
+        FOSSASAT_DEBUG_PRINTLN(y);
+        FOSSASAT_DEBUG_PRINT('\t');
+        FOSSASAT_DEBUG_PRINTLN(y);
+
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_GYRO_X, x);
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_GYRO_Y, y);
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_GYRO_Z, z);
+
+        memcpy(&x, optData + 3*sizeof(float), sizeof(float));
+        memcpy(&y, optData + 4*sizeof(float), sizeof(float));
+        memcpy(&z, optData + 5*sizeof(float), sizeof(float));
+
+        FOSSASAT_DEBUG_PRINT(F("Accelerometer:\t"));
+        FOSSASAT_DEBUG_PRINTLN(x);
+        FOSSASAT_DEBUG_PRINT('\t');
+        FOSSASAT_DEBUG_PRINTLN(y);
+        FOSSASAT_DEBUG_PRINT('\t');
+        FOSSASAT_DEBUG_PRINTLN(y);
+
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_ACCEL_X, x);
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_ACCEL_Y, y);
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_ACCEL_Z, z);
+
+        memcpy(&x, optData + 6*sizeof(float), sizeof(float));
+        memcpy(&y, optData + 7*sizeof(float), sizeof(float));
+        memcpy(&z, optData + 8*sizeof(float), sizeof(float));
+
+        FOSSASAT_DEBUG_PRINT(F("Magnetometer:\t"));
+        FOSSASAT_DEBUG_PRINTLN(x);
+        FOSSASAT_DEBUG_PRINT('\t');
+        FOSSASAT_DEBUG_PRINTLN(y);
+        FOSSASAT_DEBUG_PRINT('\t');
+        FOSSASAT_DEBUG_PRINTLN(y);
+
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_MAG_X, x);
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_MAG_Y, y);
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_MAG_Z, z);
       }
 
     } break;

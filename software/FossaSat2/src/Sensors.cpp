@@ -73,16 +73,19 @@ void Sensors_IMU_Sleep(bool sleep) {
   imu.sleepGyro(sleep);
 }
 
-float Sensors_IMU_CalcGyro(int16_t raw) {
-  return(imu.calcGyro(raw) * IMU_DEG_S_TO_RAD_S);
+float Sensors_IMU_CalcGyro(int16_t raw, uint32_t offsetAddr) {
+  float offset = PersistentStorage_SystemInfo_Get<float>(offsetAddr);
+  return((imu.calcGyro(raw) * IMU_DEG_S_TO_RAD_S) + offset);
 }
 
-float Sensors_IMU_CalcAccel(int16_t raw) {
-  return(imu.calcAccel(raw) * IMU_G_TO_MS2);
+float Sensors_IMU_CalcAccel(int16_t raw, uint32_t offsetAddr) {
+  float offset = PersistentStorage_SystemInfo_Get<float>(offsetAddr);
+  return((imu.calcAccel(raw) * IMU_G_TO_MS2) + offset);
 }
 
-float Sensors_IMU_CalcMag(int16_t raw) {
-  return(imu.calcMag(raw) * IMU_GAUSS_TO_TESLA);
+float Sensors_IMU_CalcMag(int16_t raw, uint32_t offsetAddr) {
+  float offset = PersistentStorage_SystemInfo_Get<float>(offsetAddr);
+  return((imu.calcMag(raw) * IMU_GAUSS_TO_TESLA) + offset);
 }
 
 bool Sensors_Current_Setup(currentSensor_t& sensor) {
