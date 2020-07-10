@@ -17,12 +17,9 @@ void ACS_OnboardControl(const ADCS_CALC_TYPE stateVars[ADCS_STATE_DIM], const AD
   // Module of the magnetic field intensity
   const ADCS_CALC_TYPE B_module = ADCS_Add_Tolerance(ADCS_VectorNorm(mag), 0);
 
-  // Variables declaration
-    ADCS_CALC_TYPE controlLawAux;
-
   // Generation of the control law by means of a matrix product Lc = K*M
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
-    controlLawAux = 0;
+    ADCS_CALC_TYPE controlLawAux = 0;
     for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
       controlLawAux += (ADCS_CALC_TYPE)gain[i][j] * stateVars[j];
     }
