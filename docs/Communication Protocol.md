@@ -393,6 +393,21 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Response: none
 - Description: Performs detumbling with closed-loop ADCS control.
 
+### CMD_SET_IMU_OFFSET
+- Optional data length: 36
+- Optional data:
+  - 0 - 3: X axis gyroscope offset in rad/s, float, LSB first
+  - 4 - 7: Y axis gyroscope offset in rad/s, float, LSB first
+  - 8 - 11: Z axis gyroscope offset in rad/s, float, LSB first
+  - 12 - 15: X axis accelerometer offset in m/s^2, float, LSB first
+  - 16 - 19: Y axis accelerometer offset in m/s^2, float, LSB first
+  - 20 - 23: Z axis accelerometer offset in m/s^2, float, LSB first
+  - 24 - 27: X axis magnetometer offset in T, float, LSB first
+  - 28 - 31: Y axis magnetometer offset in T, float, LSB first
+  - 32 - 35: Z axis magnetometer offset in T, float, LSB first
+- Response: none
+- Description: Sets static IMU offset.
+
 ---
 # Responses
 

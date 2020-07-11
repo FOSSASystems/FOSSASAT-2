@@ -136,7 +136,7 @@
 /*
    Default sleep intervals
 */
-#define DEFAULT_NUMBER_OF_SLEEP_INTERVALS               6
+#define DEFAULT_NUMBER_OF_SLEEP_INTERVALS               6       // maximum of 8
 #define DEFAULT_SLEEP_INTERVAL_VOLTAGES                 { 4050, 4000, 3900, 3800, 3700,    0 }    // mV
 #define DEFAULT_SLEEP_INTERVAL_LENGTHS                  {   20,   35,  100,  160,  180,  240 }    // sec
 
@@ -145,6 +145,19 @@
 */
 #define TLE_LINE_1                                      "1 00000U 20000A   20182.79906828 0.00000000  00000-0 -12345-3 0    10"
 #define TLE_LINE_2                                      "2 00000 137.0503 217.9687 0010435 173.7291 322.4297 15.88896416000000"
+
+/*
+   Default IMU static offsets
+*/
+#define IMU_OFFSET_GYRO_X                               0.0   // rad/s
+#define IMU_OFFSET_GYRO_Y                               0.0   // rad/s
+#define IMU_OFFSET_GYRO_Z                               0.0   // rad/s
+#define IMU_OFFSET_ACCEL_X                              0.0   // m/s^2
+#define IMU_OFFSET_ACCEL_Y                              0.0   // m/s^2
+#define IMU_OFFSET_ACCEL_Z                              0.0   // m/s^2
+#define IMU_OFFSET_MAG_X                                0.0   // Tesla
+#define IMU_OFFSET_MAG_Y                                0.0   // Tesla
+#define IMU_OFFSET_MAG_Z                                0.0   // Tesla
 
 /*
    Flash Configuration
@@ -204,8 +217,17 @@
 #define FLASH_LOOP_COUNTER                        (FLASH_SYSTEM_INFO + 0xAD)  //  0x000000AD    0x000000AD    uint8_t
 #define FLASH_LAST_ADCS_RESULT                    (FLASH_SYSTEM_INFO + 0xAE)  //  0x000000AE    0x000000AE    uint8_t
 #define FLASH_NUM_SLEEP_INTERVALS                 (FLASH_SYSTEM_INFO + 0xAF)  //  0x000000AF    0x000000AF    uint8_t
-#define FLASH_SLEEP_INTERVALS                     (FLASH_SYSTEM_INFO + 0xB0)  //  0x000000B0    0x000000BF    FLASH_NUM_SLEEP_INTERVALS x (int16_t + uint16_t)
-#define FLASH_FSK_ONLY_ENABLED                    (FLASH_SYSTEM_INFO + 0xC0)  //  0x000000AF    0x000000AF    uint8_t
+#define FLASH_SLEEP_INTERVALS                     (FLASH_SYSTEM_INFO + 0xB0)  //  0x000000B0    0x000000CF    FLASH_NUM_SLEEP_INTERVALS x (int16_t + uint16_t)
+#define FLASH_IMU_OFFSET_GYRO_X                   (FLASH_SYSTEM_INFO + 0xD0)  //  0x000000D0    0x000000D3    float
+#define FLASH_IMU_OFFSET_GYRO_Y                   (FLASH_SYSTEM_INFO + 0xD4)  //  0x000000D4    0x000000D7    float
+#define FLASH_IMU_OFFSET_GYRO_Z                   (FLASH_SYSTEM_INFO + 0xD8)  //  0x000000D8    0x000000DB    float
+#define FLASH_IMU_OFFSET_ACCEL_X                  (FLASH_SYSTEM_INFO + 0xDC)  //  0x000000DC    0x000000DF    float
+#define FLASH_IMU_OFFSET_ACCEL_Y                  (FLASH_SYSTEM_INFO + 0xE0)  //  0x000000E0    0x000000E3    float
+#define FLASH_IMU_OFFSET_ACCEL_Z                  (FLASH_SYSTEM_INFO + 0xE4)  //  0x000000E4    0x000000E7    float
+#define FLASH_IMU_OFFSET_MAG_X                    (FLASH_SYSTEM_INFO + 0xE8)  //  0x000000E8    0x000000EB    float
+#define FLASH_IMU_OFFSET_MAG_Y                    (FLASH_SYSTEM_INFO + 0xEC)  //  0x000000EC    0x000000EF    float
+#define FLASH_IMU_OFFSET_MAG_Z                    (FLASH_SYSTEM_INFO + 0xF0)  //  0x000000F0    0x000000F3    float
+#define FLASH_FSK_ONLY_ENABLED                    (FLASH_SYSTEM_INFO + 0xF1)  //  0x000000F1    0x000000F1    uint8_t
 #define FLASH_SYSTEM_INFO_CRC                     (FLASH_SYSTEM_INFO + 0xF8)  //  0x000000F8    0x000000FB    uint32_t
 #define FLASH_MEMORY_ERROR_COUNTER                (FLASH_SYSTEM_INFO + 0xFC)  //  0x000000FC    0x000000FF    uint32_t
 
