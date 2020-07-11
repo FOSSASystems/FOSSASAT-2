@@ -166,23 +166,23 @@ void setup() {
         FOSSASAT_DEBUG_PORT.println(F("Device\t\tomega [rad./s]\ta [m/s^2]\tB [tesla]"));
         FOSSASAT_DEBUG_PORT.println(F("-------------------------------------------------------------"));
         FOSSASAT_DEBUG_PORT.print(F("X axis\t\t"));
-        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcGyro(imu.gx));
+        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcAccel(imu.ax));
+        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcAccel(imu.ax, FLASH_IMU_OFFSET_ACCEL_X));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_IMU_CalcMag(imu.mx));
+        FOSSASAT_DEBUG_PORT.println(Sensors_IMU_CalcMag(imu.mx, FLASH_IMU_OFFSET_MAG_X));
         FOSSASAT_DEBUG_PORT.print(F("Y axis\t\t"));
-        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcGyro(imu.gy));
+        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcAccel(imu.ay));
+        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcAccel(imu.ay, FLASH_IMU_OFFSET_ACCEL_Y));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_IMU_CalcMag(imu.my));
+        FOSSASAT_DEBUG_PORT.println(Sensors_IMU_CalcMag(imu.my, FLASH_IMU_OFFSET_MAG_Y));
         FOSSASAT_DEBUG_PORT.print(F("Z axis\t\t"));
-        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcGyro(imu.gz));
+        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcAccel(imu.az));
+        FOSSASAT_DEBUG_PORT.print(Sensors_IMU_CalcAccel(imu.az, FLASH_IMU_OFFSET_ACCEL_Z));
         FOSSASAT_DEBUG_PORT.print(F("\t\t"));
-        FOSSASAT_DEBUG_PORT.println(Sensors_IMU_CalcMag(imu.mz));
+        FOSSASAT_DEBUG_PORT.println(Sensors_IMU_CalcMag(imu.mz, FLASH_IMU_OFFSET_MAG_Z));
         FOSSASAT_DEBUG_PORT.println();
 
         // current sensors
