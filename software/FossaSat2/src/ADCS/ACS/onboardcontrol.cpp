@@ -23,7 +23,7 @@ void ACS_OnboardControl(const ADCS_CALC_TYPE stateVars[ADCS_STATE_DIM], const AD
     for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
       controlLawAux += (ADCS_CALC_TYPE)gain[i][j] * stateVars[j];
     }
-    controlLaw[i] = controlLawAux;
+    controlLaw[i] = -1.0*controlLawAux;
   }
   FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(controlLaw, ADCS_NUM_AXES);
 

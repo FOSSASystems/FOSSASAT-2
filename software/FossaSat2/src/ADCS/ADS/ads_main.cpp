@@ -14,10 +14,10 @@
 
 /*****************  Auxiliary functions implementation *********************/
 bool ADS_Eclipse_Decision(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], const ADCS_CALC_TYPE threshold) {
-  ADCS_CALC_TYPE sum = luxData[0];
 
+  ADCS_CALC_TYPE sum = 0;
   // skip luxData[1] - not solar cell power
-  for(uint8_t i = 2; i < ADCS_NUM_PANELS; i++) {
+  for(uint8_t i = 1; i < ADCS_NUM_PANELS; i++) {
     sum += luxData[i];
   }
 
