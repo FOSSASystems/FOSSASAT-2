@@ -538,9 +538,9 @@
 #define ADCS_ROTATION_TRIGGER                           (M_PI/6.0) // Angular difference between sensor to trigger their averaging
 #define ADCS_DISTURBANCE_COVARIANCE                     0.001     // Covariance of the dynamical disturbances
 #define ADCS_NOISE_COVARIANCE                           0.001     // Covariance of the sensor noise
-#define ADCS_COIL_CHARACTERISTICS                       { {15.833,       0,       0}, \
-                                                          {     0, 893.655,       0}, \
-                                                          {     0,       0, 108.551} }
+#define ADCS_COIL_CHARACTERISTICS                       { {893.655,     0,       0}, \
+                                                          {     0, 15.833,       0}, \
+                                                          {     0,      0, 108.551} }
 #define ADCS_PANEL_UNIT_VECTOR                          { {1.0, 0, 0}, \
                                                           {0, 1.0, 0}, \
                                                           {0, 0, 1.0}, \
@@ -551,9 +551,9 @@
 #define ADCS_DEFAULT_CONTROLLER                         { {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0} }
-#define ADCS_INERTIA_TENSOR                             { {2645.9, -2.2, -4.41}, \
-                                                          {-2.2, 1167.3, 0.2}, \
-                                                          {-4.41, 0.2, 1090.9} } // Inertia tensor is introduced in its inversed form
+#define ADCS_INERTIA_TENSOR                             { {2645.9, 2.2, 4.41}, \
+                                                          {2.2, 1167.3, -0.1}, \
+                                                          {4.41, -0.1, 1090.9} } // Inertia tensor is introduced in its inversed form
 #define ADCS_NUM_CONTROLLERS                            1       //  use only one controller by default
 #define ADCS_BRIDGE_TIMER_UPDATE_PERIOD                 (ADCS_TIME_STEP/100)  // time step between successive H bridge output updates, in ms
 #define ADCS_BRIDGE_OUTPUT_HIGH                         63      // H bridge drive strength to be used as "high"
