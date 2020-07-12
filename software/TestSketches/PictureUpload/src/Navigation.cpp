@@ -296,7 +296,10 @@ void Navigation_GNSS_Setup_Logging() {
   gpsLogState.overwrite = false;
 
   // run for the requested duration
-  gpsLogState.start = millis();
+  gpsLogState.start = rtc.getEpoch();
+
+  // set science mode flag
+  scienceModeActive = true;
 }
 
 void Navigation_GNSS_SerialEvent() {
@@ -355,6 +358,8 @@ void Navigation_GNSS_SerialEvent() {
         gpsLogState.overwrite = true;
       }
 
+      PowerControl_Watchdog_Heartbeat();
+
     } else {
       // add to buffer
       gpsLogState.buff[gpsLogState.buffPos] = c;
@@ -362,6 +367,7 @@ void Navigation_GNSS_SerialEvent() {
     }
   }
 }
+
 uint32_t Navigation_GNSS_Finish_Logging() {
   // update last fix addres
   PersistentStorage_SystemInfo_Set<uint32_t>(FLASH_NMEA_LOG_LATEST_FIX, gpsLogState.lastFixAddr);
@@ -371,6 +377,9 @@ uint32_t Navigation_GNSS_Finish_Logging() {
 
   // stop UART interface (to prevent it from waking up the MCU)
   GpsSerial.end();
+
+  // clear science mode flag
+  scienceModeActive = false;
 
   // save the number of logged bytes and send it
   uint32_t logged = gpsLogState.flashPos - FLASH_NMEA_LOG_START;
