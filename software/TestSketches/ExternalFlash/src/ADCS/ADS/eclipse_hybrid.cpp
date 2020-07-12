@@ -19,8 +19,8 @@ void ADS_Eclipse_Hybrid(const ADCS_CALC_TYPE magData[ADCS_NUM_AXES], const ADCS_
   ADCS_CALC_TYPE lvFrame[ADCS_NUM_AXES];
 
   // Unitary frame vectors
-  const ADCS_CALC_TYPE dataGain = 1.0 / (ADCS_VectorNorm(magData) + adcsParams.calcTol);
-  const ADCS_CALC_TYPE epheGain = 1.0 / (ADCS_VectorNorm(magEphe) + adcsParams.calcTol);
+  const ADCS_CALC_TYPE dataGain = 1.0 / ADCS_Add_Tolerance(ADCS_VectorNorm(magData), 0);
+  const ADCS_CALC_TYPE epheGain = 1.0 / ADCS_Add_Tolerance(ADCS_VectorNorm(magEphe), 0);
 
   // Unitary vector calculation in the body frame
   bodyFrame[0] = dataGain * magData[0];

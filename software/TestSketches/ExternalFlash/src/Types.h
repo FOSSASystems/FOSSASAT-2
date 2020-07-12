@@ -39,6 +39,7 @@ struct gpsLogState_t {
 
 struct adcsBridgeState_t {
   bool outputHigh;
+  bool forward;
   uint32_t lastUpdate;
   uint32_t pulseLen;
 };
@@ -48,7 +49,7 @@ struct adcsState_t {
   ADCS_CALC_TYPE prevOmegaNorm;
   ADCS_CALC_TYPE prevEulerNorm;
   ADCS_CALC_TYPE prevStateVars[2*ADCS_NUM_AXES];
-  ADCS_CALC_TYPE prevControlVector[2*ADCS_NUM_AXES];
+  ADCS_CALC_TYPE prevControlVector[ADCS_NUM_AXES];
   ADCS_CALC_TYPE kalmanMatrixP[2*ADCS_NUM_AXES][2*ADCS_NUM_AXES];
   uint32_t currentEpheRow;
   uint32_t start;
@@ -59,13 +60,12 @@ struct adcsState_t {
 };
 
 struct adcsControlBits_t {
-  uint8_t detumbleOnly : 1;       // LSB
+  uint8_t overrideFaultX : 1; // LSB
+  uint8_t overrideFaultY : 1;
+  uint8_t overrideFaultZ : 1;
   uint8_t overrideDetumbleTol : 1;
   uint8_t overrideEulerTol : 1;
   uint8_t overrideOmegaTol : 1;
-  uint8_t overrideFaultX : 1;
-  uint8_t overrideFaultY : 1;
-  uint8_t overrideFaultZ : 1;
 };
 
 struct adcsParams_t {
@@ -85,6 +85,7 @@ struct adcsParams_t {
   uint32_t activeLen;
   ADCS_CALC_TYPE calcTol;
   ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES];
+  ADCS_CALC_TYPE inertiaTensor[ADCS_NUM_AXES][ADCS_NUM_AXES];
   ADCS_CALC_TYPE eclipseThreshold;
   ADCS_CALC_TYPE rotationWeightRatio;
   ADCS_CALC_TYPE rotationTrigger;

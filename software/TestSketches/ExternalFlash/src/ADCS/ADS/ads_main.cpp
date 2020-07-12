@@ -14,8 +14,10 @@
 
 /*****************  Auxiliary functions implementation *********************/
 bool ADS_Eclipse_Decision(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], const ADCS_CALC_TYPE threshold) {
+
   ADCS_CALC_TYPE sum = 0;
-  for(uint8_t i = 0; i < ADCS_NUM_PANELS; i++) {
+  // skip luxData[1] - not solar cell power
+  for(uint8_t i = 1; i < ADCS_NUM_PANELS; i++) {
     sum += luxData[i];
   }
 
@@ -43,20 +45,23 @@ void ADS_Main(ADCS_CALC_TYPE omega[ADCS_NUM_AXES], ADCS_CALC_TYPE magData[ADCS_N
 
   // Measurements from sensors
   ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS];
-  luxData[0] = Sensors_Current_ReadPower(currSensorXA);
-  luxData[1] = Sensors_Current_ReadPower(currSensorXB);
+  luxData[0] = Sensors_Read_Light(lightSensorPanelY);
+  luxData[1] = Sensors_Current_ReadPower(currSensorXA);
   luxData[2] = Sensors_Current_ReadPower(currSensorZA);
-  luxData[3] = Sensors_Current_ReadPower(currSensorZB);
-  luxData[4] = Sensors_Current_ReadPower(currSensorY);
-  luxData[5] = Sensors_Read_Light(lightSensorPanelY);
+  luxData[3] = Sensors_Current_ReadPower(currSensorY);
+  luxData[4] = Sensors_Current_ReadPower(currSensorXB);
+  luxData[5] = Sensors_Current_ReadPower(currSensorZB);
+  FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(luxData, ADCS_NUM_PANELS);
 
   // Decide whether the satellite is in eclipse situation or under light
   if(ADS_Eclipse_Decision(luxData, adcsParams.eclipseThreshold)) {
     // Generation of the measurements
+    FOSSASAT_DEBUG_PRINTLN(F("eclipse"));
     ADS_Euler_Integrator(omega, prevAngles, anglesInt, adcsParams.timeStep);
     ADS_Eclipse_Hybrid(magData, magEphe, rotationMatrix);
 
   } else {
+    FOSSASAT_DEBUG_PRINTLN(F("no eclipse"));
     ADCS_CALC_TYPE solarEphBody[ADCS_NUM_AXES];                   // Solar ephemerides in the body frame
     ADCS_CALC_TYPE redundantSolarEph[ADCS_NUM_AXES];              // Redundant solar ephemerides in the body frame
 
@@ -81,5 +86,5 @@ void ADS_Main(ADCS_CALC_TYPE omega[ADCS_NUM_AXES], ADCS_CALC_TYPE magData[ADCS_N
   measurements[5] = omega[2];
 
   // Filtering of the signal
-  ADS_Kalman_Filter(adcsParams.disturbCovariance, adcsParams.noiseCovariance, adcsParams.timeStep, stateVars, measurements, controlVector, matrixP, filtered_y);
+  ADS_Kalman_Filter(adcsParams.disturbCovariance, adcsParams.noiseCovariance, adcsParams.timeStep, stateVars, measurements, controlVector, adcsParams.inertiaTensor, matrixP, filtered_y);
 }
