@@ -24,7 +24,6 @@
 
 // common
 #define CALLSIGN_DEFAULT                                "FOSSASAT-2"
-#define CARRIER_FREQUENCY                               436.7       /*!< MHz */
 #define SYNC_WORD                                       0x12        /*!< Ensure this sync word is compatable with all devices. */
 #define TCXO_VOLTAGE                                    1.6         /*!< Sets the radio's TCX0 voltage. (V) */
 #define MAX_NUM_OF_BLOCKS                               3           /*!< maximum number of AES128 blocks that will be accepted */
@@ -34,6 +33,7 @@
 #define WHITENING_INITIAL                               0x1FF       /*!< Whitening LFSR initial value, to ensure SX127x compatibility */
 
 // LoRa
+#define LORA_FREQUENCY                                  436.7       /*!< MHz */
 #define LORA_BANDWIDTH                                  125.0       /*!< kHz dual sideband */
 #define LORA_SPREADING_FACTOR                           11
 #define LORA_SPREADING_FACTOR_ALT                       10
@@ -43,12 +43,13 @@
 #define LORA_PREAMBLE_LENGTH                            8       // symbols
 
 // GFSK
+#define FSK_FREQUENCY                                   436.9       /*!< MHz */
 #define FSK_BIT_RATE                                    9.6         /*!< kbps nominal */
 #define FSK_FREQUENCY_DEVIATION                         5.0         /*!< kHz single-sideband */
 #define FSK_RX_BANDWIDTH                                39.0        /*!< kHz single-sideband */
 #define FSK_OUTPUT_POWER                                20          /*!< dBm */
 #define FSK_PREAMBLE_LENGTH                             16          /*!< bits */
-#define FSK_DATA_SHAPING                                0.5         /*!< GFSK filter BT product */
+#define FSK_DATA_SHAPING                                RADIOLIB_SHAPING_0_5  /*!< GFSK filter BT product */
 #define FSK_CURRENT_LIMIT                               140.0       /*!< mA */
 
 // Morse Code
