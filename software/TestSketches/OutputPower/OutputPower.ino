@@ -78,30 +78,30 @@ int16_t Communication_Set_Modem(uint8_t modem) {
   // initialize requested modem
   switch (modem) {
     case MODEM_LORA:
-        state = radio.begin(CARRIER_FREQUENCY,
+        state = radio.begin(LORA_FREQUENCY,
                             LORA_BANDWIDTH,
                             LORA_SPREADING_FACTOR,
                             LORA_CODING_RATE,
                             SYNC_WORD,
                             LORA_OUTPUT_POWER,
-                            LORA_CURRENT_LIMIT,
                             LORA_PREAMBLE_LENGTH,
                             TCXO_VOLTAGE);
         radio.setCRC(true);
+        radio.setCurrentLimit(LORA_CURRENT_LIMIT);
       break;
     case MODEM_FSK: {
-        state = radio.beginFSK(CARRIER_FREQUENCY,
+        state = radio.beginFSK(FSK_FREQUENCY,
                                FSK_BIT_RATE,
                                FSK_FREQUENCY_DEVIATION,
                                FSK_RX_BANDWIDTH,
                                FSK_OUTPUT_POWER,
-                               FSK_CURRENT_LIMIT,
                                FSK_PREAMBLE_LENGTH,
-                               FSK_DATA_SHAPING,
                                TCXO_VOLTAGE);
         uint8_t syncWordFSK[2] = {SYNC_WORD, SYNC_WORD};
         radio.setSyncWord(syncWordFSK, 2);
         radio.setCRC(2);
+        radio.setDataShaping(FSK_DATA_SHAPING);
+        radio.setCurrentLimit(FSK_CURRENT_LIMIT);
       } break;
     default:
       FOSSASAT_DEBUG_PRINT(F("Unkown modem "));
@@ -134,7 +134,7 @@ void setup() {
   FOSSASAT_DEBUG_PORT.begin(FOSSASAT_DEBUG_SPEED);
   while(!FOSSASAT_DEBUG_PORT);
   FOSSASAT_DEBUG_PORT.println();
-  
+
   RadioSPI.begin();
 
   memset(dummyPacket, 0xAA, sizeof(dummyPacket));
@@ -154,18 +154,12 @@ void loop() {
   radio.transmit(dummyPacket, sizeof(dummyPacket));
   digitalWrite(WATCHDOG_IN, !digitalRead(WATCHDOG_IN));
   delay(1000);
-  
+
   // FSK Tx
   Communication_Set_Modem(MODEM_FSK);
-  radio.transmit(dummyPacket, sizeof(dummyPacket));
+  for(uint8_t i = 0; i < 10; i++) {
     radio.transmit(dummyPacket, sizeof(dummyPacket));
-      radio.transmit(dummyPacket, sizeof(dummyPacket));
-      radio.transmit(dummyPacket, sizeof(dummyPacket));
-    radio.transmit(dummyPacket, sizeof(dummyPacket));
-      radio.transmit(dummyPacket, sizeof(dummyPacket));
-      radio.transmit(dummyPacket, sizeof(dummyPacket));
-    radio.transmit(dummyPacket, sizeof(dummyPacket));
-      radio.transmit(dummyPacket, sizeof(dummyPacket));
+  }
   digitalWrite(WATCHDOG_IN, !digitalRead(WATCHDOG_IN));
   delay(1000);
 }
