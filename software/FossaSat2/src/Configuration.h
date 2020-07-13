@@ -529,7 +529,7 @@
 #define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)  // maximum length of H-bridge pulse
 #define ADCS_DETUMB_OMEGA_TOLERANCE                     0.001     // detumbling will be stopped once change in normalized angular velocity drops below this value
 #define ADCS_ACTIVE_EULER_TOLERANCE                     0.01     //
-#define ADCS_ACTIVE_OMEGA_TOLERANCE                     0.01     //
+#define ADCS_ACTIVE_OMEGA_TOLERANCE                     0.001     //
 #define ADCS_MIN_INERTIAL_MOMENT                        0.0003782 //
 #define ADCS_PULSE_AMPLITUDE                            1.0       // current pulse amplitude - maximum H-bridge voltage output divided by magnetorquer impednace
 #define ADCS_CALCULATION_TOLERANCE                      0.001    //
