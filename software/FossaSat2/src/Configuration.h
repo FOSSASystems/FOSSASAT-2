@@ -533,13 +533,13 @@
 #define ADCS_NUM_PANELS                                 6       // number of solar panels for eclipse decision
 #define ADCS_CALC_TYPE                                  double  // numeric type to use in ADCS calculation, float for single precision, double for double precision
 #define ADCS_TIME_STEP                                  100     // time step between successive ADCS updates, in ms
-#define ADCS_PULSE_MAX_INTENSITY                        1.0    // abs max value in the H bridges
+#define ADCS_PULSE_MAX_INTENSITY                        0.001175   // abs max value in the H-bridge output
 #define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)  // maximum length of H-bridge pulse
 #define ADCS_DETUMB_OMEGA_TOLERANCE                     0.001     // detumbling will be stopped once change in normalized angular velocity drops below this value
 #define ADCS_ACTIVE_EULER_TOLERANCE                     0.01     //
-#define ADCS_ACTIVE_OMEGA_TOLERANCE                     0.01     //
+#define ADCS_ACTIVE_OMEGA_TOLERANCE                     0.001     //
 #define ADCS_MIN_INERTIAL_MOMENT                        0.0003782 //
-#define ADCS_PULSE_AMPLITUDE                            1.0       // current pulse amplitude - maximum H-bridge voltage output divided by magnetorquer impednace
+#define ADCS_PULSE_AMPLITUDE                            0.001150  // current pulse amplitude - maximum H-bridge voltage output divided by magnetorquer impednace
 #define ADCS_CALCULATION_TOLERANCE                      0.001    //
 #define ADCS_ECLIPSE_THRESHOLD                          0.28     // Eclipse condition reaching for a 20% output of the solar panels
 #define ADCS_ROTATION_WEIGHT_RATIO                      0.7     //  Weight ratio to average sensor, referred to the Euler integrator scheme (less accurate)
