@@ -16,12 +16,12 @@ void ADS_Measurement_Hybrid(const ADCS_CALC_TYPE v_1[ADCS_NUM_AXES], const ADCS_
                             ADCS_CALC_TYPE eulerAnglesMatrix[ADCS_NUM_AXES][ADCS_NUM_AXES]) {
 
   // Normalize both ephemeris and measurements vectors
-  ADCS_CALC_TYPE m1[ADCS_NUM_AXES] = m_1;
-  ADCS_CALC_TYPE m2[ADCS_NUM_AXES] = m_2;
-  ADCS_CALC_TYPE m3[ADCS_NUM_AXES] = m_3;
-  ADCS_CALC_TYPE v1[ADCS_NUM_AXES] = v_1;
-  ADCS_CALC_TYPE v2[ADCS_NUM_AXES] = v_2;
-  ADCS_CALC_TYPE v3[ADCS_NUM_AXES] = v_3;
+  ADCS_CALC_TYPE m1[ADCS_NUM_AXES] = {m_1, 0, 0};
+  ADCS_CALC_TYPE m2[ADCS_NUM_AXES] = {m_2, 0, 0};
+  ADCS_CALC_TYPE m3[ADCS_NUM_AXES] = {m_3, 0, 0};
+  ADCS_CALC_TYPE v1[ADCS_NUM_AXES] = {v_1, 0, 0};
+  ADCS_CALC_TYPE v2[ADCS_NUM_AXES] = {v_2, 0, 0};
+  ADCS_CALC_TYPE v3[ADCS_NUM_AXES] = {v_3, 0, 0};
 
   ADCS_CALC_TYPE m1_norm = ADCS_Add_Tolerance(ADCS_VectorNorm(m_1),0);
   ADCS_CALC_TYPE m2_norm = ADCS_Add_Tolerance(ADCS_VectorNorm(m_2),0);
