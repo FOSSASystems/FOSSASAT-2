@@ -16,13 +16,13 @@ void ADS_Measurement_Hybrid(const ADCS_CALC_TYPE v_1[ADCS_NUM_AXES], const ADCS_
                             ADCS_CALC_TYPE eulerAnglesMatrix[ADCS_NUM_AXES][ADCS_NUM_AXES]) {
 
   // Normalize both ephemeris and measurements vectors
-  ADCS_CALC_TYPE m1_norm = ADCS_VectorNorm(m_1);
-  ADCS_CALC_TYPE m2_norm = ADCS_VectorNorm(m_2);
-  ADCS_CALC_TYPE m3_norm = ADCS_VectorNorm(m_3);
+  ADCS_CALC_TYPE m1_norm = ADCS_Add_Tolerance(ADCS_VectorNorm(m_1),0);
+  ADCS_CALC_TYPE m2_norm = ADCS_Add_Tolerance(ADCS_VectorNorm(m_2),0);
+  ADCS_CALC_TYPE m3_norm = ADCS_Add_Tolerance(ADCS_VectorNorm(m_3),0);
 
-  ADCS_CALC_TYPE v1_norm = ADCS_VectorNorm(v_1);
-  ADCS_CALC_TYPE v2_norm = ADCS_VectorNorm(v_2);
-  ADCS_CALC_TYPE v3_norm = ADCS_VectorNorm(v_3);
+  ADCS_CALC_TYPE v1_norm = ADCS_Add_Tolerance(ADCS_VectorNorm(v_1),0);
+  ADCS_CALC_TYPE v2_norm = ADCS_Add_Tolerance(ADCS_VectorNorm(v_2),0);
+  ADCS_CALC_TYPE v3_norm = ADCS_Add_Tolerance(ADCS_VectorNorm(v_3),0);
 
   ADCS_CALC_TYPE m1[ADCS_NUM_AXES];
   ADCS_CALC_TYPE m2[ADCS_NUM_AXES];
@@ -31,13 +31,13 @@ void ADS_Measurement_Hybrid(const ADCS_CALC_TYPE v_1[ADCS_NUM_AXES], const ADCS_
   ADCS_CALC_TYPE v2[ADCS_NUM_AXES];
   ADCS_CALC_TYPE v3[ADCS_NUM_AXES];
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
-      m1[i] = m_1[i] * (1.0/ADCS_Add_Tolerance(m1_norm, 0));
-      m2[i] = m_2[i] * (1.0/ADCS_Add_Tolerance(m2_norm, 0));
-      m3[i] = m_3[i] * (1.0/ADCS_Add_Tolerance(m3_norm, 0));
+      m1[i] *= (1.0/m1_norm);
+      m2[i] *= (1.0/m2_norm);
+      m3[i] *= (1.0/m3_norm);
 
-      v1[i] = v_1[i] * (1.0/ADCS_Add_Tolerance(v1_norm, 0));
-      v2[i] = v_2[i] * (1.0/ADCS_Add_Tolerance(v2_norm, 0));
-      v3[i] = v_3[i] * (1.0/ADCS_Add_Tolerance(v3_norm, 0));
+      v1[i] *= (1.0/v1_norm);
+      v2[i] *= (1.0/v2_norm);
+      v3[i] *= (1.0/v3_norm);
   }
 
   // Measurements matrix

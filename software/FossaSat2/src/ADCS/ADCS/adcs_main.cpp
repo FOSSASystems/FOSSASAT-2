@@ -262,7 +262,7 @@ void ADCS_ActiveControl_Update() {
   FOSSASAT_DEBUG_PRINT(F("omegaNorm=\t"));
   FOSSASAT_DEBUG_PRINTLN(omegaNorm, 4);
   bool eulerToleranceReached = (abs(eulerNorm - adcsState.prevEulerNorm) >= adcsParams.activeEulerTol);
-  bool omegaToleranceReached = (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.activeOmegaTol);
+  bool omegaToleranceReached = (abs(omegaNorm - adcsState.prevOmegaNorm) <= adcsParams.activeOmegaTol);
   if ((adcsParams.control.bits.overrideEulerTol || eulerToleranceReached) && (adcsParams.control.bits.overrideOmegaTol || omegaToleranceReached)) {
     // Choose controller from ADCS parameters
     float controllerMatrix[ADCS_NUM_AXES][ADCS_STATE_DIM];

@@ -16,7 +16,7 @@
 bool ADS_Eclipse_Decision(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], const ADCS_CALC_TYPE threshold) {
 
   ADCS_CALC_TYPE sum = 0;
-  // skip luxData[1] - not solar cell power
+  // skip luxData[0] - not solar cell power
   for(uint8_t i = 1; i < ADCS_NUM_PANELS; i++) {
     sum += luxData[i];
   }
@@ -29,8 +29,8 @@ bool ADS_Eclipse_Decision(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], const A
 }
 
 /**************** Main structure ****************/
-void ADS_Main(ADCS_CALC_TYPE omega[ADCS_NUM_AXES], ADCS_CALC_TYPE magData[ADCS_NUM_AXES], ADCS_CALC_TYPE stateVars[ADCS_STATE_DIM],
-              ADCS_CALC_TYPE controlVector[ADCS_STATE_DIM], ADCS_CALC_TYPE matrixP[ADCS_STATE_DIM][ADCS_STATE_DIM], ADCS_CALC_TYPE solarEphe[ADCS_STATE_DIM],
+void ADS_Main(const ADCS_CALC_TYPE omega[ADCS_NUM_AXES], const ADCS_CALC_TYPE magData[ADCS_NUM_AXES], const ADCS_CALC_TYPE stateVars[ADCS_STATE_DIM],
+              const ADCS_CALC_TYPE controlVector[ADCS_STATE_DIM], ADCS_CALC_TYPE matrixP[ADCS_STATE_DIM][ADCS_STATE_DIM], ADCS_CALC_TYPE solarEphe[ADCS_STATE_DIM],
               ADCS_CALC_TYPE magEphe[ADCS_STATE_DIM], ADCS_CALC_TYPE filtered_y[ADCS_STATE_DIM], ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES]) {
 
   // Relevant variables declaration
