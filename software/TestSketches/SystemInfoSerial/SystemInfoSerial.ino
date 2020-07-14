@@ -1,12 +1,12 @@
 #include "FossaSat2.h"
 
 // compile-time checks
-#if (!defined(RADIOLIB_VERSION)) || (RADIOLIB_VERSION < 0x03060200)
-  #error "Unsupported RadioLib version (< 3.6.2)!"
+#if (!defined(RADIOLIB_VERSION)) || (RADIOLIB_VERSION < 0x04000000)
+  #error "Unsupported RadioLib version (< 4.0.0)!"
 #endif
 
 #if (!defined(RADIOLIB_STATIC_ONLY))
-  #error "RadioLib is using dynamic memory management, make sure static only is enabled in FossaSat2.h"
+  #error "RadioLib is using dynamic memory management, make sure static only is enabled in RadioLib/src/BuildOpt.h"
 #endif
 
 void setup() {

@@ -54,6 +54,8 @@ template void PersistentStorage_SystemInfo_Set<int16_t>(uint8_t, int16_t);
 template void PersistentStorage_SystemInfo_Set<uint16_t>(uint8_t, uint16_t);
 template void PersistentStorage_SystemInfo_Set<int32_t>(uint8_t, int32_t);
 template void PersistentStorage_SystemInfo_Set<uint32_t>(uint8_t, uint32_t);
+template void PersistentStorage_SystemInfo_Set<float>(uint8_t, float);
+template void PersistentStorage_SystemInfo_Set<double>(uint8_t, double);
 
 template<typename T>
 // cppcheck-suppress unusedFunction
@@ -181,15 +183,15 @@ void PersistentStorage_Update_Stats(uint8_t flags) {
   if(flags & STATS_FLAGS_IMU) {
     // IMU
     Sensors_IMU_Update();
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_GYRO_X, Sensors_IMU_CalcGyro(imu.gx));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_GYRO_Y, Sensors_IMU_CalcGyro(imu.gy));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_GYRO_Z, Sensors_IMU_CalcGyro(imu.gz));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_ACCEL_X, Sensors_IMU_CalcAccel(imu.ax));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_ACCEL_Y, Sensors_IMU_CalcAccel(imu.ay));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_ACCEL_Z, Sensors_IMU_CalcAccel(imu.az));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_MAG_X, Sensors_IMU_CalcMag(imu.mx));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_MAG_Y, Sensors_IMU_CalcMag(imu.my));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_MAG_Z, Sensors_IMU_CalcMag(imu.mz));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_GYRO_X, Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_GYRO_Y, Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_GYRO_Z, Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_ACCEL_X, Sensors_IMU_CalcAccel(imu.ax, FLASH_IMU_OFFSET_ACCEL_X));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_ACCEL_Y, Sensors_IMU_CalcAccel(imu.ay, FLASH_IMU_OFFSET_ACCEL_Y));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_ACCEL_Z, Sensors_IMU_CalcAccel(imu.az, FLASH_IMU_OFFSET_ACCEL_Z));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_MAG_X, Sensors_IMU_CalcMag(imu.mx, FLASH_IMU_OFFSET_MAG_X));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_MAG_Y, Sensors_IMU_CalcMag(imu.my, FLASH_IMU_OFFSET_MAG_Y));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_MAG_Z, Sensors_IMU_CalcMag(imu.mz, FLASH_IMU_OFFSET_MAG_Z));
   }
 
   if(flags & STATS_FLAGS_POWER) {
@@ -341,23 +343,23 @@ void PersistentStorage_Reset_Stats() {
   memcpy(statsPage + (FLASH_STATS_MAG_Z - FLASH_STATS), &floatMax, sizeof(floatMax));
 
   Sensors_IMU_Update();
-  floatVal = Sensors_IMU_CalcGyro(imu.gx);
+  floatVal = Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X);
   memcpy(statsPage + (FLASH_STATS_GYRO_X - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcGyro(imu.gy);
+  floatVal = Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y);
   memcpy(statsPage + (FLASH_STATS_GYRO_Y - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcGyro(imu.gz);
+  floatVal = Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z);
   memcpy(statsPage + (FLASH_STATS_GYRO_Z - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcAccel(imu.ax);
+  floatVal = Sensors_IMU_CalcAccel(imu.ax, FLASH_IMU_OFFSET_ACCEL_X);
   memcpy(statsPage + (FLASH_STATS_ACCEL_X - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcAccel(imu.ay);
+  floatVal = Sensors_IMU_CalcAccel(imu.ay, FLASH_IMU_OFFSET_ACCEL_Y);
   memcpy(statsPage + (FLASH_STATS_ACCEL_Y - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcAccel(imu.az);
+  floatVal = Sensors_IMU_CalcAccel(imu.az, FLASH_IMU_OFFSET_ACCEL_Z);
   memcpy(statsPage + (FLASH_STATS_ACCEL_Z - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcMag(imu.mx);
+  floatVal = Sensors_IMU_CalcMag(imu.mx, FLASH_IMU_OFFSET_MAG_X);
   memcpy(statsPage + (FLASH_STATS_MAG_X - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcMag(imu.my);
+  floatVal = Sensors_IMU_CalcMag(imu.my, FLASH_IMU_OFFSET_MAG_Y);
   memcpy(statsPage + (FLASH_STATS_MAG_Y - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
-  floatVal = Sensors_IMU_CalcMag(imu.mz);
+  floatVal = Sensors_IMU_CalcMag(imu.mz, FLASH_IMU_OFFSET_MAG_Z);
   memcpy(statsPage + (FLASH_STATS_MAG_Z - FLASH_STATS) + sizeof(floatVal), &floatVal, sizeof(floatVal));
 
   memcpy(statsPage + (FLASH_STATS_GYRO_X - FLASH_STATS) + 2*sizeof(floatMin), &floatMin, sizeof(floatMin));
@@ -628,6 +630,29 @@ void PersistentStorage_Reset_System_Info() {
     memcpy(systemInfoBuffer + FLASH_SLEEP_INTERVALS + sizeof(int16_t) + i*intervalSize, &l, sizeof(uint16_t));
   }
 
+  // set default IMU offsets
+  float f = IMU_OFFSET_GYRO_X;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_GYRO_X, &f, sizeof(f));
+  f = IMU_OFFSET_GYRO_Y;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_GYRO_Y, &f, sizeof(f));
+  f = IMU_OFFSET_GYRO_Z;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_GYRO_Z, &f, sizeof(f));
+  f = IMU_OFFSET_ACCEL_X;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_ACCEL_X, &f, sizeof(f));
+  f = IMU_OFFSET_ACCEL_Y;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_ACCEL_Y, &f, sizeof(f));
+  f = IMU_OFFSET_ACCEL_Z;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_ACCEL_Z, &f, sizeof(f));
+  f = IMU_OFFSET_MAG_X;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_MAG_X, &f, sizeof(f));
+  f = IMU_OFFSET_MAG_Y;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_MAG_Y, &f, sizeof(f));
+  f = IMU_OFFSET_MAG_Z;
+  memcpy(systemInfoBuffer + FLASH_IMU_OFFSET_MAG_Z, &f, sizeof(f));
+
+  // set default FSK only flag
+  systemInfoBuffer[FLASH_FSK_ONLY_ENABLED] = 1;
+
   // set CRC
   uint32_t crc = CRC32_Get(systemInfoBuffer, FLASH_SYSTEM_INFO_CRC);
   memcpy(systemInfoBuffer + FLASH_SYSTEM_INFO_CRC, &crc, sizeof(uint32_t));
@@ -638,10 +663,10 @@ void PersistentStorage_Reset_System_Info() {
 
 void PersistentStorage_Reset_ADCS_Params() {
   // build a completely new page
-  uint8_t adcsPage[FLASH_EXT_PAGE_SIZE];
+  uint8_t adcsPage[2*FLASH_EXT_PAGE_SIZE];
 
   // set everything to 0 by default
-  memset(adcsPage, 0, FLASH_EXT_PAGE_SIZE);
+  memset(adcsPage, 0, 2*FLASH_EXT_PAGE_SIZE);
 
   ADCS_CALC_TYPE f = ADCS_PULSE_MAX_INTENSITY;
   memcpy(adcsPage + (FLASH_ADCS_PULSE_MAX_INTENSITY - FLASH_ADCS_PARAMETERS), &f, sizeof(f));
@@ -681,11 +706,26 @@ void PersistentStorage_Reset_ADCS_Params() {
   uint8_t us = ADCS_NUM_CONTROLLERS;
   memcpy(adcsPage + (FLASH_ADCS_NUM_CONTROLLERS - FLASH_ADCS_PARAMETERS), &us, sizeof(us));
 
-  ADCS_CALC_TYPE coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES] = ADCS_COIL_CHARACTERISTICS;
-  memcpy(adcsPage + (FLASH_ADCS_COIL_CHAR_MATRIX - FLASH_ADCS_PARAMETERS), coilChar, ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(ADCS_CALC_TYPE));
+  // write default coil characteristics
+  float coilChar[ADCS_NUM_AXES][ADCS_NUM_AXES] = ADCS_COIL_CHARACTERISTICS;
+  for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+    for(uint8_t j = 0; j < ADCS_NUM_AXES; j++) {
+      float val = coilChar[i][j];
+      memcpy(adcsPage + (FLASH_ADCS_COIL_CHAR_MATRIX - FLASH_ADCS_PARAMETERS) + (i*ADCS_NUM_AXES*sizeof(val) + j*sizeof(val)), &val, sizeof(val));
+    }
+  }
+
+  // write default inertia tensor matrix
+  float inertiaTensor[ADCS_NUM_AXES][ADCS_NUM_AXES] = ADCS_INERTIA_TENSOR;
+  for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+    for(uint8_t j = 0; j < ADCS_NUM_AXES; j++) {
+      float val = inertiaTensor[i][j];
+      memcpy(adcsPage + (FLASH_ADCS_INERTIA_TENSOR_MATRIX - FLASH_ADCS_PARAMETERS) + (i*ADCS_NUM_AXES*sizeof(val) + j*sizeof(val)), &val, sizeof(val));
+    }
+  }
 
   // write the default ADCS info
-  PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);
+  PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, 2*FLASH_EXT_PAGE_SIZE);
 
   // write the default ADCS controller
   memset(adcsPage, 0, FLASH_EXT_PAGE_SIZE);
@@ -967,16 +1007,18 @@ void PersistentStorage_SPItransaction(uint8_t* cmd, uint8_t cmdLen, bool write, 
     FlashSPI.transfer(cmd[n]);
   }
 
-  // send data
-  if(write) {
-    for(size_t n = 0; n < numBytes; n++) {
-      // send byte
-      FlashSPI.transfer(data[n]);
-    }
+  if(data != NULL) {
+    // send data
+    if(write) {
+      for(size_t n = 0; n < numBytes; n++) {
+        // send byte
+        FlashSPI.transfer(data[n]);
+      }
 
-  } else {
-    for(size_t n = 0; n < numBytes; n++) {
-      data[n] = FlashSPI.transfer(MX25L51245G_CMD_NOP);
+    } else {
+      for(size_t n = 0; n < numBytes; n++) {
+        data[n] = FlashSPI.transfer(MX25L51245G_CMD_NOP);
+      }
     }
   }
 

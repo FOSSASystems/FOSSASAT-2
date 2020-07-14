@@ -19,5 +19,9 @@ ADCS_CALC_TYPE ACS_IntensitiesRectifier(const ADCS_CALC_TYPE intensity1, const A
 
   // Pulse time calculation
   ADCS_CALC_TYPE duration = energy/pow(amplitude, 2.0);
+  if (intensity2 < 0) {
+    duration *= -1.0;
+  }
+
   return(duration);
 }

@@ -17,7 +17,7 @@
 #define RTC_SECONDS                                     0
 
 // uncomment to reset system info (callsign, configuration etc.) on start
-#define RESET_SYSTEM_INFO
+//#define RESET_SYSTEM_INFO
 
 // comment out to disable deployment sequence
 //#define ENABLE_DEPLOYMENT_SEQUENCE
@@ -101,8 +101,8 @@
 #define MPPT_OFF                                        PA11
 #define ANALOG_IN_RANDOM_SEED                           PC2    // used as source for randomSeed(), should be left floating
 
-#define POWER_FET_POLARITY_ON                           HIGH
-#define POWER_FET_POLARITY_OFF                          LOW
+#define POWER_FET_POLARITY_ON                           LOW
+#define POWER_FET_POLARITY_OFF                          HIGH
 
 
 /*
@@ -136,7 +136,7 @@
 /*
    Default sleep intervals
 */
-#define DEFAULT_NUMBER_OF_SLEEP_INTERVALS               6
+#define DEFAULT_NUMBER_OF_SLEEP_INTERVALS               6       // maximum of 8
 #define DEFAULT_SLEEP_INTERVAL_VOLTAGES                 { 4050, 4000, 3900, 3800, 3700,    0 }    // mV
 #define DEFAULT_SLEEP_INTERVAL_LENGTHS                  {   20,   35,  100,  160,  180,  240 }    // sec
 
@@ -145,6 +145,19 @@
 */
 #define TLE_LINE_1                                      "1 00000U 20000A   20182.79906828 0.00000000  00000-0 -12345-3 0    10"
 #define TLE_LINE_2                                      "2 00000 137.0503 217.9687 0010435 173.7291 322.4297 15.88896416000000"
+
+/*
+   Default IMU static offsets
+*/
+#define IMU_OFFSET_GYRO_X                               0.0   // rad/s
+#define IMU_OFFSET_GYRO_Y                               0.0   // rad/s
+#define IMU_OFFSET_GYRO_Z                               0.0   // rad/s
+#define IMU_OFFSET_ACCEL_X                              0.0   // m/s^2
+#define IMU_OFFSET_ACCEL_Y                              0.0   // m/s^2
+#define IMU_OFFSET_ACCEL_Z                              0.0   // m/s^2
+#define IMU_OFFSET_MAG_X                                0.0   // Tesla
+#define IMU_OFFSET_MAG_Y                                0.0   // Tesla
+#define IMU_OFFSET_MAG_Z                                0.0   // Tesla
 
 /*
    Flash Configuration
@@ -204,7 +217,17 @@
 #define FLASH_LOOP_COUNTER                        (FLASH_SYSTEM_INFO + 0xAD)  //  0x000000AD    0x000000AD    uint8_t
 #define FLASH_LAST_ADCS_RESULT                    (FLASH_SYSTEM_INFO + 0xAE)  //  0x000000AE    0x000000AE    uint8_t
 #define FLASH_NUM_SLEEP_INTERVALS                 (FLASH_SYSTEM_INFO + 0xAF)  //  0x000000AF    0x000000AF    uint8_t
-#define FLASH_SLEEP_INTERVALS                     (FLASH_SYSTEM_INFO + 0xB0)  //  0x000000B0    0x000000BF    FLASH_NUM_SLEEP_INTERVALS x (int16_t + uint16_t)
+#define FLASH_SLEEP_INTERVALS                     (FLASH_SYSTEM_INFO + 0xB0)  //  0x000000B0    0x000000CF    FLASH_NUM_SLEEP_INTERVALS x (int16_t + uint16_t)
+#define FLASH_IMU_OFFSET_GYRO_X                   (FLASH_SYSTEM_INFO + 0xD0)  //  0x000000D0    0x000000D3    float
+#define FLASH_IMU_OFFSET_GYRO_Y                   (FLASH_SYSTEM_INFO + 0xD4)  //  0x000000D4    0x000000D7    float
+#define FLASH_IMU_OFFSET_GYRO_Z                   (FLASH_SYSTEM_INFO + 0xD8)  //  0x000000D8    0x000000DB    float
+#define FLASH_IMU_OFFSET_ACCEL_X                  (FLASH_SYSTEM_INFO + 0xDC)  //  0x000000DC    0x000000DF    float
+#define FLASH_IMU_OFFSET_ACCEL_Y                  (FLASH_SYSTEM_INFO + 0xE0)  //  0x000000E0    0x000000E3    float
+#define FLASH_IMU_OFFSET_ACCEL_Z                  (FLASH_SYSTEM_INFO + 0xE4)  //  0x000000E4    0x000000E7    float
+#define FLASH_IMU_OFFSET_MAG_X                    (FLASH_SYSTEM_INFO + 0xE8)  //  0x000000E8    0x000000EB    float
+#define FLASH_IMU_OFFSET_MAG_Y                    (FLASH_SYSTEM_INFO + 0xEC)  //  0x000000EC    0x000000EF    float
+#define FLASH_IMU_OFFSET_MAG_Z                    (FLASH_SYSTEM_INFO + 0xF0)  //  0x000000F0    0x000000F3    float
+#define FLASH_FSK_ONLY_ENABLED                    (FLASH_SYSTEM_INFO + 0xF1)  //  0x000000F1    0x000000F1    uint8_t
 #define FLASH_SYSTEM_INFO_CRC                     (FLASH_SYSTEM_INFO + 0xF8)  //  0x000000F8    0x000000FB    uint32_t
 #define FLASH_MEMORY_ERROR_COUNTER                (FLASH_SYSTEM_INFO + 0xFC)  //  0x000000FC    0x000000FF    uint32_t
 
@@ -229,7 +252,8 @@
 #define FLASH_ADCS_BRIDGE_OUTPUT_HIGH         (FLASH_ADCS_PARAMETERS + 0x78)  //  0x00001078    0x00001078    int8_t
 #define FLASH_ADCS_BRIDGE_OUTPUT_LOW          (FLASH_ADCS_PARAMETERS + 0x79)  //  0x00001079    0x00001079    int8_t
 #define FLASH_ADCS_NUM_CONTROLLERS            (FLASH_ADCS_PARAMETERS + 0x7A)  //  0x0000107A    0x0000107A    uint8_t
-#define FLASH_ADCS_COIL_CHAR_MATRIX           (FLASH_ADCS_PARAMETERS + 0x80)  //  0x00001080    0x000010C8    9x float or double
+#define FLASH_ADCS_COIL_CHAR_MATRIX           (FLASH_ADCS_PARAMETERS + 0x100) //  0x00001100    0x00001123    9x float
+#define FLASH_ADCS_INERTIA_TENSOR_MATRIX      (FLASH_ADCS_PARAMETERS + 0x124) //  0x00001124    0x00001147    9x float
 
 // sector 2 - stats
 #define FLASH_STATS                                               0x00002000  //  0x00002000    0x000020FF
@@ -321,10 +345,10 @@
 // common
 #define CALLSIGN_DEFAULT                                "FOSSASAT-2"
 #define SYNC_WORD                                       0x12        /*!< Ensure this sync word is compatable with all devices. */
-#define TCXO_VOLTAGE                                    0//1.6         /*!< Sets the radio's TCX0 voltage. (V) */
+#define TCXO_VOLTAGE                                    1.6         /*!< Sets the radio's TCX0 voltage. (V) */
 #define MAX_NUM_OF_BLOCKS                               3           /*!< maximum number of AES128 blocks that will be accepted */
-#define LORA_RECEIVE_WINDOW_LENGTH                      0//40          /*!< How long to listen out for LoRa transmissions for (s) */
-#define FSK_RECEIVE_WINDOW_LENGTH                       60//20          /*!< How long to listen out for FSK transmissions for (s) */
+#define LORA_RECEIVE_WINDOW_LENGTH                      40          /*!< How long to listen out for LoRa transmissions for (s) */
+#define FSK_RECEIVE_WINDOW_LENGTH                       20          /*!< How long to listen out for FSK transmissions for (s) */
 #define RESPONSE_DELAY                                  500         /*!< How long to wait for before responding to a transmission (ms) */
 #define RESPONSE_DELAY_SHORT                            0           /*!< Shorter version of RESPONSE_DELAY to be used for certain frames (e.g. picture downlink) (ms) */
 #define WHITENING_INITIAL                               0x1FF       /*!< Whitening LFSR initial value, to ensure SX127x compatibility */
@@ -367,7 +391,10 @@
                                                           CMD_ABORT, \
                                                           CMD_MANEUVER, \
                                                           /* CMD_SET_ADCS_PARAMETERS, */ \
-                                                          CMD_ERASE_FLASH \
+                                                          CMD_ERASE_FLASH, \
+                                                          /* CMD_SET_ADCS_CONTROLLER, */ \
+                                                          /* CMD_SET_ADCS_EPHEMERIDES, */ \
+                                                          /* CMD_DETUMBLE */ \
                                                          }          /*!< List of function IDs that remain available in "science mode" (e.g. logging GPS or ADCS closed-loop control) */
 
 // LoRa
@@ -387,13 +414,13 @@
 #define FSK_RX_BANDWIDTH                                39.0        /*!< kHz single-sideband */
 #define FSK_OUTPUT_POWER                                20          /*!< dBm */
 #define FSK_PREAMBLE_LENGTH                             16          /*!< bits */
-#define FSK_DATA_SHAPING                                0.5         /*!< GFSK filter BT product */
+#define FSK_DATA_SHAPING                                RADIOLIB_SHAPING_0_5  /*!< GFSK filter BT product */
 #define FSK_CURRENT_LIMIT                               140.0       /*!< mA */
 
 // Morse Code
 #define NUM_CW_BEEPS                                    3           /*!< number of CW sync beeps in low power mode */
 #define MORSE_PREAMBLE_LENGTH                           0           /*!< number of start signal repetitions */
-#define MORSE_SPEED                                     200//20          /*!< words per minute */
+#define MORSE_SPEED                                     20          /*!< words per minute */
 #define MORSE_BATTERY_MIN                               3200.0      /*!< minimum voltage value that can be send via Morse (corresponds to 'A'), mV*/
 #define MORSE_BATTERY_STEP                              50.0        /*!< voltage step in Morse, mV */
 #define MORSE_BEACON_LOOP_FREQ                          2           /*!< how often to transmit full Morse code beacon (e.g. transmit every second main loop when set to 2) */
@@ -498,38 +525,41 @@
 #define ADCS_NUM_PANELS                                 6       // number of solar panels for eclipse decision
 #define ADCS_CALC_TYPE                                  double  // numeric type to use in ADCS calculation, float for single precision, double for double precision
 #define ADCS_TIME_STEP                                  100     // time step between successive ADCS updates, in ms
-#define ADCS_PULSE_MAX_INTENSITY                        1.0     //
+#define ADCS_PULSE_MAX_INTENSITY                        1.0    // abs max value in the H bridges
 #define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)  // maximum length of H-bridge pulse
-#define ADCS_DETUMB_OMEGA_TOLERANCE                     0.1     // detumbling will be stopped once change in normalized angular velocity drops below this value
-#define ADCS_ACTIVE_EULER_TOLERANCE                     1.0     //
-#define ADCS_ACTIVE_OMEGA_TOLERANCE                     0.1     //
-#define ADCS_MIN_INERTIAL_MOMENT                        1000    //
-#define ADCS_PULSE_AMPLITUDE                            0.1     //
-#define ADCS_CALCULATION_TOLERANCE                      0.01    //
-#define ADCS_ECLIPSE_THRESHOLD                          1.0     //
-#define ADCS_ROTATION_WEIGHT_RATIO                      0.5     //
-#define ADCS_ROTATION_TRIGGER                           1.0     //
-#define ADCS_DISTURBANCE_COVARIANCE                     1.0     //
-#define ADCS_NOISE_COVARIANCE                           1.0     //
-#define ADCS_COIL_CHARACTERISTICS                       { {15.83,   0,        0}, \
-                                                          {0,       893.65,   0}, \
-                                                          {0,       0,        108.551} }
-#define ADCS_PANEL_UNIT_VECTOR                          { {1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0}, \
-                                                          {1.0, 1.0, 1.0} }
+#define ADCS_DETUMB_OMEGA_TOLERANCE                     0.001     // detumbling will be stopped once change in normalized angular velocity drops below this value
+#define ADCS_ACTIVE_EULER_TOLERANCE                     0.01     //
+#define ADCS_ACTIVE_OMEGA_TOLERANCE                     0.01     //
+#define ADCS_MIN_INERTIAL_MOMENT                        0.0003782 //
+#define ADCS_PULSE_AMPLITUDE                            1.0       // current pulse amplitude - maximum H-bridge voltage output divided by magnetorquer impednace
+#define ADCS_CALCULATION_TOLERANCE                      0.001    //
+#define ADCS_ECLIPSE_THRESHOLD                          0.28     // Eclipse condition reaching for a 20% output of the solar panels
+#define ADCS_ROTATION_WEIGHT_RATIO                      0.7     //  Weight ratio to average sensor, referred to the Euler integrator scheme (less accurate)
+#define ADCS_ROTATION_TRIGGER                           (M_PI/6.0) // Angular difference between sensor to trigger their averaging
+#define ADCS_DISTURBANCE_COVARIANCE                     0.001     // Covariance of the dynamical disturbances
+#define ADCS_NOISE_COVARIANCE                           0.001     // Covariance of the sensor noise
+#define ADCS_COIL_CHARACTERISTICS                       { {893.655,     0,       0}, \
+                                                          {     0, 15.833,       0}, \
+                                                          {     0,      0, 108.551} }
+#define ADCS_PANEL_UNIT_VECTOR                          { {1.0, 0, 0}, \
+                                                          {0, 1.0, 0}, \
+                                                          {0, 0, 1.0}, \
+                                                          {-1.0, 0, 0}, \
+                                                          {0, -1.0, 0}, \
+                                                          {0,  0,-1.0}  }
 #define ADCS_MAX_NUM_CONTROLLERS                        10      //
 #define ADCS_DEFAULT_CONTROLLER                         { {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0} }
+#define ADCS_INERTIA_TENSOR                             { {2645.9, 2.2, 4.41}, \
+                                                          {2.2, 1167.3, -0.1}, \
+                                                          {4.41, -0.1, 1090.9} } // Inertia tensor is introduced in its inversed form
 #define ADCS_NUM_CONTROLLERS                            1       //  use only one controller by default
 #define ADCS_BRIDGE_TIMER_UPDATE_PERIOD                 (ADCS_TIME_STEP/100)  // time step between successive H bridge output updates, in ms
 #define ADCS_BRIDGE_OUTPUT_HIGH                         63      // H bridge drive strength to be used as "high"
 #define ADCS_BRIDGE_OUTPUT_LOW                         -63      // H bridge drive strength to be used as "low"
-#define ADCS_SOLAR_POWER_XZ_MAX                        (967.0)  // maximum output power of solar panels X and Z, in mW
-#define ADCS_SOLAR_POWER_Y_MAX                         (242.0)  // maximum output power of solar panel Y, in mW
+#define ADCS_SOLAR_POWER_XZ_MAX                        (0.9670)  // maximum output power of solar panels X and Z, in W
+#define ADCS_SOLAR_POWER_Y_MAX                         (0.2420)  // maximum output power of solar panel Y, in W
 #define ADCS_SOLAR_SENSOR_MAX                          (172911.0) // maximum light intensity output of solar sensors, in lux
 
 /*
@@ -570,7 +600,7 @@ extern HardwareTimer* AdcsTimer;
 extern HardwareTimer* HbridgeTimer;
 
 // RadioLib instances
-extern SX1262 radio;
+extern SX1268 radio;
 extern MorseClient morse;
 
 // camera instance

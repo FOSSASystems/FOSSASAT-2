@@ -55,9 +55,7 @@ void ADCS_Detumble_Init(const uint8_t controlFlags, const uint32_t detumbleDurat
     // get initial IMU data
     Sensors_IMU_Update();
     ADCS_CALC_TYPE omega[ADCS_NUM_AXES];
-    omega[0] = Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z);
-    omega[1] = Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X);
-    omega[2] = -1.0*Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y);
+    Sensors_IMU_CalcGyro(imu.gz, imu.gx, -1*imu.gy, FLASH_IMU_OFFSET_GYRO_X, omega);
     adcsState.prevOmegaNorm = ADCS_VectorNorm(omega);
 
     FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(omega, ADCS_NUM_AXES);
@@ -79,15 +77,11 @@ void ADCS_Detumble_Update() {
 
   // Call for the magnetometer raw data
   ADCS_CALC_TYPE mag[ADCS_NUM_AXES];
-  mag[0] = Sensors_IMU_CalcMag(imu.mz, FLASH_IMU_OFFSET_MAG_Z);
-  mag[1] = -1.0*Sensors_IMU_CalcMag(imu.mx, FLASH_IMU_OFFSET_MAG_X);
-  mag[2] = -1.0*Sensors_IMU_CalcMag(imu.my, FLASH_IMU_OFFSET_MAG_Y);
+  Sensors_IMU_CalcMag(imu.mz, -1*imu.mx, -1*imu.my, FLASH_IMU_OFFSET_MAG_X, mag);
 
   // Call the IMU angular velocity data
   ADCS_CALC_TYPE omega[ADCS_NUM_AXES];
-  omega[0] = Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z);
-  omega[1] = Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X);
-  omega[2] = -1.0*Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y);
+  Sensors_IMU_CalcGyro(imu.gz, imu.gx, -1*imu.gy, FLASH_IMU_OFFSET_GYRO_X, omega);
 
   ADCS_CALC_TYPE omegaNorm = ADCS_VectorNorm(omega);
   ADCS_CALC_TYPE intensity[ADCS_NUM_AXES];
@@ -167,13 +161,9 @@ void ADCS_ActiveControl_Init(const uint8_t controlFlags, const uint32_t activeDu
   // get initial IMU data
   Sensors_IMU_Update();
   ADCS_CALC_TYPE mag[ADCS_NUM_AXES];
-  mag[0] = Sensors_IMU_CalcMag(imu.mz, FLASH_IMU_OFFSET_MAG_Z);
-  mag[1] = -1.0*Sensors_IMU_CalcMag(imu.mx, FLASH_IMU_OFFSET_MAG_X);
-  mag[2] = -1.0*Sensors_IMU_CalcMag(imu.my, FLASH_IMU_OFFSET_MAG_Y);
+  Sensors_IMU_CalcMag(imu.mz, -1*imu.mx, -1*imu.my, FLASH_IMU_OFFSET_MAG_X, mag);
   ADCS_CALC_TYPE omega[ADCS_NUM_AXES];
-  omega[0] = Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z);
-  omega[1] = Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X);
-  omega[2] = -1.0*Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y);
+  Sensors_IMU_CalcGyro(imu.gz, imu.gx, -1*imu.gy, FLASH_IMU_OFFSET_GYRO_X, omega);
   adcsState.prevOmegaNorm = ADCS_VectorNorm(omega);
 
   FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(mag, ADCS_NUM_AXES);
@@ -233,13 +223,9 @@ void ADCS_ActiveControl_Update() {
   // get IMU data
   Sensors_IMU_Update();
   ADCS_CALC_TYPE omega[ADCS_NUM_AXES];
-  omega[0] = Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z);
-  omega[1] = Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X);
-  omega[2] = -1.0*Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y);
+  Sensors_IMU_CalcGyro(imu.gz, imu.gx, -1*imu.gy, FLASH_IMU_OFFSET_GYRO_X, omega);
   ADCS_CALC_TYPE magData[ADCS_NUM_AXES];
-  magData[0] = Sensors_IMU_CalcMag(imu.mz, FLASH_IMU_OFFSET_MAG_Z);
-  magData[1] = -1.0*Sensors_IMU_CalcMag(imu.mx, FLASH_IMU_OFFSET_MAG_X);
-  magData[2] = -1.0*Sensors_IMU_CalcMag(imu.my, FLASH_IMU_OFFSET_MAG_Y);
+  Sensors_IMU_CalcMag(imu.mz, -1*imu.mx, -1*imu.my, FLASH_IMU_OFFSET_MAG_X, magData);
   FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(omega, ADCS_NUM_AXES);
   FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(magData, ADCS_NUM_AXES);
 

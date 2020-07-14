@@ -73,19 +73,89 @@ void Sensors_IMU_Sleep(bool sleep) {
   imu.sleepGyro(sleep);
 }
 
-float Sensors_IMU_CalcGyro(int16_t raw, uint32_t offsetAddr) {
-  float offset = PersistentStorage_SystemInfo_Get<float>(offsetAddr);
-  return((imu.calcGyro(raw) * IMU_DEG_S_TO_RAD_S) + offset);
+void Sensors_IMU_CalcGyro(int16_t rawX, int16_t rawY, int16_t rawZ, uint32_t offsetAddr, double processed[ADCS_NUM_AXES]) {
+  float tmp[ADCS_NUM_AXES];
+  Sensors_IMU_CalcGyro(rawX, rawY, rawZ, offsetAddr, tmp);
+  processed[0] = (double)tmp[0];
+  processed[1] = (double)tmp[1];
+  processed[2] = (double)tmp[2];
 }
 
-float Sensors_IMU_CalcAccel(int16_t raw, uint32_t offsetAddr) {
-  float offset = PersistentStorage_SystemInfo_Get<float>(offsetAddr);
-  return((imu.calcAccel(raw) * IMU_G_TO_MS2) + offset);
+void Sensors_IMU_CalcAccel(int16_t rawX, int16_t rawY, int16_t rawZ, uint32_t offsetAddr, double processed[ADCS_NUM_AXES]) {
+  float tmp[ADCS_NUM_AXES];
+  Sensors_IMU_CalcAccel(rawX, rawY, rawZ, offsetAddr, tmp);
+  processed[0] = (double)tmp[0];
+  processed[1] = (double)tmp[1];
+  processed[2] = (double)tmp[2];
 }
 
-float Sensors_IMU_CalcMag(int16_t raw, uint32_t offsetAddr) {
+void Sensors_IMU_CalcMag(int16_t rawX, int16_t rawY, int16_t rawZ, uint32_t offsetAddr, double processed[ADCS_NUM_AXES]) {
+  float tmp[ADCS_NUM_AXES];
+  Sensors_IMU_CalcMag(rawX, rawY, rawZ, offsetAddr, tmp);
+  processed[0] = (double)tmp[0];
+  processed[1] = (double)tmp[1];
+  processed[2] = (double)tmp[2];
+}
+
+void Sensors_IMU_CalcGyro(int16_t rawX, int16_t rawY, int16_t rawZ, uint32_t offsetAddr, float processed[ADCS_NUM_AXES]) {
   float offset = PersistentStorage_SystemInfo_Get<float>(offsetAddr);
-  return((imu.calcMag(raw) * IMU_GAUSS_TO_TESLA) + offset);
+  processed[0] = (imu.calcGyro(rawX) * IMU_DEG_S_TO_RAD_S) + offset;
+  offset = PersistentStorage_SystemInfo_Get<float>(offsetAddr + sizeof(float));
+  processed[1] = (imu.calcGyro(rawY) * IMU_DEG_S_TO_RAD_S) + offset;
+  offset = PersistentStorage_SystemInfo_Get<float>(offsetAddr + 2*sizeof(float));
+  processed[2] = (imu.calcGyro(rawZ) * IMU_DEG_S_TO_RAD_S) + offset;
+}
+
+void Sensors_IMU_CalcAccel(int16_t rawX, int16_t rawY, int16_t rawZ, uint32_t offsetAddr, float processed[ADCS_NUM_AXES]) {
+  float offset = PersistentStorage_SystemInfo_Get<float>(offsetAddr);
+  processed[0] = (imu.calcAccel(rawX) * IMU_G_TO_MS2) + offset;
+  offset = PersistentStorage_SystemInfo_Get<float>(offsetAddr + sizeof(float));
+  processed[1] = (imu.calcAccel(rawY) * IMU_G_TO_MS2) + offset;
+  offset = PersistentStorage_SystemInfo_Get<float>(offsetAddr + 2*sizeof(float));
+  processed[2] = (imu.calcAccel(rawZ) * IMU_G_TO_MS2) + offset;
+}
+
+void Sensors_IMU_CalcMag(int16_t rawX, int16_t rawY, int16_t rawZ, uint32_t offsetAddr, float processed[ADCS_NUM_AXES]) {
+  float raw[ADCS_NUM_AXES] = {(float)rawX, (float)rawY, (float)rawZ};
+
+  // load transformation matrix and bias vector
+  uint8_t transMatrBuffer[ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(float)];
+  PersistentStorage_Read(FLASH_ADCS_IMU_TRANS_MATRIX, transMatrBuffer, ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(float));
+  uint8_t biasVectorBuffer[ADCS_NUM_AXES*sizeof(float)];
+  PersistentStorage_Read(FLASH_ADCS_IMU_BIAS_VECTOR, biasVectorBuffer, ADCS_NUM_AXES*sizeof(float));
+  float transMatrix[ADCS_NUM_AXES][ADCS_NUM_AXES];
+  float biasVector[ADCS_NUM_AXES];
+  for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+    float val = 0;
+    memcpy(&val, transMatrBuffer + i*sizeof(float), sizeof(float));
+    biasVector[i] = val;
+    for(uint8_t j = 0; j < ADCS_NUM_AXES; j++) {
+      memcpy(&val, transMatrBuffer + (i*ADCS_NUM_AXES*sizeof(float) + j*sizeof(float)), sizeof(float));
+      transMatrix[i][j] = val;
+    }
+  }
+
+  // perform transformation
+  for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+    raw[i] -= biasVector[i];
+  }
+
+  float tmp[ADCS_NUM_AXES] = {0, 0, 0};
+  for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+    for(uint8_t j = 0; j < ADCS_NUM_AXES; j++) {
+      tmp[i] += transMatrix[i][j] * raw[j];
+    }
+  }
+
+  // TODO vector normalization here?
+
+  // convert to Tesla and add static offset
+  float offset = PersistentStorage_SystemInfo_Get<float>(offsetAddr);
+  processed[0] = (imu.calcMag((int16_t)tmp[0]) * IMU_GAUSS_TO_TESLA) + offset;
+  offset = PersistentStorage_SystemInfo_Get<float>(offsetAddr + sizeof(float));
+  processed[1] = (imu.calcMag((int16_t)tmp[1]) * IMU_GAUSS_TO_TESLA) + offset;
+  offset = PersistentStorage_SystemInfo_Get<float>(offsetAddr + 2*sizeof(float));
+  processed[2] = (imu.calcMag((int16_t)tmp[2]) * IMU_GAUSS_TO_TESLA) + offset;
 }
 
 bool Sensors_Current_Setup(currentSensor_t& sensor) {

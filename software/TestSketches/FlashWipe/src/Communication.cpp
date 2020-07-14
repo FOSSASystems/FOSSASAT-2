@@ -57,10 +57,10 @@ int16_t Communication_Set_Modem(uint8_t modem) {
                             LORA_CODING_RATE,
                             SYNC_WORD,
                             LORA_OUTPUT_POWER,
-                            LORA_CURRENT_LIMIT,
                             LORA_PREAMBLE_LENGTH,
                             TCXO_VOLTAGE);
         radio.setCRC(true);
+        radio.setCurrentLimit(LORA_CURRENT_LIMIT);
       break;
     case MODEM_FSK: {
         state = radio.beginFSK(FSK_FREQUENCY,
@@ -68,13 +68,13 @@ int16_t Communication_Set_Modem(uint8_t modem) {
                                FSK_FREQUENCY_DEVIATION,
                                FSK_RX_BANDWIDTH,
                                FSK_OUTPUT_POWER,
-                               FSK_CURRENT_LIMIT,
                                FSK_PREAMBLE_LENGTH,
-                               FSK_DATA_SHAPING,
                                TCXO_VOLTAGE);
         uint8_t syncWordFSK[2] = {SYNC_WORD, SYNC_WORD};
         radio.setSyncWord(syncWordFSK, 2);
         radio.setCRC(2);
+        radio.setDataShaping(FSK_DATA_SHAPING);
+        radio.setCurrentLimit(FSK_CURRENT_LIMIT);
       } break;
     default:
       FOSSASAT_DEBUG_PRINT(F("Unkown modem "));
@@ -208,7 +208,7 @@ void Communication_Send_Basic_System_Info() {
 
 void Communication_Send_Full_System_Info() {
   // build response frame
-  static const uint8_t optDataLen = 13*sizeof(uint8_t) + 12*sizeof(int16_t) + sizeof(uint16_t) + 2*sizeof(uint32_t) + 2*sizeof(float);
+  static const uint8_t optDataLen = 14*sizeof(uint8_t) + 12*sizeof(int16_t) + sizeof(uint16_t) + 2*sizeof(uint32_t) + 2*sizeof(float);
   uint8_t optData[optDataLen];
   uint8_t* optDataPtr = optData;
 
@@ -228,7 +228,8 @@ void Communication_Send_Full_System_Info() {
                         ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE_ENABLED)    << 1) & 0b00000010) |
                         ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE)            << 2) & 0b00011100) |
                         ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_MPPT_TEMP_SWITCH_ENABLED)  << 5) & 0b00100000) |
-                        ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_MPPT_KEEP_ALIVE_ENABLED)   << 6) & 0b01000000));
+                        ((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_MPPT_KEEP_ALIVE_ENABLED)   << 6) & 0b01000000) |
+                        (((uint8_t)scienceModeActive << 7) & 0b10000000));
   Communication_Frame_Add(&optDataPtr, powerConfig, "powerConfig", 1, "");
 
   uint16_t resetCounter = PersistentStorage_SystemInfo_Get<uint16_t>(FLASH_RESTART_COUNTER);
@@ -311,6 +312,9 @@ void Communication_Send_Full_System_Info() {
                          (uint8_t)currSensorY.available << 3 | (uint8_t)currSensorMPPT.available << 2 |
                          (uint8_t)lightSensorPanelY.available << 1 | (uint8_t)lightSensorTop.available << 0;
   Communication_Frame_Add(&optDataPtr, sensorStates, "sensors", 1, "");
+
+  uint8_t adcsResult = PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LAST_ADCS_RESULT);
+  Communication_Frame_Add(&optDataPtr, adcsResult, "adcsResult", 1, "");
 
   FOSSASAT_DEBUG_PRINTLN(F("--------------------"));
 
@@ -694,7 +698,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     case CMD_GET_STATISTICS: {
       if(Communication_Check_OptDataLen(1, optDataLen)) {
         // check FSK is active
-        if(currentModem != MODEM_FSK) {
+        if((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_FSK_ONLY_ENABLED) != 0x00) && (currentModem != MODEM_FSK)) {
           FOSSASAT_DEBUG_PRINTLN(F("FSK is required to get stats"));
           return;
         }
@@ -705,7 +709,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_GET_FULL_SYSTEM_INFO: {
       // check FSK is active
-      if(currentModem != MODEM_FSK) {
+      if((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_FSK_ONLY_ENABLED) != 0x00) && (currentModem != MODEM_FSK)) {
         FOSSASAT_DEBUG_PRINTLN(F("FSK is required to get full system info"));
         return;
       }
@@ -797,7 +801,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_REQUEST_PUBLIC_PICTURE: {
       // check FSK is active
-      if(currentModem != MODEM_FSK) {
+      if((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_FSK_ONLY_ENABLED) != 0x00) && (currentModem != MODEM_FSK)) {
         FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer picture"));
         return;
       }
@@ -936,6 +940,15 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             PersistentStorage_Reset_ADCS_Params();
             PowerControl_Watchdog_Heartbeat();
           }
+
+          if(optData[0] & 0b01000000) {
+            // wipe ephemerides data storage
+            FOSSASAT_DEBUG_PRINTLN(F("Wiping ephemerides storage"));
+            for(uint32_t addr = FLASH_ADCS_EPHEMERIDES_START; addr < FLASH_ADCS_EPHEMERIDES_END; addr += FLASH_64K_BLOCK_SIZE) {
+              PersistentStorage_64kBlockErase(addr);
+              PowerControl_Watchdog_Heartbeat();
+            }
+          }
         }
       } break;
 
@@ -944,6 +957,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         if(Communication_Check_OptDataLen(2, optDataLen)) {
           PersistentStorage_SystemInfo_Set<uint8_t>(FLASH_TRANSMISSIONS_ENABLED, optData[0]);
           PersistentStorage_SystemInfo_Set<uint8_t>(FLASH_AUTO_STATISTICS, optData[1]);
+          PersistentStorage_SystemInfo_Set<uint8_t>(FLASH_FSK_ONLY_ENABLED, optData[2]);
         }
       } break;
 
@@ -1126,7 +1140,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_RECORD_IMU: {
       // check FSK is active
-      if(currentModem != MODEM_FSK) {
+      if((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_FSK_ONLY_ENABLED) != 0x00) && (currentModem != MODEM_FSK)) {
         FOSSASAT_DEBUG_PRINTLN(F("FSK is required to record IMU"));
         return;
       }
@@ -1194,9 +1208,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // gyroscope
           if(flags & 0x01) {
-            valX = Sensors_IMU_CalcGyro(imu.gx);
-            valY = Sensors_IMU_CalcGyro(imu.gy);
-            valZ = Sensors_IMU_CalcGyro(imu.gz);
+            valX = Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X);
+            valY = Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y);
+            valZ = Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z);
 
             Communication_Frame_Add(&respOptDataPtr, valX, "G X", 1, "deg/s");
             Communication_Frame_Add(&respOptDataPtr, valY, "G Y", 1, "deg/s");
@@ -1205,9 +1219,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // accelerometer
           if(flags & 0x02) {
-            valX = Sensors_IMU_CalcAccel(imu.ax);
-            valY = Sensors_IMU_CalcAccel(imu.ay);
-            valZ = Sensors_IMU_CalcAccel(imu.az);
+            valX = Sensors_IMU_CalcAccel(imu.ax, FLASH_IMU_OFFSET_ACCEL_X);
+            valY = Sensors_IMU_CalcAccel(imu.ay, FLASH_IMU_OFFSET_ACCEL_Y);
+            valZ = Sensors_IMU_CalcAccel(imu.az, FLASH_IMU_OFFSET_ACCEL_Z);
 
             Communication_Frame_Add(&respOptDataPtr, valX, "A X", 1, "m/s^2");
             Communication_Frame_Add(&respOptDataPtr, valY, "A Y", 1, "m/s^2");
@@ -1216,9 +1230,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // magnetometer
           if(flags & 0x04) {
-            valX = Sensors_IMU_CalcMag(imu.mx);
-            valY = Sensors_IMU_CalcMag(imu.my);
-            valZ = Sensors_IMU_CalcMag(imu.mz);
+            valX = Sensors_IMU_CalcMag(imu.mx, FLASH_IMU_OFFSET_MAG_X);
+            valY = Sensors_IMU_CalcMag(imu.my, FLASH_IMU_OFFSET_MAG_Y);
+            valZ = Sensors_IMU_CalcMag(imu.mz, FLASH_IMU_OFFSET_MAG_Z);
 
             Communication_Frame_Add(&respOptDataPtr, valX, "M X", 1, "gauss");
             Communication_Frame_Add(&respOptDataPtr, valY, "M Y", 1, "gauss");
@@ -1253,25 +1267,52 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_RUN_MANUAL_ACS: {
-      if(Communication_Check_OptDataLen(8, optDataLen)) {
-        int8_t x = optData[0];
-        FOSSASAT_DEBUG_PRINT(F("x = "));
-        FOSSASAT_DEBUG_PRINTLN(x);
+      if(Communication_Check_OptDataLen(19, optDataLen)) {
+        int8_t xHigh = optData[0];
+        FOSSASAT_DEBUG_PRINT(F("x high = "));
+        FOSSASAT_DEBUG_PRINTLN(xHigh);
 
-        int8_t y = optData[1];
-        FOSSASAT_DEBUG_PRINT(F("y = "));
-        FOSSASAT_DEBUG_PRINTLN(y);
+        int8_t xLow = optData[1];
+        FOSSASAT_DEBUG_PRINT(F("x low = "));
+        FOSSASAT_DEBUG_PRINTLN(xLow);
 
-        int8_t z = optData[2];
-        FOSSASAT_DEBUG_PRINT(F("z = "));
-        FOSSASAT_DEBUG_PRINTLN(z);
+        int8_t yHigh = optData[2];
+        FOSSASAT_DEBUG_PRINT(F("y high = "));
+        FOSSASAT_DEBUG_PRINTLN(yHigh);
+
+        int8_t yLow = optData[3];
+        FOSSASAT_DEBUG_PRINT(F("y low = "));
+        FOSSASAT_DEBUG_PRINTLN(yLow);
+
+        int8_t zHigh = optData[4];
+        FOSSASAT_DEBUG_PRINT(F("z high = "));
+        FOSSASAT_DEBUG_PRINTLN(zHigh);
+
+        int8_t zLow = optData[5];
+        FOSSASAT_DEBUG_PRINT(F("z low = "));
+        FOSSASAT_DEBUG_PRINTLN(zLow);
+
+        uint32_t xLen = 0;
+        memcpy(&xLen, optData + 6, sizeof(uint32_t));
+        FOSSASAT_DEBUG_PRINT(F("x pulse len = "));
+        FOSSASAT_DEBUG_PRINTLN(xLen);
+
+        uint32_t yLen = 0;
+        memcpy(&yLen, optData + 6 + sizeof(uint32_t), sizeof(uint32_t));
+        FOSSASAT_DEBUG_PRINT(F("y pulse len = "));
+        FOSSASAT_DEBUG_PRINTLN(yLen);
+
+        uint32_t zLen = 0;
+        memcpy(&zLen, optData + 6 + 2*sizeof(uint32_t), sizeof(uint32_t));
+        FOSSASAT_DEBUG_PRINT(F("z pulse len = "));
+        FOSSASAT_DEBUG_PRINTLN(zLen);
 
         uint32_t duration = 0;
-        memcpy(&duration, optData + 3, sizeof(uint32_t));
+        memcpy(&duration, optData + 6 + 3*sizeof(uint32_t), sizeof(uint32_t));
         FOSSASAT_DEBUG_PRINT(F("duration = "));
         FOSSASAT_DEBUG_PRINTLN(duration);
 
-        uint8_t ignoreFlags = optData[7];
+        uint8_t ignoreFlags = optData[18];
         FOSSASAT_DEBUG_PRINT(F("ignoreFlags = 0x"));
         FOSSASAT_DEBUG_PRINTLN(ignoreFlags, HEX);
 
@@ -1285,13 +1326,47 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         bridgeY.getFault();
         bridgeZ.getFault();
 
-        // set H-bridge outputs
+        // run for the requested duration
         uint32_t start = millis();
         uint32_t elapsed = 0;
-        bridgeX.drive(x);
-        bridgeY.drive(y);
-        bridgeZ.drive(z);
+        uint32_t lastUpdateX = 0;
+        uint32_t lastUpdateY = 0;
+        uint32_t lastUpdateZ = 0;
+        bool bridgeHighX = false;
+        bool bridgeHighY = false;
+        bool bridgeHighZ = false;
         while(millis() - start < duration) {
+          // set H-bridge outputs
+          if(millis() - lastUpdateX >= xLen) {
+            if(bridgeHighX) {
+              bridgeX.drive(xLow);
+            } else {
+              bridgeX.drive(xHigh);
+            }
+            bridgeHighX = !bridgeHighX;
+            lastUpdateX = millis();
+          }
+
+          if(millis() - lastUpdateY >= yLen) {
+            if(bridgeHighY) {
+              bridgeY.drive(yLow);
+            } else {
+              bridgeY.drive(yHigh);
+            }
+            bridgeHighY = !bridgeHighY;
+            lastUpdateY = millis();
+          }
+
+          if(millis() - lastUpdateZ >= zLen) {
+            if(bridgeHighZ) {
+              bridgeZ.drive(zLow);
+            } else {
+              bridgeZ.drive(zHigh);
+            }
+            bridgeHighZ = !bridgeHighZ;
+            lastUpdateZ = millis();
+          }
+
           // check battery
           #ifdef ENABLE_TRANSMISSION_CONTROL
           if(PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_LOW_POWER_MODE) != LOW_POWER_NONE) {
@@ -1305,15 +1380,15 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
           // check faults
           respOptData[0] = bridgeX.getFault();
-          if((x != 0) && (respOptData[0] & FAULT) && (respOptData[0] != 0) && ((ignoreFlags & 0x01) == 0x00)) {
+          if((xHigh != 0) && (xLow != 0) && (respOptData[0] & FAULT) && (respOptData[0] != 0) && ((ignoreFlags & 0x01) == 0x00)) {
             break;
           }
           respOptData[1] = bridgeY.getFault();
-          if((y != 0) && (respOptData[1] & FAULT) && (respOptData[1] != 0) && ((ignoreFlags & 0x02) == 0x00)) {
+          if((yHigh != 0) && (yLow != 0) && (respOptData[1] & FAULT) && (respOptData[1] != 0) && ((ignoreFlags & 0x02) == 0x00)) {
             break;
           }
           respOptData[2] = bridgeZ.getFault();
-          if((z != 0) && (respOptData[2] & FAULT) && (respOptData[2] != 0) && ((ignoreFlags & 0x04) == 0x00)) {
+          if((zHigh != 0) && (zLow != 0) && (respOptData[2] & FAULT) && (respOptData[2] != 0) && ((ignoreFlags & 0x04) == 0x00)) {
             break;
           }
 
@@ -1343,7 +1418,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_GET_PICTURE_BURST: {
       // check FSK is active
-      if(currentModem != MODEM_FSK) {
+      if((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_FSK_ONLY_ENABLED) != 0x00) && (currentModem != MODEM_FSK)) {
         FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer picture"));
         return;
       }
@@ -1461,17 +1536,15 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // wait for offset to elapse
         FOSSASAT_DEBUG_PRINTLN(F("Waiting for offset to elapse"));
-        PowerControl_Wait(offset, LOW_POWER_SLEEP);
+        PowerControl_Wait(offset * 1000, LOW_POWER_SLEEP);
 
         // setup logging variables
         Navigation_GNSS_Setup_Logging();
 
         // run for the requested duration
-        // TODO change millis() for RTC - millis() timer is not updated in sleep mode
-        while(millis() - gpsLogState.start < duration) {
+        while(rtc.getEpoch() - gpsLogState.start < duration) {
           // check new data
           Navigation_GNSS_SerialEvent();
-          PowerControl_Watchdog_Heartbeat();
 
           // check new packets
           Communication_Check_New_Packet();
@@ -1488,6 +1561,9 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
             break;
           }
           #endif
+
+          // sleep for one second
+          PowerControl_Wait(1000, LOW_POWER_SLEEP);
         }
 
         // finish logging
@@ -1506,7 +1582,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_GET_GPS_LOG: {
       // check FSK is active
-      if(currentModem != MODEM_FSK) {
+      if((PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_FSK_ONLY_ENABLED) != 0x00) && (currentModem != MODEM_FSK)) {
         FOSSASAT_DEBUG_PRINTLN(F("FSK is required to transfer GPS log"));
         return;
       }
@@ -1718,7 +1794,6 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
       uint16_t respOptDataLen = Navigation_GNSS_Run_Cmd(optData, optDataLen, respOptData);
 
       // send the response
-      // TODO: send ACK/NACK state?
       if((respOptDataLen == 0) || (respOptDataLen == 0xFFFF)) {
         Communication_Send_Response(RESP_GPS_COMMAND_RESPONSE);
       } else {
@@ -1765,17 +1840,12 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_MANEUVER: {
-      if(Communication_Check_OptDataLen(15, optDataLen)) {
+      if(Communication_Check_OptDataLen(5, optDataLen)) {
         // extract parameters
-        uint32_t detumbleLen = 0;
-        memcpy(&detumbleLen, optData + 1, sizeof(detumbleLen));
-        FOSSASAT_DEBUG_PRINT(F("detumbleLen = "));
-        FOSSASAT_DEBUG_PRINTLN(detumbleLen);
-
-        uint32_t maneuverLen = 0;
-        memcpy(&maneuverLen, optData + 5, sizeof(maneuverLen));
-        FOSSASAT_DEBUG_PRINT(F("maneuverLen = "));
-        FOSSASAT_DEBUG_PRINTLN(maneuverLen);
+        uint32_t len = 0;
+        memcpy(&len, optData + 1, sizeof(len));
+        FOSSASAT_DEBUG_PRINT(F("len = "));
+        FOSSASAT_DEBUG_PRINTLN(len);
 
         uint8_t controlFlags = optData[0];
         FOSSASAT_DEBUG_PRINT(F("controlFlags = "));
@@ -1786,37 +1856,67 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         double meanOrbitalMotion = (2.0 * M_PI * PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_MEAN_MOTION)) / (24.0 * 3600.0);
 
         // initialize ADCS
-        ADCS_Main(controlFlags, detumbleLen, maneuverLen, optData + 9, orbitalInclination, meanOrbitalMotion);
+        ADCS_ActiveControl_Init(controlFlags, len, orbitalInclination, meanOrbitalMotion);
+      }
+    } break;
+
+    case CMD_DETUMBLE: {
+      if(Communication_Check_OptDataLen(5, optDataLen)) {
+        // extract parameters
+        uint32_t len = 0;
+        memcpy(&len, optData + 1, sizeof(len));
+        FOSSASAT_DEBUG_PRINT(F("len = "));
+        FOSSASAT_DEBUG_PRINTLN(len);
+
+        uint8_t controlFlags = optData[0];
+        FOSSASAT_DEBUG_PRINT(F("controlFlags = "));
+        FOSSASAT_DEBUG_PRINTLN(controlFlags, HEX);
+
+        // read orbital period and inclination from TLE
+        double orbitalInclination = PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_INCLINATION) * (M_PI/180.0);
+        double meanOrbitalMotion = (2.0 * M_PI * PersistentStorage_SystemInfo_Get<double>(FLASH_TLE_MEAN_MOTION)) / (24.0 * 3600.0);
+
+        // initialize ADCS
+        ADCS_Detumble_Init(controlFlags, len, orbitalInclination, meanOrbitalMotion);
       }
     } break;
 
     case CMD_SET_ADCS_PARAMETERS: {
       if(Communication_Check_OptDataLen(34, optDataLen)) {
         // read the current ADCS parameters
-        uint8_t adcsPage[FLASH_EXT_PAGE_SIZE];
-        PersistentStorage_Read(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);
+        uint8_t adcsSector[FLASH_SECTOR_SIZE];
+        PersistentStorage_Read(FLASH_ADCS_PARAMETERS, adcsSector, FLASH_SECTOR_SIZE);
         uint8_t* optDataPtr = optData;
 
         // set the parameters that require conversion
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_MAX_INTENSITY);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_MAX_LENGTH);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_OMEGA_TOLERANCE);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_PULSE_AMPLITUDE);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_B_MODULE_TOLERANCE);
-        Communication_Set_ADCS_Param(&optDataPtr, adcsPage, FLASH_ADCS_MIN_INERTIAL_MOMENT);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_PULSE_MAX_INTENSITY);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_PULSE_MAX_LENGTH);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_DETUMB_OMEGA_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_PULSE_AMPLITUDE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_CALCULATION_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_MIN_INERTIAL_MOMENT);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_ACTIVE_EULER_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_ACTIVE_OMEGA_TOLERANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_ECLIPSE_THRESHOLD);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_ROTATION_WEIGHT_RATIO);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_ROTATION_TRIGGER);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_DISTURBANCE_COVARIANCE);
+        Communication_Set_ADCS_Param(&optDataPtr, adcsSector, FLASH_ADCS_NOISE_COVARIANCE);
 
         // set the rest
-        memcpy(adcsPage + (FLASH_ADCS_TIME_STEP - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint32_t));
+        memcpy(adcsSector + (FLASH_ADCS_TIME_STEP - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint32_t));
         optDataPtr += sizeof(uint32_t);
-        memcpy(adcsPage + (FLASH_ADCS_BRIDGE_TIMER_UPDATE_PERIOD - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint32_t));
+        memcpy(adcsSector + (FLASH_ADCS_BRIDGE_TIMER_UPDATE_PERIOD - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint32_t));
         optDataPtr += sizeof(uint32_t);
-        memcpy(adcsPage + (FLASH_ADCS_BRIDGE_OUTPUT_HIGH - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(int8_t));
+        memcpy(adcsSector + (FLASH_ADCS_BRIDGE_OUTPUT_HIGH - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(int8_t));
         optDataPtr += sizeof(int8_t);
-        memcpy(adcsPage + (FLASH_ADCS_BRIDGE_OUTPUT_LOW - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(int8_t));
+        memcpy(adcsSector + (FLASH_ADCS_BRIDGE_OUTPUT_LOW - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(int8_t));
         optDataPtr += sizeof(int8_t);
+        memcpy(adcsSector + (FLASH_ADCS_NUM_CONTROLLERS - FLASH_ADCS_PARAMETERS), optDataPtr, sizeof(uint8_t));
+        optDataPtr += sizeof(uint8_t);
 
         // write all at once
-        PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsPage, FLASH_EXT_PAGE_SIZE);
+        PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsSector, FLASH_SECTOR_SIZE);
       }
     } break;
 
@@ -1827,6 +1927,131 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         FOSSASAT_DEBUG_PRINT(F("Erasing flash sector at address 0x"));
         FOSSASAT_DEBUG_PRINTLN(addr, HEX);
         PersistentStorage_SectorErase(addr);
+      }
+
+    } break;
+
+    case CMD_SET_ADCS_CONTROLLER: {
+      if(Communication_Check_OptDataLen(77, optDataLen)) {
+        uint8_t id = optData[0];
+        FOSSASAT_DEBUG_PRINT(F("ADCS controller ID: "));
+        FOSSASAT_DEBUG_PRINTLN(id);
+
+        FOSSASAT_DEBUG_PRINTLN(F("Controller: "));
+        float val = 0;
+        float controller[ADCS_NUM_AXES][2*ADCS_NUM_AXES];
+        for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+          for(uint8_t j = 0; j < 2*ADCS_NUM_AXES; j++) {
+            memcpy(&val, optData + 1 + (2*ADCS_NUM_AXES*i + j) * sizeof(float), sizeof(float));
+            FOSSASAT_DEBUG_PRINT(val, 4);
+            FOSSASAT_DEBUG_PRINT('\t');
+            controller[i][j] = val;
+          }
+          FOSSASAT_DEBUG_PRINTLN();
+        }
+        PersistentStorage_Set_ADCS_Controller(id, controller);
+
+      }
+
+    } break;
+
+    case CMD_SET_ADCS_EPHEMERIDES: {
+      if(optDataLen >= 27) {
+        uint16_t chunkId = 0;
+        memcpy(&chunkId, optData, sizeof(chunkId));
+        FOSSASAT_DEBUG_PRINT(F("ADCS ephemerides chunk ID: "));
+        FOSSASAT_DEBUG_PRINTLN(chunkId);
+
+        uint8_t rowCount = (optDataLen - 2) / FLASH_ADCS_EPHEMERIDES_SLOT_SIZE;
+        FOSSASAT_DEBUG_PRINT(F("Number of ephemerides rows: "));
+        FOSSASAT_DEBUG_PRINTLN(rowCount);
+
+        uint8_t controllerId = optData[optDataLen - 1];
+        FOSSASAT_DEBUG_PRINT(F("Controller type: "));
+        FOSSASAT_DEBUG_PRINTLN(controllerId);
+
+        for(uint8_t row = 0; row < rowCount; row++) {
+          FOSSASAT_DEBUG_PRINT(F("Ephe row #: "));
+          FOSSASAT_DEBUG_PRINTLN(row);
+
+          float val = 0;
+          uint8_t i = 0;
+          float ephemerides[2*ADCS_NUM_AXES];
+
+          FOSSASAT_DEBUG_PRINTLN(F("Mag. ephemeris: "));
+          for(; i < ADCS_NUM_AXES; i++) {
+              memcpy(&val, optData + 2 + row*FLASH_ADCS_EPHEMERIDES_SLOT_SIZE + i*(sizeof(float)), sizeof(float));
+              FOSSASAT_DEBUG_PRINT(val, 4);
+              FOSSASAT_DEBUG_PRINT('\t');
+              ephemerides[i] = val;
+          }
+          FOSSASAT_DEBUG_PRINTLN();
+
+          FOSSASAT_DEBUG_PRINTLN(F("Solar ephemeris: "));
+          for(; i < 2*ADCS_NUM_AXES; i++) {
+              memcpy(&val, optData + 2 + row*FLASH_ADCS_EPHEMERIDES_SLOT_SIZE + i*(sizeof(float)), sizeof(float));
+              FOSSASAT_DEBUG_PRINT(val, 4);
+              FOSSASAT_DEBUG_PRINT('\t');
+              ephemerides[i] = val;
+          }
+          FOSSASAT_DEBUG_PRINTLN();
+
+          PersistentStorage_Set_ADCS_Ephemerides(chunkId*5 + row, ephemerides, controllerId);
+        }
+      }
+
+    } break;
+
+    case CMD_SET_IMU_OFFSET: {
+      if(Communication_Check_OptDataLen(12, optDataLen)) {
+        float x = 0;
+        float y = 0;
+        float z = 0;
+
+        memcpy(&x, optData, sizeof(float));
+        memcpy(&y, optData + sizeof(float), sizeof(float));
+        memcpy(&z, optData + 2*sizeof(float), sizeof(float));
+
+        FOSSASAT_DEBUG_PRINT(F("Gyroscope:\t"));
+        FOSSASAT_DEBUG_PRINTLN(x);
+        FOSSASAT_DEBUG_PRINT('\t');
+        FOSSASAT_DEBUG_PRINTLN(y);
+        FOSSASAT_DEBUG_PRINT('\t');
+        FOSSASAT_DEBUG_PRINTLN(y);
+
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_GYRO_X, x);
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_GYRO_Y, y);
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_GYRO_Z, z);
+
+        memcpy(&x, optData + 3*sizeof(float), sizeof(float));
+        memcpy(&y, optData + 4*sizeof(float), sizeof(float));
+        memcpy(&z, optData + 5*sizeof(float), sizeof(float));
+
+        FOSSASAT_DEBUG_PRINT(F("Accelerometer:\t"));
+        FOSSASAT_DEBUG_PRINTLN(x);
+        FOSSASAT_DEBUG_PRINT('\t');
+        FOSSASAT_DEBUG_PRINTLN(y);
+        FOSSASAT_DEBUG_PRINT('\t');
+        FOSSASAT_DEBUG_PRINTLN(y);
+
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_ACCEL_X, x);
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_ACCEL_Y, y);
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_ACCEL_Z, z);
+
+        memcpy(&x, optData + 6*sizeof(float), sizeof(float));
+        memcpy(&y, optData + 7*sizeof(float), sizeof(float));
+        memcpy(&z, optData + 8*sizeof(float), sizeof(float));
+
+        FOSSASAT_DEBUG_PRINT(F("Magnetometer:\t"));
+        FOSSASAT_DEBUG_PRINTLN(x);
+        FOSSASAT_DEBUG_PRINT('\t');
+        FOSSASAT_DEBUG_PRINTLN(y);
+        FOSSASAT_DEBUG_PRINT('\t');
+        FOSSASAT_DEBUG_PRINTLN(y);
+
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_MAG_X, x);
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_MAG_Y, y);
+        PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_MAG_Z, z);
       }
 
     } break;

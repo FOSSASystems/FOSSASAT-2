@@ -159,6 +159,12 @@
 #define IMU_OFFSET_MAG_Y                                0.0   // Tesla
 #define IMU_OFFSET_MAG_Z                                0.0   // Tesla
 
+#define ADCS_IMU_TRANS_MATRIX                           { {1.442, 0.445, 0.019}, \
+                                                          {0.070, 2.466, 0.017}, \
+                                                          {0.004, 1.085, 1.424} }
+
+#define ADCS_IMU_BIAS_VECTOR                            { 301.175, 1921.501, 520.479 }
+
 /*
    Flash Configuration
 */
@@ -232,7 +238,7 @@
 #define FLASH_MEMORY_ERROR_COUNTER                (FLASH_SYSTEM_INFO + 0xFC)  //  0x000000FC    0x000000FF    uint32_t
 
 // sector 1 - ADCS parameters
-#define FLASH_ADCS_PARAMETERS                                     0x00001000  //  0x00001000    0x000010FF
+#define FLASH_ADCS_PARAMETERS                                     0x00001000  //  0x00001000    0x000011FF
 
 #define FLASH_ADCS_PULSE_MAX_INTENSITY        (FLASH_ADCS_PARAMETERS + 0x00)  //  0x00001000    0x00001007    float or double
 #define FLASH_ADCS_PULSE_MAX_LENGTH           (FLASH_ADCS_PARAMETERS + 0x08)  //  0x00001008    0x0000100F    float or double
@@ -254,9 +260,11 @@
 #define FLASH_ADCS_NUM_CONTROLLERS            (FLASH_ADCS_PARAMETERS + 0x7A)  //  0x0000107A    0x0000107A    uint8_t
 #define FLASH_ADCS_COIL_CHAR_MATRIX           (FLASH_ADCS_PARAMETERS + 0x100) //  0x00001100    0x00001123    9x float
 #define FLASH_ADCS_INERTIA_TENSOR_MATRIX      (FLASH_ADCS_PARAMETERS + 0x124) //  0x00001124    0x00001147    9x float
+#define FLASH_ADCS_IMU_TRANS_MATRIX           (FLASH_ADCS_PARAMETERS + 0x148) //  0x00001148    0x0000116B    9x float
+#define FLASH_ADCS_IMU_BIAS_VECTOR            (FLASH_ADCS_PARAMETERS + 0x16C) //  0x0000116C    0x00001177    3x float
 
 // sector 2 - stats
-#define FLASH_STATS                                               0x00002000  //  0x00002000    0x000020FF
+#define FLASH_STATS                                               0x00002000  //  0x00002000    0x000021FF
 
 #define FLASH_STATS_TEMP_PANEL_Y                        (FLASH_STATS + 0x00)  //  0x00002000    0x00002005    3x int16_t
 #define FLASH_STATS_TEMP_TOP                            (FLASH_STATS + 0x06)  //  0x00002006    0x0000200B    3x int16_t
