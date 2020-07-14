@@ -480,9 +480,9 @@ void ADCS_Set_Pulse_Lengths(ADCS_CALC_TYPE intensity[ADCS_NUM_AXES]) {
   // solar Y+ = ADCS Z+
   // solar Z+ = ADCS X+
   ADCS_CALC_TYPE pulseLength[ADCS_NUM_AXES];
-  pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep, adcsParams.pulseAmplitude);
+  pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep, adcsParams.pulseAmplitude);
   pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep, adcsParams.pulseAmplitude);
-  pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep, adcsParams.pulseAmplitude);
+  pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep, adcsParams.pulseAmplitude);
 
   // set directions
   if(pulseLength[0] > 0) {
