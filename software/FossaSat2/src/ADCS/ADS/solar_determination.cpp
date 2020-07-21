@@ -4,7 +4,7 @@
    File: solar_determination.c
    04/30/20
 
-   This file drives the calculation of the solar ephemeris from lux and current data
+   This file drives the calculation of the solar ephemerides from lux and current data
 */
 
 /***************** Headers ********************/
@@ -28,14 +28,9 @@ void ADS_Solar_Determination(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], ADCS
   // Main calculation
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
     solarEph[i] = 0;
-    for(uint8_t j = 0; j < ADCS_NUM_AXES; j++) {
-      solarEph[i] += panelUnitVector[i][j]*luxData[j]*(1.0/maxPower[j]);
-    }
-  }
-
-  for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
     redundantSolarEph[i] = 0;
     for(uint8_t j = 0; j < ADCS_NUM_AXES; j++) {
+      solarEph[i] += panelUnitVector[i][j]*luxData[j]*(1.0/maxPower[j]);
       redundantSolarEph[i] += panelUnitVector[ADCS_NUM_AXES + i][j]*luxData[ADCS_NUM_AXES + j]*(1.0/maxPower[ADCS_NUM_AXES + j]);
     }
   }

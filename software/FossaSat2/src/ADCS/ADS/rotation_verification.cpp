@@ -12,7 +12,7 @@
 #include "../ADCS/adcs.h"
 
 /*************** Main function ***************/
-bool ADS_Rotation_Verification(ADCS_CALC_TYPE angles1[ADCS_NUM_AXES], ADCS_CALC_TYPE angles2[ADCS_NUM_AXES],
+bool ADS_Rotation_Verification(ADCS_CALC_TYPE angles1[ADCS_NUM_AXES], const ADCS_CALC_TYPE angles2[ADCS_NUM_AXES],
                                const ADCS_CALC_TYPE weightRatio, const ADCS_CALC_TYPE trigger) {
   // Constants definition
   const ADCS_CALC_TYPE weight1 = weightRatio;

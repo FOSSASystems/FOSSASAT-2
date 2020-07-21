@@ -4,7 +4,7 @@
    File: detumbling.c
    04/30/20
 
-   This file drives the detumbling procedure commands
+   This file drives the detumbling procedure commands -B-dot algorithm, accomplish by angular velocity measurements-
 */
 
 /************************* Headers **************************/
