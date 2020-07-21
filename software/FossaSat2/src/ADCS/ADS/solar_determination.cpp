@@ -40,7 +40,7 @@ void ADS_Solar_Determination(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], ADCS
 
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
     redundantSolarEph[i] *= (0.5)*(1.0/redundantSolarEphNorm);
-    solarEph[i] *= (0.5)*1.0/solarEphNorm);
+    solarEph[i] *= (0.5)*(1.0/solarEphNorm);
     solarEph[i] += redundantSolarEph[i];
   }
 }
