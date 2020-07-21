@@ -67,9 +67,8 @@ void ADS_Main(const ADCS_CALC_TYPE omega[ADCS_NUM_AXES], const ADCS_CALC_TYPE ma
 
     // Generation of the measurements
     ADS_Euler_Integrator(omega, prevAngles, anglesInt, adcsParams.timeStep);
-    ADS_Solar_Determination(luxData, solarEphBody, redundantSolarEph);
-    ADS_Measurement_Hybrid(solarEphBody, redundantSolarEph, magData, solarEphe, solarEphe, magEphe, rotationMatrix);
-
+    ADS_Solar_Determination(luxData, solarEphBody);
+    ADS_Measurement_Hybrid(solarEphe, magEphe, solarEphBody, magData, rotationMatrix);
   }
 
   // Processing of the measurements
