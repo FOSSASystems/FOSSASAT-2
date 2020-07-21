@@ -63,7 +63,7 @@ void ADS_Main(const ADCS_CALC_TYPE omega[ADCS_NUM_AXES], const ADCS_CALC_TYPE ma
   } else {
     FOSSASAT_DEBUG_PRINTLN(F("no eclipse"));
     ADCS_CALC_TYPE solarEphBody[ADCS_NUM_AXES];                   // Solar ephemerides in the body frame
-    ADCS_CALC_TYPE redundantSolarEph[ADCS_NUM_AXES];              // Redundant solar ephemerides in the body frame
+    //ADCS_CALC_TYPE redundantSolarEph[ADCS_NUM_AXES];              // Redundant solar ephemerides in the body frame
 
     // Generation of the measurements
     ADS_Euler_Integrator(omega, prevAngles, anglesInt, adcsParams.timeStep);
