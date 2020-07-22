@@ -15,7 +15,7 @@ ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[ADCS_NUM_AXES]) {
 }
 
 ADCS_CALC_TYPE ADCS_Add_Tolerance(ADCS_CALC_TYPE var, ADCS_CALC_TYPE forbiddenVal) {
-  // check if variable is within the interval <forbiddenVal - tolerance, forbiddenVal + tolerace>
+  // check if variable is within the interval <forbiddenVal - tolerance, forbiddenVal + tolerance>
   ADCS_CALC_TYPE limitHigh = forbiddenVal + adcsParams.calcTol;
   ADCS_CALC_TYPE limitLow = forbiddenVal - adcsParams.calcTol;
   if((var < limitLow) || (var > limitHigh)) {
