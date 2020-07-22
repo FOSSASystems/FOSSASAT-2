@@ -476,9 +476,9 @@ void ADCS_Set_Pulse_Lengths(ADCS_CALC_TYPE intensity[ADCS_NUM_AXES]) {
 
   // Calculate the intensities
   // pulseLength vector follows solar panel reference frame, not ADCS frame!
-  // solar X+ = ADCS Y+
+  // solar X+ = ADCS X+
   // solar Y+ = ADCS Z+
-  // solar Z+ = ADCS X+
+  // solar Z+ = ADCS Y+
   ADCS_CALC_TYPE pulseLength[ADCS_NUM_AXES];
   pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep, adcsParams.pulseAmplitude);
   pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep, adcsParams.pulseAmplitude);
