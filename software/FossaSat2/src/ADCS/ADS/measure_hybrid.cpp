@@ -4,7 +4,7 @@
    File:
    04/18/20
 
-   This file drives the measurements hybridation algorithm
+   This file drives the measurements hybridation algorithm (TRIAD)
 */
 
 /*********************** Headers ***********************/

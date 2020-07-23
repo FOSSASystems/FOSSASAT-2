@@ -128,6 +128,13 @@ void ADS_Kalman_Filter(const ADCS_CALC_TYPE Q, const ADCS_CALC_TYPE R, const ADC
     for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
       for(uint8_t k = 0; k < ADCS_STATE_DIM; k++) {
         M_aux1[i][j] += P[i][k]*A_trans[k][j];
+      }
+    }
+  }
+
+  for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
+    for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
+      for(uint8_t k = 0; k < ADCS_STATE_DIM; k++) {
         M_aux2[i][j] += A[i][k]*M_aux1[k][j];
       }
     }
@@ -159,7 +166,7 @@ void ADS_Kalman_Filter(const ADCS_CALC_TYPE Q, const ADCS_CALC_TYPE R, const ADC
 
   // Kalman transfer function and processing
   for(uint8_t i = 0; i < ADCS_STATE_DIM; i++) {
-    filtered_y[i] = x0[i];
+    filtered_y[i] = x_k[i];
     for(uint8_t j = 0; j < ADCS_STATE_DIM; j++) {
       filtered_y[i] += kalman_gain[i][j]*y_k[j];
     }
