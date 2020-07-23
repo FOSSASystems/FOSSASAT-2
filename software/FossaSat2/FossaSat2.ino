@@ -137,7 +137,7 @@ void setup() {
     PersistentStorage_Reset_ADCS_Params();
 
     // print data for integration purposes (independently of FOSSASAT_DEBUG macro!)
-    start = millis();
+    uint32_t start = millis();
     uint32_t lastSample = 0;
     while (millis() - start <= (uint32_t)DEPLOYMENT_DEBUG_LENGTH * (uint32_t)1000) {
       // update IMU
