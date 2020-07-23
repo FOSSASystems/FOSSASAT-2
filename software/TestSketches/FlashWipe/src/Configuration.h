@@ -101,8 +101,8 @@
 #define MPPT_OFF                                        PA11
 #define ANALOG_IN_RANDOM_SEED                           PC2    // used as source for randomSeed(), should be left floating
 
-#define POWER_FET_POLARITY_ON                           LOW
-#define POWER_FET_POLARITY_OFF                          HIGH
+#define POWER_FET_POLARITY_ON                           HIGH
+#define POWER_FET_POLARITY_OFF                          LOW
 
 
 /*
@@ -158,6 +158,12 @@
 #define IMU_OFFSET_MAG_X                                0.0   // Tesla
 #define IMU_OFFSET_MAG_Y                                0.0   // Tesla
 #define IMU_OFFSET_MAG_Z                                0.0   // Tesla
+
+#define ADCS_IMU_TRANS_MATRIX                           { {1.442, 0.445, 0.019}, \
+                                                          {0.070, 2.466, 0.017}, \
+                                                          {0.004, 1.085, 1.424} }
+
+#define ADCS_IMU_BIAS_VECTOR                            { 301.175, 1921.501, 520.479 }
 
 /*
    Flash Configuration
@@ -232,7 +238,7 @@
 #define FLASH_MEMORY_ERROR_COUNTER                (FLASH_SYSTEM_INFO + 0xFC)  //  0x000000FC    0x000000FF    uint32_t
 
 // sector 1 - ADCS parameters
-#define FLASH_ADCS_PARAMETERS                                     0x00001000  //  0x00001000    0x000010FF
+#define FLASH_ADCS_PARAMETERS                                     0x00001000  //  0x00001000    0x000011FF
 
 #define FLASH_ADCS_PULSE_MAX_INTENSITY        (FLASH_ADCS_PARAMETERS + 0x00)  //  0x00001000    0x00001007    float or double
 #define FLASH_ADCS_PULSE_MAX_LENGTH           (FLASH_ADCS_PARAMETERS + 0x08)  //  0x00001008    0x0000100F    float or double
@@ -254,9 +260,11 @@
 #define FLASH_ADCS_NUM_CONTROLLERS            (FLASH_ADCS_PARAMETERS + 0x7A)  //  0x0000107A    0x0000107A    uint8_t
 #define FLASH_ADCS_COIL_CHAR_MATRIX           (FLASH_ADCS_PARAMETERS + 0x100) //  0x00001100    0x00001123    9x float
 #define FLASH_ADCS_INERTIA_TENSOR_MATRIX      (FLASH_ADCS_PARAMETERS + 0x124) //  0x00001124    0x00001147    9x float
+#define FLASH_ADCS_IMU_TRANS_MATRIX           (FLASH_ADCS_PARAMETERS + 0x148) //  0x00001148    0x0000116B    9x float
+#define FLASH_ADCS_IMU_BIAS_VECTOR            (FLASH_ADCS_PARAMETERS + 0x16C) //  0x0000116C    0x00001177    3x float
 
 // sector 2 - stats
-#define FLASH_STATS                                               0x00002000  //  0x00002000    0x000020FF
+#define FLASH_STATS                                               0x00002000  //  0x00002000    0x000021FF
 
 #define FLASH_STATS_TEMP_PANEL_Y                        (FLASH_STATS + 0x00)  //  0x00002000    0x00002005    3x int16_t
 #define FLASH_STATS_TEMP_TOP                            (FLASH_STATS + 0x06)  //  0x00002006    0x0000200B    3x int16_t
@@ -345,10 +353,10 @@
 // common
 #define CALLSIGN_DEFAULT                                "FOSSASAT-2"
 #define SYNC_WORD                                       0x12        /*!< Ensure this sync word is compatable with all devices. */
-#define TCXO_VOLTAGE                                    1.6         /*!< Sets the radio's TCX0 voltage. (V) */
+#define TCXO_VOLTAGE                                    0//1.6         /*!< Sets the radio's TCX0 voltage. (V) */
 #define MAX_NUM_OF_BLOCKS                               3           /*!< maximum number of AES128 blocks that will be accepted */
-#define LORA_RECEIVE_WINDOW_LENGTH                      40          /*!< How long to listen out for LoRa transmissions for (s) */
-#define FSK_RECEIVE_WINDOW_LENGTH                       20          /*!< How long to listen out for FSK transmissions for (s) */
+#define LORA_RECEIVE_WINDOW_LENGTH                      0//40          /*!< How long to listen out for LoRa transmissions for (s) */
+#define FSK_RECEIVE_WINDOW_LENGTH                       60//20          /*!< How long to listen out for FSK transmissions for (s) */
 #define RESPONSE_DELAY                                  500         /*!< How long to wait for before responding to a transmission (ms) */
 #define RESPONSE_DELAY_SHORT                            0           /*!< Shorter version of RESPONSE_DELAY to be used for certain frames (e.g. picture downlink) (ms) */
 #define WHITENING_INITIAL                               0x1FF       /*!< Whitening LFSR initial value, to ensure SX127x compatibility */
@@ -420,7 +428,7 @@
 // Morse Code
 #define NUM_CW_BEEPS                                    3           /*!< number of CW sync beeps in low power mode */
 #define MORSE_PREAMBLE_LENGTH                           0           /*!< number of start signal repetitions */
-#define MORSE_SPEED                                     20          /*!< words per minute */
+#define MORSE_SPEED                                     200//20          /*!< words per minute */
 #define MORSE_BATTERY_MIN                               3200.0      /*!< minimum voltage value that can be send via Morse (corresponds to 'A'), mV*/
 #define MORSE_BATTERY_STEP                              50.0        /*!< voltage step in Morse, mV */
 #define MORSE_BEACON_LOOP_FREQ                          2           /*!< how often to transmit full Morse code beacon (e.g. transmit every second main loop when set to 2) */
@@ -525,16 +533,15 @@
 #define ADCS_NUM_PANELS                                 6       // number of solar panels for eclipse decision
 #define ADCS_CALC_TYPE                                  double  // numeric type to use in ADCS calculation, float for single precision, double for double precision
 #define ADCS_TIME_STEP                                  100     // time step between successive ADCS updates, in ms
-#define ADCS_PULSE_MAX_INTENSITY                        1.0    // abs max value in the H bridges
-#define ADCS_PULSE_MAX_LENGTH                           (ADCS_TIME_STEP/2.0)  // maximum length of H-bridge pulse
-#define ADCS_DETUMB_OMEGA_TOLERANCE                     0.001     // detumbling will be stopped once change in normalized angular velocity drops below this value
+#define ADCS_PULSE_MAX_INTENSITY                        0.001175   // abs max value in the H-bridge output (Amperes)
+#define ADCS_PULSE_MAX_LENGTH                           (0.8*ADCS_TIME_STEP)  // maximum length of H-bridge pulse
+#define ADCS_DETUMB_OMEGA_TOLERANCE                     0.009     // detumbling will be stopped once change in normalized angular velocity drops below this value
 #define ADCS_ACTIVE_EULER_TOLERANCE                     0.01     //
-#define ADCS_ACTIVE_OMEGA_TOLERANCE                     0.01     //
-#define ADCS_MIN_INERTIAL_MOMENT                        0.0003782 //
-#define ADCS_PULSE_AMPLITUDE                            1.0       // current pulse amplitude - maximum H-bridge voltage output divided by magnetorquer impednace
-#define ADCS_CALCULATION_TOLERANCE                      0.001    //
-#define ADCS_ECLIPSE_THRESHOLD                          0.28     // Eclipse condition reaching for a 20% output of the solar panels
-#define ADCS_ROTATION_WEIGHT_RATIO                      0.7     //  Weight ratio to average sensor, referred to the Euler integrator scheme (less accurate)
+#define ADCS_ACTIVE_OMEGA_TOLERANCE                     0.5     //
+#define ADCS_PULSE_AMPLITUDE                            0.001150  // current pulse amplitude - maximum H-bridge voltage output divided by magnetorquer impednace
+#define ADCS_CALCULATION_TOLERANCE                      0.00001    //
+#define ADCS_ECLIPSE_THRESHOLD                          0.411  // Eclipse condition reaching for a 10% output of the solar panels in W
+#define ADCS_ROTATION_WEIGHT_RATIO                      0.8     //  Weight ratio to average sensor, referred to the Euler integrator scheme (less accurate)
 #define ADCS_ROTATION_TRIGGER                           (M_PI/6.0) // Angular difference between sensor to trigger their averaging
 #define ADCS_DISTURBANCE_COVARIANCE                     0.001     // Covariance of the dynamical disturbances
 #define ADCS_NOISE_COVARIANCE                           0.001     // Covariance of the sensor noise
@@ -547,13 +554,14 @@
                                                           {-1.0, 0, 0}, \
                                                           {0, -1.0, 0}, \
                                                           {0,  0,-1.0}  }
-#define ADCS_MAX_NUM_CONTROLLERS                        10      //
 #define ADCS_DEFAULT_CONTROLLER                         { {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, \
                                                           {1.0, 1.0, 1.0, 1.0, 1.0, 1.0} }
+#define ADCS_MIN_INERTIAL_MOMENT                        0.0003782 //
 #define ADCS_INERTIA_TENSOR                             { {2645.9, 2.2, 4.41}, \
                                                           {2.2, 1167.3, -0.1}, \
                                                           {4.41, -0.1, 1090.9} } // Inertia tensor is introduced in its inversed form
+#define ADCS_MAX_NUM_CONTROLLERS                        10      //
 #define ADCS_NUM_CONTROLLERS                            1       //  use only one controller by default
 #define ADCS_BRIDGE_TIMER_UPDATE_PERIOD                 (ADCS_TIME_STEP/100)  // time step between successive H bridge output updates, in ms
 #define ADCS_BRIDGE_OUTPUT_HIGH                         63      // H bridge drive strength to be used as "high"
@@ -600,7 +608,7 @@ extern HardwareTimer* AdcsTimer;
 extern HardwareTimer* HbridgeTimer;
 
 // RadioLib instances
-extern SX1268 radio;
+extern SX1262 radio;
 extern MorseClient morse;
 
 // camera instance

@@ -1202,41 +1202,30 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
           #endif
 
           // read the values
-          float valX = 0;
-          float valY = 0;
-          float valZ = 0;
+          float val[3];
 
           // gyroscope
           if(flags & 0x01) {
-            valX = Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X);
-            valY = Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y);
-            valZ = Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z);
-
-            Communication_Frame_Add(&respOptDataPtr, valX, "G X", 1, "deg/s");
-            Communication_Frame_Add(&respOptDataPtr, valY, "G Y", 1, "deg/s");
-            Communication_Frame_Add(&respOptDataPtr, valZ, "G Z", 1, "deg/s");
+            Sensors_IMU_CalcGyro(imu.gx, imu.gy, imu.gz, FLASH_IMU_OFFSET_GYRO_X, val);
+            Communication_Frame_Add(&respOptDataPtr, val[0], "G X", 1, "rad/s");
+            Communication_Frame_Add(&respOptDataPtr, val[1], "G Y", 1, "rad/s");
+            Communication_Frame_Add(&respOptDataPtr, val[2], "G Z", 1, "rad/s");
           }
 
           // accelerometer
           if(flags & 0x02) {
-            valX = Sensors_IMU_CalcAccel(imu.ax, FLASH_IMU_OFFSET_ACCEL_X);
-            valY = Sensors_IMU_CalcAccel(imu.ay, FLASH_IMU_OFFSET_ACCEL_Y);
-            valZ = Sensors_IMU_CalcAccel(imu.az, FLASH_IMU_OFFSET_ACCEL_Z);
-
-            Communication_Frame_Add(&respOptDataPtr, valX, "A X", 1, "m/s^2");
-            Communication_Frame_Add(&respOptDataPtr, valY, "A Y", 1, "m/s^2");
-            Communication_Frame_Add(&respOptDataPtr, valZ, "A Z", 1, "m/s^2");
+            Sensors_IMU_CalcAccel(imu.ax, imu.ay, imu.az, FLASH_IMU_OFFSET_ACCEL_X, val);
+            Communication_Frame_Add(&respOptDataPtr, val[0], "A X", 1, "m/s^2");
+            Communication_Frame_Add(&respOptDataPtr, val[1], "A Y", 1, "m/s^2");
+            Communication_Frame_Add(&respOptDataPtr, val[2], "A Z", 1, "m/s^2");
           }
 
           // magnetometer
           if(flags & 0x04) {
-            valX = Sensors_IMU_CalcMag(imu.mx, FLASH_IMU_OFFSET_MAG_X);
-            valY = Sensors_IMU_CalcMag(imu.my, FLASH_IMU_OFFSET_MAG_Y);
-            valZ = Sensors_IMU_CalcMag(imu.mz, FLASH_IMU_OFFSET_MAG_Z);
-
-            Communication_Frame_Add(&respOptDataPtr, valX, "M X", 1, "gauss");
-            Communication_Frame_Add(&respOptDataPtr, valY, "M Y", 1, "gauss");
-            Communication_Frame_Add(&respOptDataPtr, valZ, "M Z", 1, "gauss");
+            Sensors_IMU_CalcMag(imu.mx, imu.my, imu.mz, FLASH_IMU_OFFSET_MAG_Z, val);
+            Communication_Frame_Add(&respOptDataPtr, val[0], "M X", 1, "Tesla");
+            Communication_Frame_Add(&respOptDataPtr, val[1], "M Y", 1, "Tesla");
+            Communication_Frame_Add(&respOptDataPtr, val[2], "M Z", 1, "Tesla");
           }
 
           // send the sample
@@ -2054,6 +2043,12 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         PersistentStorage_SystemInfo_Set<float>(FLASH_IMU_OFFSET_MAG_Z, z);
       }
 
+    } break;
+
+    case CMD_SET_IMU_CALIBRATION: {
+      if(Communication_Check_OptDataLen(45, optDataLen)) {
+        // TODO implement
+      }
     } break;
 
     default:

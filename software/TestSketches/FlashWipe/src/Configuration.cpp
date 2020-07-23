@@ -34,7 +34,7 @@ HardwareTimer* AdcsTimer = new HardwareTimer(TIM2);
 HardwareTimer* HbridgeTimer = new HardwareTimer(TIM3);
 
 // RadioLib instances
-SX1268 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_NRST, RADIO_BUSY, RadioSPI, SPISettings(2000000, MSBFIRST, SPI_MODE0));
+SX1262 radio = new Module(RADIO_NSS, RADIO_DIO1, RADIO_NRST, RADIO_BUSY, RadioSPI, SPISettings(2000000, MSBFIRST, SPI_MODE0));
 MorseClient morse(&radio);
 
 // camera instance
