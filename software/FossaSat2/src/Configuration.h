@@ -20,16 +20,16 @@
 //#define RESET_SYSTEM_INFO
 
 // comment out to disable deployment sequence
-//#define ENABLE_DEPLOYMENT_SEQUENCE
+#define ENABLE_DEPLOYMENT_SEQUENCE
 
 // comment out to disable sleep during deployment sequence
-//#define ENABLE_DEPLOYMENT_SLEEP
+#define ENABLE_DEPLOYMENT_SLEEP
 
 // comment out to disable charging period during deployment sequence
-//#define ENABLE_DEPLOYMENT_CHARGING
+#define ENABLE_DEPLOYMENT_CHARGING
 
 // comment out to disable transmission control (transmission disable and no transmissions in low power mode)
-//#define ENABLE_TRANSMISSION_CONTROL
+#define ENABLE_TRANSMISSION_CONTROL
 
 /*
     Array Length Limits
