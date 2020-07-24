@@ -535,9 +535,9 @@
 #define ADCS_TIME_STEP                                  100     // time step between successive ADCS updates, in ms
 #define ADCS_PULSE_MAX_INTENSITY                        0.001175   // abs max value in the H-bridge output (Amperes)
 #define ADCS_PULSE_MAX_LENGTH                           (0.8*ADCS_TIME_STEP)  // maximum length of H-bridge pulse
-#define ADCS_DETUMB_OMEGA_TOLERANCE                     0.009     // detumbling will be stopped once change in normalized angular velocity drops below this value
+#define ADCS_DETUMB_OMEGA_TOLERANCE                     0.002     // detumbling will be stopped once change in normalized angular velocity drops below this value
 #define ADCS_ACTIVE_EULER_TOLERANCE                     0.01     //
-#define ADCS_ACTIVE_OMEGA_TOLERANCE                     0.5     //
+#define ADCS_ACTIVE_OMEGA_TOLERANCE                     0.8     //
 #define ADCS_PULSE_AMPLITUDE                            0.001150  // current pulse amplitude - maximum H-bridge voltage output divided by magnetorquer impednace
 #define ADCS_CALCULATION_TOLERANCE                      0.00001    //
 #define ADCS_ECLIPSE_THRESHOLD                          0.411  // Eclipse condition reaching for a 10% output of the solar panels in W
