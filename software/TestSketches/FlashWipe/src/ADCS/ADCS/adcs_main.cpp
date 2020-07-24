@@ -15,7 +15,7 @@ ADCS_CALC_TYPE ADCS_VectorNorm(const ADCS_CALC_TYPE dim[ADCS_NUM_AXES]) {
 }
 
 ADCS_CALC_TYPE ADCS_Add_Tolerance(ADCS_CALC_TYPE var, ADCS_CALC_TYPE forbiddenVal) {
-  // check if variable is within the interval <forbiddenVal - tolerance, forbiddenVal + tolerace>
+  // check if variable is within the interval <forbiddenVal - tolerance, forbiddenVal + tolerance>
   ADCS_CALC_TYPE limitHigh = forbiddenVal + adcsParams.calcTol;
   ADCS_CALC_TYPE limitLow = forbiddenVal - adcsParams.calcTol;
   if((var < limitLow) || (var > limitHigh)) {
@@ -55,9 +55,7 @@ void ADCS_Detumble_Init(const uint8_t controlFlags, const uint32_t detumbleDurat
     // get initial IMU data
     Sensors_IMU_Update();
     ADCS_CALC_TYPE omega[ADCS_NUM_AXES];
-    omega[0] = Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z);
-    omega[1] = Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X);
-    omega[2] = -1.0*Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y);
+    Sensors_IMU_CalcGyro(imu.gz, imu.gx, -1*imu.gy, FLASH_IMU_OFFSET_GYRO_X, omega);
     adcsState.prevOmegaNorm = ADCS_VectorNorm(omega);
 
     FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(omega, ADCS_NUM_AXES);
@@ -79,15 +77,11 @@ void ADCS_Detumble_Update() {
 
   // Call for the magnetometer raw data
   ADCS_CALC_TYPE mag[ADCS_NUM_AXES];
-  mag[0] = Sensors_IMU_CalcMag(imu.mz, FLASH_IMU_OFFSET_MAG_Z);
-  mag[1] = -1.0*Sensors_IMU_CalcMag(imu.mx, FLASH_IMU_OFFSET_MAG_X);
-  mag[2] = -1.0*Sensors_IMU_CalcMag(imu.my, FLASH_IMU_OFFSET_MAG_Y);
+  Sensors_IMU_CalcMag(imu.mz, -1*imu.mx, -1*imu.my, FLASH_IMU_OFFSET_MAG_X, mag);
 
   // Call the IMU angular velocity data
   ADCS_CALC_TYPE omega[ADCS_NUM_AXES];
-  omega[0] = Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z);
-  omega[1] = Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X);
-  omega[2] = -1.0*Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y);
+  Sensors_IMU_CalcGyro(imu.gz, imu.gx, -1*imu.gy, FLASH_IMU_OFFSET_GYRO_X, omega);
 
   ADCS_CALC_TYPE omegaNorm = ADCS_VectorNorm(omega);
   ADCS_CALC_TYPE intensity[ADCS_NUM_AXES];
@@ -167,13 +161,9 @@ void ADCS_ActiveControl_Init(const uint8_t controlFlags, const uint32_t activeDu
   // get initial IMU data
   Sensors_IMU_Update();
   ADCS_CALC_TYPE mag[ADCS_NUM_AXES];
-  mag[0] = Sensors_IMU_CalcMag(imu.mz, FLASH_IMU_OFFSET_MAG_Z);
-  mag[1] = -1.0*Sensors_IMU_CalcMag(imu.mx, FLASH_IMU_OFFSET_MAG_X);
-  mag[2] = -1.0*Sensors_IMU_CalcMag(imu.my, FLASH_IMU_OFFSET_MAG_Y);
+  Sensors_IMU_CalcMag(imu.mz, -1*imu.mx, -1*imu.my, FLASH_IMU_OFFSET_MAG_X, mag);
   ADCS_CALC_TYPE omega[ADCS_NUM_AXES];
-  omega[0] = Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z);
-  omega[1] = Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X);
-  omega[2] = -1.0*Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y);
+  Sensors_IMU_CalcGyro(imu.gz, imu.gx, -1*imu.gy, FLASH_IMU_OFFSET_GYRO_X, omega);
   adcsState.prevOmegaNorm = ADCS_VectorNorm(omega);
 
   FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(mag, ADCS_NUM_AXES);
@@ -233,13 +223,9 @@ void ADCS_ActiveControl_Update() {
   // get IMU data
   Sensors_IMU_Update();
   ADCS_CALC_TYPE omega[ADCS_NUM_AXES];
-  omega[0] = Sensors_IMU_CalcGyro(imu.gz, FLASH_IMU_OFFSET_GYRO_Z);
-  omega[1] = Sensors_IMU_CalcGyro(imu.gx, FLASH_IMU_OFFSET_GYRO_X);
-  omega[2] = -1.0*Sensors_IMU_CalcGyro(imu.gy, FLASH_IMU_OFFSET_GYRO_Y);
+  Sensors_IMU_CalcGyro(imu.gz, imu.gx, -1*imu.gy, FLASH_IMU_OFFSET_GYRO_X, omega);
   ADCS_CALC_TYPE magData[ADCS_NUM_AXES];
-  magData[0] = Sensors_IMU_CalcMag(imu.mz, FLASH_IMU_OFFSET_MAG_Z);
-  magData[1] = -1.0*Sensors_IMU_CalcMag(imu.mx, FLASH_IMU_OFFSET_MAG_X);
-  magData[2] = -1.0*Sensors_IMU_CalcMag(imu.my, FLASH_IMU_OFFSET_MAG_Y);
+  Sensors_IMU_CalcMag(imu.mz, -1*imu.mx, -1*imu.my, FLASH_IMU_OFFSET_MAG_X, magData);
   FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(omega, ADCS_NUM_AXES);
   FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(magData, ADCS_NUM_AXES);
 
@@ -276,7 +262,7 @@ void ADCS_ActiveControl_Update() {
   FOSSASAT_DEBUG_PRINT(F("omegaNorm=\t"));
   FOSSASAT_DEBUG_PRINTLN(omegaNorm, 4);
   bool eulerToleranceReached = (abs(eulerNorm - adcsState.prevEulerNorm) >= adcsParams.activeEulerTol);
-  bool omegaToleranceReached = (abs(omegaNorm - adcsState.prevOmegaNorm) >= adcsParams.activeOmegaTol);
+  bool omegaToleranceReached = (abs(omegaNorm - adcsState.prevOmegaNorm) <= adcsParams.activeOmegaTol);
   if ((adcsParams.control.bits.overrideEulerTol || eulerToleranceReached) && (adcsParams.control.bits.overrideOmegaTol || omegaToleranceReached)) {
     // Choose controller from ADCS parameters
     float controllerMatrix[ADCS_NUM_AXES][ADCS_STATE_DIM];
@@ -490,13 +476,13 @@ void ADCS_Set_Pulse_Lengths(ADCS_CALC_TYPE intensity[ADCS_NUM_AXES]) {
 
   // Calculate the intensities
   // pulseLength vector follows solar panel reference frame, not ADCS frame!
-  // solar X+ = ADCS Y+
+  // solar X+ = ADCS X+
   // solar Y+ = ADCS Z+
-  // solar Z+ = ADCS X+
+  // solar Z+ = ADCS Y+
   ADCS_CALC_TYPE pulseLength[ADCS_NUM_AXES];
-  pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep, adcsParams.pulseAmplitude);
+  pulseLength[0] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep, adcsParams.pulseAmplitude);
   pulseLength[1] = ACS_IntensitiesRectifier(adcsState.prevIntensity[2], intensity[2], adcsParams.timeStep, adcsParams.pulseAmplitude);
-  pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[0], intensity[0], adcsParams.timeStep, adcsParams.pulseAmplitude);
+  pulseLength[2] = ACS_IntensitiesRectifier(adcsState.prevIntensity[1], intensity[1], adcsParams.timeStep, adcsParams.pulseAmplitude);
 
   // set directions
   if(pulseLength[0] > 0) {
