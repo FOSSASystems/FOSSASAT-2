@@ -17,7 +17,7 @@
 #define RTC_SECONDS                                     0
 
 // uncomment to reset system info (callsign, configuration etc.) on start
-//#define RESET_SYSTEM_INFO
+#define RESET_SYSTEM_INFO
 
 // comment out to disable deployment sequence
 //#define ENABLE_DEPLOYMENT_SEQUENCE
@@ -29,7 +29,7 @@
 //#define ENABLE_DEPLOYMENT_CHARGING
 
 // comment out to disable transmission control (transmission disable and no transmissions in low power mode)
-//#define ENABLE_TRANSMISSION_CONTROL
+#define ENABLE_TRANSMISSION_CONTROL
 
 /*
     Array Length Limits
@@ -120,10 +120,10 @@
    Voltage Limits
 */
 
-#define DEPLOYMENT_BATTERY_VOLTAGE_LIMIT                3700    // mV
+#define DEPLOYMENT_BATTERY_VOLTAGE_LIMIT                3650    // mV
 #define HEATER_BATTERY_VOLTAGE_LIMIT                    3800    // mV
-#define BATTERY_CW_BEEP_VOLTAGE_LIMIT                   3800          /*!< Battery voltage limit to switch into morse beep (mV). */
-#define LOW_POWER_MODE_VOLTAGE_LIMIT                    3800
+#define BATTERY_CW_BEEP_VOLTAGE_LIMIT                   3000          /*!< Battery voltage limit to switch into morse beep (mV). */
+#define LOW_POWER_MODE_VOLTAGE_LIMIT                    3000
 
 /*
    Temperature Limits
@@ -138,7 +138,7 @@
 */
 #define DEFAULT_NUMBER_OF_SLEEP_INTERVALS               6       // maximum of 8
 #define DEFAULT_SLEEP_INTERVAL_VOLTAGES                 { 4050, 4000, 3900, 3800, 3700,    0 }    // mV
-#define DEFAULT_SLEEP_INTERVAL_LENGTHS                  {   20,   35,  100,  160,  180,  240 }    // sec
+#define DEFAULT_SLEEP_INTERVAL_LENGTHS                  {   20,   35,  100,  160,  180,  10 }    // sec
 
 /*
    Default TLE
@@ -431,7 +431,7 @@
 #define MORSE_SPEED                                     20          /*!< words per minute */
 #define MORSE_BATTERY_MIN                               3200.0      /*!< minimum voltage value that can be send via Morse (corresponds to 'A'), mV*/
 #define MORSE_BATTERY_STEP                              50.0        /*!< voltage step in Morse, mV */
-#define MORSE_BEACON_LOOP_FREQ                          2           /*!< how often to transmit full Morse code beacon (e.g. transmit every second main loop when set to 2) */
+#define MORSE_BEACON_LOOP_FREQ                          4           /*!< how often to transmit full Morse code beacon (e.g. transmit every second main loop when set to 2) */
 
 /*
     Temperature Sensors
@@ -471,7 +471,7 @@
 
 // MCU temperature sensor
 #define TEMP_SENSOR_MCU_BUS                             Wire2
-#define TEMP_SENSOR_MCU_ADDRESS                         0b1001010 // ADD1 low, ADD0 high
+#define TEMP_SENSOR_MCU_ADDRESS                         0b1001011 // ADD1 low, ADD0 high
 
 /*
     ADCS H-bridges
@@ -500,7 +500,7 @@
 #define CURR_SENSOR_X_A_BUS                             Wire
 #define CURR_SENSOR_X_A_ADDRESS                         0b1000001 // A1 low, A0 high
 #define CURR_SENSOR_X_B_BUS                             Wire
-#define CURR_SENSOR_X_B_ADDRESS                         0b1000010 // A1 low, A0 SDA
+#define CURR_SENSOR_X_B_ADDRESS                         0b1000000 // A1 low, A0 SDA
 
 // Z axis solar cells
 #define CURR_SENSOR_Z_A_BUS                             Wire
