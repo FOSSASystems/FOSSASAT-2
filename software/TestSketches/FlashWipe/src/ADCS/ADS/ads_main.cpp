@@ -16,7 +16,7 @@
 bool ADS_Eclipse_Decision(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], const ADCS_CALC_TYPE threshold) {
 
   ADCS_CALC_TYPE sum = 0;
-  // skip luxData[1] - not solar cell power
+  // skip luxData[0] - not solar cell power
   for(uint8_t i = 1; i < ADCS_NUM_PANELS; i++) {
     sum += luxData[i];
   }
@@ -29,9 +29,9 @@ bool ADS_Eclipse_Decision(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], const A
 }
 
 /**************** Main structure ****************/
-void ADS_Main(ADCS_CALC_TYPE omega[ADCS_NUM_AXES], ADCS_CALC_TYPE magData[ADCS_NUM_AXES], ADCS_CALC_TYPE stateVars[ADCS_STATE_DIM],
-              ADCS_CALC_TYPE controlVector[ADCS_STATE_DIM], ADCS_CALC_TYPE matrixP[ADCS_STATE_DIM][ADCS_STATE_DIM], ADCS_CALC_TYPE solarEphe[ADCS_STATE_DIM],
-              ADCS_CALC_TYPE magEphe[ADCS_STATE_DIM], ADCS_CALC_TYPE filtered_y[ADCS_STATE_DIM], ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES]) {
+void ADS_Main(const ADCS_CALC_TYPE omega[ADCS_NUM_AXES], const ADCS_CALC_TYPE magData[ADCS_NUM_AXES], const ADCS_CALC_TYPE stateVars[ADCS_STATE_DIM],
+              const ADCS_CALC_TYPE controlVector[ADCS_STATE_DIM], ADCS_CALC_TYPE matrixP[ADCS_STATE_DIM][ADCS_STATE_DIM], const ADCS_CALC_TYPE solarEphe[ADCS_STATE_DIM],
+              const ADCS_CALC_TYPE magEphe[ADCS_STATE_DIM], ADCS_CALC_TYPE filtered_y[ADCS_STATE_DIM], ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES]) {
 
   // Relevant variables declaration
   ADCS_CALC_TYPE anglesInt[ADCS_NUM_AXES];                      // Angular determination variables
@@ -63,13 +63,11 @@ void ADS_Main(ADCS_CALC_TYPE omega[ADCS_NUM_AXES], ADCS_CALC_TYPE magData[ADCS_N
   } else {
     FOSSASAT_DEBUG_PRINTLN(F("no eclipse"));
     ADCS_CALC_TYPE solarEphBody[ADCS_NUM_AXES];                   // Solar ephemerides in the body frame
-    ADCS_CALC_TYPE redundantSolarEph[ADCS_NUM_AXES];              // Redundant solar ephemerides in the body frame
 
     // Generation of the measurements
     ADS_Euler_Integrator(omega, prevAngles, anglesInt, adcsParams.timeStep);
-    ADS_Solar_Determination(luxData, solarEphBody, redundantSolarEph);
-    ADS_Measurement_Hybrid(solarEphBody, redundantSolarEph, magData, solarEphe, solarEphe, magEphe, rotationMatrix);
-
+    ADS_Solar_Determination(luxData, solarEphBody);
+    ADS_Measurement_Hybrid(solarEphe, magEphe, solarEphBody, magData, rotationMatrix);
   }
 
   // Processing of the measurements

@@ -4,7 +4,7 @@
    File: detumbling.c
    04/30/20
 
-   This file drives the detumbling procedure commands
+   This file drives the detumbling procedure commands -B-dot algorithm, accomplish by angular velocity measurements-
 */
 
 /************************* Headers **************************/
@@ -39,7 +39,10 @@ void ACS_BdotFunction(const ADCS_CALC_TYPE omega[ADCS_NUM_AXES], const ADCS_CALC
     FOSSASAT_DEBUG_PRINT_ADCS_VECTOR(magMoment, ADCS_NUM_AXES);
 
     // Definition of intensity output -solving the equation: A*I = m-
-    intensity[0] = magMoment[0]*coilChar[0][0] + magMoment[1]*coilChar[0][1] + magMoment[2]*coilChar[0][2];
-    intensity[1] = magMoment[0]*coilChar[1][0] + magMoment[1]*coilChar[1][1] + magMoment[2]*coilChar[1][2];
-    intensity[2] = magMoment[0]*coilChar[2][0] + magMoment[1]*coilChar[2][1] + magMoment[2]*coilChar[2][2];
+    for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+        intensity[i] = 0;
+        for(uint8_t j = 0; j < ADCS_NUM_AXES; j++) {
+            intensity[i] += coilChar[i][j] * magMoment[j];
+        }
+    }
 }

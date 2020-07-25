@@ -22,16 +22,19 @@ void setup() {
   PersistentStorage_Reset();
   PersistentStorage_Enter4ByteMode();
 
+#ifdef RESET_SYSTEM_INFO
+  PersistentStorage_Reset_System_Info();
+  PersistentStorage_Reset_ADCS_Params();
+#endif
+
+  // load system info page
+  PersistentStorage_Read(FLASH_SYSTEM_INFO, systemInfoBuffer, FLASH_EXT_PAGE_SIZE);
+
   // increment reset counter
   uint16_t restartCounter = PersistentStorage_SystemInfo_Get<uint16_t>(FLASH_RESTART_COUNTER);
   FOSSASAT_DEBUG_PORT.print(F("Restart #"));
   FOSSASAT_DEBUG_PORT.println(restartCounter++);
   PersistentStorage_SystemInfo_Set(FLASH_RESTART_COUNTER, restartCounter);
-
-#ifdef RESET_SYSTEM_INFO
-  PersistentStorage_Reset_System_Info();
-  PersistentStorage_Reset_ADCS_Params();
-#endif
 
   // print system info page
   FOSSASAT_DEBUG_PRINT_FLASH(FLASH_SYSTEM_INFO, FLASH_EXT_PAGE_SIZE);
@@ -134,7 +137,7 @@ void setup() {
     PersistentStorage_Reset_ADCS_Params();
 
     // print data for integration purposes (independently of FOSSASAT_DEBUG macro!)
-    start = millis();
+    uint32_t start = millis();
     uint32_t lastSample = 0;
     while (millis() - start <= (uint32_t)DEPLOYMENT_DEBUG_LENGTH * (uint32_t)1000) {
       // update IMU
