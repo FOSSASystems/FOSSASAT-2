@@ -28,7 +28,7 @@ void ADS_Solar_Determination(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], ADCS
   for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
     solarEph[i] = 0;
     for(uint8_t j = 0; j < ADCS_NUM_PANELS; j++) {
-      solarEph[i] += panelUnitVector[i][j]*(luxData[j]*(1.0/maxPower[j]));
+      solarEph[i] += panelUnitVector[i][j]*(luxData[j]/maxPower[j]);
     }
   }
 
