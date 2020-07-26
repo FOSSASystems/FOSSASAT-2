@@ -26,19 +26,23 @@
 
 // Y panel temperature sensor
 #define TEMP_SENSOR_Y_PANEL_BUS                         Wire
-#define TEMP_SENSOR_Y_PANEL_ADDRESS                     0b1001000 // ADD1 low, ADD0 low
+#define TEMP_SENSOR_Y_PANEL_ADDRESS                     0b1001000
+ // ADD1 low, ADD0 low
 
 // top panel temperature sensor
 #define TEMP_SENSOR_TOP_BUS                             Wire2
-#define TEMP_SENSOR_TOP_ADDRESS                         0b1001011 // ADD1 float, ADD0 low
+#define TEMP_SENSOR_TOP_ADDRESS                         0b1001001
+ // ADD1 float, ADD0 low
 
 // bottom panel temperature sensor
 #define TEMP_SENSOR_BOTTOM_BUS                          Wire2
-#define TEMP_SENSOR_BOTTOM_ADDRESS                      0b1001000 // ADD1 low, ADD0 low
+#define TEMP_SENSOR_BOTTOM_ADDRESS                      0b1001001
+ // ADD1 low, ADD0 low
 
 // battery temperature sensor
 #define TEMP_SENSOR_BATTERY_BUS                         Wire2
-#define TEMP_SENSOR_BATTERY_ADDRESS                     0b1001001 // ADD1 low, ADD0 float
+#define TEMP_SENSOR_BATTERY_ADDRESS                     0b1001011
+ // ADD1 low, ADD0 float
 
 // second battery temperature sensor
 #define TEMP_SENSOR_SEC_BATTERY_BUS                     Wire2

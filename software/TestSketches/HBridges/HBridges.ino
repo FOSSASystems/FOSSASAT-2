@@ -65,7 +65,7 @@ void loop() {
   FOSSASAT_DEBUG_PORT.println(bridgeY.getFault());
   FOSSASAT_DEBUG_PORT.print(F("\t\tZ axis \t"));
   FOSSASAT_DEBUG_PORT.println(bridgeZ.getFault());
-  delay(1000);
+  delay(5000);
   
   bridgeX.stop();
   bridgeY.stop();
@@ -78,7 +78,7 @@ void loop() {
   FOSSASAT_DEBUG_PORT.println(bridgeY.getFault());
   FOSSASAT_DEBUG_PORT.print(F("\t\tZ axis \t"));
   FOSSASAT_DEBUG_PORT.println(bridgeZ.getFault());
-  delay(1000);
+  delay(5000);
 
   bridgeX.drive(-1 * speedVal);
   bridgeY.drive(-1 * speedVal);
@@ -105,5 +105,5 @@ void loop() {
   FOSSASAT_DEBUG_PORT.println(bridgeY.getFault());
   FOSSASAT_DEBUG_PORT.print(F("\t\tZ axis \t"));
   FOSSASAT_DEBUG_PORT.println(bridgeZ.getFault());
-  delay(1000);
+  delay(5000);
 }

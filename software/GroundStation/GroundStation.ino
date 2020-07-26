@@ -22,10 +22,10 @@
 #define USE_SX126X                    // uncomment to use SX126x
 
 // pin definitions
-#define CS                    10      // SPI chip select
+#define CS                    7      // SPI chip select
 #define DIO                   2       // DIO0 for SX127x, DIO1 for SX126x
 #define NRST                  RADIOLIB_NC      // NRST pin (optional)
-#define BUSY                  9       // BUSY pin (SX126x-only)
+#define BUSY                  4       // BUSY pin (SX126x-only)
 
 // modem configuration
 #define LORA_FREQUENCY        436.7   // MHz
