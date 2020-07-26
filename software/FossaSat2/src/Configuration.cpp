@@ -103,7 +103,7 @@ void Configuration_Setup() {
   pinMode(BATTERY_HEATER_FET, OUTPUT);
 
   pinMode(WATCHDOG_IN, OUTPUT);
-  pinMode(MPPT_OFF, OUTPUT);
+  pinMode(MPPT_OFF, INPUT);
   pinMode(ANALOG_IN_RANDOM_SEED, INPUT_ANALOG);
 
   // provide seed for encrpytion PRNG

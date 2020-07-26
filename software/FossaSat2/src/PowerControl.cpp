@@ -141,13 +141,14 @@ void PowerControl_Manage_Battery() {
   uint8_t mpptTempSwitch = PersistentStorage_SystemInfo_Get<uint8_t>(FLASH_MPPT_TEMP_SWITCH_ENABLED);
   if(mpptKeepAlive == 1) {
     // MPPT keep alive is enabled, force charging regardless of everything else
-    digitalWrite(MPPT_OFF, LOW);
+    pinMode(MPPT_OFF, INPUT);
   } else if((mpptTempSwitch == 1) && ((Sensors_Temperature_Read(tempSensorBattery) <= mpptTempLimit) || (Sensors_Temperature_Read(tempSensorSecBattery) <= mpptTempLimit))) {
     // at least one battery has temperature below limit, disable charging
+    pinMode(MPPT_OFF, OUTPUT);
     digitalWrite(MPPT_OFF, HIGH);
   } else {
     // temperature above limit, enable charging
-    digitalWrite(MPPT_OFF, LOW);
+    pinMode(MPPT_OFF, INPUT);
   }
 
   // check temperature and voltage limit to enable heater
