@@ -542,7 +542,7 @@
 #define ADCS_CALCULATION_TOLERANCE                      0.00001    //
 #define ADCS_ECLIPSE_THRESHOLD                          0.411  // Eclipse condition reaching for a 10% output of the solar panels in W
 #define ADCS_ROTATION_WEIGHT_RATIO                      0.8     //  Weight ratio to average sensor, referred to the Euler integrator scheme (less accurate)
-#define ADCS_ROTATION_TRIGGER                           (M_PI/6.0) // Angular difference between sensor to trigger their averaging
+#define ADCS_ROTATION_TRIGGER                           (M_PI/12.0) // Angular difference between sensor to trigger their averaging
 #define ADCS_DISTURBANCE_COVARIANCE                     0.0001     // Covariance of the dynamical disturbances
 #define ADCS_NOISE_COVARIANCE                           0.0001     // Covariance of the sensor noise
 #define ADCS_COIL_CHARACTERISTICS                       { {893.655,     0,       0}, \
@@ -559,7 +559,7 @@
                                                           {2.2, 1167.3, -0.1}, \
                                                           {4.41, -0.1, 1090.9} } // Inertia tensor is introduced in its inversed form
 #define ADCS_MAX_NUM_CONTROLLERS                        10      //
-#define ADCS_NUM_CONTROLLERS                            1       //  use only one controller by default
+#define ADCS_NUM_CONTROLLERS                            2       //  use only one controller by default
 #define ADCS_BRIDGE_TIMER_UPDATE_PERIOD                 (ADCS_TIME_STEP/100)  // time step between successive H bridge output updates, in ms
 #define ADCS_BRIDGE_OUTPUT_HIGH                         63      // H bridge drive strength to be used as "high"
 #define ADCS_BRIDGE_OUTPUT_LOW                         -63      // H bridge drive strength to be used as "low"
