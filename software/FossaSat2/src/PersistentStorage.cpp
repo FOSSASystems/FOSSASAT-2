@@ -166,12 +166,12 @@ void PersistentStorage_Update_Stats(uint8_t flags) {
 
   if(flags & STATS_FLAGS_VOLTAGES) {
     // voltages
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_VOLT_XA, (uint8_t)(Sensors_Current_ReadVoltage(currSensorXA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER)));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_VOLT_XB, (uint8_t)(Sensors_Current_ReadVoltage(currSensorXB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER)));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_VOLT_ZA, (uint8_t)(Sensors_Current_ReadVoltage(currSensorZA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER)));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_VOLT_ZB, (uint8_t)(Sensors_Current_ReadVoltage(currSensorZB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER)));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_VOLT_Y, (uint8_t)(Sensors_Current_ReadVoltage(currSensorY) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER)));
-    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_VOLT_MPPT, (uint8_t)(Sensors_Current_ReadVoltage(currSensorMPPT) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER)));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_VOLT_XA, (uint8_t)(Sensors_Current_ReadVoltage(currSensorXA) / (float)VOLTAGE_MULTIPLIER));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_VOLT_XB, (uint8_t)(Sensors_Current_ReadVoltage(currSensorXB) / (float)VOLTAGE_MULTIPLIER));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_VOLT_ZA, (uint8_t)(Sensors_Current_ReadVoltage(currSensorZA) / (float)VOLTAGE_MULTIPLIER));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_VOLT_ZB, (uint8_t)(Sensors_Current_ReadVoltage(currSensorZB) / (float)VOLTAGE_MULTIPLIER));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_VOLT_Y, (uint8_t)(Sensors_Current_ReadVoltage(currSensorY) / (float)VOLTAGE_MULTIPLIER));
+    PersistentStorage_Update_Stat(statsBuffer, FLASH_STATS_VOLT_MPPT, (uint8_t)(Sensors_Current_ReadVoltage(currSensorMPPT) / (float)VOLTAGE_MULTIPLIER));
   }
 
   if(flags & STATS_FLAGS_LIGHT) {
@@ -302,17 +302,17 @@ void PersistentStorage_Reset_Stats() {
   memcpy(statsPage + (FLASH_STATS_VOLT_Y - FLASH_STATS), &byteMax, sizeof(byteMax));
   memcpy(statsPage + (FLASH_STATS_VOLT_MPPT - FLASH_STATS), &byteMax, sizeof(byteMax));
 
-  byteVal = Sensors_Current_ReadVoltage(currSensorXA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  byteVal = Sensors_Current_ReadVoltage(currSensorXA) / (float)VOLTAGE_MULTIPLIER;
   memcpy(statsPage + (FLASH_STATS_CURR_XA - FLASH_STATS) + sizeof(byteVal), &byteVal, sizeof(byteVal));
-  byteVal = Sensors_Current_ReadVoltage(currSensorXB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  byteVal = Sensors_Current_ReadVoltage(currSensorXB) / (float)VOLTAGE_MULTIPLIER;
   memcpy(statsPage + (FLASH_STATS_VOLT_XB - FLASH_STATS) + sizeof(byteVal), &byteVal, sizeof(byteVal));
-  byteVal = Sensors_Current_ReadVoltage(currSensorZA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  byteVal = Sensors_Current_ReadVoltage(currSensorZA) / (float)VOLTAGE_MULTIPLIER;
   memcpy(statsPage + (FLASH_STATS_VOLT_ZA - FLASH_STATS) + sizeof(byteVal), &byteVal, sizeof(byteVal));
-  byteVal = Sensors_Current_ReadVoltage(currSensorZB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  byteVal = Sensors_Current_ReadVoltage(currSensorZB) / (float)VOLTAGE_MULTIPLIER;
   memcpy(statsPage + (FLASH_STATS_VOLT_ZB - FLASH_STATS) + sizeof(byteVal), &byteVal, sizeof(byteVal));
-  byteVal = Sensors_Current_ReadVoltage(currSensorY) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  byteVal = Sensors_Current_ReadVoltage(currSensorY) / (float)VOLTAGE_MULTIPLIER;
   memcpy(statsPage + (FLASH_STATS_VOLT_Y - FLASH_STATS) + sizeof(byteVal), &byteVal, sizeof(byteVal));
-  byteVal = Sensors_Current_ReadVoltage(currSensorMPPT) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  byteVal = Sensors_Current_ReadVoltage(currSensorMPPT) / (float)VOLTAGE_MULTIPLIER;
   memcpy(statsPage + (FLASH_STATS_VOLT_Y - FLASH_STATS) + sizeof(byteVal), &byteVal, sizeof(byteVal));
 
   memcpy(statsPage + (FLASH_STATS_VOLT_XA - FLASH_STATS) + 2*sizeof(byteMin), &byteMin, sizeof(byteMin));
