@@ -25,6 +25,7 @@ void setup() {
 #ifdef RESET_SYSTEM_INFO
   PersistentStorage_Reset_System_Info();
   PersistentStorage_Reset_ADCS_Params();
+  PersistentStorage_Reset_Stats();
 #endif
 
   // load system info page
