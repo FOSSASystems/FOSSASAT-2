@@ -2047,7 +2047,47 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
     case CMD_SET_IMU_CALIBRATION: {
       if(Communication_Check_OptDataLen(48, optDataLen)) {
-        // TODO implement
+        // read the current ADCS parameters
+        uint8_t adcsSector[FLASH_SECTOR_SIZE];
+        PersistentStorage_Read(FLASH_ADCS_PARAMETERS, adcsSector, FLASH_SECTOR_SIZE);
+        uint8_t* optDataPtr = optData;
+
+        // set the transformation matrix
+        FOSSASAT_DEBUG_PRINTLN(F("Trans. matrix: "));
+        float val = 0;
+        float transMatrix[ADCS_NUM_AXES][ADCS_NUM_AXES];
+        for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+          for(uint8_t j = 0; j < ADCS_NUM_AXES; j++) {
+            memcpy(&val, optData + (ADCS_NUM_AXES*i + j) * sizeof(float), sizeof(float));
+            FOSSASAT_DEBUG_PRINT(val, 4);
+            FOSSASAT_DEBUG_PRINT('\t');
+            transMatrix[i][j] = val;
+          }
+          FOSSASAT_DEBUG_PRINTLN();
+        }
+
+        // update buffer
+        uint32_t transMatrixLen = ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(float);
+        memcpy(adcsSector + FLASH_ADCS_IMU_TRANS_MATRIX, transMatrix, transMatrixLen);
+
+        // set the bias vector
+        FOSSASAT_DEBUG_PRINTLN(F("Bias vector: "));
+        val = 0;
+        float biasVector[ADCS_NUM_AXES];
+        for(uint8_t i = 0; i < ADCS_NUM_AXES; i++) {
+          memcpy(&val, optData + transMatrixLen + i * sizeof(float), sizeof(float));
+          FOSSASAT_DEBUG_PRINT(val, 4);
+          FOSSASAT_DEBUG_PRINT('\t');
+          biasVector[i] = val;
+        }
+        FOSSASAT_DEBUG_PRINTLN();
+
+        // update buffer
+        uint32_t biasVectorLen = ADCS_NUM_AXES*sizeof(float);
+        memcpy(adcsSector + FLASH_ADCS_IMU_BIAS_VECTOR, biasVector, biasVectorLen);
+
+        // write all at once
+        PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsSector, FLASH_SECTOR_SIZE);
       }
     } break;
 
