@@ -2046,7 +2046,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
     } break;
 
     case CMD_SET_IMU_CALIBRATION: {
-      if(Communication_Check_OptDataLen(45, optDataLen)) {
+      if(Communication_Check_OptDataLen(48, optDataLen)) {
         // TODO implement
       }
     } break;

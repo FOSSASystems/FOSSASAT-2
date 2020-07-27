@@ -409,10 +409,10 @@ The following commands are encrypted using AES-128 and must be correctly decrypt
 - Description: Sets static IMU offset.
 
 ### CMD_SET_IMU_CALIBRATION
-- Optional data length: 45
+- Optional data length: 48
 - Optional data:
   - 0 - 35: transformation matrix, 9 floats
-  - 36 - 44: bias vector, 3 floats
+  - 36 - 47: bias vector, 3 floats
 - Response: none
 - Description: Sets IMU calibration data (matrix sent in the same order as [CMD_SET_ADCS_CONTROLLER](#CMD_SET_ADCS_CONTROLLER)).
 
