@@ -2050,7 +2050,6 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
         // read the current ADCS parameters
         uint8_t adcsSector[FLASH_SECTOR_SIZE];
         PersistentStorage_Read(FLASH_ADCS_PARAMETERS, adcsSector, FLASH_SECTOR_SIZE);
-        uint8_t* optDataPtr = optData;
 
         // set the transformation matrix
         FOSSASAT_DEBUG_PRINTLN(F("Trans. matrix: "));
@@ -2068,7 +2067,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // update buffer
         uint32_t transMatrixLen = ADCS_NUM_AXES*ADCS_NUM_AXES*sizeof(float);
-        memcpy(adcsSector + FLASH_ADCS_IMU_TRANS_MATRIX, transMatrix, transMatrixLen);
+        memcpy(adcsSector + (FLASH_ADCS_IMU_TRANS_MATRIX - FLASH_ADCS_PARAMETERS), transMatrix, transMatrixLen);
 
         // set the bias vector
         FOSSASAT_DEBUG_PRINTLN(F("Bias vector: "));
@@ -2084,7 +2083,7 @@ void Communication_Execute_Function(uint8_t functionId, uint8_t* optData, size_t
 
         // update buffer
         uint32_t biasVectorLen = ADCS_NUM_AXES*sizeof(float);
-        memcpy(adcsSector + FLASH_ADCS_IMU_BIAS_VECTOR, biasVector, biasVectorLen);
+        memcpy(adcsSector + (FLASH_ADCS_IMU_BIAS_VECTOR - FLASH_ADCS_PARAMETERS), biasVector, biasVectorLen);
 
         // write all at once
         PersistentStorage_Write(FLASH_ADCS_PARAMETERS, adcsSector, FLASH_SECTOR_SIZE);
