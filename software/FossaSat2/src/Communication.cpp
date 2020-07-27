@@ -156,7 +156,7 @@ void Communication_Send_Basic_System_Info() {
 
   FOSSASAT_DEBUG_PRINTLN(F("--- System info: ---"));
 
-  uint8_t mpptOutputVoltage = Sensors_Current_ReadVoltage(currSensorMPPT) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t mpptOutputVoltage = Sensors_Current_ReadVoltage(currSensorMPPT) / (float)VOLTAGE_MULTIPLIER;
   Communication_Frame_Add(&optDataPtr, mpptOutputVoltage, "batteryVoltage", VOLTAGE_MULTIPLIER, "mV");
 
   int16_t mpptOutputCurrent = Sensors_Current_Read(currSensorMPPT) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
@@ -176,19 +176,19 @@ void Communication_Send_Basic_System_Info() {
   uint16_t resetCounter = PersistentStorage_SystemInfo_Get<uint16_t>(FLASH_RESTART_COUNTER);
   Communication_Frame_Add(&optDataPtr, resetCounter, "resetCounter", 1, "");
 
-  uint8_t voltageXA = Sensors_Current_ReadVoltage(currSensorXA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageXA = Sensors_Current_ReadVoltage(currSensorXA) / (float)VOLTAGE_MULTIPLIER;
   Communication_Frame_Add(&optDataPtr, voltageXA, "voltageXA", VOLTAGE_MULTIPLIER, "mV");
 
-  uint8_t voltageXB = Sensors_Current_ReadVoltage(currSensorXB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageXB = Sensors_Current_ReadVoltage(currSensorXB) / (float)VOLTAGE_MULTIPLIER;
   Communication_Frame_Add(&optDataPtr, voltageXB, "voltageXB", VOLTAGE_MULTIPLIER, "mV");
 
-  uint8_t voltageZA = Sensors_Current_ReadVoltage(currSensorZA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageZA = Sensors_Current_ReadVoltage(currSensorZA) / (float)VOLTAGE_MULTIPLIER;
   Communication_Frame_Add(&optDataPtr, voltageZA, "voltageZA", VOLTAGE_MULTIPLIER, "mV");
 
-  uint8_t voltageZB = Sensors_Current_ReadVoltage(currSensorZB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageZB = Sensors_Current_ReadVoltage(currSensorZB) / (float)VOLTAGE_MULTIPLIER;
   Communication_Frame_Add(&optDataPtr, voltageZB, "voltageZB", VOLTAGE_MULTIPLIER, "mV");
 
-  uint8_t voltageY = Sensors_Current_ReadVoltage(currSensorY) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageY = Sensors_Current_ReadVoltage(currSensorY) / (float)VOLTAGE_MULTIPLIER;
   Communication_Frame_Add(&optDataPtr, voltageY, "voltageY", VOLTAGE_MULTIPLIER, "mV");
 
   int16_t batteryTemperature = Sensors_Temperature_Read(tempSensorBattery) * (TEMPERATURE_UNIT / TEMPERATURE_MULTIPLIER);
@@ -214,7 +214,7 @@ void Communication_Send_Full_System_Info() {
 
   FOSSASAT_DEBUG_PRINTLN(F("--- System info: ---"));
 
-  uint8_t mpptOutputVoltage = Sensors_Current_ReadVoltage(currSensorMPPT) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t mpptOutputVoltage = Sensors_Current_ReadVoltage(currSensorMPPT) / (float)VOLTAGE_MULTIPLIER;
   Communication_Frame_Add(&optDataPtr, mpptOutputVoltage, "batteryVoltage", VOLTAGE_MULTIPLIER, "mV");
 
   int16_t mpptOutputCurrent = Sensors_Current_Read(currSensorMPPT) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
@@ -235,31 +235,31 @@ void Communication_Send_Full_System_Info() {
   uint16_t resetCounter = PersistentStorage_SystemInfo_Get<uint16_t>(FLASH_RESTART_COUNTER);
   Communication_Frame_Add(&optDataPtr, resetCounter, "resetCounter", 1, "");
 
-  uint8_t voltageXA = Sensors_Current_ReadVoltage(currSensorXA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageXA = Sensors_Current_ReadVoltage(currSensorXA) / (float)VOLTAGE_MULTIPLIER;
   Communication_Frame_Add(&optDataPtr, voltageXA, "voltageXA", VOLTAGE_MULTIPLIER, "mV");
 
   int16_t currentXA = Sensors_Current_Read(currSensorXA) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentXA, "currentXA", CURRENT_MULTIPLIER, "uA");
 
-  uint8_t voltageXB = Sensors_Current_ReadVoltage(currSensorXB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageXB = Sensors_Current_ReadVoltage(currSensorXB) / (float)VOLTAGE_MULTIPLIER;
   Communication_Frame_Add(&optDataPtr, voltageXB, "voltageXB", VOLTAGE_MULTIPLIER, "mV");
 
   int16_t currentXB = Sensors_Current_Read(currSensorXB) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentXB, "currentXB", CURRENT_MULTIPLIER, "uA");
 
-  uint8_t voltageZA = Sensors_Current_ReadVoltage(currSensorZA) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageZA = Sensors_Current_ReadVoltage(currSensorZA) / (float)VOLTAGE_MULTIPLIER;
   Communication_Frame_Add(&optDataPtr, voltageZA, "voltageZA", VOLTAGE_MULTIPLIER, "mV");
 
   int16_t currentZA = Sensors_Current_Read(currSensorZA) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentZA, "currentZA", CURRENT_MULTIPLIER, "uA");
 
-  uint8_t voltageZB = Sensors_Current_ReadVoltage(currSensorZB) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageZB = Sensors_Current_ReadVoltage(currSensorZB) / (float)VOLTAGE_MULTIPLIER;
   Communication_Frame_Add(&optDataPtr, voltageZB, "voltageZB", VOLTAGE_MULTIPLIER, "mV");
 
   int16_t currentZB = Sensors_Current_Read(currSensorZB) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
   Communication_Frame_Add(&optDataPtr, currentZB, "currentZB", CURRENT_MULTIPLIER, "uA");
 
-  uint8_t voltageY = Sensors_Current_ReadVoltage(currSensorY) * (VOLTAGE_UNIT / VOLTAGE_MULTIPLIER);
+  uint8_t voltageY = Sensors_Current_ReadVoltage(currSensorY) / (float)VOLTAGE_MULTIPLIER;
   Communication_Frame_Add(&optDataPtr, voltageY, "voltageY", VOLTAGE_MULTIPLIER, "mV");
 
   int16_t currentY = Sensors_Current_Read(currSensorY) * ((CURRENT_UNIT / 1000) / CURRENT_MULTIPLIER);
