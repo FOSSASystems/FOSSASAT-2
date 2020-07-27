@@ -2,13 +2,13 @@
 
 #define GPS_TX                                          PA0
 #define GPS_RX                                          PA1
-#define GPS_POWER_FET                                   PC3
+#define GPS_POWER_FET                                   PB8
 
 HardwareSerial GpsSerial(GPS_RX, GPS_TX);
 
 void setup() {
   pinMode(GPS_POWER_FET, OUTPUT);
-  digitalWrite(GPS_POWER_FET, HIGH);
+  digitalWrite(GPS_POWER_FET, LOW);
   
   // initialize debug port
   FOSSASAT_DEBUG_PORT.begin(FOSSASAT_DEBUG_SPEED);

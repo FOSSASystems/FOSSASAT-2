@@ -89,7 +89,7 @@
 // GPS
 #define GPS_TX                                          PA0
 #define GPS_RX                                          PA1
-#define GPS_POWER_FET                                   PC3
+#define GPS_POWER_FET                                   PD8
 
 // control FETs
 #define DEPLOYMENT_FET_1                                PB1
@@ -120,10 +120,10 @@
    Voltage Limits
 */
 
-#define DEPLOYMENT_BATTERY_VOLTAGE_LIMIT                3650    // mV
+#define DEPLOYMENT_BATTERY_VOLTAGE_LIMIT                3600    // mV
 #define HEATER_BATTERY_VOLTAGE_LIMIT                    3800    // mV
-#define BATTERY_CW_BEEP_VOLTAGE_LIMIT                   3000          /*!< Battery voltage limit to switch into morse beep (mV). */
-#define LOW_POWER_MODE_VOLTAGE_LIMIT                    3000
+#define BATTERY_CW_BEEP_VOLTAGE_LIMIT                   3700          /*!< Battery voltage limit to switch into morse beep (mV). */
+#define LOW_POWER_MODE_VOLTAGE_LIMIT                    3600
 
 /*
    Temperature Limits
@@ -137,8 +137,8 @@
    Default sleep intervals
 */
 #define DEFAULT_NUMBER_OF_SLEEP_INTERVALS               6       // maximum of 8
-#define DEFAULT_SLEEP_INTERVAL_VOLTAGES                 { 4050, 4000, 3900, 3800, 3700,    0 }    // mV
-#define DEFAULT_SLEEP_INTERVAL_LENGTHS                  {   20,   35,  100,  160,  180,  10 }    // sec
+#define DEFAULT_SLEEP_INTERVAL_VOLTAGES                 { 4050, 3950, 3900, 3800, 3700,    3600 }    // mV
+#define DEFAULT_SLEEP_INTERVAL_LENGTHS                  {   0,   5,  10,  30,  40,  100 }    // sec
 
 /*
    Default TLE

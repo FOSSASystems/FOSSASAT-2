@@ -107,11 +107,11 @@ void PowerControl_Deploy() {
 
   // enable MOSFETs one at a time
   digitalWrite(DEPLOYMENT_FET_1, HIGH);
-  PowerControl_Wait(1000, LOW_POWER_SLEEP);
+  PowerControl_Wait(5000, LOW_POWER_SLEEP);
   digitalWrite(DEPLOYMENT_FET_1, LOW);
 
   digitalWrite(DEPLOYMENT_FET_2, HIGH);
-  PowerControl_Wait(1000, LOW_POWER_SLEEP);
+  PowerControl_Wait(5000, LOW_POWER_SLEEP);
   digitalWrite(DEPLOYMENT_FET_2, LOW);
 }
 
