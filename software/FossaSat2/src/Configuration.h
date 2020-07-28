@@ -89,7 +89,7 @@
 // GPS
 #define GPS_TX                                          PA0
 #define GPS_RX                                          PA1
-#define GPS_POWER_FET                                   PD8
+#define GPS_POWER_FET                                   PB8
 
 // control FETs
 #define DEPLOYMENT_FET_1                                PB1
