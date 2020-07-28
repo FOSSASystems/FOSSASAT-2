@@ -35,6 +35,7 @@ float Sensors_Temperature_Read(wireSensor_t& sensor) {
 uint16_t Sensors_IMU_Setup() {
   // initialize IMU
   uint16_t state = imu.begin(IMU_ACCEL_GYRO_ADDRESS, IMU_MAG_ADDRESS, IMU_BUS);
+  imu.setMagScale(16);
 
   // set to sleep by default
   Sensors_IMU_Sleep(true);
