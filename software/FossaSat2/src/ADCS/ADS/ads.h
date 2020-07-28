@@ -15,8 +15,8 @@ bool ADS_Eclipse_Decision(const ADCS_CALC_TYPE luxData[ADCS_NUM_PANELS], const A
 
 // Main ADS structure
 void ADS_Main(const ADCS_CALC_TYPE omega[ADCS_NUM_AXES], const ADCS_CALC_TYPE magData[ADCS_NUM_AXES], const ADCS_CALC_TYPE stateVars[ADCS_STATE_DIM],
-              const ADCS_CALC_TYPE controlVector[ADCS_NUM_AXES], ADCS_CALC_TYPE matrixP[ADCS_STATE_DIM][ADCS_STATE_DIM], const ADCS_CALC_TYPE solarEphe[ADCS_STATE_DIM],
-              const ADCS_CALC_TYPE magEphe[ADCS_STATE_DIM], ADCS_CALC_TYPE filtered_y[ADCS_STATE_DIM], ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES]);
+              const ADCS_CALC_TYPE controlVector[ADCS_NUM_AXES], ADCS_CALC_TYPE matrixP[ADCS_STATE_DIM][ADCS_STATE_DIM], const ADCS_CALC_TYPE solarEphe[ADCS_NUM_AXES],
+              const ADCS_CALC_TYPE magEphe[ADCS_NUM_AXES], ADCS_CALC_TYPE filtered_y[ADCS_STATE_DIM], ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES]);
 
 // Determination of the Euler angles
 void ADS_Angles_Determination(const ADCS_CALC_TYPE eulerAnglesMatrix[ADCS_NUM_AXES][ADCS_NUM_AXES], ADCS_CALC_TYPE newAnglesVector[ADCS_NUM_AXES]);
