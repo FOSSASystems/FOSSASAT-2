@@ -25,7 +25,6 @@ void setup() {
 #ifdef RESET_SYSTEM_INFO
   PersistentStorage_Reset_System_Info();
   PersistentStorage_Reset_ADCS_Params();
-  PersistentStorage_Reset_Stats();
 #endif
 
   // load system info page
@@ -136,6 +135,7 @@ void setup() {
     // integration, reset system info
     PersistentStorage_Reset_System_Info();
     PersistentStorage_Reset_ADCS_Params();
+    PersistentStorage_Reset_Stats();
 
     // print data for integration purposes (independently of FOSSASAT_DEBUG macro!)
     uint32_t start = millis();
@@ -252,8 +252,14 @@ void setup() {
     }
 
     // increment deployment counter
+    FOSSASAT_DEBUG_PORT.println(F("================================"));
+    FOSSASAT_DEBUG_PORT.println(F("===  Integration loop done   ==="));
+    FOSSASAT_DEBUG_PORT.println(F("=== \"We'll fly what we have\" ==="));
+    FOSSASAT_DEBUG_PORT.println(F("================================"));
     attemptNumber++;
     PersistentStorage_SystemInfo_Set(FLASH_DEPLOYMENT_COUNTER, attemptNumber);
+    PersistentStorage_Set_Buffer(FLASH_SYSTEM_INFO, systemInfoBuffer, FLASH_EXT_PAGE_SIZE);
+    PowerControl_Wait(DEPLOYMENT_SLEEP_LENGTH, LOW_POWER_SLEEP);
 
   } else if(attemptNumber <= 3) {
     // mid-flight reset, deploy
