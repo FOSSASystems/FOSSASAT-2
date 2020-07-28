@@ -352,8 +352,8 @@ void loop() {
   #ifdef ENABLE_TRANSMISSION_CONTROL
     } else {
       // set delay between beeps according to battery voltage
-      uint32_t delayLen = battVoltage * 1000.0 - MORSE_BATTERY_MIN;
-      if(battVoltage * 1000.0 < MORSE_BATTERY_MIN + MORSE_BATTERY_STEP) {
+      uint32_t delayLen = battVoltage - MORSE_BATTERY_MIN;
+      if(battVoltage < MORSE_BATTERY_MIN + MORSE_BATTERY_STEP) {
         delayLen = MORSE_BATTERY_STEP;
       }
 

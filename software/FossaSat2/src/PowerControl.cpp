@@ -6,7 +6,7 @@ uint32_t PowerControl_Get_Sleep_Interval() {
 
   #ifdef ENABLE_INTERVAL_CONTROL
     // get battery voltage
-    int16_t batt = PowerControl_Get_Battery_Voltage() * 1000.0;
+    int16_t batt = PowerControl_Get_Battery_Voltage();
 
     // get number of intervals
     uint8_t numIntervals = systemInfoBuffer[FLASH_NUM_SLEEP_INTERVALS];
