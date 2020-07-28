@@ -35,7 +35,9 @@ LSM9DS1 imu;
 
 uint16_t Sensors_Setup_IMU() {
   // initialize IMU
-  return(imu.begin(IMU_ACCEL_GYRO_ADDRESS, IMU_MAG_ADDRESS, IMU_BUS));
+  uint16_t id = imu.begin(IMU_ACCEL_GYRO_ADDRESS, IMU_MAG_ADDRESS, IMU_BUS);
+  imu.setMagScale(16);
+  return(id);
 }
 
 void Sensors_Update_IMU() {
