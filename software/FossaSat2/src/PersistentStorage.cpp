@@ -226,17 +226,13 @@ void PersistentStorage_Reset_Stats() {
   // get minimum and maximum values for all used data types
   int16_t intMax = 0x7FFF;
   int16_t intVal = 0;
-  int16_t intMin = 0xFFFF;
+  int16_t intMin = 0x8000;
   uint8_t byteMax = 0xFF;
   uint8_t byteVal = 0;
   uint8_t byteMin = 0x00;
-  uint32_t floatMaxBits = 0x7F7FFFFF;
-  uint32_t floatMinBits = 0xFF7FFFFF;
-  float floatMax = 0;
+  float floatMax = 1000000;
   float floatVal = 0;
-  float floatMin = 0;
-  memcpy(&floatMax, &floatMaxBits, sizeof(uint32_t));
-  memcpy(&floatMin, &floatMinBits, sizeof(uint32_t));
+  float floatMin = -1000000;
 
   // set temperatures
   memcpy(statsPage + (FLASH_STATS_TEMP_PANEL_Y - FLASH_STATS), &intMax, sizeof(intMax));
