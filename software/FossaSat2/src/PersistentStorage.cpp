@@ -224,10 +224,10 @@ void PersistentStorage_Reset_Stats() {
   memset(statsPage, 0, statsBufferLen);
 
   // get minimum and maximum values for all used data types
-  int16_t intMax = 0x7FFF;
+  int16_t intMax = 32767;
   int16_t intVal = 0;
-  int16_t intMin = 0x8000;
-  uint8_t byteMax = 0xFF;
+  int16_t intMin = -1;
+  uint8_t byteMax = 255;
   uint8_t byteVal = 0;
   uint8_t byteMin = 0x00;
   float floatMax = 1000000;
