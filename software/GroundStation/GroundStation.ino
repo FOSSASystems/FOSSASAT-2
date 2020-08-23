@@ -870,7 +870,7 @@ void requestRetransmitCustom() {
 }
 
 int16_t setLoRa() {
-  int state = radio.begin(FREQUENCY,
+  int state = radio.begin(LORA_FREQUENCY,
                           BANDWIDTH,
                           SPREADING_FACTOR,
                           CODING_RATE,
@@ -887,7 +887,7 @@ int16_t setLoRa() {
 }
 
 int16_t setGFSK() {
-  int state = radio.beginFSK(FREQUENCY,
+  int state = radio.beginFSK(FSK_FREQUENCY,
                              BIT_RATE,
                              FREQ_DEV,
                              RX_BANDWIDTH,
@@ -896,8 +896,8 @@ int16_t setGFSK() {
                              TCXO_VOLTAGE);
   uint8_t syncWordFSK[2] = {SYNC_WORD, SYNC_WORD};
   radio.setSyncWord(syncWordFSK, 2);
-  radio.setDataShaping(FSK_DATA_SHAPING);
-  radio.setCurrentLimit(FSK_CURRENT_LIMIT);
+  radio.setDataShaping(DATA_SHAPING);
+  radio.setCurrentLimit(CURRENT_LIMIT);
   #ifdef USE_SX126X
     radio.setCRC(2);
     radio.setWhitening(true, WHITENING_INITIAL);
@@ -1272,7 +1272,7 @@ void loop() {
         break;
       case 'z': {
         uint8_t pos[] = { 1, 2, 3, 4, 5, 6 };
-        maneuver(0b00011111, 50*1000, 6000, pos);
+        maneuver(0b0011111, 50*1000, 6000, pos);
       } break;
       case 'Z':
         setAdcsParams(80, 2.0, 40.0, 0.2, 800, 0.3, 0.02, 1, 40, -40);
