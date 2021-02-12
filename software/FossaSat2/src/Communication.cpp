@@ -28,6 +28,7 @@ int16_t Communication_Set_SpreadingFactor(uint8_t sfMode) {
   }
 
   return(state);
+  //pppp
 }
 
 int16_t Communication_Set_LoRa_Configuration(float bw, uint8_t sf, uint8_t cr, uint16_t preambleLen, bool crc, int8_t power) {
