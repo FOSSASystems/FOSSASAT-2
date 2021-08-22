@@ -9,7 +9,7 @@ var structadcs_params__t =
     [ "bridgeTimerUpdatePeriod", "structadcs_params__t.html#abe4143c21590c18b9f7d52812cc29f71", null ],
     [ "calcTol", "structadcs_params__t.html#af9db8e79ba0f30887af8877aa4d169a0", null ],
     [ "coilChar", "structadcs_params__t.html#ac50461c638063a08b2528a93a07704ad", null ],
-    [ "control", "structadcs_params__t.html#ad04f64becb764d81ca99606d96c71607", null ],
+    [ "control", "structadcs_params__t.html#a38b76924f22642990b8110c1963757d0", null ],
     [ "controllers", "structadcs_params__t.html#aabbd9bc8d9932140692215301457386c", null ],
     [ "detumbleLen", "structadcs_params__t.html#ac31d3780b5332d048fe5885ce91bada0", null ],
     [ "detumbleOmegaTol", "structadcs_params__t.html#a49b3b1430c42f58b309f65b257db4ecb", null ],
