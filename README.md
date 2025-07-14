@@ -26,6 +26,8 @@
 <img width="400" height="300" align="left" alt="GIF" src="https://user-images.githubusercontent.com/22770735/92360453-739f2d00-f10a-11ea-80b4-5bcf9976401c.jpg" />
 <img width="400" height="300" align="center" alt="GIF" src="https://user-images.githubusercontent.com/22770735/92360480-7e59c200-f10a-11ea-8ef2-bfc5b55f4669.jpg" />
 
+<i></i>
+
 ## [Doxygen Documentation](https://fossasystems.github.io/FOSSASAT-2)
 
 
