@@ -26,12 +26,16 @@
 <img width="400" height="300" align="left" alt="GIF" src="https://user-images.githubusercontent.com/22770735/92360453-739f2d00-f10a-11ea-80b4-5bcf9976401c.jpg" />
 <img width="400" height="300" align="center" alt="GIF" src="https://user-images.githubusercontent.com/22770735/92360480-7e59c200-f10a-11ea-8ef2-bfc5b55f4669.jpg" />
 
-<i></i>
+<br>
 
 ## [Doxygen Documentation](https://fossasystems.github.io/FOSSASAT-2)
 
 
-First generation 2P Satellite dedicated to demonstrating new miniaturized technology for picosatellites developed by FOSSA. Launched aboard a Firefly Alpha launch vehicle on the maiden flight with an unfortunate explosion. 
+First generation 2P Satellite dedicated to demonstrating new miniaturized technology for picosatellites developed by FOSSA. Launched aboard a Firefly Alpha launch vehicle on the maiden flight with an unfortunate explosion. The satellite was recovered, and on a later launch, a FOSSASAT-1B was successfully placed in orbit by a Firefly Alpha. 
+
+<br>
+<img width="400" height="300" align="center" alt="GIF" src="https://i0.wp.com/spacenews.com/wp-content/uploads/2021/09/alpha-explosion.jpg?fit=879%2C518&ssl=1" /> 
+<br>
 
 ## Payload
 The main payload of FossaSat-2 is an OV2640 low-resolution CMOS camera. GSD is >50m/pixel. A Skytraq GNSS reciever is being used to test active TLE generation for PocketQubes. GPS Payload Supported by the Galileo Science office.
