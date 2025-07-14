@@ -29,7 +29,7 @@
 ## [Doxygen Documentation](https://fossasystems.github.io/FOSSASAT-2)
 
 
-First generation 2P Satellite dedicated to demonstrating new miniaturized technology for picosatellites developed by FOSSA. To be launched in Q1 2020 aboard a Firefly Alpha launch vehicle. 
+First generation 2P Satellite dedicated to demonstrating new miniaturized technology for picosatellites developed by FOSSA. Launched aboard a Firefly Alpha launch vehicle on the maiden flight with an unfortunate explosion. 
 
 ## Payload
 The main payload of FossaSat-2 is an OV2640 low-resolution CMOS camera. GSD is >50m/pixel. A Skytraq GNSS reciever is being used to test active TLE generation for PocketQubes. GPS Payload Supported by the Galileo Science office.
